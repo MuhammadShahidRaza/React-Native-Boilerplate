@@ -1,79 +1,234 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-# Getting Started
+# React Native Project Setup
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+This document provides step-by-step instructions to set up the React Native project for other users to get started.
 
-## Step 1: Start the Metro Server
+---
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+## 1. Prerequisites
 
-To start Metro, run the following command from the _root_ of your React Native project:
+Ensure the following tools are installed on your system:
+- Node.js
+- Yarn
+- Watchman
+- React Native CLI
+- Xcode (for iOS development)
+- Android Studio (for Android development)
 
+---
+
+## 2. Project Setup Steps
+
+### Step 1: Clone the Repository
 ```bash
-# using npm
-npm start
-
-# OR using Yarn
-yarn start
+git clone https://github.com/MuhammadShahidRaza/React-Native-Boilerplate.git
+cd <project-folder>
 ```
 
-## Step 2: Start your Application
+### Step 2: Copy Required Files and Folders
+- Copy the following into the project root:
+  - `src` folder
+  - `babel.config.js`
+  - `commitlint.config.js`
+  - `declarations.d.ts`
+  - `eslint.config.js`
+  - `metro.config.js`
+  - `.prettierrc.js`
+  - `App.tsx`
+  - `.env` files
+- Copy the `.husky` folder.
+- Copy the `Font` folder unzip that , open the xcode and paste in the project folder.
+- Copy the `updateBuildGradle.js` file.
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+### Step 3: Install Dependencies
 
-### For Android
-
+#### Main Dependencies:
 ```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+yarn add react-native-reanimated react-native-safe-area-context react-native-screens react-native-skeleton-placeholder formik @reduxjs/toolkit i18next react-native-dotenv react-i18next react-native-svg react-native-toast-message react-native-vector-icons react-redux yup react-native-permissions react-native-phone-number-input react-native-image-crop-picker axios @react-navigation/native-stack @react-navigation/native @react-native-async-storage/async-storage @react-native-community/geolocation react-native-linear-gradient @notifee/react-native
 ```
 
-### For iOS
-
+#### Development Dependencies:
 ```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+yarn add -D @commitlint/cli @commitlint/config-conventional @types/react-native-vector-icons @typescript-eslint/eslint-plugin @typescript-eslint/parser babel-plugin-module-resolver eslint-config-prettier eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-react-native globals husky lint-staged metro-react-native-babel-preset react-native-codegen react-native-svg-transformer typescript-eslint
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+### Step 4: Update Project Files
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+1. **`index.js`**:
+   Add the following line:
+   ```javascript
+   import './src/i18n';
+   ```
 
-## Step 3: Modifying your App
+2. **`android/app/src/main/res/values/strings.xml`**:
+   Add any required map keys or other configuration values.
 
-Now that you have successfully run the app, let's modify it.
+3. **Change App Icons**:
+   Use [EasyAppIcon](https://easyappicon.com) to generate and replace the app icons.
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+4. **`tsconfig.json`**:
+   Replace or update with the provided `tsconfig.json` file.
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+5. **`package.json`**:
+   Add these scripts:
+   ```json
+   "scripts": {
+       "build": "cd android && ./gradlew clean && ./gradlew assembleRelease",
+       "aab": "cd android && ./gradlew clean && ./gradlew bundleRelease",
+       "debugAndroid": "cd android && ./gradlew clean && cd .. && yarn android",
+       "debugIos": "cd ios && pod install && cd .. && yarn ios",
+       "prepare": "husky",
+       "format": "prettier --write ./src",
+       "simulators": "xcrun simctl list devices",
+       "lint": "eslint .",
+       "start": "react-native start",
+       "test": "jest",
+       "clean": "rm -rf node_modules && yarn cache clean && yarn",
+       "android": "react-native run-android",
+       "reverse": "adb reverse tcp:8081 tcp:8081",
+       "devices": "adb devices && yarn reverse",
+       "android:clean": "cd android && ./gradlew clean",
+       "android:bundle:assets": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+       "open-apk": "open ./android/app/build/outputs/apk/",
+       "signing": "cd android && ./gradlew signingReport && cd ..",
+       "open-bundle": "open ./android/app/build/outputs/bundle",
+       "build:prod": "yarn android:clean && cd android && ./gradlew assembleRelease && yarn open-apk",
+       "bundle": "cd android && ./gradlew bundleRelease && open-bundle",
+       "ios": "react-native run-ios",
+       "pod": "cd ios && pod install && cd ..",
+       "pod:reset": "cd ios && pod deintegrate && pod setup && pod install && cd ..",
+       "ios:clean": "cd ios && rm -rf ~/Library/Caches/CocoaPods && rm -rf Pods && rm -rf ~/Library/Developer/Xcode/DerivedData/* && yarn pod",
+       "ios:debug": "pod && yarn ios",
+       "ios:bundle:assets": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios"
+   },
+   "lint-staged": {
+       "./src/**/*.{js,jsx,ts,tsx}": [
+           "yarn format",
+           "yarn lint"
+       ]
+   }
+   ```
 
-## Congratulations! :tada:
+---
 
-You've successfully run and modified your React Native App. :partying_face:
+## 5. Configure iOS
 
-### Now what?
+### `Podfile`
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+- **Before** this line:
+  Remove All Above code
 
-# Troubleshooting
+  ```ruby
+  (platform :ios, min_ios_version_supported)
+  prepare_react_native_project!
+  ```
+ And Add:
+  ```ruby
+ def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
+  ```
 
-# Learn More
+- **After** this line:
+  ```ruby
+  (platform :ios, min_ios_version_supported)
+  prepare_react_native_project!
+  ```
+  
+- Add permissions (which required for your app):
+  ```ruby
+setup_permissions([
+    'AppTrackingTransparency',
+    'Bluetooth',
+    'Calendars',
+    'CalendarsWriteOnly',
+    'Camera',
+    'Contacts',
+    'FaceID',
+    'LocationAccuracy',
+    'LocationAlways',
+    'LocationWhenInUse',
+    'MediaLibrary',
+    'Microphone',
+    'Motion',
+    'Notifications',
+    'PhotoLibrary',
+    'PhotoLibraryAddOnly',
+    'Reminders',
+    'Siri',
+    'SpeechRecognition',
+    'StoreKit',
+])
+  ```
 
-To learn more about React Native, take a look at the following resources:
+### `Info.plist`
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Add the following:
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>$(PRODUCT_NAME) needs your location to show nearby practitioners.</string>
+<key>UIAppFonts</key>
+<array>
+    <string>AntDesign.ttf</string>
+    <string>Entypo.ttf</string>
+    <string>EvilIcons.ttf</string>
+    <string>Feather.ttf</string>
+    <string>FontAwesome.ttf</string>
+    <string>FontAwesome5_Brands.ttf</string>
+    <string>FontAwesome5_Regular.ttf</string>
+    <string>FontAwesome5_Solid.ttf</string>
+    <string>FontAwesome6_Brands.ttf</string>
+    <string>FontAwesome6_Regular.ttf</string>
+    <string>FontAwesome6_Solid.ttf</string>
+    <string>Foundation.ttf</string>
+    <string>Ionicons.ttf</string>
+    <string>MaterialIcons.ttf</string>
+    <string>MaterialCommunityIcons.ttf</string>
+    <string>SimpleLineIcons.ttf</string>
+    <string>Octicons.ttf</string>
+    <string>Zocial.ttf</string>
+    <string>Fontisto.ttf</string>
+    <string>GorditaBlack.otf</string>
+    <string>GorditaBold.otf</string>
+    <string>GorditaLight.otf</string>
+    <string>GorditaMedium.otf</string>
+    <string>GorditaRegular.otf</string>
+</array>
+```
+
+---
+
+## 6. Final Steps
+
+### Run the Build Gradle Update Script
+```bash
+node updateBuildGradle.js
+```
+
+
+### Run the Build Gradle Update Script
+```bash
+npx react-native-asset
+```
+
+---
+
+Build the Project
+
+For iOS:
+
+yarn pod && yarn ios
+
+For Android:
+
+yarn debugAndroid
+
+Your project is now ready for development!
