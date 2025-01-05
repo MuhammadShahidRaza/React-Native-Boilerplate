@@ -168,7 +168,7 @@ export const VARIABLES = {
   MaterialIcons: 'MaterialIcons' as IconComponentName,
 };
 
-export const MAP_API_KEY = 'AIzaSyBG6CH0sPL2NEWV5F1CRNejVL6D7o2bR6c';
+export const MAP_API_KEY = '';
 
 export const INITIAL_LAT_LNG = {
   lat: 33.753746,
