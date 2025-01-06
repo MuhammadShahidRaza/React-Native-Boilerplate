@@ -1,4 +1,4 @@
-package com.uptherank
+package com.YourAppName
 
 import android.app.Application
 import com.facebook.react.PackageList
