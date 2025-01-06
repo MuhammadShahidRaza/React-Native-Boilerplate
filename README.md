@@ -1,76 +1,88 @@
+# React Native Project Setup Guide
 
-# React Native Project Setup
-
-This document provides step-by-step instructions to set up the React Native project for other users to get started.
-
+This document provides step-by-step instructions to integrate the React Native boilerplate into your existing project folder. Follow these steps to quickly set up the necessary files and dependencies.
 ---
+
+
 
 ## 1. Prerequisites
 
-Ensure the following tools are installed on your system:
-- Node.js
-- Yarn
-- Watchman
-- React Native CLI
-- Xcode (for iOS development)
-- Android Studio (for Android development)
+Before starting, ensure you have the following tools installed on your system:
+
+- **Node.js** – [Download Node.js](https://nodejs.org/)
+- **Yarn** – [Install Yarn](https://yarnpkg.com/getting-started/install)
+- **Watchman** – [Install Watchman](https://facebook.github.io/watchman/docs/install)
+- **React Native CLI** – [Install React Native CLI](https://reactnative.dev/docs/environment-setup)
+- **Xcode** – [Download Xcode from the App Store](https://apps.apple.com/us/app/xcode/id497799835?mt=12) (for iOS development)
+- **Android Studio** – [Download Android Studio](https://developer.android.com/studio) (for Android development)
 
 ---
 
 ## 2. Project Setup Steps
 
 ### Step 1: Clone the Repository
+First, clone the React Native boilerplate project to your local machine:
+
 ```bash
 git clone https://github.com/MuhammadShahidRaza/React-Native-Boilerplate.git
 cd <project-folder>
 ```
 
 ### Step 2: Copy Required Files and Folders
-- Copy the following into the project root:
-  - `src` folder
-  - `babel.config.js`
-  - `commitlint.config.js`
-  - `declarations.d.ts`
-  - `eslint.config.js`
-  - `metro.config.js`
-  - `.prettierrc.js`
-  - `App.tsx`
-  - `.env` files
-- Copy the `.husky` folder.
-- Copy the `Font` folder unzip that , open the xcode and paste in the project folder.
-- Copy the `updateBuildGradle.js` file.
+
+Copy the following files and folders into the root of your project directory:
+
+- **`src` folder**
+- **`babel.config.js`**
+- **`commitlint.config.js`**
+- **`declarations.d.ts`**
+- **`eslint.config.js`**
+- **`metro.config.js`**
+- **`.prettierrc.js`**
+- **`App.tsx`**
+- **`.env` files**
+- **`.husky` folder**
+- **`Font` folder** (unzip and open in Xcode to paste in the project folder)
+- **`updateBuildGradle.js` file**
 
 ### Step 3: Install Dependencies
 
-#### Main Dependencies:
+#### Main Dependencies
+
+Run the following command to install the main dependencies:
+
 ```bash
 yarn add react-native-reanimated react-native-safe-area-context react-native-screens react-native-skeleton-placeholder formik @reduxjs/toolkit i18next react-native-dotenv react-i18next react-native-svg react-native-toast-message react-native-vector-icons react-redux yup react-native-permissions react-native-phone-number-input react-native-image-crop-picker axios @react-navigation/native-stack @react-navigation/native @react-native-async-storage/async-storage @react-native-community/geolocation react-native-linear-gradient @notifee/react-native
 ```
 
-#### Development Dependencies:
+#### Development Dependencies
+
+Run the following command to install the development dependencies:
+
 ```bash
 yarn add -D @commitlint/cli @commitlint/config-conventional @types/react-native-vector-icons @typescript-eslint/eslint-plugin @typescript-eslint/parser babel-plugin-module-resolver eslint-config-prettier eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-react-native globals husky lint-staged metro-react-native-babel-preset react-native-codegen react-native-svg-transformer typescript-eslint
 ```
 
 ### Step 4: Update Project Files
 
-1. **`index.js`**:
-   Add the following line:
+1. **`index.js`**  
+   Add the following line at the top:
    ```javascript
    import './src/i18n';
    ```
 
-2. **`android/app/src/main/res/values/strings.xml`**:
-   Add any required map keys or other configuration values.
+2. **`android/app/src/main/res/values/strings.xml`**  
+   Add any required map keys or other configuration values as needed.
 
-3. **Change App Icons**:
-   Use [EasyAppIcon](https://easyappicon.com) to generate and replace the app icons.
+3. **Change App Icons**  
+   Use [EasyAppIcon](https://easyappicon.com) to generate and replace the app icons in your project.
 
-4. **`tsconfig.json`**:
+4. **`tsconfig.json`**  
    Replace or update with the provided `tsconfig.json` file.
 
-5. **`package.json`**:
-   Add these scripts:
+5. **`package.json`**  
+   Add these scripts under the `"scripts"` section:
+
    ```json
    "scripts": {
        "build": "cd android && ./gradlew clean && ./gradlew assembleRelease",
@@ -111,30 +123,30 @@ yarn add -D @commitlint/cli @commitlint/config-conventional @types/react-native-
 
 ---
 
-## 5. Configure iOS
+## 3. Configure iOS
 
-### `Podfile`
+### Update the `Podfile`
 
 - **Before** this line:
-  Remove All Above code
-
   ```ruby
   (platform :ios, min_ios_version_supported)
   prepare_react_native_project!
   ```
- And Add:
-  ```ruby
- def node_require(script)
-  # Resolve script with node to allow for hoisting
-  require Pod::Executable.execute_command('node', ['-p',
-    "require.resolve(
-      '#{script}',
-      {paths: [process.argv[1]]},
-    )", __dir__]).strip
-end
 
-node_require('react-native/scripts/react_native_pods.rb')
-node_require('react-native-permissions/scripts/setup.rb')
+  Add the following code to resolve the React Native dependencies:
+
+  ```ruby
+  def node_require(script)
+    # Resolve script with node to allow for hoisting
+    require Pod::Executable.execute_command('node', ['-p',
+      "require.resolve(
+        '#{script}',
+        {paths: [process.argv[1]]},
+      )", __dir__]).strip
+  end
+
+  node_require('react-native/scripts/react_native_pods.rb')
+  node_require('react-native-permissions/scripts/setup.rb')
   ```
 
 - **After** this line:
@@ -142,36 +154,38 @@ node_require('react-native-permissions/scripts/setup.rb')
   (platform :ios, min_ios_version_supported)
   prepare_react_native_project!
   ```
-  
-- Add permissions (which required for your app):
+
+  Add the required permissions for your app:
+
   ```ruby
-setup_permissions([
-    'AppTrackingTransparency',
-    'Bluetooth',
-    'Calendars',
-    'CalendarsWriteOnly',
-    'Camera',
-    'Contacts',
-    'FaceID',
-    'LocationAccuracy',
-    'LocationAlways',
-    'LocationWhenInUse',
-    'MediaLibrary',
-    'Microphone',
-    'Motion',
-    'Notifications',
-    'PhotoLibrary',
-    'PhotoLibraryAddOnly',
-    'Reminders',
-    'Siri',
-    'SpeechRecognition',
-    'StoreKit',
-])
+  setup_permissions([
+      'AppTrackingTransparency',
+      'Bluetooth',
+      'Calendars',
+      'CalendarsWriteOnly',
+      'Camera',
+      'Contacts',
+      'FaceID',
+      'LocationAccuracy',
+      'LocationAlways',
+      'LocationWhenInUse',
+      'MediaLibrary',
+      'Microphone',
+      'Motion',
+      'Notifications',
+      'PhotoLibrary',
+      'PhotoLibraryAddOnly',
+      'Reminders',
+      'Siri',
+      'SpeechRecognition',
+      'StoreKit',
+  ])
   ```
 
-### `Info.plist`
+### Update `Info.plist`
 
-Add the following:
+Add the following keys to the `Info.plist`:
+
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>$(PRODUCT_NAME) needs your location to show nearby practitioners.</string>
@@ -206,29 +220,35 @@ Add the following:
 
 ---
 
-## 6. Final Steps
+## 4. Final Steps
 
-### Run the Build Gradle Update Script
+### Run the Gradle Update Script
+To update your Gradle configuration, run:
+
 ```bash
 node updateBuildGradle.js
 ```
 
+### Generate Assets
 
-### Run the Build Gradle Update Script
+Run the following command to generate the necessary assets:
+
 ```bash
 npx react-native-asset
 ```
 
 ---
 
-Build the Project
+### Run the Build 
 
-For iOS:
 
-yarn pod && yarn ios
+### For iOS:
 
-For Android:
+yarn debugIos
+
+### For Android:
 
 yarn debugAndroid
 
 Your project is now ready for development!
+
