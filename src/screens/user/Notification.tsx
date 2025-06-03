@@ -20,7 +20,7 @@ export const Notification = () => {
         hideBorder
         containerStyle={{marginVertical: 20}}
         onPress={() => navigate(SCREENS.NOTIFICATION_LISTING)}
-        userImage={IMAGES.TODAY}
+        userImage={IMAGES.USER}
         userName={COMMON_TEXT.TODAY}
         message={PRACTITIONER_TEXT.SESSION_TODAY}
         time="04:20 PM"
@@ -35,7 +35,7 @@ export const Notification = () => {
         }}
         hideBorder
         onPress={() => navigate(SCREENS.NOTIFICATION_LISTING)}
-        userImage={IMAGES.SESSION_COMPLETED}
+        userImage={IMAGES.USER}
         userName={PRACTITIONER_TEXT.SESSION_COMPLETED}
         messageNumLine={2}
         messageStyle={{
