@@ -139,8 +139,8 @@ const confirmPasswordSchema = ({name = 'new_password'}) => {
     .transform((_, originalValue) =>
       typeof originalValue === 'string' ? originalValue.trim() : originalValue,
     )
-    .required(
-      getValidationMessageWithTranslation(VALIDATION_MESSAGES.IS_REQUIRED, {
+    .required(()=>
+      getValidationMessageWithTranslation( VALIDATION_MESSAGES.IS_REQUIRED, {
         name: COMMON_TEXT.CONFIRM_PASSWORD,
       }),
     );
