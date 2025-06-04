@@ -26,7 +26,7 @@ export const AboutUs = () => {
         <Typography style={styles.bottomHeading}>
           {SETTINGS_TEXT.ABOUT_3_TRANSFORMATION_CUPPING}
         </Typography>
-        <Photo source={IMAGES.ABOUT_US} imageStyle={styles.aboutimage} />
+        {/* <Photo source={IMAGES.ABOUT_US} imageStyle={styles.aboutimage} /> */}
         <Button title={SETTINGS_TEXT.FIND_THERAPIST} />
       </View>
     </Wrapper>

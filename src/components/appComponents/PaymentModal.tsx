@@ -90,7 +90,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             svgName={SVG.GOOGLE}
             buttonName={COMMON_TEXT.PAY}
           />
-          <Photo source={IMAGES.VISA} imageStyle={styles.visaImage} />
+          {/* <Photo source={IMAGES.VISA} imageStyle={styles.visaImage} /> */}
           <Button
             startIcon={{
               componentName: VARIABLES.AntDesign,

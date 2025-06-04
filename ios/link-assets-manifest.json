@@ -20,6 +20,22 @@
     {
       "path": "src/assets/fonts/GorditaRegular.otf",
       "sha1": "4180ceaaf5b38e3c554a33c3fee07a7b421e1b8c"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsBold.ttf",
+      "sha1": "b9b65c039a1f10a5cb5e0726c6e7e18e98a8e517"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsMedium.ttf",
+      "sha1": "af7058373acbcf383dd114b8f9bbfb9faafd79eb"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsRegular.ttf",
+      "sha1": "01d319c533f62ea29f03b5df8adfd4d93d2d2a38"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsSemiBold.ttf",
+      "sha1": "20b39c8b480c946b084d6aa09f12bf10b2ec5aa6"
     }
   ]
 }

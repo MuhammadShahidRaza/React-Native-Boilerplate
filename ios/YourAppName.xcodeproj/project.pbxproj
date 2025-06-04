@@ -7,85 +7,45 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00E356F31AD99517003FC87E /* YourAppNameTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* YourAppNameTests.m */; };
 		0C80B921A6F3F58F76C31292 /* libPods-YourAppName.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-YourAppName.a */; };
-		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2B10050EE054408BAEB41D6C /* GorditaMedium.otf in Resources */ = {isa = PBXBuildFile; fileRef = ABF3CE6397734135ACF4B0AE /* GorditaMedium.otf */; };
-		7699B88040F8A987B510C191 /* libPods-YourAppName-YourAppNameTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-YourAppName-YourAppNameTests.a */; };
-		78FBE640732144E88F184021 /* GorditaBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = C73DD9BDF0B6441FB7A646F1 /* GorditaBold.otf */; };
+		3541F9610A984E33BBFFB3AC /* GorditaRegular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4D7391172FE9473BAECD52F0 /* GorditaRegular.otf */; };
+		57D9818D2453F3CB5B28C2EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		74BCF24C670F4945B2A260A6 /* GorditaBlack.otf in Resources */ = {isa = PBXBuildFile; fileRef = AB28400179A549E19EEDCF64 /* GorditaBlack.otf */; };
+		75A82212C3CC432ABBA95282 /* GorditaLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12C8521589574CE299C42D15 /* GorditaLight.otf */; };
+		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		B126159435474BDA840FB889 /* GorditaRegular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 396CB105812841109039D0FE /* GorditaRegular.otf */; };
-		C87A2FA696181B3565DFA177 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
-		E1E5AC153BAC425DBCF7F5C0 /* GorditaLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 962A7B51F91844069F241D05 /* GorditaLight.otf */; };
-		FBD22514699F47BE857CB7B9 /* GorditaBlack.otf in Resources */ = {isa = PBXBuildFile; fileRef = 08788D94BF5442BE90AE29EB /* GorditaBlack.otf */; };
+		CB9EEC15D29046A19D7F6C5B /* GorditaMedium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0B404F00DAF846C7A8036450 /* GorditaMedium.otf */; };
+		D9353931395D4D3AA7872C44 /* GorditaBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = EC49D890B4704A70BAD0E502 /* GorditaBold.otf */; };
+		C6CE980DA3BE4510AABB69C3 /* PoppinsBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3CA5BA4062EF4920A6D03AB3 /* PoppinsBold.ttf */; };
+		1DB9B5556EA04CA39F520D67 /* PoppinsMedium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6BCF4984E6F640F2A6AA31C8 /* PoppinsMedium.ttf */; };
+		E2296A67A1DF49949E5F8111 /* PoppinsRegular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0A9691E0A10C4073BAC8861E /* PoppinsRegular.ttf */; };
+		AB040772DE514AC1AF265933 /* PoppinsSemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1B39C6C3FA74310865C1EDE /* PoppinsSemiBold.ttf */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		00E356F41AD99517003FC87E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = YourAppName;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		00E356EE1AD99517003FC87E /* YourAppNameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = YourAppNameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* YourAppNameTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YourAppNameTests.m; sourceTree = "<group>"; };
-		043E8A162D29EBE500B06FE4 /* AntDesign.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = AntDesign.ttf; sourceTree = "<group>"; };
-		043E8A172D29EBE500B06FE4 /* Entypo.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Entypo.ttf; sourceTree = "<group>"; };
-		043E8A182D29EBE500B06FE4 /* EvilIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = EvilIcons.ttf; sourceTree = "<group>"; };
-		043E8A192D29EBE500B06FE4 /* Feather.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Feather.ttf; sourceTree = "<group>"; };
-		043E8A1A2D29EBE500B06FE4 /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.ttf; sourceTree = "<group>"; };
-		043E8A1B2D29EBE500B06FE4 /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome5_Brands.ttf; sourceTree = "<group>"; };
-		043E8A1C2D29EBE500B06FE4 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome5_Regular.ttf; sourceTree = "<group>"; };
-		043E8A1D2D29EBE500B06FE4 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome5_Solid.ttf; sourceTree = "<group>"; };
-		043E8A1E2D29EBE500B06FE4 /* FontAwesome6_Brands.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome6_Brands.ttf; sourceTree = "<group>"; };
-		043E8A1F2D29EBE500B06FE4 /* FontAwesome6_Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome6_Regular.ttf; sourceTree = "<group>"; };
-		043E8A202D29EBE500B06FE4 /* FontAwesome6_Solid.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome6_Solid.ttf; sourceTree = "<group>"; };
-		043E8A212D29EBE500B06FE4 /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fontisto.ttf; sourceTree = "<group>"; };
-		043E8A222D29EBE500B06FE4 /* Foundation.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Foundation.ttf; sourceTree = "<group>"; };
-		043E8A232D29EBE500B06FE4 /* Ionicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Ionicons.ttf; sourceTree = "<group>"; };
-		043E8A242D29EBE500B06FE4 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MaterialCommunityIcons.ttf; sourceTree = "<group>"; };
-		043E8A252D29EBE500B06FE4 /* MaterialIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MaterialIcons.ttf; sourceTree = "<group>"; };
-		043E8A262D29EBE500B06FE4 /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Octicons.ttf; sourceTree = "<group>"; };
-		043E8A272D29EBE500B06FE4 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = SimpleLineIcons.ttf; sourceTree = "<group>"; };
-		043E8A282D29EBE500B06FE4 /* Zocial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Zocial.ttf; sourceTree = "<group>"; };
-		08788D94BF5442BE90AE29EB /* GorditaBlack.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBlack.otf; path = ../src/assets/fonts/GorditaBlack.otf; sourceTree = "<group>"; };
+		0B404F00DAF846C7A8036450 /* GorditaMedium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaMedium.otf; path = ../src/assets/fonts/GorditaMedium.otf; sourceTree = "<group>"; };
+		12C8521589574CE299C42D15 /* GorditaLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaLight.otf; path = ../src/assets/fonts/GorditaLight.otf; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* YourAppName.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YourAppName.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = YourAppName/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = YourAppName/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = YourAppName/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = YourAppName/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = YourAppName/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = YourAppName/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		19F6CBCC0A4E27FBF8BF4A61 /* libPods-YourAppName-YourAppNameTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-YourAppName-YourAppNameTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		396CB105812841109039D0FE /* GorditaRegular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaRegular.otf; path = ../src/assets/fonts/GorditaRegular.otf; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-YourAppName.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YourAppName.debug.xcconfig"; path = "Target Support Files/Pods-YourAppName/Pods-YourAppName.debug.xcconfig"; sourceTree = "<group>"; };
+		4D7391172FE9473BAECD52F0 /* GorditaRegular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaRegular.otf; path = ../src/assets/fonts/GorditaRegular.otf; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-YourAppName.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YourAppName.release.xcconfig"; path = "Target Support Files/Pods-YourAppName/Pods-YourAppName.release.xcconfig"; sourceTree = "<group>"; };
-		5B7EB9410499542E8C5724F5 /* Pods-YourAppName-YourAppNameTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YourAppName-YourAppNameTests.debug.xcconfig"; path = "Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-YourAppName.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-YourAppName.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = YourAppName/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = YourAppName/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		89C6BE57DB24E9ADA2F236DE /* Pods-YourAppName-YourAppNameTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YourAppName-YourAppNameTests.release.xcconfig"; path = "Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests.release.xcconfig"; sourceTree = "<group>"; };
-		962A7B51F91844069F241D05 /* GorditaLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaLight.otf; path = ../src/assets/fonts/GorditaLight.otf; sourceTree = "<group>"; };
-		ABF3CE6397734135ACF4B0AE /* GorditaMedium.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaMedium.otf; path = ../src/assets/fonts/GorditaMedium.otf; sourceTree = "<group>"; };
-		C73DD9BDF0B6441FB7A646F1 /* GorditaBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBold.otf; path = ../src/assets/fonts/GorditaBold.otf; sourceTree = "<group>"; };
+		AB28400179A549E19EEDCF64 /* GorditaBlack.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBlack.otf; path = ../src/assets/fonts/GorditaBlack.otf; sourceTree = "<group>"; };
+		EC49D890B4704A70BAD0E502 /* GorditaBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBold.otf; path = ../src/assets/fonts/GorditaBold.otf; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		3CA5BA4062EF4920A6D03AB3 /* PoppinsBold.ttf */ = {isa = PBXFileReference; name = "PoppinsBold.ttf"; path = "../src/assets/fonts/PoppinsBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6BCF4984E6F640F2A6AA31C8 /* PoppinsMedium.ttf */ = {isa = PBXFileReference; name = "PoppinsMedium.ttf"; path = "../src/assets/fonts/PoppinsMedium.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0A9691E0A10C4073BAC8861E /* PoppinsRegular.ttf */ = {isa = PBXFileReference; name = "PoppinsRegular.ttf"; path = "../src/assets/fonts/PoppinsRegular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		F1B39C6C3FA74310865C1EDE /* PoppinsSemiBold.ttf */ = {isa = PBXFileReference; name = "PoppinsSemiBold.ttf"; path = "../src/assets/fonts/PoppinsSemiBold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		00E356EB1AD99517003FC87E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7699B88040F8A987B510C191 /* libPods-YourAppName-YourAppNameTests.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -97,58 +57,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00E356EF1AD99517003FC87E /* YourAppNameTests */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F21AD99517003FC87E /* YourAppNameTests.m */,
-				00E356F01AD99517003FC87E /* Supporting Files */,
-			);
-			path = YourAppNameTests;
-			sourceTree = "<group>";
-		};
-		00E356F01AD99517003FC87E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F11AD99517003FC87E /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		043E8A292D29EBE500B06FE4 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				043E8A162D29EBE500B06FE4 /* AntDesign.ttf */,
-				043E8A172D29EBE500B06FE4 /* Entypo.ttf */,
-				043E8A182D29EBE500B06FE4 /* EvilIcons.ttf */,
-				043E8A192D29EBE500B06FE4 /* Feather.ttf */,
-				043E8A1A2D29EBE500B06FE4 /* FontAwesome.ttf */,
-				043E8A1B2D29EBE500B06FE4 /* FontAwesome5_Brands.ttf */,
-				043E8A1C2D29EBE500B06FE4 /* FontAwesome5_Regular.ttf */,
-				043E8A1D2D29EBE500B06FE4 /* FontAwesome5_Solid.ttf */,
-				043E8A1E2D29EBE500B06FE4 /* FontAwesome6_Brands.ttf */,
-				043E8A1F2D29EBE500B06FE4 /* FontAwesome6_Regular.ttf */,
-				043E8A202D29EBE500B06FE4 /* FontAwesome6_Solid.ttf */,
-				043E8A212D29EBE500B06FE4 /* Fontisto.ttf */,
-				043E8A222D29EBE500B06FE4 /* Foundation.ttf */,
-				043E8A232D29EBE500B06FE4 /* Ionicons.ttf */,
-				043E8A242D29EBE500B06FE4 /* MaterialCommunityIcons.ttf */,
-				043E8A252D29EBE500B06FE4 /* MaterialIcons.ttf */,
-				043E8A262D29EBE500B06FE4 /* Octicons.ttf */,
-				043E8A272D29EBE500B06FE4 /* SimpleLineIcons.ttf */,
-				043E8A282D29EBE500B06FE4 /* Zocial.ttf */,
-			);
-			path = Fonts;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* YourAppName */ = {
 			isa = PBXGroup;
 			children = (
-				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
-				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 			);
 			name = YourAppName;
@@ -159,9 +74,24 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-YourAppName.a */,
-				19F6CBCC0A4E27FBF8BF4A61 /* libPods-YourAppName-YourAppNameTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		45F2A4ED09304C2DA1F1A867 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AB28400179A549E19EEDCF64 /* GorditaBlack.otf */,
+				EC49D890B4704A70BAD0E502 /* GorditaBold.otf */,
+				12C8521589574CE299C42D15 /* GorditaLight.otf */,
+				0B404F00DAF846C7A8036450 /* GorditaMedium.otf */,
+				4D7391172FE9473BAECD52F0 /* GorditaRegular.otf */,
+				3CA5BA4062EF4920A6D03AB3 /* PoppinsBold.ttf */,
+				6BCF4984E6F640F2A6AA31C8 /* PoppinsMedium.ttf */,
+				0A9691E0A10C4073BAC8861E /* PoppinsRegular.ttf */,
+				F1B39C6C3FA74310865C1EDE /* PoppinsSemiBold.ttf */,
+			);
+			name = Resources;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -174,14 +104,12 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				043E8A292D29EBE500B06FE4 /* Fonts */,
 				13B07FAE1A68108700A75B9A /* YourAppName */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* YourAppNameTests */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
-				A0D1C49AC5F242C9BB3BB3F4 /* Resources */,
+				45F2A4ED09304C2DA1F1A867 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -192,21 +120,8 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* YourAppName.app */,
-				00E356EE1AD99517003FC87E /* YourAppNameTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A0D1C49AC5F242C9BB3BB3F4 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				08788D94BF5442BE90AE29EB /* GorditaBlack.otf */,
-				C73DD9BDF0B6441FB7A646F1 /* GorditaBold.otf */,
-				962A7B51F91844069F241D05 /* GorditaLight.otf */,
-				ABF3CE6397734135ACF4B0AE /* GorditaMedium.otf */,
-				396CB105812841109039D0FE /* GorditaRegular.otf */,
-			);
-			name = Resources;
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -214,8 +129,6 @@
 			children = (
 				3B4392A12AC88292D35C810B /* Pods-YourAppName.debug.xcconfig */,
 				5709B34CF0A7D63546082F79 /* Pods-YourAppName.release.xcconfig */,
-				5B7EB9410499542E8C5724F5 /* Pods-YourAppName-YourAppNameTests.debug.xcconfig */,
-				89C6BE57DB24E9ADA2F236DE /* Pods-YourAppName-YourAppNameTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -223,27 +136,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* YourAppNameTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "YourAppNameTests" */;
-			buildPhases = (
-				A55EABD7B0C7F3A422A6CC61 /* [CP] Check Pods Manifest.lock */,
-				00E356EA1AD99517003FC87E /* Sources */,
-				00E356EB1AD99517003FC87E /* Frameworks */,
-				00E356EC1AD99517003FC87E /* Resources */,
-				C59DA0FBD6956966B86A3779 /* [CP] Embed Pods Frameworks */,
-				F6A41C54EA430FDDC6A6ED99 /* [CP] Copy Pods Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				00E356F51AD99517003FC87E /* PBXTargetDependency */,
-			);
-			name = YourAppNameTests;
-			productName = YourAppNameTests;
-			productReference = 00E356EE1AD99517003FC87E /* YourAppNameTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		13B07F861A680F5B00A75B9A /* YourAppName */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "YourAppName" */;
@@ -273,10 +165,6 @@
 			attributes = {
 				LastUpgradeCheck = 1210;
 				TargetAttributes = {
-					00E356ED1AD99517003FC87E = {
-						CreatedOnToolsVersion = 6.2;
-						TestTargetID = 13B07F861A680F5B00A75B9A;
-					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
 					};
@@ -296,31 +184,27 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* YourAppName */,
-				00E356ED1AD99517003FC87E /* YourAppNameTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		00E356EC1AD99517003FC87E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F8E1A680F5B00A75B9A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				C87A2FA696181B3565DFA177 /* PrivacyInfo.xcprivacy in Resources */,
-				FBD22514699F47BE857CB7B9 /* GorditaBlack.otf in Resources */,
-				78FBE640732144E88F184021 /* GorditaBold.otf in Resources */,
-				E1E5AC153BAC425DBCF7F5C0 /* GorditaLight.otf in Resources */,
-				2B10050EE054408BAEB41D6C /* GorditaMedium.otf in Resources */,
-				B126159435474BDA840FB889 /* GorditaRegular.otf in Resources */,
+				74BCF24C670F4945B2A260A6 /* GorditaBlack.otf in Resources */,
+				D9353931395D4D3AA7872C44 /* GorditaBold.otf in Resources */,
+				75A82212C3CC432ABBA95282 /* GorditaLight.otf in Resources */,
+				CB9EEC15D29046A19D7F6C5B /* GorditaMedium.otf in Resources */,
+				3541F9610A984E33BBFFB3AC /* GorditaRegular.otf in Resources */,
+				57D9818D2453F3CB5B28C2EC /* PrivacyInfo.xcprivacy in Resources */,
+				C6CE980DA3BE4510AABB69C3 /* PoppinsBold.ttf in Resources */,
+				1DB9B5556EA04CA39F520D67 /* PoppinsMedium.ttf in Resources */,
+				E2296A67A1DF49949E5F8111 /* PoppinsRegular.ttf in Resources */,
+				AB040772DE514AC1AF265933 /* PoppinsSemiBold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,28 +244,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-YourAppName/Pods-YourAppName-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A55EABD7B0C7F3A422A6CC61 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-YourAppName-YourAppNameTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -404,23 +266,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C59DA0FBD6956966B86A3779 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -438,111 +283,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-YourAppName/Pods-YourAppName-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F6A41C54EA430FDDC6A6ED99 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-YourAppName-YourAppNameTests/Pods-YourAppName-YourAppNameTests-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		00E356EA1AD99517003FC87E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				00E356F31AD99517003FC87E /* YourAppNameTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		13B07F871A680F5B00A75B9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
-				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* YourAppName */;
-			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		00E356F61AD99517003FC87E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5B7EB9410499542E8C5724F5 /* Pods-YourAppName-YourAppNameTests.debug.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = YourAppNameTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-lc++",
-					"$(inherited)",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/YourAppName.app/YourAppName";
-			};
-			name = Debug;
-		};
-		00E356F71AD99517003FC87E /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 89C6BE57DB24E9ADA2F236DE /* Pods-YourAppName-YourAppNameTests.release.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = YourAppNameTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-lc++",
-					"$(inherited)",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/YourAppName.app/YourAppName";
-			};
-			name = Release;
-		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-YourAppName.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3ZG53CCNMB;
 				ENABLE_BITCODE = NO;
@@ -558,10 +320,16 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourappname;
 				PRODUCT_NAME = YourAppName;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -572,6 +340,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3ZG53CCNMB;
 				INFOPLIST_FILE = YourAppName/Info.plist;
@@ -586,9 +356,15 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.yourappname;
 				PRODUCT_NAME = YourAppName;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -662,10 +438,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -734,10 +507,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -748,15 +518,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "YourAppNameTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00E356F61AD99517003FC87E /* Debug */,
-				00E356F71AD99517003FC87E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "YourAppName" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

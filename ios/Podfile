@@ -5,6 +5,7 @@
 #     {paths: [process.argv[1]]},
 #   )', __dir__]).strip
 
+
 def node_require(script)
   # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
@@ -18,32 +19,33 @@ node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
 
+
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-
 setup_permissions([
-# 'AppTrackingTransparency',
-# 'Bluetooth',
-# 'Calendars',
-# 'CalendarsWriteOnly',
-'Camera',
-# 'Contacts',
-# 'FaceID',
-# 'LocationAccuracy',
-# 'LocationAlways',
-# 'LocationWhenInUse',
-# 'MediaLibrary',
-# 'Microphone',
-# 'Motion',
-'Notifications',
-'PhotoLibrary',
-# 'PhotoLibraryAddOnly',
-# 'Reminders',
-# 'Siri',
-# 'SpeechRecognition',
-# 'StoreKit',
+    # 'AppTrackingTransparency',
+    # 'Bluetooth',
+    # 'Calendars',
+    # 'CalendarsWriteOnly',
+    'Camera',
+    # 'Contacts',
+    # 'FaceID',
+    # 'LocationAccuracy',
+    'LocationAlways',
+    'LocationWhenInUse',
+    'MediaLibrary',
+    # 'Microphone',
+    # 'Motion',
+    'Notifications',
+    'PhotoLibrary',
+    # 'PhotoLibraryAddOnly',
+    # 'Reminders',
+    # 'Siri',
+    # 'SpeechRecognition',
+    # 'StoreKit',
 ])
+
 
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -60,11 +62,6 @@ target 'YourAppName' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  target 'YourAppNameTests' do
-    inherit! :complete
-    # Pods for testing
-  end
 
   post_install do |installer|
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202

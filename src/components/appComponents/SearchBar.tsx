@@ -25,14 +25,14 @@ export const SearchBar = ({
       value={value}
       placeholder={HOME_TEXT.SEARCH_PRACTITIONERS}
       onChangeText={onChangeText}
-      endImage={
-        <Photo
-          size={15}
-          source={IMAGES.FILTER_ICON}
-          style={{padding: 12}}
-          onPress={() => navigate(SCREENS.FILTER)}
-        />
-      }
+      // endImage={
+      //   <Photo
+      //     size={15}
+      //     source={IMAGES.FILTER_ICON}
+      //     style={{padding: 12}}
+      //     onPress={() => navigate(SCREENS.FILTER)}
+      //   />
+      // }
       secondContainerStyle={[
         styles.inputSecondContainer,
         {borderWidth: showBorder ? 1 : 0},
