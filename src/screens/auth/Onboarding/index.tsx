@@ -114,7 +114,7 @@ export const OnBoarding = () => {
               Svg={page.svg}
             />
             <Typography
-              color={COLORS.MUD_TEXT}
+              color={COLORS.SECONDARY}
               fontSize={FontSize.XL}
               style={styles.heading}
               fontWeight={FontWeight.Bold}>
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: COLORS.MUD_BORDER,
+    backgroundColor: COLORS.PRIMARY,
     marginHorizontal: 5,
   },
   activeDot: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     bottom: 40,
   },
   skipButtonText: {
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
     marginBottom: 5,
     fontSize: FontSize.Large,
   },

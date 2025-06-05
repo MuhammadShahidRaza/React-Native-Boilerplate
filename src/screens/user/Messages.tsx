@@ -199,7 +199,7 @@ export const Messages = () => {
             iconName={'send'}
             onPress={handleSend}
             iconStyle={{
-              backgroundColor: COLORS.MUD_TEXT,
+              backgroundColor: COLORS.SECONDARY,
               color: COLORS.WHITE,
               marginBottom: 15,
               padding: 10,

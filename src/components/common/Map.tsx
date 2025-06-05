@@ -113,7 +113,7 @@ export const Map: FC<MapProps> = ({
         {showMarker && (
           <Marker
             coordinate={currentRegion}
-            pinColor={COLORS.MUD_TEXT}
+            pinColor={COLORS.SECONDARY}
             draggable
             onDragEnd={handleMarkerDragEnd}
             onPress={() => onPressMarker?.(currentLocation)}
@@ -122,7 +122,7 @@ export const Map: FC<MapProps> = ({
 
         {showMarkers &&
           markersCoordinate.map((coord, index) => (
-            <Marker key={index} pinColor={COLORS.MUD_TEXT} coordinate={coord}>
+            <Marker key={index} pinColor={COLORS.SECONDARY} coordinate={coord}>
               {customPopup && (
                 <Callout onPress={customPopupPress}>{customPopup}</Callout>
               )}
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   iconStyle: {
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
   },
   rowComponent: {
     gap: 10,

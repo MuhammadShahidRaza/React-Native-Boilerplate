@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   bottomHeading: {
     fontWeight: FontWeight.Bold,
     textAlign: 'center',
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
   },
   aboutimage: {
     height: screenHeight(20),

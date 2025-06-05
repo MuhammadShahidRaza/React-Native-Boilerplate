@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     color: COLORS.MEDIUM_GREY,
   },
   userNameDescription: {
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
     marginBottom: isIOS() ? 3 : 0,
     fontSize: FontSize.MediumSmall,
   },

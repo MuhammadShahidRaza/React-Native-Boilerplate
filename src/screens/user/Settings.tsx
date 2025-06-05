@@ -34,7 +34,7 @@ const ItemsView: React.FC<Props> = ({iconName, title, onPress}) => (
     <Icon
       componentName={VARIABLES.MaterialIcons}
       iconName={iconName}
-      color={COLORS.MUD_TEXT}
+      color={COLORS.SECONDARY}
       size={FontSize.ExtraLarge}
     />
     <Typography style={styles.typography}>{title}</Typography>

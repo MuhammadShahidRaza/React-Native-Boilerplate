@@ -1,5 +1,5 @@
-import {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import {
   Dropdown,
   DropdownItemProps,
@@ -11,42 +11,42 @@ import {
   Typography,
   AuthComponent,
 } from 'components/index';
-import {COLORS} from 'utils/colors';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {LANGUAGES, VARIABLES} from 'constants/common';
-import {COMMON_TEXT} from 'constants/screens';
-import {useTranslation} from 'hooks/useTranslation';
-import {IMAGES} from 'constants/assets/images';
-import {SVG} from 'constants/assets';
-import {setAppLanguage} from 'store/slices/appSettings';
-import {useAppDispatch} from 'types/reduxTypes';
-import {setItem} from 'utils/storage';
-import {FLEX_CENTER, screenWidth} from 'utils/index';
+import { COLORS } from 'utils/colors';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { LANGUAGES, VARIABLES } from 'constants/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { useTranslation } from 'hooks/useTranslation';
+import { IMAGES } from 'constants/assets/images';
+import { SVG } from 'constants/assets';
+import { setAppLanguage } from 'store/slices/appSettings';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setItem } from 'utils/storage';
+import { FLEX_CENTER, screenWidth } from 'utils/index';
 
 type RenderItemProps = {
   item: DropdownItemProps;
   index: number;
 };
 export const Language = () => {
-  const {isLangRTL, changeLanguage} = useTranslation();
+  const { isLangRTL, changeLanguage } = useTranslation();
   const dispatch = useAppDispatch();
   const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGES.ENGLISH);
   const handleNext = () => {
     changeLanguage(selectedLanguage);
-    dispatch(setAppLanguage(selectedLanguage));
     setItem(VARIABLES.LANGUAGE, selectedLanguage);
+    dispatch(setAppLanguage(selectedLanguage));
   };
 
   const languages: DropdownItemProps[] = [
-    {name: LANGUAGES.ENGLISH, image: IMAGES.ENGLISH},
-    {name: LANGUAGES.ARABIC, image: IMAGES.ARABIC},
-    {name: LANGUAGES.SPANISH, image: IMAGES.SPANISH},
-    {name: LANGUAGES.DUTCH, image: IMAGES.DUTCH},
-    {name: LANGUAGES.PORTUGUESE, image: IMAGES.PORTUGUESE},
-    {name: LANGUAGES.GERMAN, image: IMAGES.GERMAN},
+    { name: LANGUAGES.ENGLISH, image: IMAGES.ENGLISH },
+    { name: LANGUAGES.ARABIC, image: IMAGES.ARABIC },
+    { name: LANGUAGES.SPANISH, image: IMAGES.SPANISH },
+    { name: LANGUAGES.DUTCH, image: IMAGES.DUTCH },
+    { name: LANGUAGES.PORTUGUESE, image: IMAGES.PORTUGUESE },
+    { name: LANGUAGES.GERMAN, image: IMAGES.GERMAN },
   ];
 
-  const renderItem = ({item, index}: RenderItemProps) => (
+  const renderItem = ({ item, index }: RenderItemProps) => (
     <Photo
       key={index}
       onPress={() => {
@@ -58,11 +58,9 @@ export const Language = () => {
   );
 
   return (
-    <AuthComponent bottomText="" bottomButtonText="">
-      <View style={{flex: 1, zIndex: 1}}>
-        <Typography style={styles.titleText}>
-          {COMMON_TEXT.CHOOSE_LANGUAGE}
-        </Typography>
+    <AuthComponent bottomText='' bottomButtonText=''>
+      <View style={{ flex: 1, zIndex: 1 }}>
+        <Typography style={styles.titleText}>{COMMON_TEXT.CHOOSE_LANGUAGE}</Typography>
 
         <FlatListComponent
           data={languages}
@@ -78,7 +76,7 @@ export const Language = () => {
             onSelect={setSelectedLanguage}
             width={screenWidth(60)}
             containerStyle={{
-              borderColor: COLORS.MUD_BORDER,
+              borderColor: COLORS.PRIMARY,
             }}
           />
         </View>
@@ -88,19 +86,16 @@ export const Language = () => {
         isRightLeftJustify
         activeOpacity={0.5}
         onPress={handleNext}
-        style={styles.skipButton}>
-        <Typography style={styles.skipButtonText}>
-          {COMMON_TEXT.NEXT}
-        </Typography>
+        style={styles.skipButton}
+      >
+        <Typography style={styles.skipButtonText}>{COMMON_TEXT.NEXT}</Typography>
         <Icon
           size={FontSize.ExtraLarge}
           componentName={VARIABLES.AntDesign}
-          color={COLORS.SECONDARY}
+          color={COLORS.PRIMARY}
           iconName={isLangRTL ? 'arrowleft' : 'arrowright'}
         />
       </RowComponent>
-
-      <SvgComponent containerStyle={styles.logo} Svg={SVG.ONBAORDING_LOGO} />
     </AuthComponent>
   );
 };
@@ -114,21 +109,15 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     zIndex: 2,
-    right: 30,
     width: 100,
     padding: 20,
     gap: 5,
     alignSelf: 'flex-end',
-    bottom: -50,
+    marginTop: 100,
   },
   skipButtonText: {
-    color: COLORS.MUD_TEXT,
+    color: COLORS.PRIMARY,
     fontSize: FontSize.Large,
-  },
-  logo: {
-    position: 'absolute',
-    bottom: -190,
-    right: -80,
   },
   container: {
     padding: 20,

@@ -1,14 +1,10 @@
-import {useState, useEffect} from 'react';
-import {getItem, requestNotificationPermission} from 'utils/index';
-import {VARIABLES} from 'constants/common';
-import {
-  setAppLanguage,
-  setIsUserLoggedIn,
-  setIsUserVisitedApp,
-} from 'store/slices/appSettings';
-import {RootState, useAppDispatch, useAppSelector} from 'types/reduxTypes';
-import {useTranslation} from './useTranslation';
-import {getUserDetails} from 'api/functions/app/user';
+import { useState, useEffect } from 'react';
+import { getItem, requestNotificationPermission } from 'utils/index';
+import { VARIABLES } from 'constants/common';
+import { setAppLanguage, setIsUserLoggedIn, setIsUserVisitedApp } from 'store/slices/appSettings';
+import { RootState, useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import { useTranslation } from './useTranslation';
+import { getUserDetails } from 'api/functions/app/user';
 
 interface UserLoginStatus {
   isUserLoggedIn: boolean;
@@ -19,18 +15,16 @@ interface UserLoginStatus {
 
 export const useUserLoginStatus = (): UserLoginStatus => {
   const dispatch = useAppDispatch();
-  const {changeLanguage} = useTranslation();
+  const { changeLanguage } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
-  const {isUserLoggedIn, isUserVisitedApp, appLanguage} = useAppSelector(
+  const { isUserLoggedIn, isUserVisitedApp, appLanguage } = useAppSelector(
     (state: RootState) => state.app,
   );
 
   useEffect(() => {
     const checkUserIsLogin = async () => {
       try {
-        const hasUserVisitedTheApp = await getItem(
-          VARIABLES.IS_USER_VISITED_THE_APP,
-        );
+        const hasUserVisitedTheApp = await getItem(VARIABLES.IS_USER_VISITED_THE_APP);
         const userSelectedLanguage = await getItem(VARIABLES.LANGUAGE);
         if (hasUserVisitedTheApp) {
           dispatch(setIsUserVisitedApp(true));
@@ -42,8 +36,8 @@ export const useUserLoginStatus = (): UserLoginStatus => {
         const isUserLoggedInApp = await getItem(VARIABLES.IS_USER_LOGGED_IN);
         if (isUserLoggedInApp) {
           dispatch(setIsUserLoggedIn(true));
-          await requestNotificationPermission();
-          await getUserDetails();
+          // await requestNotificationPermission();
+          // await getUserDetails();
         }
       } catch (error) {
         console.error('Error checking user login status:', error);

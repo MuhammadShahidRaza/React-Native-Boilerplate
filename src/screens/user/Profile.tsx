@@ -117,7 +117,7 @@ export const Profile = () => {
               startIcon={{
                 componentName: iconComponent,
                 iconName,
-                color: COLORS.MUD_TEXT,
+                color: COLORS.SECONDARY,
                 size: FontSize.Large,
                 iconStyle,
               }}
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     width: screenWidth(25),
     height: screenHeight(12),
     borderWidth: 3,
-    borderColor: COLORS.MUD_TEXT,
+    borderColor: COLORS.SECONDARY,
     borderRadius: screenWidth(20),
   },
   editIcon: {

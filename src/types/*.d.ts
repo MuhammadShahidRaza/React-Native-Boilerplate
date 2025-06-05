@@ -13,4 +13,5 @@ declare module '@env' {
   export const APPLE_MERCHANT_ID: string;
   export const ANDROID_CHANNEL_ZENDESK: string;
   export const IOS_CHANNEL_ZENDESK: string;
+  export const MAP_API_KEY: string;
 }

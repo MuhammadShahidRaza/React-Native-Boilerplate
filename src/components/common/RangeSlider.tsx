@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedStyle: {
-    backgroundColor: COLORS.MUD_BORDER,
+    backgroundColor: COLORS.PRIMARY,
   },
   containerStyle: {
     marginTop: 10,
@@ -87,10 +87,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: COLORS.WHITE,
     borderWidth: 2,
-    borderColor: COLORS.MUD_TEXT,
+    borderColor: COLORS.SECONDARY,
   },
   markerText: {
     paddingTop: 10,
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
   },
 });

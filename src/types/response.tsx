@@ -12,9 +12,10 @@ export interface MessageResponse {
 export interface User {
   id: number;
   language_id: number;
-  first_name: string;
-  last_name: string;
-  user_name: string | null;
+  first_name?: string;
+  last_name?: string;
+  full_name: string;
+  username: string | null;
   email: string;
   about: string | null;
   verification_code: string;

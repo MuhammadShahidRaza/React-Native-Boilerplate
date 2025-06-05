@@ -1,14 +1,8 @@
-import Geolocation, {
-  GeolocationResponse,
-} from '@react-native-community/geolocation';
-import Permissions, {
-  check,
-  PERMISSIONS,
-  RESULTS,
-} from 'react-native-permissions';
-import {Alert, Linking} from 'react-native';
-import {isIOS} from './helpers';
-import {MAP_API_KEY} from 'constants/common';
+import Geolocation, { GeolocationResponse } from '@react-native-community/geolocation';
+import Permissions, { check, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { Alert, Linking } from 'react-native';
+import { isIOS } from './helpers';
+import { ENV_CONSTANTS } from 'constants/common';
 
 interface AddressComponents {
   long_name: string;
@@ -25,13 +19,8 @@ export interface AddressDetails {
   longitude: number;
 }
 
-const getAddressComponent = (
-  addressComponents: AddressComponents[],
-  type: string,
-): string => {
-  const component = addressComponents.find(component =>
-    component.types.includes(type),
-  );
+const getAddressComponent = (addressComponents: AddressComponents[], type: string): string => {
+  const component = addressComponents.find(component => component.types.includes(type));
   return component?.long_name || '';
 };
 
@@ -54,7 +43,7 @@ const reverseGeocode = async ({
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address|route|postal_code&key=${MAP_API_KEY}`,
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address|route|postal_code&key=${ENV_CONSTANTS.MAP_API_KEY}`,
     );
 
     if (!response.ok) {
@@ -86,16 +75,10 @@ const reverseGeocode = async ({
 const getLocationPermission = async (): Promise<boolean> => {
   try {
     const permission = await Permissions.request(
-      isIOS()
-        ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
-        : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+      isIOS() ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
     );
 
-    if (
-      permission === 'blocked' ||
-      permission === 'denied' ||
-      permission === 'unavailable'
-    ) {
+    if (permission === 'blocked' || permission === 'denied' || permission === 'unavailable') {
       Alert.alert(
         'Allow Permissions',
         'Please allow location permission to access your current location',
@@ -103,9 +86,7 @@ const getLocationPermission = async (): Promise<boolean> => {
           {
             text: 'Go to Settings',
             onPress: () =>
-              isIOS()
-                ? Linking.openURL('App-Prefs:LOCATION_SERVICES')
-                : Linking.openSettings(),
+              isIOS() ? Linking.openURL('App-Prefs:LOCATION_SERVICES') : Linking.openSettings(),
           },
           {
             text: 'Cancel',
@@ -124,7 +105,6 @@ const getLocationPermission = async (): Promise<boolean> => {
 const getCurrentLocation = async (): Promise<GeolocationResponse | null> => {
   try {
     const hasPermission = await getLocationPermission();
-
     if (hasPermission) {
       return new Promise((resolve, reject) => {
         Geolocation.getCurrentPosition(
@@ -170,9 +150,4 @@ const isLocationPermissionGranted = async () => {
   }
 };
 
-export {
-  getCurrentLocation,
-  reverseGeocode,
-  getLocationPermission,
-  isLocationPermissionGranted,
-};
+export { getCurrentLocation, reverseGeocode, getLocationPermission, isLocationPermissionGranted };

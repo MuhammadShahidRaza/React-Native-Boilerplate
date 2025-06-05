@@ -86,6 +86,7 @@ export const deviceDetails = () => {
     device_os: deviceOS(),
     app_version: appVersion(),
   };
+  
   return data;
 };
 

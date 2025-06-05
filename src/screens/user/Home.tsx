@@ -1,12 +1,9 @@
-import {useEffect} from 'react';
-import {StyleSheet} from 'react-native';
-import {
-  Typography,
-  Wrapper,
-} from 'components/index';
-import {COLORS} from 'utils/colors';
-import {getHomeListing} from 'api/functions/app/home';
-
+import { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
+import { Typography, Wrapper } from 'components/index';
+import { COLORS } from 'utils/colors';
+import { getHomeListing } from 'api/functions/app/home';
+import { clearAllStorageItems } from 'utils/storage';
 
 export const Home = () => {
   const CheckLocationPermission = async () => {
@@ -14,19 +11,19 @@ export const Home = () => {
     // if (!isGranted) {
     //   replace(SCREENS.LOCATION);
     // } else {
-      getHomeListing();
+    // getHomeListing();
     // }
   };
   useEffect(() => {
-    CheckLocationPermission();
+    // CheckLocationPermission();
+    clearAllStorageItems();
   }, []);
 
   return (
     <Wrapper useScrollView backgroundColor={COLORS.HEADER}>
-    <Typography>HOME</Typography>
+      <Typography>HOME</Typography>
     </Wrapper>
   );
 };
 
-const styles = StyleSheet.create({
-});
+const styles = StyleSheet.create({});

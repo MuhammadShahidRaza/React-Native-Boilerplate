@@ -40,7 +40,7 @@ export const SearchBar = ({
       startIcon={{
         componentName: VARIABLES.Ionicons,
         iconName: 'search',
-        color: COLORS.MUD_TEXT,
+        color: COLORS.SECONDARY,
         size: FontSize.Large,
       }}
       containerStyle={styles.inputContainer}
