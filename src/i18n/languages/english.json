@@ -179,7 +179,14 @@
     "MARK_ALL_AS_READ": "Mark all as read",
     "TRY_AGAIN": "Please try again.",
     "WHATS_ON_MIND": "What's on your mind?",
-    "TRYING_TO_EXIT_CONFIRMATION": "Are you sure you want to exit?"
+    "TRYING_TO_EXIT_CONFIRMATION": "Are you sure you want to exit?",
+    "ENTER_4_DIGIT": "Enter 4-digit",
+    "RECOVERY_CODE": "Recovery code",
+    "RE_SEND_CODE": "Re-send code",
+    "VERIFY": "VERIFY",
+    "ENTER_VERIFICATION_CODE_YOU": "Enter verification code you received on your email address",
+    "RESET_YOUR_PASSWORD_WITH": "Reset your password to get back into your account safely.",
+    "DID_NOT_YOU_RECIEVE": "Didn't you receive any code?"
   },
   "MONTHS": {
     "JANUARY": "January",
