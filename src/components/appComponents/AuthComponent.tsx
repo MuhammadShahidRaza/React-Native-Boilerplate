@@ -2,7 +2,7 @@ import { RowComponent, SvgComponent, Typography, Wrapper } from 'components/comm
 import { SVG } from 'constants/assets';
 import { SCREENS } from 'constants/routes';
 import { COMMON_TEXT } from 'constants/screens';
-import { navigate } from 'navigation/Navigators';
+import { reset } from 'navigation/Navigators';
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ChildrenType, FontSize, FontWeight, StyleType, SvgNameType } from 'types/index';
 import { screenWidth, FLEX_CENTER, COLORS, screenHeight } from 'utils/index';
@@ -16,6 +16,7 @@ type Props = {
   bottomText?: string;
   onBottomTextPress?: () => void;
   descriptionStyle?: StyleProp<TextStyle>;
+  heading1Style?: StyleProp<TextStyle>;
   containerStyle?: StyleProp<ViewStyle>;
 };
 type SocialIconProps = {
@@ -23,6 +24,7 @@ type SocialIconProps = {
   buttonName: string;
   containerStyle?: StyleType;
   textStyle?: StyleProp<TextStyle>;
+  heading1Style?: StyleProp<TextStyle>;
   onPress: () => void;
 };
 
@@ -33,17 +35,18 @@ export const AuthComponent = ({
   showLogo = true,
   descriptionStyle,
   containerStyle,
+  heading1Style,
   bottomText = COMMON_TEXT.ALREADY_HAVE_AN_ACCOUNT,
   bottomButtonText = COMMON_TEXT.SIGN_IN,
   onBottomTextPress = () => {
-    navigate(SCREENS.LOGIN);
+    reset(SCREENS.LOGIN);
   },
 }: Props) => {
   return (
     <Wrapper useScrollView>
       {showLogo && <SvgComponent Svg={SVG.LOGO} containerStyle={styles.logo} />}
       <View style={[styles.container, containerStyle]}>
-        <Typography style={styles.heading1}>{heading1}</Typography>
+        {heading1 && <Typography style={[styles.heading1, heading1Style]}>{heading1}</Typography>}
         <Typography
           style={[styles.description, { marginBottom: description ? 20 : 5 }, descriptionStyle]}
         >

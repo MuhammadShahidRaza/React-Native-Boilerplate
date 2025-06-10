@@ -1,13 +1,23 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
-import { Typography, RowComponent, Wrapper } from 'components/common';
+import { Typography, RowComponent, Wrapper, Button } from 'components/common';
 import { COLORS } from 'utils/colors';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { COMMON_TEXT } from 'constants/screens';
+import { useRoute } from '@react-navigation/native';
+import { navigate } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
+import { setItem } from 'utils/storage';
+import { VARIABLES } from 'constants/common';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setIsUserLoggedIn } from 'store/slices/appSettings';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
 
 export const Verification = () => {
+  const dispatch = useAppDispatch();
+  const isFromForgot = useRoute()?.params?.isFromForgot;
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(TIMER_SECONDS);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
@@ -29,6 +39,12 @@ export const Verification = () => {
   };
 
   const handleVerify = () => {
+    if (isFromForgot) {
+      navigate(SCREENS.RESET_PASSWORD);
+      return;
+    }
+    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
+    dispatch(setIsUserLoggedIn(true));
     // Add verification logic here
   };
 
@@ -43,31 +59,40 @@ export const Verification = () => {
   };
 
   // Create array for visual display
-  const displayCode = Array(CODE_LENGTH).fill('').map((_, idx) => code[idx] || '');
+  const displayCode = Array(CODE_LENGTH)
+    .fill('')
+    .map((_, idx) => code[idx] || '');
 
   return (
-    <Wrapper>
+    <Wrapper useScrollView>
       <View style={styles.container}>
-        <Typography style={styles.title}>Enter 4-digit</Typography>
-        <Typography style={styles.title}>recovery code</Typography>
-        <Typography style={styles.subtitle}>
-          Enter verification code you received on your email address
+        <Typography style={styles.title}>
+          {isFromForgot ? COMMON_TEXT.VERIFICATION_CODE : COMMON_TEXT.ENTER_4_DIGIT}
         </Typography>
-        
+        {!isFromForgot && (
+          <Typography style={[styles.title, { textTransform: 'lowercase' }]}>
+            {COMMON_TEXT.RECOVERY_CODE}
+          </Typography>
+        )}
+        <Typography style={styles.subtitle}>{COMMON_TEXT.ENTER_VERIFICATION_CODE_YOU}</Typography>
         <View style={styles.codeContainer}>
           <TextInput
             ref={inputRef}
             style={styles.hiddenInput}
             value={code}
             onChangeText={handleChange}
-            keyboardType="number-pad"
+            keyboardType='number-pad'
             maxLength={CODE_LENGTH}
             autoFocus
-            textContentType="oneTimeCode"
+            textContentType='oneTimeCode'
           />
           <RowComponent style={styles.codeRow}>
             {displayCode.map((digit, idx) => (
-              <View
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => {
+                  inputRef.current?.focus();
+                }}
                 key={idx}
                 style={[
                   styles.codeInput,
@@ -76,11 +101,10 @@ export const Verification = () => {
                 ]}
               >
                 <Typography style={styles.codeText}>{digit}</Typography>
-              </View>
+              </TouchableOpacity>
             ))}
           </RowComponent>
         </View>
-
         <RowComponent
           style={{
             justifyContent: 'center',
@@ -91,17 +115,16 @@ export const Verification = () => {
           <Text style={styles.timer}>:</Text>
           <Typography style={styles.timer}>{`${timer.toString().padStart(2, '0')}`}</Typography>
         </RowComponent>
-        <TouchableOpacity
+        <Button
           style={styles.verifyButton}
           onPress={handleVerify}
+          title={COMMON_TEXT.VERIFY}
           disabled={code.length !== CODE_LENGTH}
-        >
-          <Typography style={styles.verifyButtonText}>Verify</Typography>
-        </TouchableOpacity>
-        <Typography style={styles.infoText}>Didn't you receive any code?</Typography>
+        />
+        <Typography style={styles.infoText}>{COMMON_TEXT.DID_NOT_YOU_RECIEVE}</Typography>
         <TouchableOpacity onPress={handleResend} disabled={!isResendEnabled}>
           <Typography style={[styles.resendText, !isResendEnabled && styles.resendDisabled]}>
-            Re-send code
+            {COMMON_TEXT.RE_SEND_CODE}
           </Typography>
         </TouchableOpacity>
       </View>
@@ -115,20 +138,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Large,
-    marginBottom: 8,
+    fontSize: FontSize.ExtraLarge,
     color: COLORS.PRIMARY,
     textAlign: 'left',
   },
   subtitle: {
-    color: COLORS.BORDER,
-    fontSize: FontSize.Small,
-    marginBottom: 24,
+    color: COLORS.TEXT,
+    fontSize: FontSize.MediumSmall,
+    marginVertical: 20,
     textAlign: 'left',
   },
   codeContainer: {
     position: 'relative',
-    marginBottom: 24,
+    marginVertical: 24,
   },
   hiddenInput: {
     position: 'absolute',
@@ -170,16 +192,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   verifyButton: {
-    backgroundColor: COLORS.PRIMARY,
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  verifyButtonText: {
-    color: COLORS.WHITE,
-    fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Medium,
+    marginBottom: 30,
   },
   infoText: {
     color: COLORS.BORDER,

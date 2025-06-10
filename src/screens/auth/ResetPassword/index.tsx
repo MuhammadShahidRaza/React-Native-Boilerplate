@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { COMMON_TEXT, VARIABLES } from 'constants/index';
+import { COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
 import { COLORS, resetPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Input, AuthComponent } from 'components/index';
+import { reset } from 'navigation/Navigators';
 // import { resetUserPassword } from 'api/functions/auth';
 
 interface ResetPasswordFormValues {
@@ -27,6 +28,8 @@ export const ResetPassword = () => {
       password_confirmation: values?.confirm_password,
     };
     // resetUserPassword({data});
+
+    reset(SCREENS.LOGIN);
   };
 
   const formik = useFormikForm<ResetPasswordFormValues>({
@@ -36,7 +39,16 @@ export const ResetPassword = () => {
   });
 
   return (
-    <AuthComponent heading1={COMMON_TEXT.RESET_PASSWORD}>
+    <AuthComponent
+      description={COMMON_TEXT.RESET_YOUR_PASSWORD_WITH}
+      showLogo={false}
+      descriptionStyle={{
+        textAlign: 'left',
+      }}
+      containerStyle={{
+        marginTop: 0,
+      }}
+    >
       <FocusProvider>
         <Input
           name={COMMON_TEXT.NEW_PASSWORD}
@@ -53,6 +65,10 @@ export const ResetPassword = () => {
             size: FontSize.MediumLarge,
             onPress: () => formik.setFieldValue('showNewPassword', !formik.values.showNewPassword),
           }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
           secureTextEntry={!formik.values.showNewPassword}
           error={formik.errors.new_password}
           touched={Boolean(formik.touched.new_password && formik.submitCount)}
@@ -66,6 +82,10 @@ export const ResetPassword = () => {
           allowSpacing={false}
           returnKeyType='done'
           placeholder={COMMON_TEXT.ENTER_CONFIRM_PASSWORD}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showConfirmPassword ? 'eye' : 'eye-off',
@@ -79,11 +99,7 @@ export const ResetPassword = () => {
           touched={Boolean(formik.touched.confirm_password && formik.submitCount)}
         />
       </FocusProvider>
-      <Button
-        title={COMMON_TEXT.RESET_PASSWORD}
-        onPress={formik.handleSubmit}
-        style={styles.button}
-      />
+      <Button title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
     </AuthComponent>
   );
 };

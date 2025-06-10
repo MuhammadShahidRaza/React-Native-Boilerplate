@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Typography, Wrapper } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { getHomeListing } from 'api/functions/app/home';
+import { clearAllStorageItems } from 'utils/storage';
 
 export const Home = () => {
   // const CheckLocationPermission = async () => {
@@ -13,10 +14,9 @@ export const Home = () => {
   // getHomeListing();
   // }
   // };
-  // useEffect(() => {
-  // CheckLocationPermission();
-  // clearAllStorageItems();
-  // }, []);
+  useEffect(() => {
+    clearAllStorageItems();
+  }, []);
 
   return (
     <Wrapper useScrollView backgroundColor={COLORS.HEADER}>
