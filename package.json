@@ -53,6 +53,7 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-image-crop-picker": "^0.50.1",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-maps": "^1.24.3",
     "react-native-permissions": "^5.4.1",
     "react-native-phone-number-input": "^2.1.0",
     "react-native-reanimated": "^3.18.0",

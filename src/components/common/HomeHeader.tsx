@@ -70,7 +70,7 @@ export const HomeHeader = ({
   const { isLangRTL } = useTranslation();
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ zIndex: 2000 }}>
       <RowComponent style={styles.headerContainer}>
         <View>
           <Typography style={styles.title}>{title}</Typography>
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginHorizontal: 20,
     paddingTop: 15,
-    alignItems: 'flex-start'
+    alignItems: 'flex-start',
   },
   title: {
     fontSize: FontSize.Large,
