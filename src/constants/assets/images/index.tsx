@@ -2,6 +2,8 @@ export const IMAGES = {
   //COMMON:
   USER: require('assets/images/common/user.jpeg'),
   VISA: require('assets/images/common/visa.png'),
+  CURRENCY_NOTE: require('assets/images/common/currency_note.png'),
+
 
   //LANGUAGES:
   ARABIC: require('assets/images/languages/arabic.png'),
@@ -10,6 +12,7 @@ export const IMAGES = {
   DUTCH: require('assets/images/languages/dutch.png'),
   GERMAN: require('assets/images/languages/german.png'),
   PORTUGUESE: require('assets/images/languages/portuguese.png'),
+  DEFAULT_IMAGE: "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D"
 
 
   //HOME
