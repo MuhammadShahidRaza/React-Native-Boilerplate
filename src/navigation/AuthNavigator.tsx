@@ -52,7 +52,7 @@ export const AuthNavigator = () => {
     },
     [SCREENS.RESET_PASSWORD]: {
       component: ResetPassword,
-      options: { headerShown: true },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.RESET_PASSWORD) },
     },
     [SCREENS.VERIFICATION]: {
       component: Verification,
