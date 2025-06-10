@@ -62,6 +62,7 @@ export const ForgotPassword = () => {
 
 const styles = StyleSheet.create({
   button: {
-    marginVertical: 25,
+    marginTop:12,
+    alignSelf:"center"
   },
 });

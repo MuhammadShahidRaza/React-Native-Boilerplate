@@ -3,6 +3,10 @@ import { View, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-nativ
 import { Typography, RowComponent, Wrapper } from 'components/common';
 import { COLORS } from 'utils/colors';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { navigate } from 'navigation/index';
+import { SCREENS } from 'constants/routes/index';
+import { Button } from 'components/common/Button';
+import { COMMON_TEXT } from 'constants/screens/index';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
@@ -30,6 +34,7 @@ export const Verification = () => {
 
   const handleVerify = () => {
     // Add verification logic here
+    navigate(SCREENS.RESET_PASSWORD);
   };
 
   const handleResend = () => {
@@ -91,13 +96,14 @@ export const Verification = () => {
           <Text style={styles.timer}>:</Text>
           <Typography style={styles.timer}>{`${timer.toString().padStart(2, '0')}`}</Typography>
         </RowComponent>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.verifyButton}
           onPress={handleVerify}
           disabled={code.length !== CODE_LENGTH}
         >
           <Typography style={styles.verifyButtonText}>Verify</Typography>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <Button title={COMMON_TEXT.SUBMIT} onPress={()=>{}} style={styles.button} />
         <Typography style={styles.infoText}>Didn't you receive any code?</Typography>
         <TouchableOpacity onPress={handleResend} disabled={!isResendEnabled}>
           <Typography style={[styles.resendText, !isResendEnabled && styles.resendDisabled]}>
@@ -125,6 +131,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Small,
     marginBottom: 24,
     textAlign: 'left',
+  },
+    button: {
+    marginTop:12,
+    alignSelf:"center"
   },
   codeContainer: {
     position: 'relative',

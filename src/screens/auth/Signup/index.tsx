@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 30,
+    alignSelf:'center'
   },
   line: {
     width: screenWidth(100),

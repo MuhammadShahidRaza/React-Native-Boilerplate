@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
 import {
   loginValidationSchema,
@@ -12,6 +12,7 @@ import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
 import { navigate } from 'navigation/index';
+import { Checkbox } from 'components/common/Checkbox';
 
 interface LoginFormValues {
   email: string;
@@ -87,7 +88,7 @@ export const Login = () => {
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showPassword ? 'eye' : 'eye-off',
-            color: COLORS.PRIMARY,
+            color: COLORS.INPUT_FIELD_TEXT,
             size: FontSize.MediumLarge,
             onPress: () => {
               formik.setFieldValue('showPassword', !formik.values.showPassword);
@@ -98,13 +99,13 @@ export const Login = () => {
           touched={Boolean(formik.touched.password && formik.submitCount)}
         />
       </FocusProvider>
-      <RowComponent style={styles.row} isRightLeftJustify>
-        {/* <Checkbox
+      <RowComponent style={styles.row}>
+        <Checkbox
           style={styles.checkbox}
           label={COMMON_TEXT.REMEMBER_ME}
           checked={formik.values.rememberMe}
           onChange={checked => formik.setFieldValue('rememberMe', checked)}
-        /> */}
+        />
         <RowComponent>
           <Typography
             onPress={() => {
@@ -124,7 +125,9 @@ export const Login = () => {
           </Typography>
         </RowComponent>
       </RowComponent>
-      <Button title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
+      <View style={{ alignSelf: 'center' }}>
+        <Button title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
+      </View>
     </AuthComponent>
   );
 };
@@ -132,10 +135,14 @@ export const Login = () => {
 const styles = StyleSheet.create({
   checkbox: {},
   forgotPassword: {
-    color: COLORS.TEXT,
+    color: COLORS.SECONDARY,
+    fontSize: FontSize.Medium,
   },
   row: {
-    marginBottom: 50,
+    marginBottom: 18,
+    marginTop: 15,
+    // alignSelf:'center',
+    justifyContent: 'space-between',
   },
   line: {
     width: screenWidth(25),

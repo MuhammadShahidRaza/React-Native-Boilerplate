@@ -62,10 +62,10 @@ export const Input: React.FC<InputProps> = ({
   onSubmitEditing,
   autoFocus,
   blurOnSubmit,
-  lineAfterIcon = true,
-  isTitleInLine = true,
+  lineAfterIcon = false,
+  isTitleInLine = false,
   secureTextEntry,
-  allowSpacing = true,
+  allowSpacing = false,
   name,
   startIcon,
   endIcon,
@@ -78,7 +78,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const inputRef = useRef<TextInput>(null);
   const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
-  const height = isTitleInLine ? 36 : 42;
+  const height = isTitleInLine ? 36 : 42; 
   const isErrorShown = touched && error;
   useEffect(() => {
     textInput(name, inputRef.current);
@@ -100,18 +100,18 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {!isTitleInLine && title && (
-        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
-          {title}
-        </Typography>
-      )}
+    {!isTitleInLine && title && (
+      <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+        {title}
+      </Typography>
+    )}
 
       <RowComponent
         style={[
           styles.inputContainer,
           {
             borderColor:
-              name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
+              name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.INPUT_BACKGROUND,
             borderWidth: 1,
             borderRadius: isTitleInLine ? 15 : 10,
           },
@@ -166,6 +166,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.INPUT_BACKGROUND,
     paddingHorizontal: 8,
+    paddingVertical:6,
     marginBottom: 5,
   },
   inputContainerWithTitle: { width: '80%' },
@@ -185,14 +186,14 @@ const styles = StyleSheet.create({
   startIcon: {
     padding: 10,
     fontSize: FontSize.ExtraLarge,
-    color: COLORS.PRIMARY,
+    color: COLORS.INPUT_FIELD_TEXT,
   },
   endIcon: {
     padding: 10,
   },
   title: {
     paddingTop: 6,
-    color: COLORS.ICONS,
+    color: COLORS.TEXT,
     fontSize: FontSize.MediumSmall,
   },
   error: {
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: COLORS.PRIMARY,
+    color: COLORS.INPUT_FIELD_TEXT,
   },
   iconContainer: {
     marginHorizontal: 8,

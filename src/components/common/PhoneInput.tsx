@@ -50,16 +50,16 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   placeholder,
   error,
   onChangeText,
-  lineAfterIcon = true,
+  lineAfterIcon = false,
   style,
   touched,
   returnKeyType = 'next',
   onSubmitEditing,
   autoFocus,
-  isTitleInLine = true,
+  isTitleInLine = false,
   blurOnSubmit,
   defaultCode = 'NG',
-  allowSpacing = true,
+  allowSpacing = false,
   name,
   startIcon,
   endIcon,
@@ -103,7 +103,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
         ]}
       >
         {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
-        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
+        {/* <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} /> */}
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
         <View style={styles.inputContainerWithTitle}>
@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textInputStyle: {
-    color: COLORS.PRIMARY,
+    color: COLORS.INPUT_FIELD_TEXT,
   },
 });

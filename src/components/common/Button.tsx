@@ -6,7 +6,7 @@ import {
   TextStyle,
 } from 'react-native';
 import {FontSize, RootState, StyleType, useAppSelector} from 'types/index';
-import {COLORS} from 'utils/index';
+import {COLORS, screenWidth} from 'utils/index';
 import {Typography} from './Typography';
 import {Icon, IconComponentProps} from './Icon';
 import {RowComponent} from './Row';
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
   button: {
     padding: 15,
     backgroundColor: COLORS.PRIMARY,
-    borderRadius: 10,
+    borderRadius: 100,
+    width:259,
     opacity: 1,
   },
   disabledButton: {
