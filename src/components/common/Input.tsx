@@ -9,7 +9,7 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import { COLORS, REGEX, screenWidth } from 'utils/index';
+import { COLORS, REGEX } from 'utils/index';
 import { Typography } from './Typography';
 import { useFocus } from 'hooks/useFocus';
 import { Icon, IconComponentProps } from './Icon';
@@ -17,7 +17,6 @@ import { RowComponent } from './Row';
 import i18n from 'i18n/index';
 import { ChildrenType, StyleType } from 'types/common';
 import { FontSize } from 'types/fontTypes';
-import { VARIABLES } from 'constants/common';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -38,6 +37,7 @@ interface InputProps extends TextInputProps {
   allowSpacing?: boolean;
   touched?: boolean;
   name: string;
+  isTitleInLine?: boolean;
   error?: string;
   lineAfterIcon?: boolean;
   startIcon: IconComponentProps;
@@ -63,6 +63,7 @@ export const Input: React.FC<InputProps> = ({
   autoFocus,
   blurOnSubmit,
   lineAfterIcon = true,
+  isTitleInLine = true,
   secureTextEntry,
   allowSpacing = true,
   name,
@@ -77,6 +78,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const inputRef = useRef<TextInput>(null);
   const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
+  const height = isTitleInLine ? 36 : 42;
   const isErrorShown = touched && error;
   useEffect(() => {
     textInput(name, inputRef.current);
@@ -98,6 +100,12 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {!isTitleInLine && title && (
+        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+          {title}
+        </Typography>
+      )}
+
       <RowComponent
         style={[
           styles.inputContainer,
@@ -105,26 +113,24 @@ export const Input: React.FC<InputProps> = ({
             borderColor:
               name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
             borderWidth: 1,
+            borderRadius: isTitleInLine ? 15 : 10,
           },
           secondContainerStyle,
         ]}
       >
         {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
-        <Icon
-          componentName={startIcon?.componentName ?? VARIABLES.AntDesign}
-          iconName={startIcon?.iconName ?? 'lock1'}
-          iconStyle={[styles.startIcon, startIcon?.iconStyle]}
-          {...startIcon}
-        />
+        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
 
         <View style={styles.inputContainerWithTitle}>
-          {title && <Typography style={[styles.title, titleStyle]}>{title}</Typography>}
+          {isTitleInLine && title && (
+            <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+          )}
           <RowComponent>
             <TextInput
               ref={inputRef}
-              style={[styles.input, style]}
+              style={[{ height }, styles.input, style]}
               placeholder={i18n.t(placeholder)}
               value={value}
               onPress={onPress}
@@ -158,7 +164,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 15,
     backgroundColor: COLORS.INPUT_BACKGROUND,
     paddingHorizontal: 8,
     marginBottom: 5,
@@ -197,7 +202,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 36,
     color: COLORS.PRIMARY,
   },
   iconContainer: {

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,46 +7,31 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import {
-  Wrapper,
-  SvgComponent,
-  Typography,
-  Icon,
-  RowComponent,
-} from 'components/common';
-import {
-  screenHeight,
-  screenWidth,
-  COLORS,
-  FLEX_CENTER,
-  setItem,
-} from 'utils/index';
-import {COMMON_TEXT, ONBOARDING_TEXT} from 'constants/screens';
-import {FontSize, FontWeight} from 'types/index';
-import {VARIABLES} from 'constants/common';
-import {useTranslation} from 'hooks/index';
-import {SVG} from 'constants/assets';
-import {useAppDispatch} from 'types/reduxTypes';
-import {setIsUserVisitedApp} from 'store/slices/appSettings';
+import { Wrapper, SvgComponent, Typography, Icon, RowComponent } from 'components/common';
+import { screenHeight, screenWidth, COLORS, FLEX_CENTER, setItem } from 'utils/index';
+import { COMMON_TEXT, ONBOARDING_TEXT } from 'constants/screens';
+import { FontSize, FontWeight } from 'types/index';
+import { VARIABLES } from 'constants/common';
+import { useTranslation } from 'hooks/index';
+import { SVG } from 'constants/assets';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setIsUserVisitedApp } from 'store/slices/appSettings';
 
 export const OnBoarding = () => {
   const dispatch = useAppDispatch();
   const scrollViewRef = useRef<ScrollView>(null);
-  const {isLangRTL} = useTranslation();
+  const { isLangRTL } = useTranslation();
   const [currentPage, setCurrentPage] = useState<number>(0);
   const fullScreenWidth = screenWidth(100);
   const handleSkip = () => {
     dispatch(setIsUserVisitedApp(true));
-    setItem(
-      VARIABLES.IS_USER_VISITED_THE_APP,
-      VARIABLES.IS_USER_VISITED_THE_APP,
-    );
+    setItem(VARIABLES.IS_USER_VISITED_THE_APP, VARIABLES.IS_USER_VISITED_THE_APP);
   };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (scrollViewRef.current && isLangRTL) {
-        scrollViewRef.current.scrollToEnd({animated: false});
+        scrollViewRef.current.scrollToEnd({ animated: false });
       }
     });
 
@@ -55,17 +40,17 @@ export const OnBoarding = () => {
 
   const pages = [
     {
-      svg: SVG.ONBAORDING1,
+      svg: SVG.LOGO,
       heading: ONBOARDING_TEXT.HEADING_1,
       description: ONBOARDING_TEXT.DESCRIPTION_1,
     },
     {
-      svg: SVG.ONBAORDING2,
+      svg: SVG.LOGO,
       heading: ONBOARDING_TEXT.HEADING_2,
       description: ONBOARDING_TEXT.DESCRIPTION_2,
     },
     {
-      svg: SVG.ONBAORDING3,
+      svg: SVG.LOGO,
       heading: ONBOARDING_TEXT.HEADING_3,
       description: ONBOARDING_TEXT.DESCRIPTION_3,
     },
@@ -104,25 +89,25 @@ export const OnBoarding = () => {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+      >
         {renderedPages.map((page, index) => (
-          <View key={index} style={[styles.page, {width: fullScreenWidth}]}>
+          <View key={index} style={[styles.page, { width: fullScreenWidth }]}>
             <SvgComponent
               svgWidth={screenWidth(75)}
               svgHeight={screenHeight(40)}
-              containerStyle={index == 1 ? styles.svgContainer : {}}
+              // containerStyle={index == 1 ? styles.svgContainer : {}}
               Svg={page.svg}
             />
             <Typography
               color={COLORS.SECONDARY}
               fontSize={FontSize.XL}
               style={styles.heading}
-              fontWeight={FontWeight.Bold}>
+              fontWeight={FontWeight.Bold}
+            >
               {page.heading}
             </Typography>
-            <Typography style={styles.description}>
-              {page.description}
-            </Typography>
+            <Typography style={styles.description}>{page.description}</Typography>
           </View>
         ))}
       </ScrollView>
@@ -132,10 +117,7 @@ export const OnBoarding = () => {
             <TouchableOpacity
               hitSlop={10}
               key={index}
-              style={[
-                styles.dot,
-                index === currentPage ? styles.activeDot : null,
-              ]}
+              style={[styles.dot, index === currentPage ? styles.activeDot : null]}
               onPress={() => scrollToPage(index)}
             />
           ))}
@@ -145,10 +127,9 @@ export const OnBoarding = () => {
             isRightLeftJustify
             activeOpacity={0.5}
             onPress={handleSkip}
-            style={styles.skipButton}>
-            <Typography style={styles.skipButtonText}>
-              {COMMON_TEXT.SKIP}
-            </Typography>
+            style={styles.skipButton}
+          >
+            <Typography style={styles.skipButtonText}>{COMMON_TEXT.SKIP}</Typography>
             <Icon
               size={FontSize.ExtraLarge}
               componentName={VARIABLES.AntDesign}
@@ -157,7 +138,6 @@ export const OnBoarding = () => {
             />
           </RowComponent>
         )}
-        <SvgComponent containerStyle={styles.logo} Svg={SVG.ONBAORDING_LOGO} />
       </View>
     </Wrapper>
   );
@@ -214,7 +194,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontSize: FontSize.Large,
   },
-  scroll: {maxHeight: screenHeight(82)},
+  scroll: { maxHeight: screenHeight(82) },
   secondContainer: {
     height: screenHeight(18),
     justifyContent: 'space-between',

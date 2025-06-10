@@ -36,7 +36,7 @@ const arabicNumeralsMap: { [key: string]: string } = {
   '9': '٩',
 };
 
-const convertToArabicNumerals = (str: string): string => {
+export const convertToArabicNumerals = (str: string): string => {
   return str.replace(/\d/g, digit => arabicNumeralsMap[digit]);
 };
 

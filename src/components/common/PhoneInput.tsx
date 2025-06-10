@@ -32,6 +32,7 @@ interface PhoneInputProp extends PhoneInputProps {
   editable?: boolean;
   blurOnSubmit?: boolean;
   allowSpacing?: boolean;
+  isTitleInLine?: boolean;
   touched?: boolean;
   name: string;
   lineAfterIcon?: boolean;
@@ -55,6 +56,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   returnKeyType = 'next',
   onSubmitEditing,
   autoFocus,
+  isTitleInLine = true,
   blurOnSubmit,
   defaultCode = 'NG',
   allowSpacing = true,
@@ -72,6 +74,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const isErrorShown = touched && error;
+  const height = isTitleInLine ? 36 : 42;
 
   const handleTextChange = (text: string) => {
     onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);
@@ -83,6 +86,11 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {!isTitleInLine && title && (
+        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+          {title}
+        </Typography>
+      )}
       <RowComponent
         style={[
           styles.inputContainer,
@@ -90,6 +98,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
             borderColor:
               name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
             borderWidth: 1,
+            borderRadius: isTitleInLine ? 15 : 10,
           },
         ]}
       >
@@ -98,14 +107,16 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
         <View style={styles.inputContainerWithTitle}>
-          {title && <Typography style={[styles.title, titleStyle]}>{title}</Typography>}
+          {isTitleInLine && title && (
+            <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+          )}
           <RowComponent>
             <PhoneInput
               ref={phoneRef}
               defaultValue={value}
               defaultCode={defaultCode}
               placeholder={i18n.t(placeholder)}
-              containerStyle={styles.innerContainer}
+              containerStyle={[{ height }, styles.innerContainer]}
               countryPickerButtonStyle={styles.countryPickerButtonStyle}
               textInputProps={{
                 placeholderTextColor: COLORS.TEXT,
@@ -117,9 +128,9 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 onBlur: () => setActiveInput(''),
                 onFocus: () => setActiveInput(name),
               }}
-              textInputStyle={styles.textInputStyle}
+              textInputStyle={[{ height }, styles.textInputStyle]}
               codeTextStyle={styles.codeTextStyle}
-              textContainerStyle={styles.textContainerStyle}
+              textContainerStyle={[{ height }, styles.textContainerStyle]}
               onChangeCountry={country => {
                 setCountryCode(country.callingCode?.[0]);
               }}
@@ -149,14 +160,13 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
     </View>
   );
 };
-const inputHeight = 36;
+
 const styles = StyleSheet.create({
   container: {
     marginBottom: 10,
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 15,
     backgroundColor: COLORS.INPUT_BACKGROUND,
     overflow: 'hidden',
     paddingHorizontal: 8,
@@ -197,7 +207,6 @@ const styles = StyleSheet.create({
   innerContainer: {
     ...CENTER,
     borderRadius: 10,
-    height: inputHeight,
   },
   codeTextStyle: {
     height: isIOS() ? 18 : 22,
@@ -209,12 +218,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textContainerStyle: {
-    height: inputHeight,
     maxWidth: '65%',
     backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textInputStyle: {
-    height: inputHeight,
     color: COLORS.PRIMARY,
   },
 });

@@ -1,10 +1,10 @@
-import {StyleSheet} from 'react-native';
-import {COMMON_TEXT, VARIABLES} from 'constants/index';
-import {COLORS, resetPasswordValidationSchema} from 'utils/index';
-import {FocusProvider, useFormikForm} from 'hooks/index';
-import {FontSize} from 'types/fontTypes';
-import {Button, Input, AuthComponent} from 'components/index';
-import {resetUserPassword} from 'api/functions/auth';
+import { StyleSheet } from 'react-native';
+import { COMMON_TEXT, VARIABLES } from 'constants/index';
+import { COLORS, resetPasswordValidationSchema } from 'utils/index';
+import { FocusProvider, useFormikForm } from 'hooks/index';
+import { FontSize } from 'types/fontTypes';
+import { Button, Input, AuthComponent } from 'components/index';
+// import { resetUserPassword } from 'api/functions/auth';
 
 interface ResetPasswordFormValues {
   new_password: string;
@@ -26,7 +26,7 @@ export const ResetPassword = () => {
       password: values?.new_password,
       password_confirmation: values?.confirm_password,
     };
-    resetUserPassword({data});
+    // resetUserPassword({data});
   };
 
   const formik = useFormikForm<ResetPasswordFormValues>({
@@ -51,11 +51,7 @@ export const ResetPassword = () => {
             iconName: formik.values.showNewPassword ? 'eye' : 'eye-off',
             color: COLORS.ICONS,
             size: FontSize.MediumLarge,
-            onPress: () =>
-              formik.setFieldValue(
-                'showNewPassword',
-                !formik.values.showNewPassword,
-              ),
+            onPress: () => formik.setFieldValue('showNewPassword', !formik.values.showNewPassword),
           }}
           secureTextEntry={!formik.values.showNewPassword}
           error={formik.errors.new_password}
@@ -68,7 +64,7 @@ export const ResetPassword = () => {
           onBlur={formik.handleBlur('confirm_password')}
           value={formik.values.confirm_password}
           allowSpacing={false}
-          returnKeyType="done"
+          returnKeyType='done'
           placeholder={COMMON_TEXT.ENTER_CONFIRM_PASSWORD}
           endIcon={{
             componentName: VARIABLES.Ionicons,
@@ -76,16 +72,11 @@ export const ResetPassword = () => {
             color: COLORS.ICONS,
             size: FontSize.MediumLarge,
             onPress: () =>
-              formik.setFieldValue(
-                'showConfirmPassword',
-                !formik.values.showConfirmPassword,
-              ),
+              formik.setFieldValue('showConfirmPassword', !formik.values.showConfirmPassword),
           }}
           secureTextEntry={!formik.values.showConfirmPassword}
           error={formik.errors.confirm_password}
-          touched={Boolean(
-            formik.touched.confirm_password && formik.submitCount,
-          )}
+          touched={Boolean(formik.touched.confirm_password && formik.submitCount)}
         />
       </FocusProvider>
       <Button

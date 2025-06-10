@@ -1,9 +1,10 @@
-import {StyleSheet} from 'react-native';
-import {AUTH_TEXT, COMMON_TEXT} from 'constants/index';
-import {forgotPasswordValidationSchema} from 'utils/index';
-import {FocusProvider, useFormikForm} from 'hooks/index';
-import {Button, Input, AuthComponent} from 'components/index';
-import {sendOtpToEmail} from 'api/functions/auth';
+import { StyleSheet } from 'react-native';
+import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { forgotPasswordValidationSchema } from 'utils/index';
+import { FocusProvider, useFormikForm } from 'hooks/index';
+import { Button, Input, AuthComponent } from 'components/index';
+// import { sendOtpToEmail } from 'api/functions/auth';
+import { navigate } from 'navigation/Navigators';
 
 interface ForgotPasswordFormValues {
   email: string;
@@ -18,7 +19,8 @@ export const ForgotPassword = () => {
     const data = {
       email: values?.email,
     };
-    sendOtpToEmail({data});
+    // sendOtpToEmail({ data });
+    navigate(SCREENS.VERIFICATION);
   };
 
   const formik = useFormikForm<ForgotPasswordFormValues>({
@@ -29,8 +31,11 @@ export const ForgotPassword = () => {
 
   return (
     <AuthComponent
-      heading1={COMMON_TEXT.FORGOT_PASSWORD}
-      description={AUTH_TEXT.DONT_WORRY_FORGOT}>
+      showLogo={false}
+      description={AUTH_TEXT.RESET_YOUR_PASSWORD}
+      descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
+      containerStyle={{ marginTop: 0 }}
+    >
       <FocusProvider>
         <Input
           name={COMMON_TEXT.EMAIL}
@@ -39,18 +44,18 @@ export const ForgotPassword = () => {
           onBlur={formik.handleBlur('email')}
           value={formik.values.email}
           allowSpacing={false}
-          returnKeyType="done"
+          returnKeyType='go'
           keyboardType={'email-address'}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
           error={formik.errors.email}
           touched={Boolean(formik.touched.email && formik.submitCount)}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
         />
       </FocusProvider>
-      <Button
-        title={COMMON_TEXT.SEND_OTP}
-        onPress={formik.handleSubmit}
-        style={styles.button}
-      />
+      <Button title={COMMON_TEXT.SUBMIT} onPress={formik.handleSubmit} style={styles.button} />
     </AuthComponent>
   );
 };

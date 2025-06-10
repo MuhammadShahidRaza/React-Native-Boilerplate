@@ -1,27 +1,17 @@
-import { StyleSheet, View } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SVG, SCREENS } from 'constants/index';
+import { StyleSheet } from 'react-native';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
 import {
   loginValidationSchema,
   COLORS,
   screenWidth,
   // getFCMToken,
   clearAllStorageItems,
+  // deviceDetails,
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
-import {
-  Button,
-  Checkbox,
-  Typography,
-  Input,
-  AuthComponent,
-  RowComponent,
-  SocialButton,
-} from 'components/index';
+import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
 import { navigate } from 'navigation/index';
-import { loginUser, loginUserThroughSocial } from 'api/functions/auth';
-import { deviceDetails } from '../../../utils/helpers/functions';
-import { PROVIDERS } from 'types/common';
 
 interface LoginFormValues {
   email: string;
@@ -39,7 +29,6 @@ export const Login = () => {
   };
 
   const handleSubmit = async (values: LoginFormValues) => {
-    clearAllStorageItems();
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
@@ -68,7 +57,7 @@ export const Login = () => {
       <FocusProvider>
         <Input
           name={COMMON_TEXT.EMAIL}
-          title={COMMON_TEXT.EMAIL_OR_USERNAME}
+          title={COMMON_TEXT.EMAIL}
           onChangeText={formik.handleChange('email')}
           onBlur={formik.handleBlur('email')}
           value={formik.values.email}

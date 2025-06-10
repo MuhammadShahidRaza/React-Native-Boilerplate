@@ -223,6 +223,7 @@
     "WELCOME_BACK_LOGIN": "Welcome Back! 👋",
     "HELLO_AGAIN_LOGIN": "Hello again, you've been missed!",
     "DONT_WORRY_FORGOT": "Don't worry we are here to help!",
+    "RESET_YOUR_PASSWORD": "Reset your password with email to use your account.",
     "CONNECT_WITH_SIGNUP": "Connect with experts today!"
   },
   "CHAT": {
