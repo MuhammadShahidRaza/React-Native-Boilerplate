@@ -14,9 +14,9 @@ import { COLORS } from 'utils/colors';
 export type RootStackParamList = {
   [SCREENS.LOGIN]: undefined;
   [SCREENS.SIGN_UP]: undefined;
-  [SCREENS.FORGOT_PASSWORD]: { isFromForgot: boolean };
+  [SCREENS.FORGOT_PASSWORD]: undefined;
   [SCREENS.RESET_PASSWORD]: { token: string };
-  [SCREENS.VERIFICATION]: { email: string };
+  [SCREENS.VERIFICATION]: { isFromForgot: boolean };
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
