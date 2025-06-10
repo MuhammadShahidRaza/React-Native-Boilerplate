@@ -1,28 +1,17 @@
-import {StyleSheet, View} from 'react-native';
-import {AUTH_TEXT, COMMON_TEXT, VARIABLES, SVG, SCREENS} from 'constants/index';
+import { StyleSheet } from 'react-native';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
 import {
   loginValidationSchema,
   COLORS,
   screenWidth,
-  getFCMToken,
+  // getFCMToken,
   clearAllStorageItems,
+  // deviceDetails,
 } from 'utils/index';
-import {FocusProvider, useFormikForm} from 'hooks/index';
-import {FontSize} from 'types/fontTypes';
-import {
-  Button,
-  Checkbox,
-  Typography,
-  Input,
-  AuthComponent,
-  RowComponent,
-  SocialButton,
-} from 'components/index';
-import {navigate} from 'navigation/index';
-import {loginUser, loginUserThroughSocial} from 'api/functions/auth';
-import {GoogleSignIn} from 'utils/helpers';
-import {deviceDetails} from '../../../utils/helpers/functions';
-import {PROVIDERS} from 'types/common';
+import { FocusProvider, useFormikForm } from 'hooks/index';
+import { FontSize } from 'types/fontTypes';
+import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
+import { navigate } from 'navigation/index';
 
 interface LoginFormValues {
   email: string;
@@ -40,14 +29,13 @@ export const Login = () => {
   };
 
   const handleSubmit = async (values: LoginFormValues) => {
-    clearAllStorageItems()
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
-      device_token: await getFCMToken(),
-      ...deviceDetails(),
+      // device_token: await getFCMToken(),
+      // ...deviceDetails(),
     };
-    loginUser({data, rememberMe: values?.rememberMe});
+    // loginUser({ data, rememberMe: values?.rememberMe });
   };
 
   const formik = useFormikForm<LoginFormValues>({
@@ -64,7 +52,8 @@ export const Login = () => {
       bottomButtonText={COMMON_TEXT.SIGN_UP}
       onBottomTextPress={() => {
         navigate(SCREENS.SIGN_UP);
-      }}>
+      }}
+    >
       <FocusProvider>
         <Input
           name={COMMON_TEXT.EMAIL}
@@ -76,6 +65,10 @@ export const Login = () => {
           keyboardType={'email-address'}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
           error={formik.errors.email}
+          startIcon={{
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'email-outline',
+          }}
           touched={Boolean(formik.touched.email && formik.submitCount)}
         />
         <Input
@@ -84,13 +77,17 @@ export const Login = () => {
           onChangeText={formik.handleChange('password')}
           onBlur={formik.handleBlur('password')}
           value={formik.values.password}
-          returnKeyType="done"
+          returnKeyType='done'
           allowSpacing={false}
           placeholder={COMMON_TEXT.ENTER_YOUR_PASSWORD}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showPassword ? 'eye' : 'eye-off',
-            color: COLORS.ICONS,
+            color: COLORS.PRIMARY,
             size: FontSize.MediumLarge,
             onPress: () => {
               formik.setFieldValue('showPassword', !formik.values.showPassword);
@@ -101,67 +98,33 @@ export const Login = () => {
           touched={Boolean(formik.touched.password && formik.submitCount)}
         />
       </FocusProvider>
-      <RowComponent style={styles.row}>
-        <Checkbox
+      <RowComponent style={styles.row} isRightLeftJustify>
+        {/* <Checkbox
           style={styles.checkbox}
           label={COMMON_TEXT.REMEMBER_ME}
           checked={formik.values.rememberMe}
           onChange={checked => formik.setFieldValue('rememberMe', checked)}
-        />
-        <Typography
-          onPress={() => {
-            navigate(SCREENS.FORGOT_PASSWORD);
-          }}
-          style={styles.forgotPassword}>
-          {COMMON_TEXT.FORGOT_PASSWORD}
-        </Typography>
+        /> */}
+        <RowComponent>
+          <Typography
+            onPress={() => {
+              navigate(SCREENS.FORGOT_PASSWORD);
+            }}
+            style={styles.forgotPassword}
+          >
+            {COMMON_TEXT.FORGOT_PASSWORD}
+          </Typography>
+          <Typography
+            onPress={() => {
+              navigate(SCREENS.FORGOT_PASSWORD);
+            }}
+            style={styles.forgotPassword}
+          >
+            ?
+          </Typography>
+        </RowComponent>
       </RowComponent>
-      <Button
-        title={COMMON_TEXT.LOGIN}
-        onPress={formik.handleSubmit}
-        style={styles.row}
-      />
-
-      <RowComponent style={styles.row}>
-        <View style={styles.line} />
-        <Typography>{COMMON_TEXT.OR_CONTINUE_WITH}</Typography>
-        <View style={styles.line} />
-      </RowComponent>
-
-      <RowComponent style={styles.row}>
-        <SocialButton
-          onPress={async () => {
-            const user = await GoogleSignIn();
-            if (user?.social_id) {
-              const data: SocialLogin = {
-                ...user,
-                provider: PROVIDERS.GOOGLE,
-                device_token: await getFCMToken(),
-                ...deviceDetails(),
-              };
-              loginUserThroughSocial({data});
-            }
-          }}
-          svgName={SVG.GOOGLE}
-          buttonName={COMMON_TEXT.GOOGLE}
-        />
-        <SocialButton
-          onPress={async () => {
-            // const user = await AppleSignIn();
-            // if (user?.social_id) {
-            //   const data: SocialLogin = {
-            //     ...user,
-            // language_id: 1, //TODO: REMOVE THAT
-            //       device_token: await getFCMToken(),
-            // ...deviceDetails(),
-            //   };
-            //   loginUserThroughSocial({data});
-            // }
-          }}
-          svgName={SVG.FACEBOOK}
-          buttonName={COMMON_TEXT.FACEBOOK}
-        />
-      </RowComponent>
+      <Button title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
     </AuthComponent>
   );
 };
@@ -169,10 +132,10 @@ export const Login = () => {
 const styles = StyleSheet.create({
   checkbox: {},
   forgotPassword: {
-    color: COLORS.ERROR,
+    color: COLORS.TEXT,
   },
   row: {
-    marginBottom: 30,
+    marginBottom: 50,
   },
   line: {
     width: screenWidth(25),

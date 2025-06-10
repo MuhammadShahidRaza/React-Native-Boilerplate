@@ -1,5 +1,5 @@
-import {useEffect, useRef} from 'react';
-import {StyleProp} from 'react-native';
+import { useEffect, useRef } from 'react';
+import { StyleProp } from 'react-native';
 import {
   TextInput,
   StyleSheet,
@@ -9,13 +9,14 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import {COLORS, REGEX} from 'utils/index';
-import {Typography} from './Typography';
-import {useFocus} from 'hooks/useFocus';
-import {Icon, IconComponentProps} from './Icon';
-import {RowComponent} from './Row';
+import { COLORS, REGEX } from 'utils/index';
+import { Typography } from './Typography';
+import { useFocus } from 'hooks/useFocus';
+import { Icon, IconComponentProps } from './Icon';
+import { RowComponent } from './Row';
 import i18n from 'i18n/index';
-import {ChildrenType, StyleType} from 'types/common';
+import { ChildrenType, StyleType } from 'types/common';
+import { FontSize } from 'types/fontTypes';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -28,9 +29,7 @@ interface InputProps extends TextInputProps {
   endImage?: ChildrenType;
   maxLines?: number;
   returnKeyType?: TextInputProps['returnKeyType'];
-  onSubmitEditing?: (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-  ) => void;
+  onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
   autoFocus?: boolean;
   editable?: boolean;
   blurOnSubmit?: boolean;
@@ -38,8 +37,10 @@ interface InputProps extends TextInputProps {
   allowSpacing?: boolean;
   touched?: boolean;
   name: string;
+  isTitleInLine?: boolean;
   error?: string;
-  startIcon?: IconComponentProps;
+  lineAfterIcon?: boolean;
+  startIcon: IconComponentProps;
   endIcon?: IconComponentProps;
   containerStyle?: StyleType;
   secondContainerStyle?: StyleType;
@@ -61,6 +62,8 @@ export const Input: React.FC<InputProps> = ({
   onSubmitEditing,
   autoFocus,
   blurOnSubmit,
+  lineAfterIcon = true,
+  isTitleInLine = true,
   secureTextEntry,
   allowSpacing = true,
   name,
@@ -74,7 +77,8 @@ export const Input: React.FC<InputProps> = ({
   ...rest
 }) => {
   const inputRef = useRef<TextInput>(null);
-  const {activeInput, setActiveInput, focusNextInput, textInput} = useFocus();
+  const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
+  const height = isTitleInLine ? 36 : 42;
   const isErrorShown = touched && error;
   useEffect(() => {
     textInput(name, inputRef.current);
@@ -87,9 +91,7 @@ export const Input: React.FC<InputProps> = ({
     onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);
   };
 
-  const handleSubmitEditing = (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-  ) => {
+  const handleSubmitEditing = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
     if (onSubmitEditing) onSubmitEditing(e);
     if (returnKeyType === 'next') {
       focusNextInput(); // Focus next input
@@ -98,54 +100,58 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {title && (
-        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+      {!isTitleInLine && title && (
+        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+          {title}
+        </Typography>
       )}
+
       <RowComponent
         style={[
           styles.inputContainer,
           {
             borderColor:
-              name === activeInput
-                ? COLORS.PRIMARY
-                : isErrorShown
-                ? COLORS.RED
-                : COLORS.BORDER,
+              name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
             borderWidth: 1,
+            borderRadius: isTitleInLine ? 15 : 10,
           },
           secondContainerStyle,
-        ]}>
-        {startIcon && (
-          <Icon
-            {...startIcon}
-            iconStyle={[styles.startIcon, startIcon.iconStyle]}
-          />
-        )}
+        ]}
+      >
+        {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
+        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
+        {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
-        <TextInput
-          ref={inputRef}
-          style={[styles.input, style]}
-          placeholder={i18n.t(placeholder)}
-          value={value}
-          onPress={onPress}
-          placeholderTextColor={COLORS.MEDIUM_GREY}
-          onChangeText={handleTextChange}
-          multiline={!!maxLines}
-          numberOfLines={maxLines}
-          editable={editable}
-          returnKeyType={returnKeyType}
-          onSubmitEditing={handleSubmitEditing}
-          autoFocus={autoFocus}
-          onBlur={() => setActiveInput('')}
-          onFocus={() => setActiveInput(name)}
-          blurOnSubmit={blurOnSubmit}
-          secureTextEntry={secureTextEntry}
-          {...rest}
-        />
-        {endIcon && (
-          <Icon {...endIcon} iconStyle={[styles.endIcon, endIcon.iconStyle]} />
-        )}
-        {endImage && endImage}
+
+        <View style={styles.inputContainerWithTitle}>
+          {isTitleInLine && title && (
+            <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+          )}
+          <RowComponent>
+            <TextInput
+              ref={inputRef}
+              style={[{ height }, styles.input, style]}
+              placeholder={i18n.t(placeholder)}
+              value={value}
+              onPress={onPress}
+              placeholderTextColor={COLORS.TEXT}
+              onChangeText={handleTextChange}
+              multiline={!!maxLines}
+              numberOfLines={maxLines}
+              editable={editable}
+              returnKeyType={returnKeyType}
+              onSubmitEditing={handleSubmitEditing}
+              autoFocus={autoFocus}
+              onBlur={() => setActiveInput('')}
+              onFocus={() => setActiveInput(name)}
+              blurOnSubmit={blurOnSubmit}
+              secureTextEntry={secureTextEntry}
+              {...rest}
+            />
+            {endIcon && <Icon {...endIcon} iconStyle={[styles.endIcon, endIcon.iconStyle]} />}
+            {endImage && endImage}
+          </RowComponent>
+        </View>
       </RowComponent>
       {isErrorShown && <Typography style={styles.error}>{error}</Typography>}
     </View>
@@ -158,10 +164,11 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    backgroundColor: COLORS.INPUT_BACKGROUND,
+    paddingHorizontal: 8,
     marginBottom: 5,
   },
+  inputContainerWithTitle: { width: '80%' },
   label: {
     backgroundColor: COLORS.WHITE,
     top: -9,
@@ -169,14 +176,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     position: 'absolute',
   },
+  lineStyle: {
+    backgroundColor: COLORS.BORDER,
+    width: 1,
+    marginHorizontal: 10,
+    height: '100%',
+  },
   startIcon: {
     padding: 10,
+    fontSize: FontSize.ExtraLarge,
+    color: COLORS.PRIMARY,
   },
   endIcon: {
     padding: 10,
   },
   title: {
-    marginBottom: 8,
+    paddingTop: 6,
+    color: COLORS.ICONS,
+    fontSize: FontSize.MediumSmall,
   },
   error: {
     paddingHorizontal: 10,
@@ -185,8 +202,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 42,
-    color: COLORS.BLACK,
+    color: COLORS.PRIMARY,
   },
   iconContainer: {
     marginHorizontal: 8,

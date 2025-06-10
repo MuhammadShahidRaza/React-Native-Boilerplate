@@ -1,4 +1,4 @@
-import {IconComponentName} from 'types/iconTypes';
+import { IconComponentName } from 'types/iconTypes';
 import {
   API_BASE_URL,
   ANDROID_MAP_KEYS,
@@ -12,6 +12,7 @@ import {
   APPLE_REDIRECT_URI,
   APPLE_MERCHANT_ID,
   ANDROID_CHANNEL_ZENDESK,
+  MAP_API_KEY,
   IOS_CHANNEL_ZENDESK,
 } from '@env';
 
@@ -29,6 +30,7 @@ export const ENV_CONSTANTS = {
   MERCHANT_ID: APPLE_MERCHANT_ID,
   ZENDESK_ANDROID: ANDROID_CHANNEL_ZENDESK,
   ZENDESK_IOS: IOS_CHANNEL_ZENDESK,
+  MAP_API_KEY: MAP_API_KEY,
 };
 
 export const LANGUAGES = {
@@ -90,8 +92,7 @@ export const VARIABLES = {
   USER_TOKEN: 'token',
   LANGUAGE: 'user selected language',
   IS_USER_LOGGED_IN: 'Is user logged in?',
-  IS_USER_VISITED_THE_APP:
-    "Is user visited the app so don't show onboarding screen.",
+  IS_USER_VISITED_THE_APP: "Is user visited the app so don't show onboarding screen.",
 
   // Booleans
   TRUE: true,
@@ -167,8 +168,6 @@ export const VARIABLES = {
   MaterialCommunityIcons: 'MaterialCommunityIcons' as IconComponentName,
   MaterialIcons: 'MaterialIcons' as IconComponentName,
 };
-
-export const MAP_API_KEY = '';
 
 export const INITIAL_LAT_LNG = {
   lat: 33.753746,

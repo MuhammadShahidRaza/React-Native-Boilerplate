@@ -61,15 +61,15 @@ export const CutomTabsBooking: React.FC<Props> = ({
                   height: screenHeight(isIOS() ? (isLangRTL ? 5 : 4.5) : 5.2),
 
                   backgroundColor:
-                    item === selectedTab ? COLORS.MUD_BORDER : COLORS.WHITE,
+                    item === selectedTab ? COLORS.PRIMARY : COLORS.WHITE,
                   borderColor:
-                    item === selectedTab ? COLORS.MUD_TEXT : COLORS.BORDER,
+                    item === selectedTab ? COLORS.SECONDARY : COLORS.BORDER,
                 },
               ]}
               textStyle={[
                 styles.tabButtonText,
                 {
-                  color: item === selectedTab ? COLORS.MUD_TEXT : COLORS.BORDER,
+                  color: item === selectedTab ? COLORS.SECONDARY : COLORS.BORDER,
                   fontWeight: FontWeight.Medium,
                 },
               ]}

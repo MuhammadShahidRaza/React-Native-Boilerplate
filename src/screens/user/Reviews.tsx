@@ -63,7 +63,7 @@ export const renderReviews = ({item}: {item: ReviewItem}) => (
       iconName: 'star',
       iconStyle: {marginBottom: isIOS() ? 3 : 0},
       size: FontSize.Small,
-      color: COLORS.MUD_TEXT,
+      color: COLORS.SECONDARY,
     }}
     time={item?.ratings}
     message={item?.remarks}
@@ -83,7 +83,7 @@ export const Reviews = () => {
               width: screenWidth(30),
               height: screenHeight(15),
               borderWidth: 3,
-              borderColor: COLORS.MUD_TEXT,
+              borderColor: COLORS.SECONDARY,
               borderRadius: screenWidth(30),
             }}
           />

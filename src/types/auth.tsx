@@ -6,6 +6,7 @@ interface Login_SignUp {
   email: string;
   phone?: string;
   password: string;
+  country: string;
   picture?: string | null;
   device_type?: string;
   device_token: string;

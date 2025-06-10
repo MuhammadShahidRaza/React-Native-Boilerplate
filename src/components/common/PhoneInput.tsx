@@ -1,5 +1,5 @@
-import {useRef, useState} from 'react';
-import {StyleProp} from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleProp } from 'react-native';
 import {
   StyleSheet,
   TextInputProps,
@@ -8,15 +8,15 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import {CENTER, COLORS, isIOS, REGEX} from 'utils/index';
-import {Typography} from './Typography';
-import {FontSize, StyleType} from 'types/index';
-import {useFocus} from 'hooks/useFocus';
-import {Icon, IconComponentProps} from './Icon';
-import {RowComponent} from './Row';
+import { CENTER, COLORS, isIOS, REGEX } from 'utils/index';
+import { Typography } from './Typography';
+import { FontSize, StyleType } from 'types/index';
+import { useFocus } from 'hooks/useFocus';
+import { Icon, IconComponentProps } from './Icon';
+import { RowComponent } from './Row';
 import i18n from 'i18n/index';
-import PhoneInput, {PhoneInputProps} from 'react-native-phone-number-input';
-import {VALIDATION_MESSAGES} from 'constants/validationMessages';
+import PhoneInput, { PhoneInputProps } from 'react-native-phone-number-input';
+import { VALIDATION_MESSAGES } from 'constants/validationMessages';
 
 interface PhoneInputProp extends PhoneInputProps {
   label?: string;
@@ -26,18 +26,18 @@ interface PhoneInputProp extends PhoneInputProps {
   onChangeText: (text: string) => void;
   style?: StyleProp<TextStyle>;
   returnKeyType?: TextInputProps['returnKeyType'];
-  onSubmitEditing?: (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-  ) => void;
+  onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
   autoFocus?: boolean;
   darkTheme?: boolean;
   editable?: boolean;
   blurOnSubmit?: boolean;
   allowSpacing?: boolean;
+  isTitleInLine?: boolean;
   touched?: boolean;
   name: string;
+  lineAfterIcon?: boolean;
+  startIcon: IconComponentProps;
   error?: string;
-  startIcon?: IconComponentProps;
   endIcon?: IconComponentProps;
   containerStyle?: StyleType;
   titleStyle?: StyleProp<TextStyle>;
@@ -50,13 +50,15 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   placeholder,
   error,
   onChangeText,
+  lineAfterIcon = true,
   style,
   touched,
   returnKeyType = 'next',
   onSubmitEditing,
   autoFocus,
+  isTitleInLine = true,
   blurOnSubmit,
-  defaultCode = 'AE',
+  defaultCode = 'NG',
   allowSpacing = true,
   name,
   startIcon,
@@ -68,89 +70,89 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   ...rest
 }) => {
   const phoneRef = useRef<PhoneInput>(null);
-  const {activeInput, setActiveInput} = useFocus();
+  const { activeInput, setActiveInput } = useFocus();
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const isErrorShown = touched && error;
+  const height = isTitleInLine ? 36 : 42;
 
   const handleTextChange = (text: string) => {
     onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);
   };
 
-  const handleSubmitEditing = (
-    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
-  ) => {
+  const handleSubmitEditing = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
     if (onSubmitEditing) onSubmitEditing(e);
   };
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {title && (
-        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+      {!isTitleInLine && title && (
+        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+          {title}
+        </Typography>
       )}
       <RowComponent
         style={[
           styles.inputContainer,
           {
             borderColor:
-              name === activeInput
-                ? COLORS.PRIMARY
-                : isErrorShown
-                ? COLORS.RED
-                : COLORS.BORDER,
+              name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
             borderWidth: 1,
+            borderRadius: isTitleInLine ? 15 : 10,
           },
-        ]}>
-        {startIcon && (
-          <Icon
-            {...startIcon}
-            iconStyle={[styles.startIcon, startIcon.iconStyle]}
-          />
-        )}
+        ]}
+      >
+        {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
+        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
+        {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
+        <View style={styles.inputContainerWithTitle}>
+          {isTitleInLine && title && (
+            <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+          )}
+          <RowComponent>
+            <PhoneInput
+              ref={phoneRef}
+              defaultValue={value}
+              defaultCode={defaultCode}
+              placeholder={i18n.t(placeholder)}
+              containerStyle={[{ height }, styles.innerContainer]}
+              countryPickerButtonStyle={styles.countryPickerButtonStyle}
+              textInputProps={{
+                placeholderTextColor: COLORS.TEXT,
+                editable: editable,
+                returnKeyType: returnKeyType,
+                maxLength: 12,
+                blurOnSubmit: blurOnSubmit,
+                onSubmitEditing: handleSubmitEditing,
+                onBlur: () => setActiveInput(''),
+                onFocus: () => setActiveInput(name),
+              }}
+              textInputStyle={[{ height }, styles.textInputStyle]}
+              codeTextStyle={styles.codeTextStyle}
+              textContainerStyle={[{ height }, styles.textContainerStyle]}
+              onChangeCountry={country => {
+                setCountryCode(country.callingCode?.[0]);
+              }}
+              onChangeFormattedText={(text: string) => {
+                const isValid = phoneRef.current?.isValidNumber(text);
+                const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
 
-        <PhoneInput
-          ref={phoneRef}
-          defaultValue={value}
-          defaultCode={defaultCode}
-          placeholder={i18n.t(placeholder)}
-          containerStyle={styles.innerContainer}
-          countryPickerButtonStyle={styles.countryPickerButtonStyle}
-          textInputProps={{
-            placeholderTextColor: COLORS.MEDIUM_GREY,
-            editable: editable,
-            returnKeyType: returnKeyType,
-            maxLength: 17,
-            blurOnSubmit: blurOnSubmit,
-            onSubmitEditing: handleSubmitEditing,
-            onBlur: () => setActiveInput(''),
-            onFocus: () => setActiveInput(name),
-          }}
-          textInputStyle={styles.textInputStyle}
-          codeTextStyle={styles.codeTextStyle}
-          textContainerStyle={styles.textContainerStyle}
-          onChangeCountry={country => {
-            setCountryCode(country.callingCode?.[0]);
-          }}
-          onChangeFormattedText={(text: string) => {
-            const isValid = phoneRef.current?.isValidNumber(text);
-            const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
+                if ((touched && !isValid) || (touched && startsWithPlusZero)) {
+                  setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
+                } else {
+                  setShowError('');
+                }
 
-            if ((touched && !isValid) || (touched && startsWithPlusZero)) {
-              setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
-            } else {
-              setShowError('');
-            }
-
-            handleTextChange(text);
-          }}
-          withDarkTheme={darkTheme}
-          autoFocus={autoFocus}
-          {...rest}
-        />
-        {endIcon && (
-          <Icon {...endIcon} iconStyle={[styles.endIcon, endIcon.iconStyle]} />
-        )}
+                handleTextChange(text);
+              }}
+              withDarkTheme={darkTheme}
+              autoFocus={autoFocus}
+              {...rest}
+            />
+            {endIcon && <Icon {...endIcon} iconStyle={[styles.endIcon, endIcon.iconStyle]} />}
+          </RowComponent>
+        </View>
       </RowComponent>
       {(isErrorShown || showError) && (
         <Typography style={styles.error}>{error || showError}</Typography>
@@ -165,9 +167,17 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 2,
+    backgroundColor: COLORS.INPUT_BACKGROUND,
+    overflow: 'hidden',
+    paddingHorizontal: 8,
     marginBottom: 5,
+  },
+  inputContainerWithTitle: { width: '80%' },
+  lineStyle: {
+    backgroundColor: COLORS.BORDER,
+    width: 1,
+    marginHorizontal: 10,
+    height: '100%',
   },
   label: {
     backgroundColor: COLORS.WHITE,
@@ -178,13 +188,16 @@ const styles = StyleSheet.create({
   },
   startIcon: {
     padding: 10,
+    fontSize: FontSize.ExtraLarge,
+    color: COLORS.PRIMARY,
   },
   endIcon: {
     padding: 10,
   },
   title: {
-    fontSize: FontSize.Medium,
-    marginBottom: 8,
+    paddingTop: 6,
+    color: COLORS.ICONS,
+    fontSize: FontSize.MediumSmall,
   },
   error: {
     paddingHorizontal: 10,
@@ -194,21 +207,21 @@ const styles = StyleSheet.create({
   innerContainer: {
     ...CENTER,
     borderRadius: 10,
-    height: 42,
   },
   codeTextStyle: {
-    height: isIOS() ? 16 : 22,
+    height: isIOS() ? 18 : 22,
     ...CENTER,
   },
   countryPickerButtonStyle: {
-    width: 70,
     borderRadius: 10,
+    width: '20%',
+    backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textContainerStyle: {
-    height: 42,
-    backgroundColor: COLORS.WHITE,
+    maxWidth: '65%',
+    backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textInputStyle: {
-    height: 42,
+    color: COLORS.PRIMARY,
   },
 });

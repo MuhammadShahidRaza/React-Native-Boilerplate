@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: FontSize.Medium,
     textTransform: 'capitalize',
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
   },
   imageStyle: {
     width: 35,

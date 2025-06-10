@@ -54,7 +54,7 @@ export const AddReview = ({route}: Props) => {
               width: screenWidth(30),
               height: screenHeight(15),
               borderWidth: 3,
-              borderColor: COLORS.MUD_TEXT,
+              borderColor: COLORS.SECONDARY,
               borderRadius: screenWidth(30),
             }}
           />
@@ -100,7 +100,7 @@ export const AddReview = ({route}: Props) => {
             emptyColor={COLORS.BORDER}
             rating={rating}
             starSize={50}
-            color={COLORS.MUD_TEXT}
+            color={COLORS.SECONDARY}
             starStyle={{
               marginLeft: 20,
             }}

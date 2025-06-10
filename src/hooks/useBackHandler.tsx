@@ -1,6 +1,6 @@
-import {navigationRef} from 'navigation/Navigators';
-import {useEffect} from 'react';
-import {Alert, BackHandler} from 'react-native';
+import { navigationRef } from 'navigation/Navigators';
+import { useEffect } from 'react';
+import { Alert, BackHandler } from 'react-native';
 
 export const useBackHandler = () => {
   useEffect(() => {
@@ -13,17 +13,15 @@ export const useBackHandler = () => {
           'Exit App',
           'Are you sure you want to exit?',
           [
-            {text: 'Cancel', onPress: () => {}, style: 'cancel'},
-            {text: 'Exit', onPress: () => BackHandler.exitApp()},
+            { text: 'Cancel', onPress: () => {}, style: 'cancel' },
+            { text: 'Exit', onPress: () => BackHandler.exitApp() },
           ],
-          {cancelable: false},
+          { cancelable: false },
         );
         return true;
       }
     };
-    BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backHandler.remove();
   }, []);
 };

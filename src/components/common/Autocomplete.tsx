@@ -1,22 +1,18 @@
-import {useRef} from 'react';
-import {
-  AddressDetails,
-  getCurrentLocation,
-  reverseGeocode,
-} from 'utils/location';
-import {RowComponent} from './Row';
-import {COLORS} from 'utils/colors';
+import { useRef } from 'react';
+import { AddressDetails, getCurrentLocation, reverseGeocode } from 'utils/location';
+import { RowComponent } from './Row';
+import { COLORS } from 'utils/colors';
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
-import {COMMON_TEXT} from 'constants/screens';
-import {MAP_API_KEY, VARIABLES} from 'constants/common';
-import {FontSize} from 'types/fontTypes';
-import {Icon} from './Icon';
-import {Typography} from './Typography';
-import {StyleSheet, TextStyle, ViewStyle} from 'react-native';
-import {SetStateType} from 'types/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
+import { FontSize } from 'types/fontTypes';
+import { Icon } from './Icon';
+import { Typography } from './Typography';
+import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { SetStateType } from 'types/common';
 import i18n from 'i18n/index';
 
 interface AutoCompleteProps {
@@ -51,10 +47,10 @@ export const Autocomplete = ({
     try {
       const position = await getCurrentLocation();
       if (position) {
-        const {latitude, longitude} = position.coords;
+        const { latitude, longitude } = position.coords;
         console.log(position);
 
-        const response = await reverseGeocode({latitude, longitude});
+        const response = await reverseGeocode({ latitude, longitude });
         console.log(response);
         inputRef?.current?.setAddressText(response?.fullAddress);
         setReverseGeocodedAddress(response);
@@ -66,9 +62,7 @@ export const Autocomplete = ({
   };
   return (
     <>
-      {title && (
-        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-      )}
+      {title && <Typography style={[styles.title, titleStyle]}>{title}</Typography>}
       <RowComponent
         style={[
           {
@@ -81,7 +75,8 @@ export const Autocomplete = ({
             borderColor: COLORS.BORDER,
           },
           containerStyle,
-        ]}>
+        ]}
+      >
         <GooglePlacesAutocomplete
           ref={inputRef}
           placeholder={i18n.t(COMMON_TEXT.ENTER_YOUR_LOCATION)}
@@ -106,7 +101,7 @@ export const Autocomplete = ({
             returnKeyType: 'search',
           }}
           query={{
-            key: MAP_API_KEY,
+            key: ENV_CONSTANTS.MAP_API_KEY,
             language: 'en',
           }}
           styles={{
@@ -134,7 +129,7 @@ export const Autocomplete = ({
           iconStyle={{
             marginHorizontal: 10,
             marginVertical: 10,
-            color: COLORS.MUD_TEXT,
+            color: COLORS.SECONDARY,
           }}
         />
       </RowComponent>

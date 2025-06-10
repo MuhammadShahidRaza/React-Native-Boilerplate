@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   message: {
-    color: COLORS.MUD_BORDER,
+    color: COLORS.PRIMARY,
   },
 });
 

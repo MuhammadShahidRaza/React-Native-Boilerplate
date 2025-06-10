@@ -1,9 +1,9 @@
-import {string, StringSchema, object, ref, Schema} from 'yup';
-import {VALIDATION_MESSAGES} from 'constants/validationMessages';
-import {REGEX} from '../regex';
-import {COMMON_TEXT} from 'constants/screens';
+import { string, StringSchema, object, ref, Schema } from 'yup';
+import { VALIDATION_MESSAGES } from 'constants/validationMessages';
+import { REGEX } from '../regex';
+import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
-import {LANGUAGES} from 'constants/common';
+import { LANGUAGES } from 'constants/common';
 
 type StringValidationOptions = {
   regex?: RegExp;
@@ -23,7 +23,7 @@ type Values = {
   [key: string]: string | number;
 };
 
-const arabicNumeralsMap: {[key: string]: string} = {
+const arabicNumeralsMap: { [key: string]: string } = {
   '0': '٠',
   '1': '١',
   '2': '٢',
@@ -36,14 +36,11 @@ const arabicNumeralsMap: {[key: string]: string} = {
   '9': '٩',
 };
 
-const convertToArabicNumerals = (str: string): string => {
+export const convertToArabicNumerals = (str: string): string => {
   return str.replace(/\d/g, digit => arabicNumeralsMap[digit]);
 };
 
-const getValidationMessageWithTranslation = (
-  key: string,
-  values: Values,
-): string => {
+const getValidationMessageWithTranslation = (key: string, values: Values): string => {
   let messageTemplate = i18n.t(key);
 
   const messageWithValues = Object.keys(values).reduce(
@@ -74,9 +71,8 @@ const createStringValidationSchema = ({
   minLength,
   maxLength,
 }: StringValidationOptions): StringSchema<string | null | undefined> => {
-  let schema: StringSchema<string | null | undefined> = string().transform(
-    (_, originalValue) =>
-      typeof originalValue === 'string' ? originalValue.trim() : originalValue,
+  let schema: StringSchema<string | null | undefined> = string().transform((_, originalValue) =>
+    typeof originalValue === 'string' ? originalValue.trim() : originalValue,
   );
 
   if (isRequired && name && !nullable) {
@@ -88,9 +84,7 @@ const createStringValidationSchema = ({
   }
 
   if (regex && regexMessage) {
-    schema = schema.matches(regex, () =>
-      getValidationMessageWithTranslation(regexMessage, {}),
-    );
+    schema = schema.matches(regex, () => getValidationMessageWithTranslation(regexMessage, {}));
   }
 
   if (minLength !== undefined) {
@@ -133,14 +127,14 @@ const passwordSchema = createStringValidationSchema({
   ...passwordValidation,
 });
 
-const confirmPasswordSchema = ({name = 'new_password'}) => {
+const confirmPasswordSchema = ({ name = 'new_password' }) => {
   return string()
     .oneOf([ref(name)], VALIDATION_MESSAGES.PASSWORDS_MUST_MATCH)
     .transform((_, originalValue) =>
       typeof originalValue === 'string' ? originalValue.trim() : originalValue,
     )
-    .required(()=>
-      getValidationMessageWithTranslation( VALIDATION_MESSAGES.IS_REQUIRED, {
+    .required(() =>
+      getValidationMessageWithTranslation(VALIDATION_MESSAGES.IS_REQUIRED, {
         name: COMMON_TEXT.CONFIRM_PASSWORD,
       }),
     );
@@ -193,32 +187,33 @@ export const loginValidationSchema = createObjectShape({
 export const signUpValidationSchema = createObjectShape({
   email: emailSchema,
   password: passwordSchema,
-  first_name: createStringValidationSchema({
-    name: COMMON_TEXT.FIRST_NAME,
+  full_name: createStringValidationSchema({
+    name: COMMON_TEXT.FULL_NAME,
     regex: REGEX.FIRST_NAME,
     regexMessage: getValidationMessageWithTranslation(
       VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
       {
-        name: COMMON_TEXT.FIRST_NAME,
+        name: COMMON_TEXT.FULL_NAME,
       },
     ),
     minLength: 3,
     maxLength: 25,
   }),
-  last_name: createStringValidationSchema({
-    name: COMMON_TEXT.LAST_NAME,
+  username: userNameSchema,
+  country: createStringValidationSchema({
+    name: COMMON_TEXT.COUNTRY,
     regex: REGEX.FIRST_NAME,
     regexMessage: getValidationMessageWithTranslation(
       VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
       {
-        name: COMMON_TEXT.LAST_NAME,
+        name: COMMON_TEXT.COUNTRY,
       },
     ),
     minLength: 3,
     maxLength: 25,
   }),
   phoneNumber: phoneNumberSchema,
-  confirmPassword: confirmPasswordSchema({name: 'password'}),
+  confirmPassword: confirmPasswordSchema({ name: 'password' }),
 });
 
 export const becomePractitionerFormValidationSchema = createObjectShape({

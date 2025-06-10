@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   iconStyle: {
     flex: 1,
-    color: COLORS.MUD_TEXT,
+    color: COLORS.SECONDARY,
   },
   headerText: {
     fontSize: FontSize.Large,

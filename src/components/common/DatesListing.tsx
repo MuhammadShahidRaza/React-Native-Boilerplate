@@ -80,7 +80,7 @@ export const DatesListing = ({
             styles.dateButton,
             {
               backgroundColor:
-                selectedDate === item.date ? COLORS.MUD_TEXT : COLORS.WHITE,
+                selectedDate === item.date ? COLORS.SECONDARY : COLORS.WHITE,
             },
           ]}>
           <Typography
