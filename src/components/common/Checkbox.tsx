@@ -11,7 +11,7 @@ import {COLORS} from 'utils/colors';
 import {Typography} from './Typography';
 import {Icon} from './Icon';
 import {VARIABLES} from 'constants/common';
-import {FLEX_CENTER, FLEX_ROW, STYLES} from 'utils/commonStyles';
+import {FLEX_CENTER, STYLES} from 'utils/commonStyles';
 import {RowComponent} from './Row';
 
 interface CheckboxProps {
