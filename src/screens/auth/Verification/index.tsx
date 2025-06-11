@@ -6,7 +6,8 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes/index';
 import { Button } from 'components/common/Button';
-import { COMMON_TEXT } from 'constants/screens/index';
+import { AUTH_TEXT, COMMON_TEXT } from 'constants/screens/index';
+import { AuthComponent } from 'components/appComponents';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
@@ -51,14 +52,18 @@ export const Verification = () => {
   const displayCode = Array(CODE_LENGTH).fill('').map((_, idx) => code[idx] || '');
 
   return (
-    <Wrapper>
+    <AuthComponent
+          heading1={'Enter OTP'}
+          description={'Enter the verification code we just sent to  tomcook@example.com.'}
+          bottomText={''}
+          bottomButtonText={''}
+          containerStyle={{ marginTop: 0 }} 
+          descriptionStyle={styles.descriptionStyles}
+          
+        >
+       <View style={styles.outer}>
       <View style={styles.container}>
-        <Typography style={styles.title}>Enter 4-digit</Typography>
-        <Typography style={styles.title}>recovery code</Typography>
-        <Typography style={styles.subtitle}>
-          Enter verification code you received on your email address
-        </Typography>
-        
+      
         <View style={styles.codeContainer}>
           <TextInput
             ref={inputRef}
@@ -86,16 +91,7 @@ export const Verification = () => {
           </RowComponent>
         </View>
 
-        <RowComponent
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Typography style={styles.timer}>00</Typography>
-          <Text style={styles.timer}>:</Text>
-          <Typography style={styles.timer}>{`${timer.toString().padStart(2, '0')}`}</Typography>
-        </RowComponent>
+      
         {/* <TouchableOpacity
           style={styles.verifyButton}
           onPress={handleVerify}
@@ -103,15 +99,30 @@ export const Verification = () => {
         >
           <Typography style={styles.verifyButtonText}>Verify</Typography>
         </TouchableOpacity> */}
-        <Button title={COMMON_TEXT.SUBMIT} onPress={()=>{}} style={styles.button} />
-        <Typography style={styles.infoText}>Didn't you receive any code?</Typography>
-        <TouchableOpacity onPress={handleResend} disabled={!isResendEnabled}>
-          <Typography style={[styles.resendText, !isResendEnabled && styles.resendDisabled]}>
-            Re-send code
-          </Typography>
-        </TouchableOpacity>
+        <Button title={COMMON_TEXT.VERIFY} onPress={()=>{handleVerify()}} style={styles.button} />
+            <RowComponent
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop:13
+          }}
+        >
+          <Typography style={styles.timer}>00</Typography>
+          <Text style={styles.timer}>:</Text>
+          <Typography style={styles.timer}>{`${timer.toString().padStart(2, '0')}`}</Typography>
+        </RowComponent>
+        
       </View>
-    </Wrapper>
+      <RowComponent style={styles.resendContainer}>
+      <Typography style={styles.infoText}>Didn't you receive any code?</Typography>
+      <TouchableOpacity onPress={handleResend} disabled={!isResendEnabled}>
+        <Typography style={[styles.resendText, !isResendEnabled && styles.resendDisabled]}>
+          Send Again
+        </Typography>
+      </TouchableOpacity>
+    </RowComponent>
+      </View>
+    </AuthComponent>
   );
 };
 
@@ -132,6 +143,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'left',
   },
+  outer: {
+  flex: 1,
+  justifyContent: 'space-between',
+},
+
+resendContainer: {
+  justifyContent: 'center',
+  alignItems: 'center',
+  height:'150%',
+  flexDirection: 'row',
+
+},
+
     button: {
     marginTop:12,
     alignSelf:"center"
@@ -149,16 +173,15 @@ const styles = StyleSheet.create({
   },
   codeRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent:'space-evenly'
   },
   codeInput: {
-    width: 56,
+    width: 50,
     height: 56,
-    borderWidth: 1,
+    borderBottomWidth : 2,
     borderColor: COLORS.BORDER,
-    borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center', 
     backgroundColor: COLORS.WHITE,
   },
   codeInputFilled: {
@@ -166,16 +189,16 @@ const styles = StyleSheet.create({
   },
   codeInputActive: {
     borderColor: COLORS.PRIMARY,
-    borderWidth: 2,
+    borderBottomWidth: 2,
   },
   codeText: {
-    fontSize: FontSize.Large,
-    color: COLORS.PRIMARY,
+    fontSize: FontSize.XXL+4,
+    color: COLORS.BLACK,
     fontWeight: FontWeight.Bold,
   },
   timer: {
-    fontSize: FontSize.Large,
-    color: COLORS.PRIMARY,
+    fontSize: FontSize.Medium,
+    color: COLORS.OTP_TIMER,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -192,18 +215,20 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Medium,
   },
   infoText: {
-    color: COLORS.BORDER,
+    color: COLORS.BLACK,
     textAlign: 'center',
-    marginBottom: 8,
+    fontSize: FontSize.Medium,
+    fontWeight:'bold',
+    marginEnd:8
   },
   resendText: {
-    color: COLORS.SECONDARY,
-    textAlign: 'center',
-    textDecorationLine: 'underline',
+    color: COLORS.PRIMARY,
+    textAlign: 'center',  
     fontWeight: FontWeight.Bold,
     fontSize: FontSize.Medium,
   },
   resendDisabled: {
-    color: COLORS.BORDER,
+    color: COLORS.PRIMARY,
   },
+  descriptionStyles:{fontSize:FontSize.MediumSmall,color:COLORS.ICONS}
 });

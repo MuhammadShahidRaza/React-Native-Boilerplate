@@ -9,8 +9,9 @@ export const COLORS = {
   INPUT_FIELD_TEXT: "#8A8A8A",
   BORDER: '#CACACA',
   TEXT: '##4D4D4D',
-
+  OTP_TIMER:'#595959',
   // COMMON:
+  GRAY:'#BDBDBD',
   WHITE: '#FFFFFF',
   LIGHT_WHITE: '#FAFBFF',
   BLACK: '#000000',

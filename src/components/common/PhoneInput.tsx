@@ -58,7 +58,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   autoFocus,
   isTitleInLine = false,
   blurOnSubmit,
-  defaultCode = 'NG',
+  defaultCode = 'AL',
   allowSpacing = false,
   name,
   startIcon,
@@ -111,7 +111,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
             <Typography style={[styles.title, titleStyle]}>{title}</Typography>
           )}
           <RowComponent>
-            <PhoneInput
+            {/* <PhoneInput
               ref={phoneRef}
               defaultValue={value}
               defaultCode={defaultCode}
@@ -149,7 +149,46 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
               withDarkTheme={darkTheme}
               autoFocus={autoFocus}
               {...rest}
-            />
+            /> */}
+            <PhoneInput
+  ref={phoneRef}
+  value=''
+  defaultValue={""}
+  defaultCode={"AF"}
+  placeholder={i18n.t(placeholder)}
+  containerStyle={[{ height }, styles.innerContainer]}
+  countryPickerButtonStyle={styles.countryPickerButtonStyle}
+  textInputProps={{
+    placeholderTextColor: COLORS.TEXT,
+    editable,
+    returnKeyType,
+    maxLength: 12,
+    blurOnSubmit,
+    onSubmitEditing: handleSubmitEditing,
+    onBlur: () => setActiveInput(''),
+    onFocus: () => setActiveInput(name),
+  }}
+  textInputStyle={[{ height }, styles.textInputStyle]}
+  codeTextStyle={styles.codeTextStyle}
+  textContainerStyle={[{ height }, styles.textContainerStyle]}
+  // onChangeCountry={country => setCountryCode(country.callingCode?.[0])}
+  onChangeCountry={country => console.log(country, ' country')}
+
+  onChangeFormattedText={(text: string) => {
+    // const isValid = phoneRef.current?.isValidNumber(text);
+    // const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
+    // if ((touched && !isValid) || (touched && startsWithPlusZero)) {
+    //   setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
+    // } else {
+    //   setShowError('');
+    // }
+    // handleTextChange(text);
+  }}
+  withDarkTheme={darkTheme}
+  autoFocus={autoFocus}
+  {...rest}
+/>
+
             {endIcon && <Icon {...endIcon} iconStyle={[styles.endIcon, endIcon.iconStyle]} />}
           </RowComponent>
         </View>
@@ -165,14 +204,18 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 10,
   },
-  inputContainer: {
-    alignItems: 'center',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
-    overflow: 'hidden',
-    paddingHorizontal: 8,
-    marginBottom: 5,
-  },
-  inputContainerWithTitle: { width: '80%' },
+ inputContainer: {
+  alignItems: 'center',
+  backgroundColor: '#FAFAFA', // ✅ light gray background
+  overflow: 'hidden',
+  paddingHorizontal: 10,
+  marginBottom: 5,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: COLORS.BORDER, // Use a light gray border
+},
+
+  inputContainerWithTitle: { width: '100%' },
   lineStyle: {
     backgroundColor: COLORS.BORDER,
     width: 1,
@@ -204,24 +247,36 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: COLORS.ERROR,
   },
-  innerContainer: {
-    ...CENTER,
-    borderRadius: 10,
-  },
+innerContainer: {
+  borderRadius: 12,
+  backgroundColor: '#FAFAFA',
+  height: 56,
+  width: '100%',
+  paddingHorizontal: 10,
+  alignItems: 'center',
+},
+
+
   codeTextStyle: {
-    height: isIOS() ? 18 : 22,
-    ...CENTER,
-  },
+  fontSize: FontSize.Medium,
+  color: COLORS.BLACK,
+},
   countryPickerButtonStyle: {
-    borderRadius: 10,
-    width: '20%',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
-  },
+  paddingRight: 5,
+  marginRight: 8,
+  borderRightWidth: 0, // No line divider
+},
   textContainerStyle: {
-    maxWidth: '65%',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
-  },
-  textInputStyle: {
-    color: COLORS.INPUT_FIELD_TEXT,
-  },
+  backgroundColor: 'transparent',
+  paddingVertical: 0,
+  marginLeft: 0,
+  borderRadius: 12,
+  height: 56,
+},
+
+ textInputStyle: {
+  fontSize: FontSize.Medium,
+  color: COLORS.GRAY,
+  paddingVertical: 0,
+},
 });

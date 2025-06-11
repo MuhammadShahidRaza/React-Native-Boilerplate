@@ -8,6 +8,7 @@ export const SCREENS = {
   PRIVACY_POLICY: 'PrivacyPolicy',
   TERMS_OF_SERVICE: 'TermsOfService',
   HOME: 'Home',
+
   DASHBOARD: 'Dashboard',
   FILTER: 'Filter',
   PROFILE: 'Profile',
@@ -60,7 +61,7 @@ export const SCREENS = {
   ONBOARDING: 'Onboarding',
   PROFILE_SETUP: 'ProfileSetup',
   WALKTHROUGH: 'Walkthrough',
-
+  ROLESELECTION:'RoleSelection',
   CONFIRMATION: 'Confirmation',
   PRE_DEPOSIT: 'PreDeposit',
   SIGNATURE: 'Signature',

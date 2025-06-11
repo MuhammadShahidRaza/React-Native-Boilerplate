@@ -1,9 +1,12 @@
-import { RowComponent, SvgComponent, Typography, Wrapper } from 'components/common';
-import { SVG } from 'constants/assets';
+import { Photo, RowComponent, SvgComponent, Typography, Wrapper } from 'components/common';
+import { IMAGES, SVG } from 'constants/assets';
+import { LANGUAGES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import { COMMON_TEXT } from 'constants/screens';
-import { navigate } from 'navigation/Navigators';
-import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import i18n from 'i18n/index';
+import { navigate, onBack } from 'navigation/Navigators';
+import { ImageBackground, StyleProp, StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { ChildrenType, FontSize, FontWeight, StyleType, SvgNameType } from 'types/index';
 import { screenWidth, FLEX_CENTER, COLORS, screenHeight } from 'utils/index';
 
@@ -41,7 +44,32 @@ export const AuthComponent = ({
 }: Props) => {
   return (
     <Wrapper useScrollView>
-      {showLogo && <SvgComponent Svg={SVG.LOGO} containerStyle={styles.logo} />}
+      {/* {showLogo && <Photo source={IMAGES.BACKGROUND_IMAGE} containerStyle={styles.logo} resizeMode='stretch'/>} */}
+      <ImageBackground source={IMAGES.BACKGROUND_IMAGE} style={{height:290}} resizeMode='stretch'>
+       <TouchableOpacity
+  onPress={onBack}
+  style={{
+    height: 32,
+    width: 32,
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 4,
+    marginVertical: 60,
+    marginLeft: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }}
+>
+  <MaterialIcons
+    name="arrow-back-ios"
+    size={FontSize.Large}
+    color={COLORS.BLACK}
+    style={{
+      transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],marginStart:10
+    }}
+  />
+</TouchableOpacity>
+
+      </ImageBackground>
       <View style={[styles.container, containerStyle]}>
         <Typography style={styles.heading1}>{heading1}</Typography>
         <Typography
@@ -107,22 +135,22 @@ const styles = StyleSheet.create({
   socialLogin: {
     borderWidth: 1,
     borderColor: COLORS.BORDER,
-    width: screenWidth(43),
+    // width: screenWidth(43),
     justifyContent: 'center',
-    gap: 10,
     paddingVertical: 12,
     borderRadius: 10,
   },
   bottomButtonTextStyle: {
-    color: COLORS.SECONDARY,
+    color: COLORS.PRIMARY,
     paddingVertical: 10,
-    textDecorationLine: 'underline',
-    fontSize: FontSize.Medium,
+    fontSize: FontSize.MediumLarge,
     fontWeight: FontWeight.Bold,
+    top:-2
   },
   bottomTextStyle: {
     color: COLORS.MEDIUM_GREY,
-    fontSize: FontSize.Medium,
+    fontSize: FontSize.MediumLarge,
+    fontWeight:'500'
   },
   textStyle: {
     fontSize: FontSize.Medium,

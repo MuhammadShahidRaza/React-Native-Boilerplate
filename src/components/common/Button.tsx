@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: COLORS.PRIMARY,
     borderRadius: 100,
-    width:259,
+    width:260,
     opacity: 1,
   },
   disabledButton: {

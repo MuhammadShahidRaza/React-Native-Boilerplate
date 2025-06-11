@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS, IMAGES, SVG } from 'constants/index';
 import {
   loginValidationSchema,
   COLORS,
@@ -10,7 +10,14 @@ import {
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
-import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
+import {
+  Button,
+  Typography,
+  Input,
+  AuthComponent,
+  RowComponent,
+  SocialButton,
+} from 'components/index';
 import { navigate } from 'navigation/index';
 import { Checkbox } from 'components/common/Checkbox';
 
@@ -48,9 +55,11 @@ export const Login = () => {
   return (
     <AuthComponent
       heading1={AUTH_TEXT.WELCOME_BACK_LOGIN}
-      description={AUTH_TEXT.HELLO_AGAIN_LOGIN}
+      description={COMMON_TEXT.AUTH_DESC}
       bottomText={COMMON_TEXT.DONT_HAVE_AN_ACCOUNT}
       bottomButtonText={COMMON_TEXT.SIGN_UP}
+      containerStyle={{ marginTop: 0 }}
+      descriptionStyle={styles.descriptionStyles}
       onBottomTextPress={() => {
         navigate(SCREENS.SIGN_UP);
       }}
@@ -104,6 +113,8 @@ export const Login = () => {
           style={styles.checkbox}
           label={COMMON_TEXT.REMEMBER_ME}
           checked={formik.values.rememberMe}
+          labelStyle={styles.forgotPassword}
+          checkboxStyle={{ borderColor: COLORS.PRIMARY, borderWidth: 3, borderRadius: 7 }}
           onChange={checked => formik.setFieldValue('rememberMe', checked)}
         />
         <RowComponent>
@@ -125,9 +136,39 @@ export const Login = () => {
           </Typography>
         </RowComponent>
       </RowComponent>
-      <View style={{ alignSelf: 'center' }}>
-        <Button title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
+      {/* <SocialButton  buttonName={'Apple'} onPress={() => { } } svgName={IMAGES.APPLE_ICON}/> */}
+      <View style={{ alignSelf: 'center', marginBottom: 30, marginTop: 10 }}>
+        <Button title={COMMON_TEXT.CONTINUE} onPress={formik.handleSubmit} style={styles.row} />
       </View>
+      <RowComponent style={styles.row}>
+        <View style={styles.line} />
+        <Typography
+          style={{
+            color: COLORS.INPUT_FIELD_TEXT,
+            fontWeight: '500',
+            fontSize: FontSize.MediumLarge,
+            marginStart: 10,
+            marginEnd: 10,
+          }}
+        >
+          or continue with
+        </Typography>
+        <View style={styles.line} />
+      </RowComponent>
+      <RowComponent style={{ marginVertical: 28, marginHorizontal: 60 }}>
+        <SocialButton
+          buttonName={''}
+          containerStyle={{ width: screenWidth(28) }}
+          onPress={() => {}}
+          svgName={SVG.GOOGLE}
+        />
+        <SocialButton
+          buttonName={''}
+          onPress={() => {}}
+          containerStyle={{ width: screenWidth(28) }}
+          svgName={SVG.APPLE}
+        />
+      </RowComponent>
     </AuthComponent>
   );
 };
@@ -135,18 +176,21 @@ export const Login = () => {
 const styles = StyleSheet.create({
   checkbox: {},
   forgotPassword: {
-    color: COLORS.SECONDARY,
+    color: COLORS.BLACK,
+    fontWeight: '700',
     fontSize: FontSize.Medium,
   },
   row: {
-    marginBottom: 18,
+    // marginBottom: 18,
     marginTop: 15,
     // alignSelf:'center',
     justifyContent: 'space-between',
   },
   line: {
-    width: screenWidth(25),
+    flex: 1,
     height: 1,
-    backgroundColor: COLORS.BLACK,
+    backgroundColor: COLORS.INPUT_FIELD_TEXT, // or any color you want
+    opacity: 0.4, // optional: for subtle look
   },
+  descriptionStyles: { fontSize: FontSize.MediumSmall, color: COLORS.ICONS },
 });

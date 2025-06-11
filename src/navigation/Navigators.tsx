@@ -68,7 +68,7 @@ export const CustomBackIcon = () => (
   <Icon
     iconStyle={[{ transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }] }]}
     componentName={VARIABLES.Ionicons}
-    iconName={'arrow-back-outline'}
+     iconName={'arrow-back'}
     size={FontSize.Large}
     onPress={() => onBack()}
   />

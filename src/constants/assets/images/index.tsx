@@ -15,6 +15,15 @@ export const IMAGES = {
 
 
 
+  BACKGROUND_IMAGE:require('assets/images/common/backgroundImage.png'),
+  LOCK_ICON:require('assets/images/common/Lock.png'),
+  APPLE_ICON:require('assets/images/common/apple.png'),
+  LOGO:require('assets/images/common/logo.png'),
+  ONBOARDING1:require('assets/images/common/onboarding1.png'),
+  ONBOARDING2:require('assets/images/common/onboarding2.png'),
+  ONBOARDING3:require('assets/images/common/onbaording3.png'),
+LOGO_WITH_NAME:require('assets/images/common/logowithname.png'),
+IMAGE_UPLOAD:require('assets/images/common/imageupload.png'),
   //LANGUAGES:
   ARABIC: require('assets/images/languages/arabic.png'),
   ENGLISH: require('assets/images/languages/english.png'),
