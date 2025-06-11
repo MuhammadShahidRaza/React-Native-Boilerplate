@@ -8,6 +8,7 @@ export const SCREENS = {
   PRIVACY_POLICY: 'PrivacyPolicy',
   TERMS_OF_SERVICE: 'TermsOfService',
   HOME: 'Home',
+
   DASHBOARD: 'Dashboard',
   FILTER: 'Filter',
   PROFILE: 'Profile',
@@ -60,7 +61,7 @@ export const SCREENS = {
   ONBOARDING: 'Onboarding',
   PROFILE_SETUP: 'ProfileSetup',
   WALKTHROUGH: 'Walkthrough',
-
+  ROLESELECTION:'RoleSelection',
   CONFIRMATION: 'Confirmation',
   PRE_DEPOSIT: 'PreDeposit',
   SIGNATURE: 'Signature',
@@ -68,6 +69,7 @@ export const SCREENS = {
   SEARCH_PRACTITIONERS: 'SearchPractitioners',
   COURSES: 'Courses',
   COURSE_DETAILS: 'CourseDetails',
+  BOOKING: 'Bookings',
   BOOKING_DETAILS: 'BookingDetails',
   PRACTITIONER_DETAILS: 'PractitionerDetails',
   BECOME_PRACTITIONER: 'BecomePractitioner',
@@ -82,4 +84,5 @@ export const SCREENS = {
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',
   BOTTOM_STACK: 'BottomStackScreen',
+  CATEGORIES: "Categories"
 } as const;

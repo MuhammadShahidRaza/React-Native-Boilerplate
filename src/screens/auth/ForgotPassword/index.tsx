@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
-import { forgotPasswordValidationSchema } from 'utils/index';
+import { COLORS, forgotPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { Button, Input, AuthComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
 import { navigate } from 'navigation/Navigators';
+import { FontSize } from 'types/fontTypes';
 
 interface ForgotPasswordFormValues {
   email: string;
@@ -32,9 +33,12 @@ export const ForgotPassword = () => {
   return (
     <AuthComponent
       showLogo={false}
-      description={AUTH_TEXT.RESET_YOUR_PASSWORD}
-      descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
+      heading1={AUTH_TEXT.FORGOT_PASSWORD}
+      description={COMMON_TEXT.AUTH_DESC}
+      descriptionStyle={styles.descriptionStyles}
       containerStyle={{ marginTop: 0 }}
+      bottomText={''}
+      bottomButtonText=''
     >
       <FocusProvider>
         <Input
@@ -50,12 +54,12 @@ export const ForgotPassword = () => {
           error={formik.errors.email}
           touched={Boolean(formik.touched.email && formik.submitCount)}
           startIcon={{
-            componentName: VARIABLES.AntDesign,
-            iconName: 'lock1',
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'email-outline',
           }}
         />
       </FocusProvider>
-      <Button title={COMMON_TEXT.SUBMIT} onPress={formik.handleSubmit} style={styles.button} />
+      <Button title={COMMON_TEXT.CONTINUE} onPress={formik.handleSubmit} style={styles.button} />
     </AuthComponent>
   );
 };
@@ -65,4 +69,5 @@ const styles = StyleSheet.create({
     marginTop:12,
     alignSelf:"center"
   },
+  descriptionStyles:{fontSize:FontSize.MediumSmall,color:COLORS.ICONS}
 });

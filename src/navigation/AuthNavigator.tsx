@@ -9,9 +9,12 @@ import {
   // OnBoarding,
   ResetPassword,
   ForgotPassword,
+  OnBoarding,
   // Language,
 } from 'screens/auth';
 import { screenOptions } from './Navigators';
+import { Intro } from 'screens/common/intro';
+import { RoleSelection } from 'screens/common/RoleSelection';
 
 export const AuthNavigator = () => {
   useBackHandler();
@@ -38,6 +41,19 @@ export const AuthNavigator = () => {
     //         options: { headerShown: false },
     //       },
     //     }),
+    
+    [SCREENS.ONBOARDING]: {
+      component: OnBoarding,
+      options: { headerShown: false },
+    },
+    [SCREENS.ROLESELECTION]: {
+      component: RoleSelection,
+      options: { headerShown: false },
+    },
+    [SCREENS.INTRO]: {
+      component: Intro,
+      options: { headerShown: false },
+    },
     [SCREENS.LOGIN]: {
       component: Login,
       options: { headerShown: false },
@@ -48,15 +64,16 @@ export const AuthNavigator = () => {
     },
     [SCREENS.FORGOT_PASSWORD]: {
       component: ForgotPassword,
-      options: { headerShown: true, headerTitle: t(COMMON_TEXT.FORGOT_PASSWORD) },
+      options: { headerShown: false},
     },
     [SCREENS.RESET_PASSWORD]: {
       component: ResetPassword,
-      options: { headerShown: true },
+      options: { headerShown: false
+       },
     },
     [SCREENS.VERIFICATION]: {
       component: Verification,
-      options: { headerShown: true },
+      options: { headerShown: false },
     },
   };
 

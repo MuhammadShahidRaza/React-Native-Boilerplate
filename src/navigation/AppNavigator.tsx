@@ -1,5 +1,5 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {SCREENS} from 'constants/index';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SCREENS } from 'constants/index';
 import {
   Chat,
   Filter,
@@ -17,14 +17,14 @@ import {
   Settings,
   Help,
   Location,
-  Home,
+  Categories,
 } from 'screens/user';
-// import {BottomNavigator} from './BottomNavigator';
-import {useBackHandler} from 'hooks/index';
+import { BottomNavigator } from './BottomNavigator';
+import { useBackHandler } from 'hooks/index';
 
 const screens = {
-  // [SCREENS.BOTTOM_STACK]: BottomNavigator,
-  [SCREENS.HOME]: Home,
+  [SCREENS.BOTTOM_STACK]: BottomNavigator,
+  [SCREENS.CATEGORIES]: Categories,
   [SCREENS.NOTIFICATION_LISTING]: NotificationListing,
   [SCREENS.ABOUT]: AboutUs,
   [SCREENS.ADD_REVIEW]: AddReview,

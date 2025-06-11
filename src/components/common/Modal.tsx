@@ -78,19 +78,20 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    backgroundColor: COLORS.DARK_BLACK_OPACITY,
+    // flex: 1,
+    // backgroundColor: COLORS.DARK_BLACK_OPACITY,
   },
   modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: COLORS.DARK_BLACK_OPACITY,
-  },
+  flex: 1,
+  justifyContent: 'center', // ✅ Center vertically
+  alignItems: 'center',     // ✅ Center horizontally
+  backgroundColor: COLORS.GRAY,
+},
   modalContent: {
-    backgroundColor: COLORS.WHITE,
-    borderTopEndRadius: 20,
-    borderTopStartRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-  },
+  backgroundColor: COLORS.WHITE,
+  borderRadius: 20,
+  paddingVertical: 20,
+  paddingHorizontal: 15,
+  width: '85%',            // ✅ Add maxHeight to make it scrollable if content is long
+},
 });

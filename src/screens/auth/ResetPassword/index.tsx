@@ -36,7 +36,7 @@ export const ResetPassword = () => {
   });
 
   return (
-    <AuthComponent heading1={COMMON_TEXT.RESET_PASSWORD}>
+    <AuthComponent heading1={COMMON_TEXT.RESET_PASSWORD}  containerStyle={{ marginTop: 0 }} description={COMMON_TEXT.AUTH_DESC} descriptionStyle={styles.descriptionStyles} bottomText='' bottomButtonText=''>
       <FocusProvider>
         <Input
           name={COMMON_TEXT.NEW_PASSWORD}
@@ -46,6 +46,10 @@ export const ResetPassword = () => {
           value={formik.values.new_password}
           allowSpacing={false}
           placeholder={COMMON_TEXT.ENTER_NEW_PASSWORD}
+           startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showNewPassword ? 'eye' : 'eye-off',
@@ -66,6 +70,10 @@ export const ResetPassword = () => {
           allowSpacing={false}
           returnKeyType='done'
           placeholder={COMMON_TEXT.ENTER_CONFIRM_PASSWORD}
+           startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock1',
+          }}
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showConfirmPassword ? 'eye' : 'eye-off',
@@ -91,5 +99,7 @@ export const ResetPassword = () => {
 const styles = StyleSheet.create({
   button: {
     marginVertical: 30,
+    alignSelf:'center'
   },
+  descriptionStyles:{fontSize:FontSize.MediumSmall,color:COLORS.ICONS}
 });

@@ -1,88 +1,100 @@
-import {useState} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import { useState } from 'react';
+import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   FlatListComponent,
   Typography,
   Wrapper,
   HomeHeader,
-  PractitionerBox,
   SearchBar,
+  Input,
+  RowComponent,
+  Header,
+  Icon,
 } from 'components/index';
-import {COLORS} from 'utils/colors';
-import {TEMPORARY_TEXT} from 'constants/screens';
-import {screenWidth} from 'utils/index';
-import {User} from 'types/common';
-import {appointmentList, HeadingWithList} from './Home';
+import { COLORS } from 'utils/colors';
+import { COMMON_TEXT, TEMPORARY_TEXT } from 'constants/screens';
+import { screenWidth } from 'utils/index';
+import { VARIABLES } from 'constants/common';
+import { FontSize } from 'types/fontTypes';
+import { IMAGES } from 'constants/assets';
+import { navigate } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
 
 const previousSearchList = [
-  {id: '1', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '2', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '3', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '4', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '5', searchName: TEMPORARY_TEXT.DR_KIM},
+  { id: '1', searchName: "Lorem Ipsum " },
+  { id: '2', searchName: "Lorem Ipsum " },
+  { id: '3', searchName: "Lorem Ipsum " },
+  { id: '4', searchName: "Lorem Ipsum " },
+  { id: '5', searchName: "Lorem Ipsum " },
 ];
 
-const user: User = {
-  name: TEMPORARY_TEXT.SHAHID,
-  location: TEMPORARY_TEXT.DUBAI,
-};
 
 export const Search = () => {
   const [searchText, setSearchText] = useState<string>('');
 
-  const handlePress = (searchName: string) => {
-    // setSearchText(searchName);
-  };
+  const renderItem = ({ item, index }: any) => {
+    return <RowComponent style={styles.previousSearchContainer} key={index}>
+      <Typography>{item.searchName}</Typography>
+      <TouchableOpacity>
+        <Icon
+          componentName={VARIABLES.EvilIcons}
+          size={FontSize.MediumLarge}
+          color={COLORS.BLACK}
+          iconName={"close"} />
+      </TouchableOpacity>
+    </RowComponent>
+  }
 
-  const renderItem = ({item}: {item: {id: string; searchName: string}}) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => handlePress(item.searchName)}>
-      <Typography numberOfLines={1} style={styles.itemText}>
-        {item.searchName}
-      </Typography>
-    </TouchableOpacity>
-  );
 
   return (
     <Wrapper useScrollView backgroundColor={COLORS.HEADER}>
-      <HomeHeader user={user} showSearch={false} />
-      <View style={styles.mainContent}>
-        <SearchBar value={searchText} onChangeText={setSearchText} />
-        <FlatListComponent
-          numColumns={3}
-          style={styles.flatList}
-          data={previousSearchList}
-          renderItem={renderItem}
-        />
-        <HeadingWithList
-          Component={PractitionerBox}
-          list={appointmentList}
-          itemsToShow={10}
-          onViewDetails={() => {}}
-        />
-      </View>
+      <Header title={"Search"} />
+
+      <RowComponent style={styles.searchContainer}>
+        <Input
+          onChangeText={setSearchText}
+          containerStyle={{ marginBottom: 0, flex: 1, marginEnd: 20 }}
+          inputContainerWithTitle={{ flex: 1 }}
+          name={COMMON_TEXT.SEARCH}
+          returnKeyType='done'
+          placeholder={COMMON_TEXT.SEARCH}
+          value={searchText}
+          endIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'search1',
+            color: COLORS.GREEN,
+            size: FontSize.MediumLarge,
+          }} />
+
+        <TouchableOpacity onPress={() => navigate(SCREENS.FILTER)}>
+          <Image style={styles.filterIcon} source={IMAGES.FILTER} />
+        </TouchableOpacity>
+
+      </RowComponent>
+
+
+      <FlatList
+        style={{ paddingHorizontal: 20 }}
+        renderItem={renderItem}
+        data={previousSearchList} />
+
+
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  mainContent: {
-    marginHorizontal: 20,
+  searchContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginBottom: 20
   },
-  flatList: {
-    marginBottom: 10,
+  filterIcon: {
+    width: 20,
+    height: 20,
   },
-  itemContainer: {
-    borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    padding: 10,
-    marginRight: 10,
-    marginBottom: 10,
-    borderRadius: 10,
-    width: screenWidth(28),
-  },
-  itemText: {
-    textAlign: 'center',
-  },
+  previousSearchContainer: {
+    marginBottom: 12,
+  }
 });

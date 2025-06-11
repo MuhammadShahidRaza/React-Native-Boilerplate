@@ -29,9 +29,12 @@
     "PLATFORM_FEE": "Platform Fee",
     "TOTAL": "Total",
     "ABOUT": "About",
+    "ROLESHEADIM":"Lorem ipsum dolor sit am et, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
     "AVAILABILITY": "Availability",
     "PAYMENT_OPTIONS": "Payment Options",
     "TIMINGS": "Timings",
+    "CUSTOMER":"Customer",
+    "SERVICER_PROVIDER":"Service Provider",
     "REMARKS": "Remarks",
     "TODAY": "Today",
     "EDIT_PROFILE": "Edit Profile",
@@ -45,6 +48,7 @@
     "REVIEW": "Review",
     "MORNING": "Morning",
     "EVENING": "Evening",
+    "VERIFY":"Verify",
     "AFTERNOON": "Afternoon",
     "READ_LESS": "Read Less",
     "READ_MORE": "Read More",
@@ -100,6 +104,7 @@
     "PREVIOUS": "Previous",
     "WELCOME": "Welcome",
     "LOADING": "Loading...",
+    "CONTINUE":"CONTINUE",
     "NO_RESULTS": "No results found",
     "CHOOSE_LANGUAGE": "Choose Language",
     "TERMS_AND_CONDITIONS": "Terms and Conditions",
@@ -130,9 +135,10 @@
     "EDUCATION": "Education",
     "RETRY": "Retry",
     "SESSION_EXPIRED": "Your session has expired. Please log in again.",
-    "CREATE_AN_ACCOUNT": "Create an Account",
+    "CREATE_AN_ACCOUNT": "Create An Account 👨‍💻",
     "ENTER_YOUR_EMAIL": "Enter Your Email",
     "ENTER_YOUR_NAME": "Enter Your Name",
+    "PRIVACY_POLICY_AND_TC":"T&C | Privacy Policy",
     "ENTER_YOUR_PASSWORD": "Enter Your Password",
     "ENTER_YOUR_PHONE_NUMBER": "Enter Your Phone Number",
     "ENTER_FIRST_NAME": "Enter Your First Name",
@@ -212,9 +218,9 @@
     "SATURDAY": "Saturday"
   },
   "ONBOARDING": {
-    "HEADING_1": "Care Your Body",
-    "HEADING_2": "Healthy & Fit",
-    "HEADING_3": "Care That You Need",
+    "HEADING_1": "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    "HEADING_2": "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+    "HEADING_3": "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
     "DESCRIPTION_1": "Forem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, a",
     "DESCRIPTION_2": "Forem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, a",
     "DESCRIPTION_3": "Forem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, a"
@@ -224,7 +230,8 @@
     "HELLO_AGAIN_LOGIN": "Hello again, you've been missed!",
     "DONT_WORRY_FORGOT": "Don't worry we are here to help!",
     "RESET_YOUR_PASSWORD": "Reset your password with email to use your account.",
-    "CONNECT_WITH_SIGNUP": "Connect with experts today!"
+    "CONNECT_WITH_SIGNUP": "Connect with experts today!",
+    "FORGOT_PASSWORD":"Forgot Password"
   },
   "CHAT": {
     "HEADING_1": "Take care of your body",
