@@ -1,14 +1,14 @@
-import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, TextStyle} from 'react-native';
-import {FontSize, StyleType} from 'types/index';
-import {Typography} from './Typography';
-import {COLORS, screenWidth} from 'utils/index';
-import {FlatListComponent} from './Flatlist';
-import {Photo} from './Photo';
-import {RowComponent} from './Row';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {COMMON_TEXT} from 'constants/screens';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, TextStyle } from 'react-native';
+import { FontSize, StyleType } from 'types/index';
+import { Typography } from './Typography';
+import { COLORS, screenWidth } from 'utils/index';
+import { FlatListComponent } from './Flatlist';
+import { Photo } from './Photo';
+import { RowComponent } from './Row';
+import { Icon } from './Icon';
+import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT } from 'constants/screens';
 
 export type DropdownItemProps = {
   name: string;
@@ -24,7 +24,7 @@ interface DropdownProps {
   options: DropdownItemProps[];
   selectedValue: string;
   title?: string;
-  width?: number;
+  width?: number | string;
   onSelect: (value: string) => void;
   containerStyle?: StyleType;
   textStyle?: TextStyle;
@@ -56,7 +56,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   );
 
   const renderDropdownItem = useCallback(
-    ({item, index}: RenderDropdownItemProps) => (
+    ({ item, index }: RenderDropdownItemProps) => (
       <RowComponent
         key={index}
         onPress={() => handleSelectOption(item.name)}
@@ -98,7 +98,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
               />
             )}
             {!selectedValue && (
-              <RowComponent style={{gap: 3}}>
+              <RowComponent style={{ gap: 3 }}>
                 <Typography style={styles.placeholderValue}>
                   {COMMON_TEXT.SELECT}
                 </Typography>
@@ -118,13 +118,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
           />
         </RowComponent>
       </View>
-      <View style={{zIndex: 1, width, marginBottom: 10}}>
+      <View style={{ zIndex: 1, width, marginBottom: 10 }}>
         {isOpen && (
-          <View style={[styles.dropdown, {width}]}>
+          <View style={[styles.dropdown, { width }]}>
             <FlatListComponent
               data={options}
               scrollEnabled={true}
-              style={{height: screenWidth(30)}}
+              style={{ height: screenWidth(30) }}
               renderItem={renderDropdownItem}
             />
           </View>

@@ -154,7 +154,7 @@ const ListView = () => {
             size: FontSize.MediumLarge,
           }} />
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={navigate(SCREENS.FILTER)}>
           <Image style={styles.filterIcon} source={IMAGES.FILTER} />
         </TouchableOpacity>
 
