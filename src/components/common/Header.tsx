@@ -1,13 +1,15 @@
-import {View, StyleSheet, StyleProp, TextStyle} from 'react-native';
-import {RowComponent} from './Row';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {FontSize, FontWeight, ChildrenType} from 'types/index';
-import {Typography} from './Typography';
-import {onBack} from 'navigation/index';
-import {Photo} from './Photo';
-import {COLORS} from 'utils/colors';
-import {useTranslation} from 'hooks/useTranslation';
+import { View, StyleSheet, StyleProp, TextStyle, SafeAreaView, TouchableOpacity } from 'react-native';
+import { RowComponent } from './Row';
+import { Icon } from './Icon';
+import { LANGUAGES, VARIABLES } from 'constants/common';
+import { FontSize, FontWeight, ChildrenType } from 'types/index';
+import { Typography } from './Typography';
+import { onBack } from 'navigation/index';
+import { Photo } from './Photo';
+import { COLORS } from 'utils/colors';
+import { useTranslation } from 'hooks/useTranslation';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import i18n from 'i18n/index';
 
 type Props = {
   endIcon?: ChildrenType;
@@ -17,6 +19,25 @@ type Props = {
   onPressBack?: () => void;
 };
 
+
+const BackButton = ({ onBack, backIconStyle }: any) => {
+  return (
+    <TouchableOpacity
+      onPress={onBack}
+      style={[styles.backIcon, backIconStyle]}
+    >
+      <MaterialIcons
+        name="arrow-back-ios"
+        size={FontSize.Large}
+        color={COLORS.BLACK}
+        style={{
+          transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }], marginStart: 10
+        }}
+      />
+    </TouchableOpacity>
+  )
+}
+
 export const Header = ({
   endIcon,
   title = '',
@@ -24,36 +45,27 @@ export const Header = ({
   centerImage = '',
   onPressBack = () => onBack(),
 }: Props) => {
-  const {isLangRTL} = useTranslation();
+  const { isLangRTL } = useTranslation();
   return (
-    <RowComponent style={styles.headerContainer}>
-      <Icon
-        iconStyle={[
-          styles.iconStyle,
-          {transform: [{scaleX: isLangRTL ? -1 : 1}]},
-          backIconStyle,
-        ]}
-        componentName={VARIABLES.Ionicons}
-        iconName={'chevron-back-sharp'}
-        size={FontSize.Large}
-        onPress={onPressBack}
-      />
-      <RowComponent style={styles.titleContainer}>
-        {centerImage && (
-          <Photo source={centerImage} imageStyle={styles.image} />
-        )}
-        <Typography style={styles.headerText}>{title}</Typography>
+    <SafeAreaView>
+      <RowComponent style={styles.headerContainer}>
+        <BackButton backIconStyle={backIconStyle} onBack={onPressBack} />
+        <RowComponent style={styles.titleContainer}>
+          {centerImage && (
+            <Photo source={centerImage} imageStyle={styles.image} />
+          )}
+          <Typography style={styles.headerText}>{title}</Typography>
+        </RowComponent>
+        <View style={styles.endIconContainer}>{endIcon}</View>
       </RowComponent>
-      <View style={styles.endIconContainer}>{endIcon}</View>
-    </RowComponent>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
     marginHorizontal: 20,
-    paddingVertical: 15,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   iconStyle: {
     flex: 1,
@@ -61,7 +73,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: FontSize.Large,
-    fontWeight: FontWeight.Black,
+    fontWeight: FontWeight.Bold,
     textAlign: 'center',
   },
   endIconContainer: {
@@ -78,4 +90,21 @@ const styles = StyleSheet.create({
     gap: 8,
     justifyContent: 'center',
   },
+  backIcon: {
+    height: 32,
+    width: 32,
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 2.62,
+
+    elevation: 4,
+  }
 });

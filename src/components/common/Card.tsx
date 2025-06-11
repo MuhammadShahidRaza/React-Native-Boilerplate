@@ -16,11 +16,13 @@ type Props = {
     uri: string;
     title?: string;
     description?: string;
-    containerStyle?: ImageStyle;
+    containerStyle?: ImageStyle | ImageStyle[];
     titleStyle?: TextStyle;
     key?: number;
     currency?: string;
     location?: string;
+    rating?: string;
+
 };
 
 
@@ -34,12 +36,13 @@ export const Card = ({
     titleStyle,
     key,
     currency = '',
-    location = ''
+    location = '',
+    rating = ''
 }: Props) => {
 
     if (type === "1") {
         return (
-            <ImageBackground key={key} style={[styles.container, containerStyle]} source={{ uri }}>
+            <ImageBackground key={key} style={[styles.container, { marginHorizontal: 20 }, containerStyle]} source={{ uri }}>
                 <View style={styles.overLay}>
                     <Typography style={[styles.title, titleStyle]}>{title}</Typography>
                     <Typography style={styles.description}>{description}</Typography>
@@ -61,7 +64,14 @@ export const Card = ({
         return (
             <View style={[styles.container, styles.typeThreeContainer, containerStyle]} key={key}>
                 <Image style={styles.typeThreeImageStyle} source={{ uri }} />
-                <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+                <RowComponent style={{ paddingHorizontal: 20 }}>
+                    <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+                    <RowComponent>
+                        <Image style={styles.ratingIcon} source={IMAGES.RATINGS} />
+                        <Typography style={styles.ratingText}>{rating}</Typography>
+                    </RowComponent>
+
+                </RowComponent>
 
                 <RowComponent style={styles.currencyAndLocationContainer}>
                     <Icon
@@ -92,13 +102,13 @@ export const Card = ({
 
 const styles = StyleSheet.create({
     container: {
-        marginHorizontal: 20,
+        marginStart: 20,
         overflow: 'hidden',
         borderRadius: 10,
         height: 250,
     },
     typeThreeContainer: {
-        marginHorizontal: 20,
+        marginStart: 20,
         overflow: 'hidden',
         borderRadius: 10,
         height: 260,
@@ -124,7 +134,15 @@ const styles = StyleSheet.create({
         fontWeight: FontWeight.Bold,
         color: COLORS.GREEN,
         marginBottom: 12,
-
+    },
+    ratingIcon: {
+        width: 12,
+        height: 12,
+        marginEnd: 4
+    },
+    ratingText: {
+        fontSize: FontSize.Small,
+        fontWeight: FontWeight.Normal,
     },
     currency: {
         fontSize: FontSize.Small,

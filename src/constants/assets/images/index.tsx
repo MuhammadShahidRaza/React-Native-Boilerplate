@@ -3,6 +3,16 @@ export const IMAGES = {
   USER: require('assets/images/common/user.jpeg'),
   VISA: require('assets/images/common/visa.png'),
   CURRENCY_NOTE: require('assets/images/common/currency_note.png'),
+  HOME: require('assets/images/common/home_icon.png'),
+  BOOKINGS: require('assets/images/common/bookings_icon.png'),
+  CHAT: require('assets/images/common/chat_icon.png'),
+  PROFILE: require('assets/images/common/profile_icon.png'),
+  RATINGS: require('assets/images/common/ratings_icon.png'),
+  FILTER: require('assets/images/common/filter_icon.png'),
+
+
+
+
 
 
   //LANGUAGES:

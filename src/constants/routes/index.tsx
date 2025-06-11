@@ -68,6 +68,7 @@ export const SCREENS = {
   SEARCH_PRACTITIONERS: 'SearchPractitioners',
   COURSES: 'Courses',
   COURSE_DETAILS: 'CourseDetails',
+  BOOKING: 'Bookings',
   BOOKING_DETAILS: 'BookingDetails',
   PRACTITIONER_DETAILS: 'PractitionerDetails',
   BECOME_PRACTITIONER: 'BecomePractitioner',

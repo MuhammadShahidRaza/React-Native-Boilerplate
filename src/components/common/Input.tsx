@@ -45,6 +45,7 @@ interface InputProps extends TextInputProps {
   containerStyle?: StyleType;
   secondContainerStyle?: StyleType;
   titleStyle?: StyleProp<TextStyle>;
+  inputContainerWithTitle?: StyleType
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -74,11 +75,12 @@ export const Input: React.FC<InputProps> = ({
   editable,
   titleStyle,
   onPress,
+  inputContainerWithTitle,
   ...rest
 }) => {
   const inputRef = useRef<TextInput>(null);
   const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
-  const height = isTitleInLine ? 36 : 42; 
+  const height = isTitleInLine ? 36 : 42;
   const isErrorShown = touched && error;
   useEffect(() => {
     textInput(name, inputRef.current);
@@ -100,11 +102,11 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-    {!isTitleInLine && title && (
-      <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
-        {title}
-      </Typography>
-    )}
+      {!isTitleInLine && title && (
+        <Typography style={[{ marginBottom: isTitleInLine ? 0 : 6 }, styles.title, titleStyle]}>
+          {title}
+        </Typography>
+      )}
 
       <RowComponent
         style={[
@@ -123,11 +125,11 @@ export const Input: React.FC<InputProps> = ({
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
 
-        <View style={styles.inputContainerWithTitle}>
+        <View style={[styles.inputContainerWithTitle, inputContainerWithTitle]}>
           {isTitleInLine && title && (
             <Typography style={[styles.title, titleStyle]}>{title}</Typography>
           )}
-          <RowComponent>
+          <RowComponent style={{ width: '100%' }}>
             <TextInput
               ref={inputRef}
               style={[{ height }, styles.input, style]}
@@ -166,7 +168,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.INPUT_BACKGROUND,
     paddingHorizontal: 8,
-    paddingVertical:6,
+    paddingVertical: 6,
     marginBottom: 5,
   },
   inputContainerWithTitle: { width: '80%' },

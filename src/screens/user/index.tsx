@@ -15,3 +15,5 @@ export * from './Settings';
 export * from './AboutUs';
 export * from './Location';
 export * from './Help';
+export * from './Bookings';
+
