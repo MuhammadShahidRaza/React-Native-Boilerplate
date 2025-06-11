@@ -29,6 +29,10 @@ interface DropdownProps {
   containerStyle?: StyleType;
   textStyle?: TextStyle;
   titleStyle?: TextStyle;
+  leftIcon?: boolean;
+  leftIconComponentName?: string,
+  leftIconName?: string,
+  leftIconColor?: string
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -40,6 +44,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
   titleStyle,
   textStyle,
   width = screenWidth(90),
+  leftIcon,
+  leftIconComponentName,
+  leftIconName,
+  leftIconColor
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -64,7 +72,25 @@ export const Dropdown: React.FC<DropdownProps> = ({
         {item.image && (
           <Photo disabled source={item.image} imageStyle={styles.imageStyle} />
         )}
-        <Typography style={styles.option}>{item.name}</Typography>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {
+            item?.leftIcon ? <Icon
+              iconStyle={{ marginEnd: 12 }}
+              componentName={item?.leftIconComponentName}
+              iconName={item?.leftIconName}
+              color={item?.leftIconColor}
+            /> : null
+          }
+          <Typography style={styles.option}>{item.name}</Typography>
+
+        </View>
+        {
+          item?.rightArrow ? <Icon
+            componentName={VARIABLES.AntDesign}
+            iconName={"arrowright"}
+            color={COLORS.GREEN}
+          /> : null
+        }
       </RowComponent>
     ),
     [handleSelectOption],
@@ -97,6 +123,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 imageStyle={styles.imageStyle}
               />
             )}
+            {
+              leftIcon ? <Icon
+                size={20}
+                componentName={leftIconComponentName}
+                iconName={leftIconName}
+                color={leftIconColor}
+              /> : null
+            }
             {!selectedValue && (
               <RowComponent style={{ gap: 3 }}>
                 <Typography style={styles.placeholderValue}>
@@ -107,6 +141,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 </Typography>
               </RowComponent>
             )}
+
             <Typography style={[styles.selectedValue, textStyle]}>
               {selectedValue}
             </Typography>
@@ -118,18 +153,16 @@ export const Dropdown: React.FC<DropdownProps> = ({
           />
         </RowComponent>
       </View>
-      <View style={{ zIndex: 1, width, marginBottom: 10 }}>
-        {isOpen && (
-          <View style={[styles.dropdown, { width }]}>
-            <FlatListComponent
-              data={options}
-              scrollEnabled={true}
-              style={{ height: screenWidth(30) }}
-              renderItem={renderDropdownItem}
-            />
-          </View>
-        )}
-      </View>
+      {isOpen && (
+        <View style={[styles.dropdown, { width }]}>
+          <FlatListComponent
+            data={options}
+            scrollEnabled={true}
+            style={{ height: screenWidth(60) }}
+            renderItem={renderDropdownItem}
+          />
+        </View>
+      )}
     </>
   );
 };
@@ -153,14 +186,14 @@ const styles = StyleSheet.create({
     color: COLORS.BORDER,
   },
   selectedContainer: {
-    height: 40,
+    height: 60,
     paddingHorizontal: 10,
   },
   title: {
     marginBottom: 8,
   },
   dropdownItem: {
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     paddingHorizontal: 10,
   },
   dropdown: {

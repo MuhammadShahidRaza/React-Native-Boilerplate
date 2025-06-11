@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, HeadingWithViewAll, HomeHeader, Input, RowComponent, Wrapper } from 'components/index';
+import { Card, Dropdown, HeadingWithViewAll, HomeHeader, Input, RowComponent, Wrapper } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { IMAGES } from 'constants/assets';
 import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -81,20 +81,110 @@ export const Home = () => {
 
 };
 
+const therapyList = [
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+  {
+    name: 'Wet Cupping',
+    leftIcon: true,
+    leftIconColor: COLORS.GREEN,
+    leftIconComponentName: VARIABLES.FontAwesome,
+    leftIconName: "bars",
+    rightArrow: true
+  },
+
+];
+
 
 const Maps = () => {
-  return (
-    <MapView
-      style={styles.map}
-      region={region}
-    >
+  const [selectedCategory, setSelectedCategory] = useState('');
 
-      <Marker
-        coordinate={region}
-        pinColor={COLORS.RED}
-        draggable
-      />
-    </MapView>
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={[styles.dropdownContainer, { zIndex: 5000 }]}>
+        <Dropdown
+          containerStyle={{ borderWidth: 2, borderColor: COLORS.BLACK }}
+          leftIcon
+          leftIconColor={COLORS.GREEN}
+          leftIconComponentName={VARIABLES.FontAwesome}
+          leftIconName='bars'
+          options={therapyList}
+          selectedValue={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+      </View>
+
+
+      <View style={[styles.dropdownContainer, { top: 120 }]}>
+        <Dropdown
+          containerStyle={{ borderWidth: 2, borderColor: COLORS.BLACK }}
+          leftIcon
+          leftIconColor={COLORS.GREEN}
+          leftIconComponentName={VARIABLES.AntDesign}
+          leftIconName='setting'
+          options={therapyList}
+          selectedValue={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+      </View>
+      <MapView
+        style={styles.map}
+        region={region}
+      >
+
+        <Marker
+          coordinate={region}
+          pinColor={COLORS.RED}
+          draggable
+        />
+      </MapView>
+    </View>
 
   )
 }
@@ -154,7 +244,7 @@ const ListView = () => {
             size: FontSize.MediumLarge,
           }} />
 
-        <TouchableOpacity onPress={navigate(SCREENS.FILTER)}>
+        <TouchableOpacity onPress={() => navigate(SCREENS.FILTER)}>
           <Image style={styles.filterIcon} source={IMAGES.FILTER} />
         </TouchableOpacity>
 
@@ -279,4 +369,12 @@ const styles = StyleSheet.create({
     marginTop: 20
 
   },
+  dropdownContainer: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    zIndex: 2000,
+    top: 50,
+    left: 20,
+    right: 20
+  }
 });

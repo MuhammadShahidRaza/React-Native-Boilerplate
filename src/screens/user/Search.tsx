@@ -66,7 +66,7 @@ export const Search = () => {
             size: FontSize.MediumLarge,
           }} />
 
-        <TouchableOpacity onPress={navigate(SCREENS.FILTER)}>
+        <TouchableOpacity onPress={() => navigate(SCREENS.FILTER)}>
           <Image style={styles.filterIcon} source={IMAGES.FILTER} />
         </TouchableOpacity>
 
