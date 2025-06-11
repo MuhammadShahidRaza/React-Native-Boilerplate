@@ -6,6 +6,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { COMMON_TEXT } from 'constants/screens';
 import { useRoute } from '@react-navigation/native';
 import { navigate } from 'navigation/Navigators';
+import { AppRouteProp } from 'types/navigation';
 import { SCREENS } from 'constants/routes';
 import { setItem } from 'utils/storage';
 import { VARIABLES } from 'constants/common';
@@ -17,7 +18,8 @@ const TIMER_SECONDS = 59;
 
 export const Verification = () => {
   const dispatch = useAppDispatch();
-  const isFromForgot = useRoute()?.params?.isFromForgot;
+  const route = useRoute<AppRouteProp<typeof SCREENS.VERIFICATION>>();
+  const isFromForgot = route.params?.isFromForgot;
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(TIMER_SECONDS);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
