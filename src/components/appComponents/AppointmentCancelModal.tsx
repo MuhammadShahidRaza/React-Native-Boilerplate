@@ -1,14 +1,9 @@
-import {View, StyleSheet} from 'react-native';
-import {
-  ModalComponent,
-  RowComponent,
-  Typography,
-  Button,
-} from 'components/index';
-import {APPOINTMENTS_TEXT, COMMON_TEXT} from 'constants/index';
-import {screenWidth} from 'utils/helpers';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
+import { View, StyleSheet } from 'react-native';
+import { ModalComponent, RowComponent, Typography, Button } from 'components/index';
+import { COMMON_TEXT } from 'constants/index';
+import { screenWidth } from 'utils/helpers';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { COLORS } from 'utils/colors';
 
 interface AppointmentCancelModalProps {
   id: string;
@@ -26,13 +21,9 @@ export const AppointmentCancelModal: React.FC<AppointmentCancelModalProps> = ({
   handleCancel,
 }) => {
   return (
-    <ModalComponent
-      modalVisible={showCancelModal}
-      setModalVisible={setShowCancelModal}>
+    <ModalComponent modalVisible={showCancelModal} setModalVisible={setShowCancelModal}>
       <View style={styles.modalContent}>
-        <Typography style={styles.modalTitle}>
-          {APPOINTMENTS_TEXT.SURE_CANCEL_APPOINTMENT}
-        </Typography>
+        <Typography style={styles.modalTitle}>{COMMON_TEXT.RADIUS}</Typography>
         <RowComponent style={styles.modalRow}>
           <Button
             style={styles.cancelButton}
@@ -45,9 +36,7 @@ export const AppointmentCancelModal: React.FC<AppointmentCancelModalProps> = ({
             onPress={() => handleConfirm(id)}
           />
         </RowComponent>
-        <Typography style={styles.modalNote}>
-          {APPOINTMENTS_TEXT.NOTE_CANCEL_APPOINTMENT_AS_TERM}
-        </Typography>
+        <Typography style={styles.modalNote}>{COMMON_TEXT.RADIUS}</Typography>
       </View>
     </ModalComponent>
   );
