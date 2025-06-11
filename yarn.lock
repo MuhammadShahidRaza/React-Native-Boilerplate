@@ -1622,6 +1622,11 @@
   resolved "https://registry.yarnpkg.com/@notifee/react-native/-/react-native-9.1.8.tgz#3d55cb3fbcc21f9e35931e366afdf64b294da891"
   integrity sha512-Az/dueoPerJsbbjRxu8a558wKY+gONUrfoy3Hs++5OqbeMsR0dYe6P+4oN6twrLFyzAhEA1tEoZRvQTFDRmvQg==
 
+"@ptomasroos/react-native-multi-slider@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@ptomasroos/react-native-multi-slider/-/react-native-multi-slider-2.2.2.tgz#35a97fb8c355627c6a2ded010b360ac5728b44ad"
+  integrity sha512-HWyCnRD3Z3SbHK2FLWYmBBqd1B4iXipeKv1+AK0FoY/CElEDTEixHE8hN60TsqxalPrznn798LE2Q4tHuCiyaA==
+
 "@react-native-async-storage/async-storage@^2.1.2":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-2.2.0.tgz#a3aa565253e46286655560172f4e366e8969f5ad"
@@ -1967,6 +1972,14 @@
   dependencies:
     invariant "^2.2.4"
     nullthrows "^1.1.1"
+
+"@react-navigation/bottom-tabs@^7.3.14":
+  version "7.3.14"
+  resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-7.3.14.tgz#9ee02baea86ab24abe267726665bc69c6df0bf4c"
+  integrity sha512-s2qinJggS2HYZdCOey9A+fN+bNpWeEKwiL/FjAVOTcv+uofxPWN6CtEZUZGPEjfRjis/srURBmCmpNZSI6sQ9Q==
+  dependencies:
+    "@react-navigation/elements" "^2.4.3"
+    color "^4.2.3"
 
 "@react-navigation/core@^7.10.0":
   version "7.10.0"
@@ -6950,6 +6963,11 @@ react-native-phone-number-input@^2.1.0:
   dependencies:
     google-libphonenumber "^3.2.10"
     react-native-country-picker-modal "^2.0.0"
+
+react-native-raw-bottom-sheet@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-raw-bottom-sheet/-/react-native-raw-bottom-sheet-3.0.0.tgz#8e7838ab9b8113bcccdc9648b41eb2bd54e86243"
+  integrity sha512-kHR7j2ExCLqf/AO3MECozMJXi48O1+YxUYSRgRo/5Ftm7mEcrxJEzvjqMmqUbVhhKlfk5hLCGFnEQ5Z9OHCUtg==
 
 react-native-reanimated@^3.18.0:
   version "3.18.0"
