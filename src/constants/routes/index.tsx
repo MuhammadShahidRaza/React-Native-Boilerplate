@@ -83,4 +83,5 @@ export const SCREENS = {
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',
   BOTTOM_STACK: 'BottomStackScreen',
+  CATEGORIES: "Categories"
 } as const;

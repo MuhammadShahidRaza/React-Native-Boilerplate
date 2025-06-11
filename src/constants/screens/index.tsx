@@ -1,3 +1,5 @@
+import { Dimensions } from "react-native";
+
 // constants/screens.ts
 export const COMMON_TEXT = {
   EMAIL: 'COMMON.EMAIL',
@@ -6,6 +8,7 @@ export const COMMON_TEXT = {
   ENTER_FULL_NAME: 'COMMON.ENTER_FULL_NAME',
   ENTER_USER_NAME: 'COMMON.ENTER_USER_NAME',
   COUNTRY: 'COMMON.COUNTRY',
+  ADDRESS: 'ADDRESS',
   ENTER_COUNTRY: 'COMMON.ENTER_COUNTRY',
   EMAIL_OR_USERNAME: 'COMMON.EMAIL_OR_USERNAME',
   FORGOT_PASSWORD: 'COMMON.FORGOT_PASSWORD',
@@ -233,3 +236,9 @@ export const TEMPORARY_TEXT = {
   EMAIL: 'TEMPORARY_TEXT.EMAIL',
   VERSION: 'TEMPORARY_TEXT.VERSION',
 };
+
+
+export const SCREEN = {
+  width: Dimensions.get('window').width,
+  height: Dimensions.get('window').height,
+}

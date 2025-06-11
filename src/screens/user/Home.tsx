@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { Card, Dropdown, HeadingWithViewAll, HomeHeader, Input, RowComponent, Wrapper } from 'components/index';
+import { useRef, useState } from 'react';
+import { Button, Card, Dropdown, HeadingWithViewAll, HomeHeader, Icon, Input, RadioButton, RowComponent, Typography, Wrapper } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { IMAGES } from 'constants/assets';
 import { FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import MapView, { Marker } from 'react-native-maps';
-import { COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { COMMON_TEXT, LANGUAGES, SCREEN, SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/Navigators';
+import { BottomSheet } from 'components/common/BottomSheet';
 
 
 const services = [
@@ -58,6 +59,10 @@ const region = {
 
 export const Home = () => {
   const [isListView, setIsListView] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const refRBSheet = useRef(null);
+
 
   return (
     <View style={styles.container}>
@@ -66,7 +71,7 @@ export const Home = () => {
           setIsListView={() => setIsListView(!isListView)}
           isListView={isListView}
           onBellPress={() => { }}
-          onLocationPress={() => { }}
+          onLocationPress={() => refRBSheet?.current?.open()}
           title="Hey, Jacob 👋"
           location='408, Lorem ipsum set dud emit' />
       </View>
@@ -74,6 +79,78 @@ export const Home = () => {
 
       {
         isListView ? <ListView /> : <Maps />
+      }
+
+
+
+      {
+        <BottomSheet
+          height={SCREEN.height * 0.55}
+          ref={refRBSheet}
+          containerStyles={styles.bottomSheetContainer}>
+          <>
+
+            <RadioButton
+              containerStyle={styles.radioButtonContainer}
+              // optionsContainerStyle={styles.radioButtonOptionsContainer}
+              options={languages}
+              selectedOption={languages[0] || languages[0]?.name}
+              onSelectOption={() => { }}
+            />
+
+            <Input
+              containerStyle={{ marginEnd: 20, width: '100%' }}
+              inputContainerWithTitle={{ flex: 1 }}
+              name={COMMON_TEXT.COUNTRY}
+              title={COMMON_TEXT.COUNTRY}
+              onChangeText={() => { }}
+              placeholder={COMMON_TEXT.ENTER_COUNTRY}
+
+              endIcon={{
+                componentName: VARIABLES.MaterialIcons,
+                iconName: 'my-location',
+                size: FontSize.Large,
+              }}
+            />
+
+            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+              <Dropdown
+                width={'48%'}
+                containerStyle={{
+                  borderWidth: 0,
+                  backgroundColor: COLORS.INPUT_BACKGROUND,
+                }}
+                options={therapyList}
+                selectedValue={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+              <Dropdown
+                width={'48%'}
+
+                containerStyle={{
+                  borderWidth: 0,
+                  backgroundColor: COLORS.INPUT_BACKGROUND,
+                }}
+                options={therapyList}
+                selectedValue={selectedCategory}
+                onSelect={setSelectedCategory}
+              />
+            </View>
+
+            <Input
+              containerStyle={{ marginEnd: 20, width: '100%' }}
+              inputContainerWithTitle={{ flex: 1 }}
+              name={COMMON_TEXT.ADDRESS}
+              title={COMMON_TEXT.ADDRESS}
+              onChangeText={() => { }}
+              placeholder={COMMON_TEXT.ADDRESS}
+            />
+
+            <Button title={COMMON_TEXT.ADD} onPress={() => { }} style={styles.button} />
+
+          </>
+
+        </BottomSheet>
       }
     </View>
   )
@@ -225,8 +302,6 @@ const ListView = () => {
 
     <Wrapper useScrollView>
       <RowComponent style={styles.searchContainer}>
-
-
         <Input
           onPress={() => navigate(SCREENS.SEARCH)}
           editable={false}
@@ -249,7 +324,7 @@ const ListView = () => {
         </TouchableOpacity>
 
       </RowComponent>
-      <HeadingWithViewAll onPress={() => { }} title="Service Categories" />
+      <HeadingWithViewAll onPress={() => navigate(SCREENS.CATEGORIES)} title="Service Categories" />
       <Card
         containerStyle={{ marginBottom: 20 }}
         uri={IMAGES.DEFAULT_IMAGE}
@@ -371,10 +446,51 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     position: 'absolute',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.WHITE,
     zIndex: 2000,
     top: 50,
     left: 20,
     right: 20
+  },
+  bottomSheetContainer: {
+    borderTopEndRadius: 20,
+    borderTopStartRadius: 20,
+    padding: 20,
+  },
+  radioButtonContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginBottom: 20
+  },
+  subChildLocation: {
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.Normal,
+  },
+  button: {
+    alignSelf: 'center'
   }
 });
+
+
+
+const languages = [
+  {
+    name: "Current Location",
+    subChild: <RowComponent>
+      <Icon
+        componentName={VARIABLES.Ionicons}
+        iconName={'location-outline'}
+        size={15}
+        onPress={() => { }}
+        iconStyle={{
+          marginEnd: 10,
+          marginVertical: 10,
+          color: COLORS.GREEN,
+        }}
+      />
+      <Typography style={styles.subChildLocation}>408, Lorem ipsum set dud emit</Typography>
+    </RowComponent>
+
+  },
+  "Add New Location"
+];

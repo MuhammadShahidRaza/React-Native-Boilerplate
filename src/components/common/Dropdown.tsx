@@ -158,7 +158,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           <FlatListComponent
             data={options}
             scrollEnabled={true}
-            style={{ height: screenWidth(60) }}
+            style={{ maxHeight: screenWidth(60) }}
             renderItem={renderDropdownItem}
           />
         </View>

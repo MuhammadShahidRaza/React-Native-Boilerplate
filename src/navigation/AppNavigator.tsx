@@ -17,13 +17,14 @@ import {
   Settings,
   Help,
   Location,
+  Categories,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
 
 const screens = {
   [SCREENS.BOTTOM_STACK]: BottomNavigator,
-  // [SCREENS.HOME]: Home,
+  [SCREENS.CATEGORIES]: Categories,
   [SCREENS.NOTIFICATION_LISTING]: NotificationListing,
   [SCREENS.ABOUT]: AboutUs,
   [SCREENS.ADD_REVIEW]: AddReview,
