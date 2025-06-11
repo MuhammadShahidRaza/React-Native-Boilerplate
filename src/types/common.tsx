@@ -20,15 +20,3 @@ export enum PROVIDERS {
   APPLE = 'apple',
   FACEBOOK = 'facebook',
 }
-
-export type StackParamList = {
-  Appointments: {
-    tab: string;
-  };
-  Courses: {
-    tab: string;
-  };
-  AddReview: {
-    isNotEditable: boolean;
-  };
-};
