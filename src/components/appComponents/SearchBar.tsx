@@ -1,13 +1,12 @@
-import {Input, Photo} from 'components/common';
-import {HOME_TEXT} from 'constants/screens';
-import {FontSize} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
-import {VARIABLES} from 'constants/common';
-import {navigate} from 'navigation/Navigators';
-import {SCREENS} from 'constants/routes';
-import {StyleSheet} from 'react-native';
-import {SetStateType, voidFuntionType} from 'types/common';
-import {IMAGES} from 'constants/assets';
+import { Input } from 'components/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { FontSize } from 'types/fontTypes';
+import { COLORS } from 'utils/colors';
+import { VARIABLES } from 'constants/common';
+import { navigate } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
+import { StyleSheet } from 'react-native';
+import { SetStateType, voidFuntionType } from 'types/common';
 
 export const SearchBar = ({
   value = '',
@@ -23,7 +22,7 @@ export const SearchBar = ({
   return (
     <Input
       value={value}
-      placeholder={HOME_TEXT.SEARCH_PRACTITIONERS}
+      placeholder={COMMON_TEXT.SEARCH}
       onChangeText={onChangeText}
       // endImage={
       //   <Photo
@@ -33,10 +32,7 @@ export const SearchBar = ({
       //     onPress={() => navigate(SCREENS.FILTER)}
       //   />
       // }
-      secondContainerStyle={[
-        styles.inputSecondContainer,
-        {borderWidth: showBorder ? 1 : 0},
-      ]}
+      secondContainerStyle={[styles.inputSecondContainer, { borderWidth: showBorder ? 1 : 0 }]}
       startIcon={{
         componentName: VARIABLES.Ionicons,
         iconName: 'search',
@@ -45,7 +41,7 @@ export const SearchBar = ({
       }}
       containerStyle={styles.inputContainer}
       onPress={onPress ? onPress : undefined}
-      name="search"
+      name='search'
     />
   );
 };

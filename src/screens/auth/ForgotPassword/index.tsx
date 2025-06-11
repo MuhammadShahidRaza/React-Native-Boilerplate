@@ -20,7 +20,9 @@ export const ForgotPassword = () => {
       email: values?.email,
     };
     // sendOtpToEmail({ data });
-    navigate(SCREENS.VERIFICATION);
+    navigate(SCREENS.VERIFICATION, {
+      isFromForgot: true,
+    });
   };
 
   const formik = useFormikForm<ForgotPasswordFormValues>({

@@ -4,14 +4,16 @@ import {
   loginValidationSchema,
   COLORS,
   screenWidth,
+  setItem,
   // getFCMToken,
-  clearAllStorageItems,
   // deviceDetails,
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
 import { navigate } from 'navigation/index';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setIsUserLoggedIn } from 'store/slices/appSettings';
 
 interface LoginFormValues {
   email: string;
@@ -21,6 +23,7 @@ interface LoginFormValues {
 }
 
 export const Login = () => {
+  const dispatch = useAppDispatch();
   const initialValues: LoginFormValues = {
     email: __DEV__ ? 'shahid@mailinator.com' : '',
     password: __DEV__ ? 'Passward123!' : '',
@@ -35,6 +38,8 @@ export const Login = () => {
       // device_token: await getFCMToken(),
       // ...deviceDetails(),
     };
+    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
+    dispatch(setIsUserLoggedIn(true));
     // loginUser({ data, rememberMe: values?.rememberMe });
   };
 
