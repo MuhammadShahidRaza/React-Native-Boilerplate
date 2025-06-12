@@ -14,7 +14,11 @@ type CategoryType = {
   image: React.FC<SvgProps>;
 };
 
-type SubCategoryType = { key: string; subCategories: { key: string; image: string }[] };
+type SubCategoryType = {
+  key: string;
+  subCategories: { key: string; image: string }[];
+  items?: { id: string; name: string; image: string }[];
+};
 
 const categoriesList: CategoryType[] = [
   { id: '1', name: 'Life Style', image: SVG.LIFE_STYLE },
@@ -31,35 +35,210 @@ const subCategoriesList: SubCategoryType[] = [
   {
     key: 'Life Style',
     subCategories: [
-      { key: 'Hotels', image: IMAGES.USER },
-      { key: 'SPA', image: IMAGES.USER },
-      { key: 'Saloons', image: IMAGES.USER },
+      { key: 'Hotels', image: IMAGES.HOTELS },
+      { key: 'SPA', image: IMAGES.SPA },
+      { key: 'Saloons', image: IMAGES.SALOONS },
     ],
   },
   {
     key: 'Food',
     subCategories: [
-      { key: 'Order Your Food', image: IMAGES.USER },
-      { key: 'Restaurant Reservation', image: IMAGES.USER },
+      { key: 'Order Your Food', image: IMAGES.ORDER_FOOD },
+      { key: 'Restaurant Reservation', image: IMAGES.RESTAURANT_RESERVATION },
     ],
   },
-  { key: 'Groceries', subCategories: [] },
-  { key: 'Wears', subCategories: [] },
-  { key: 'Health', subCategories: [] },
-  { key: 'Real State', subCategories: [] },
-  { key: 'Events', subCategories: [] },
+  {
+    key: 'Groceries',
+    subCategories: [],
+    items: [
+      {
+        id: '1',
+        name: 'Item 1',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '2',
+        name: 'Item 2',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '3',
+        name: 'Item 3',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '4',
+        name: 'Item 4',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '5',
+        name: 'Item 5',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '6',
+        name: 'Item 6',
+        image: IMAGES.ADIDAS,
+      },
+    ],
+  },
+  {
+    key: 'Wears',
+    subCategories: [],
+    items: [
+      {
+        id: '1',
+        name: 'Item 1',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '2',
+        name: 'Item 2',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '3',
+        name: 'Item 3',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '4',
+        name: 'Item 4',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '5',
+        name: 'Item 5',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '6',
+        name: 'Item 6',
+        image: IMAGES.ADIDAS,
+      },
+    ],
+  },
+  {
+    key: 'Health',
+    subCategories: [],
+    items: [
+      {
+        id: '1',
+        name: 'Item 1',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '2',
+        name: 'Item 2',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '3',
+        name: 'Item 3',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '4',
+        name: 'Item 4',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '5',
+        name: 'Item 5',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '6',
+        name: 'Item 6',
+        image: IMAGES.ADIDAS,
+      },
+    ],
+  },
+  {
+    key: 'Real State',
+    subCategories: [],
+    items: [
+      {
+        id: '1',
+        name: 'Item 1',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '2',
+        name: 'Item 2',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '3',
+        name: 'Item 3',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '4',
+        name: 'Item 4',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '5',
+        name: 'Item 5',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '6',
+        name: 'Item 6',
+        image: IMAGES.ADIDAS,
+      },
+    ],
+  },
+  {
+    key: 'Events',
+    subCategories: [],
+    items: [
+      {
+        id: '1',
+        name: 'Item 1',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '2',
+        name: 'Item 2',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '3',
+        name: 'Item 3',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '4',
+        name: 'Item 4',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '5',
+        name: 'Item 5',
+        image: IMAGES.ADIDAS,
+      },
+      {
+        id: '6',
+        name: 'Item 6',
+        image: IMAGES.ADIDAS,
+      },
+    ],
+  },
   {
     key: 'Others',
     subCategories: [
-      { key: 'Electronics', image: IMAGES.USER },
-      { key: 'Interior', image: IMAGES.USER },
+      { key: 'Electronics', image: IMAGES.ELECTRONICS },
+      { key: 'Interior', image: IMAGES.INTERIOR },
     ],
   },
 ];
 
 export const HomeComponent = () => {
   const [searchText, setSearchText] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('1');
   const handlePress = (id: string) => {
     setSelectedCategory(id);
   };
@@ -105,6 +284,19 @@ export const HomeComponent = () => {
       </View>
     </TouchableOpacity>
   );
+  const renderItems = ({ item }: { item: { id: string; name: string; image: string } }) => (
+    <TouchableOpacity
+      style={styles.subCategoryItemContainer}
+      onPress={() => handleSubCategoryPress(item.name)}
+    >
+      <Photo disabled imageStyle={styles.subCategoryItemImage} source={item.image} />
+      <View style={styles.textOverlay}>
+        <Typography numberOfLines={1} style={styles.subCategoryItemText}>
+          {item.name}
+        </Typography>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -121,21 +313,42 @@ export const HomeComponent = () => {
         data={categoriesList}
         renderItem={renderCategoryItem}
       />
-      {selectedCategory && (
-        <FlatListComponent
-          numColumns={2}
-          scrollEnabled={true}
-          columnWrapperStyle={styles.subCategoriesColumnWrapper}
-          contentContainerStyle={styles.subCategoriesContentContainer}
-          data={
-            subCategoriesList.find(
-              cat =>
-                categoriesList.find(mainCat => mainCat.id === selectedCategory)?.name === cat.key,
-            )?.subCategories || []
-          }
-          renderItem={renderSubCategoryItem}
-        />
-      )}
+      {selectedCategory &&
+        subCategoriesList.find(
+          cat => categoriesList.find(mainCat => mainCat.id === selectedCategory)?.name === cat.key,
+        )?.subCategories?.length != 0 && (
+          <FlatListComponent
+            numColumns={2}
+            scrollEnabled={true}
+            columnWrapperStyle={styles.subCategoriesColumnWrapper}
+            contentContainerStyle={styles.subCategoriesContentContainer}
+            data={
+              subCategoriesList.find(
+                cat =>
+                  categoriesList.find(mainCat => mainCat.id === selectedCategory)?.name === cat.key,
+              )?.subCategories || []
+            }
+            renderItem={renderSubCategoryItem}
+          />
+        )}
+      {selectedCategory &&
+        subCategoriesList.find(
+          cat => categoriesList.find(mainCat => mainCat.id === selectedCategory)?.name === cat.key,
+        )?.items && (
+          <FlatListComponent
+            numColumns={2}
+            scrollEnabled={true}
+            columnWrapperStyle={styles.subCategoriesColumnWrapper}
+            contentContainerStyle={styles.subCategoriesContentContainer}
+            data={
+              subCategoriesList.find(
+                cat =>
+                  categoriesList.find(mainCat => mainCat.id === selectedCategory)?.name === cat.key,
+              )?.items || []
+            }
+            renderItem={renderItems}
+          />
+        )}
     </View>
   );
 };
@@ -186,6 +399,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     padding: 5,
     borderRadius: 20,
+    overflow: 'hidden',
     height: screenHeight(25),
     width: screenWidth(42),
   },
@@ -216,9 +430,9 @@ const styles = StyleSheet.create({
     width: screenWidth(15),
   },
   subCategoryItemImage: {
-    height: screenHeight(24),
+    height: screenHeight(25),
     borderRadius: 20,
-    width: screenWidth(40),
+    width: screenWidth(43),
   },
   categoryItemImageContainer: {
     padding: 20,
