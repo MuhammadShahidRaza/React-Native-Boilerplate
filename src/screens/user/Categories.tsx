@@ -21,8 +21,8 @@ import { IMAGES } from 'constants/assets';
 import { navigate } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
 
-const previousSearchList = [
-  { id: '1', title: "Lorem Ipsum " },
+const categories = [
+  { id: '1', title: "Lorem Ipsum ", },
   { id: '2', title: "Lorem Ipsum " },
   { id: '3', title: "Lorem Ipsum " },
   { id: '4', title: "Lorem Ipsum " },
@@ -40,31 +40,31 @@ export const Categories = () => {
   const renderItem = ({ item, index }: any) => {
     return <Card
       titleStyle={styles.servicesTitle}
-      containerStyle={[styles.servicesCard, { marginEnd: index === previousSearchList.length - 1 ? 12 : 0 }]}
+      containerStyle={[styles.servicesCard, { marginEnd: index === categories.length - 1 ? 12 : 0 }]}
       key={index}
       uri={IMAGES.DEFAULT_IMAGE}
       title={item.title}
       description={item.description}
-      type="2" />
+      type="3" />
   }
 
 
   return (
     <Wrapper useScrollView backgroundColor={COLORS.HEADER}>
       <Header title={SCREENS.CATEGORIES} />
-      {previousSearchList.length == 2 ?
+      {categories.length == 2 ?
         <FlatList
           key={'_'}
           keyExtractor={item => "_" + item.id}
           renderItem={renderItem}
-          data={previousSearchList}
+          data={categories}
           numColumns={1} />
         :
         <FlatList
           key={'#'}
           keyExtractor={item => "#" + item.id}
           renderItem={renderItem}
-          data={previousSearchList}
+          data={categories}
           numColumns={2} />
       }
 

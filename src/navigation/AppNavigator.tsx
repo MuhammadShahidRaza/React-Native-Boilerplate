@@ -18,11 +18,15 @@ import {
   Help,
   Location,
   Categories,
+  Services,
+  ServicesProvider,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
 
 const screens = {
+  [SCREENS.SERVICES_PROVIDER]: ServicesProvider,
+  [SCREENS.SERVICES]: Services,
   [SCREENS.BOTTOM_STACK]: BottomNavigator,
   [SCREENS.CATEGORIES]: Categories,
   [SCREENS.NOTIFICATION_LISTING]: NotificationListing,

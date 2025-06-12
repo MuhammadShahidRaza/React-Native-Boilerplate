@@ -332,7 +332,7 @@ const ListView = () => {
         description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.'
         type="1" />
 
-      <HeadingWithViewAll onPress={() => { }} title="Services" />
+      <HeadingWithViewAll onPress={() => navigate(SCREENS.SERVICES)} title="Services" />
 
       <FlatList
         showsHorizontalScrollIndicator={false}

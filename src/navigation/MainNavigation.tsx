@@ -15,7 +15,7 @@ const MainNavigation = () => {
     <NavigationContainer theme={theme} ref={navigationRef}>
       {/* {isUserLoggedIn ? <AppNavigator /> : <AuthNavigator />} */}
 
-      <AuthNavigator />
+      <AppNavigator />
 
       <Toast />
     </NavigationContainer>
