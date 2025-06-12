@@ -15,6 +15,8 @@ import {
 import { screenOptions } from './Navigators';
 import { Intro } from 'screens/common/intro';
 import { RoleSelection } from 'screens/common/RoleSelection';
+import MyBooking from 'screens/user/MyBooking';
+import BookingDetailsScreen from 'screens/user/BookingDetailsScreen';
 
 export const AuthNavigator = () => {
   useBackHandler();
@@ -41,7 +43,14 @@ export const AuthNavigator = () => {
     //         options: { headerShown: false },
     //       },
     //     }),
-    
+    [SCREENS.MYBOOKING]: {
+      component: MyBooking,
+      options: { headerShown: false },
+    },
+    [SCREENS.BOOKINGDETAILSCREEN]: {
+      component: BookingDetailsScreen,
+      options: { headerShown: false },
+    },
     [SCREENS.ONBOARDING]: {
       component: OnBoarding,
       options: { headerShown: false },

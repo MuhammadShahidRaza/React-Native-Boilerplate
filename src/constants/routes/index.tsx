@@ -59,6 +59,8 @@ export const SCREENS = {
   TUTORIAL: 'Tutorial',
   INTRO: 'Intro',
   ONBOARDING: 'Onboarding',
+  BOOKINGDETAILSCREEN:'BookingDetailsScreen',
+  MYBOOKING:'MyBooking',
   PROFILE_SETUP: 'ProfileSetup',
   WALKTHROUGH: 'Walkthrough',
   ROLESELECTION:'RoleSelection',

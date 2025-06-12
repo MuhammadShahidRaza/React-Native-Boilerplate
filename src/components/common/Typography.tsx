@@ -8,7 +8,7 @@ import { useTranslation } from 'hooks/index';
 // type TextStyleWithoutTheseProperties = Omit<TextStyle, 'fontSize'>;
 
 interface Props extends TextProps {
-  children: string;
+  children: React.ReactNode;
   onPress?: () => void;
   style?: StyleProp<TextStyle>;
   fontSize?: FontSize;
@@ -63,7 +63,7 @@ export const Typography: React.FC<Props> = ({
 
   return (
     <Text onPress={onPress} style={[textStyle, style]} {...restProps}>
-      {t(children)}
+      {typeof children === 'string' ? t(children) : children}
     </Text>
   );
 };

@@ -9,12 +9,8 @@ export const IMAGES = {
   PROFILE: require('assets/images/common/profile_icon.png'),
   RATINGS: require('assets/images/common/ratings_icon.png'),
   FILTER: require('assets/images/common/filter_icon.png'),
-
-
-
-
-
-
+  ACTIVE_ICON: require('assets/images/common/active_icon.png'),
+  CANCEL_ICON: require('assets/images/common/cancel_icon.png'),
   BACKGROUND_IMAGE:require('assets/images/common/backgroundImage.png'),
   LOCK_ICON:require('assets/images/common/Lock.png'),
   APPLE_ICON:require('assets/images/common/apple.png'),
@@ -22,6 +18,7 @@ export const IMAGES = {
   ONBOARDING1:require('assets/images/common/onboarding1.png'),
   ONBOARDING2:require('assets/images/common/onboarding2.png'),
   ONBOARDING3:require('assets/images/common/onbaording3.png'),
+  LOCATION_ICON:require('assets/images/common/location_icon.png'),
 LOGO_WITH_NAME:require('assets/images/common/logowithname.png'),
 IMAGE_UPLOAD:require('assets/images/common/imageupload.png'),
   //LANGUAGES:
