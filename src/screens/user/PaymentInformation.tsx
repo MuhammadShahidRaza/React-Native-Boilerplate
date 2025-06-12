@@ -1,9 +1,10 @@
 import {
-  Autocomplete,
   Button,
+  Checkbox,
   Header,
   Input,
   PhoneInputComponent,
+  RadioButton,
   RowComponent,
   Wrapper,
 } from 'components/common';
@@ -29,7 +30,7 @@ interface EditProfileFormValues {
   location: AddressDetails | null;
 }
 
-export const EditProfile = () => {
+export const PaymentInformation = () => {
   const initialValues: EditProfileFormValues = {
     email: 'shahid@gmail.com',
     firstName: 'Shahid',
@@ -48,7 +49,7 @@ export const EditProfile = () => {
 
   return (
     <Wrapper>
-      <Header title={'My Information'} />
+      <Header title={'Payment Information'} />
 
       <View style={styles.container}>
         {/* Scrollable form content */}
@@ -57,6 +58,13 @@ export const EditProfile = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+            {/* <RadioButton
+                          containerStyle={styles.radioButtonContainer}
+                          // optionsContainerStyle={styles.radioButtonOptionsContainer}
+                          options={languages}
+                          selectedOption={languages[0] || languages[0]?.name}
+                          onSelectOption={() => { }}
+                        /> */}
           <Image
             source={IMAGES.IMAGE_UPLOAD}
             resizeMode="contain"
@@ -64,74 +72,73 @@ export const EditProfile = () => {
           />
 
           <FocusProvider>
-            <RowComponent style={styles.row}>
-              <Input
-                titleStyle={styles.title}
-                name={COMMON_TEXT.FIRST_NAME}
-                title={COMMON_TEXT.FIRST_NAME}
-                containerStyle={styles.nameinput}
-                onChangeText={formik.handleChange('firstName')}
-                onBlur={formik.handleBlur('firstName')}
-                value={formik.values.firstName}
-                placeholder={COMMON_TEXT.ENTER_FIRST_NAME}
-                error={formik.errors.firstName}
-                touched={Boolean(formik.touched.firstName && formik.submitCount)}
-                startIcon={{
-                  componentName: VARIABLES.Feather,
-                  iconName: 'user',
-                }}
-              />
-
-              <Input
-                titleStyle={styles.title}
-                name={COMMON_TEXT.LAST_NAME}
-                title={COMMON_TEXT.LAST_NAME}
-                containerStyle={styles.nameinput}
-                onChangeText={formik.handleChange('lastName')}
-                onBlur={formik.handleBlur('lastName')}
-                value={formik.values.lastName}
-                placeholder={COMMON_TEXT.ENTER_LAST_NAME}
-                error={formik.errors.lastName}
-                touched={Boolean(formik.touched.lastName && formik.submitCount)}
-                startIcon={{
-                  componentName: VARIABLES.Feather,
-                  iconName: 'user',
-                }}
-              />
-            </RowComponent>
+            <Input
+              titleStyle={styles.title}
+              name={COMMON_TEXT.EMAIL}
+              title={'Card Number'}
+              editable={false}
+              onChangeText={formik.handleChange('email')}
+              onBlur={formik.handleBlur('email')}
+              value={'Enter Card Number'}
+              allowSpacing={false}
+              keyboardType={'email-address'}
+              placeholder={'Enter Card Number '}
+              error={formik.errors.email}
+              touched={Boolean(formik.touched.email && formik.submitCount)}
+             
+            />
 
             <Input
               titleStyle={styles.title}
               name={COMMON_TEXT.EMAIL}
-              title={COMMON_TEXT.EMAIL}
+              title={'Card Holder Name '}
               editable={false}
               onChangeText={formik.handleChange('email')}
               onBlur={formik.handleBlur('email')}
-              value={formik.values.email}
+              value={'Enter Holder Name'}
               allowSpacing={false}
               keyboardType={'email-address'}
-              placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
+              placeholder={'Enter Holder Name'}
               error={formik.errors.email}
               touched={Boolean(formik.touched.email && formik.submitCount)}
-              startIcon={{
-                componentName: VARIABLES.MaterialCommunityIcons,
-                iconName: 'email-outline',
-              }}
+              
             />
+<RowComponent style={styles.row}>
+              <Input
+                titleStyle={styles.title}
+                name={COMMON_TEXT.FIRST_NAME}
+                title={'Expired'}
+                containerStyle={styles.nameinput}
+                onChangeText={formik.handleChange('firstName')}
+                onBlur={formik.handleBlur('firstName')}
+                value={'MM/YY'}
+                placeholder={'MM/YY '}
+                error={formik.errors.firstName}
+                touched={Boolean(formik.touched.firstName && formik.submitCount)}
+                
+              />
 
-            <PhoneInputComponent
-              titleStyle={styles.title}
-              name={COMMON_TEXT.PHONE_NUMBER}
-              title={COMMON_TEXT.PHONE_NUMBER}
-              onChangeText={formik.handleChange('phoneNumber')}
-              value={formik.values.phoneNumber}
-              defaultCode={'PK'}
-              allowSpacing={false}
-              placeholder={COMMON_TEXT.ENTER_YOUR_PHONE_NUMBER}
-              error={formik.errors.phoneNumber}
-              touched={Boolean(formik.touched.phoneNumber && formik.submitCount)}
-              startIcon={{ componentName: 'FontAwesome', iconName: '' }}
-            />
+              <Input
+                titleStyle={styles.title}
+                name={'CVV'}
+                title={'CVV Code'}
+                containerStyle={styles.nameinput}
+                onChangeText={formik.handleChange('lastName')}
+                onBlur={formik.handleBlur('lastName')}
+                value={'CVV'}
+                placeholder={'CVV'}
+                error={formik.errors.lastName}
+                touched={Boolean(formik.touched.lastName && formik.submitCount)}
+                
+              />
+            </RowComponent>
+            <Checkbox
+                      label={'Remember this card details.'}
+                      
+                      labelStyle={styles.forgotPassword}
+                      checkboxStyle={{ borderColor: COLORS.PRIMARY, borderWidth: 3, borderRadius: 7 }}
+                      onChange={checked => formik.setFieldValue('rememberMe', checked)}
+                    />
           </FocusProvider>
         </ScrollView>
 

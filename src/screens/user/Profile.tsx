@@ -38,43 +38,30 @@ export const Profile = () => {
       iconComponent: VARIABLES.MaterialCommunityIcons,
     },
     {
-      title: COMMON_TEXT.PAYMENT_OPTIONS,
+      title: 'Change Password',
       iconName: 'payments',
-      onPress: () => {},
+      onPress: () => navigate(SCREENS.CHANGE_PASSWORD),
       iconComponent: VARIABLES.MaterialIcons,
     },
     {
-      title: COMMON_TEXT.CONTACT_US,
-      iconName: 'contact-phone',
-      onPress: () => navigate(SCREENS.CONTACT_US),
-      iconComponent: VARIABLES.MaterialIcons,
-    },
-    {
-      title: COMMON_TEXT.ABOUT_US,
+      title: 'Change Language',
       iconName: 'information',
-      onPress: () => navigate(SCREENS.ABOUT),
+      onPress: () => navigate(SCREENS.CHANGE_LANGUAGE),
       iconComponent: VARIABLES.MaterialCommunityIcons,
     },
     {
-      title: COMMON_TEXT.SETTINGS,
-      iconName: 'settings-sharp',
-      onPress: () => navigate(SCREENS.SETTINGS),
-      iconComponent: VARIABLES.Ionicons,
+      title: 'Payment Information',
+      iconName: 'contact-phone',
+      onPress: () => navigate(SCREENS.PAYMENTINFORMATION),
+      iconComponent: VARIABLES.MaterialIcons,
     },
     {
-      title: COMMON_TEXT.LOGOUT,
-      iconName: 'login',
-      onPress: async () => {
-        dispatch(setIsUserLoggedIn(false));
-        await removeMultipleItem([
-          VARIABLES.USER_TOKEN,
-          VARIABLES.IS_USER_LOGGED_IN,
-        ]);
-      },
-      iconComponent: VARIABLES.Entypo,
-      iconStyle: {transform: [{scaleX: -1}]},
-      marginTop: 70,
+      title: 'Contact Support',
+      iconName: 'settings-sharp',
+      onPress: () => navigate(SCREENS.CONTACT_SUPPORT),
+      iconComponent: VARIABLES.Ionicons,
     },
+    
   ];
 
   return (
@@ -117,16 +104,22 @@ export const Profile = () => {
               startIcon={{
                 componentName: iconComponent,
                 iconName,
-                color: COLORS.SECONDARY,
+                color: COLORS.ICONS,
                 size: FontSize.Large,
                 iconStyle,
               }}
+                endIcon={{  // ✅ NEW: Right arrow icon
+    componentName: VARIABLES.MaterialIcons,
+    iconName: 'arrow-forward-ios',
+    iconStyle:styles.iconStyle,
+    size: FontSize.Small,
+    color: COLORS.ICONS,
+  }}
             />
           ),
         )}
-        <Typography style={styles.logoutText}>
-          {COMMON_TEXT.SECURELY_LOGOUT}
-        </Typography>
+        <Button title={COMMON_TEXT.LOGOUT} style={{alignSelf:'center',width:217}} />
+        
       </View>
     </Wrapper>
   );
@@ -177,12 +170,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.TRANSPARENT,
   },
   buttonText: {
-    color: COLORS.BLACK,
-    fontSize: FontSize.MediumLarge,
+    color: COLORS.ICONS,
+    fontSize: FontSize.Medium,
   },
   logoutText: {
     marginHorizontal: 60,
     color: COLORS.BORDER,
     fontSize: FontSize.MediumSmall,
   },
+  iconStyle: {
+  marginLeft: 40,
+},
 });

@@ -21,6 +21,10 @@ import {
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
+import { ChangePassword } from 'screens/user/ChangePassword';
+import { ChangeLanguage } from 'screens/user/ChangeLanguage';
+import { ContactSupport } from 'screens/user/ContactSupport';
+import { PaymentInformation } from 'screens/user/PaymentInformation';
 
 const screens = {
   [SCREENS.BOTTOM_STACK]: BottomNavigator,
@@ -35,6 +39,8 @@ const screens = {
   [SCREENS.SEARCH]: Search,
   [SCREENS.NOTIFICATIONS]: Notification,
   [SCREENS.FILTER]: Filter,
+  [SCREENS.CHANGE_LANGUAGE]:ChangeLanguage,
+  [SCREENS.CHANGE_PASSWORD]:ChangePassword,
   [SCREENS.CHAT]: Chat,
   [SCREENS.MESSAGES]: Messages,
   [SCREENS.SETTINGS]: Settings,
@@ -42,6 +48,8 @@ const screens = {
   [SCREENS.HELP]: Help,
   [SCREENS.CONTACT_US]: ContactUs,
   [SCREENS.REVIEWS]: Reviews,
+  [SCREENS.CONTACT_SUPPORT]:ContactSupport,
+  [SCREENS.PAYMENTINFORMATION]:PaymentInformation
 };
 
 export const AppNavigator = () => {
