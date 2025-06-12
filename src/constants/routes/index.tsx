@@ -59,11 +59,11 @@ export const SCREENS = {
   TUTORIAL: 'Tutorial',
   INTRO: 'Intro',
   ONBOARDING: 'Onboarding',
-  BOOKINGDETAILSCREEN:'BookingDetailsScreen',
-  MYBOOKING:'MyBooking',
+  BOOKINGDETAILSCREEN: 'BookingDetailsScreen',
+  MYBOOKING: 'MyBooking',
   PROFILE_SETUP: 'ProfileSetup',
   WALKTHROUGH: 'Walkthrough',
-  ROLESELECTION:'RoleSelection',
+  ROLESELECTION: 'RoleSelection',
   CONFIRMATION: 'Confirmation',
   PRE_DEPOSIT: 'PreDeposit',
   SIGNATURE: 'Signature',
@@ -86,5 +86,9 @@ export const SCREENS = {
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',
   BOTTOM_STACK: 'BottomStackScreen',
-  CATEGORIES: "Categories"
+  CATEGORIES: "Categories",
+  SERVICES: "Services",
+  SERVICES_PROVIDER: "ServicesProvider",
+
+
 } as const;

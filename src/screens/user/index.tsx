@@ -17,5 +17,9 @@ export * from './Location';
 export * from './Help';
 export * from './Bookings';
 export * from './Categories';
+export * from './Services';
+export * from './ServicesProvider';
+
+
 
 
