@@ -62,7 +62,7 @@ export const COLORS = {
   TOMATO: '#FF6347',
   STEEL_BLUE: '#4682B4',
   TRANSPARENT: 'transparent',
-  DARK_BLACK_OPACITY: 'rgba(2,2,2,0.5))',
+  DARK_BLACK_OPACITY: 'rgba(2,2,2,0.8))',
   WHITE_OPACITY: 'rgba(255, 255, 255, 0.4)',
   INHERIT: 'inherit',
 };

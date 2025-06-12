@@ -16,6 +16,7 @@ export type RootStackParamList = {
   [SCREENS.HOME]: undefined;
   [SCREENS.CART]: undefined;
   [SCREENS.NOTIFICATIONS]: undefined;
+  [SCREENS.NOTIFICATION_LISTING]: undefined;
   [SCREENS.PROFILE]: undefined;
   [SCREENS.SETTINGS]: undefined;
   [SCREENS.HELP]: undefined;

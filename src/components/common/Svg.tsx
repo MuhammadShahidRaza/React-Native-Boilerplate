@@ -11,6 +11,8 @@ interface SvgComponentProps extends TouchableOpacityProps {
   borderRadius?: number;
   containerStyle?: StyleType;
   children?: ChildrenType;
+  fill?: string;
+  stroke?: string;
 }
 
 export const SvgComponent: React.FC<SvgComponentProps> = ({
@@ -22,6 +24,8 @@ export const SvgComponent: React.FC<SvgComponentProps> = ({
   clickable = false,
   borderRadius = 0,
   containerStyle,
+  fill,
+  stroke,
   ...otherProps
 }) => {
   const handlePress = () => {
@@ -41,6 +45,8 @@ export const SvgComponent: React.FC<SvgComponentProps> = ({
       <Svg
         {...(svgWidth !== undefined && { width: svgWidth })}
         {...(svgHeight !== undefined && { height: svgHeight })}
+        {...(fill !== undefined && { fill: fill })}
+        {...(stroke !== undefined && { stroke: stroke })}
       />
       {children}
     </TouchableOpacity>

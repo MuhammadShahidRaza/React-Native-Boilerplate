@@ -12,6 +12,9 @@ export const Home = () => {
       <View style={styles.headerContainer}>
         <RowComponent style={STYLES.CONTAINER}>
           <MessageBox
+            onPress={() => {
+              navigate(SCREENS.PROFILE);
+            }}
             containerStyle={styles.messageBoxContainer}
             userImage={IMAGES.USER}
             imageStyle={styles.messageImageStyle}

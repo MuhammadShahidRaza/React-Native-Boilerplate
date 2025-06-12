@@ -1,10 +1,10 @@
-import {Header, MessageBox, Wrapper} from 'components/common';
-import {COMMON_TEXT, PRACTITIONER_TEXT} from 'constants/screens';
-import {IMAGES} from 'constants/assets';
-import {navigate} from 'navigation/Navigators';
-import {SCREENS} from 'constants/routes';
-import {screenHeight, screenWidth} from 'utils/helpers';
-import {FontSize} from 'types/fontTypes';
+import { Header, MessageBox, Wrapper } from 'components/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { IMAGES } from 'constants/assets';
+import { navigate } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
+import { screenHeight, screenWidth } from 'utils/helpers';
+import { FontSize } from 'types/fontTypes';
 
 export const Notification = () => {
   return (
@@ -18,12 +18,12 @@ export const Notification = () => {
           resizeMode: 'contain',
         }}
         hideBorder
-        containerStyle={{marginVertical: 20}}
+        containerStyle={{ marginVertical: 20 }}
         onPress={() => navigate(SCREENS.NOTIFICATION_LISTING)}
         userImage={IMAGES.USER}
         userName={COMMON_TEXT.TODAY}
-        message={PRACTITIONER_TEXT.SESSION_TODAY}
-        time="04:20 PM"
+        message={COMMON_TEXT.MESSAGE}
+        time='04:20 PM'
       />
 
       <MessageBox
@@ -36,13 +36,13 @@ export const Notification = () => {
         hideBorder
         onPress={() => navigate(SCREENS.NOTIFICATION_LISTING)}
         userImage={IMAGES.USER}
-        userName={PRACTITIONER_TEXT.SESSION_COMPLETED}
+        userName={COMMON_TEXT.MESSAGE}
         messageNumLine={2}
         messageStyle={{
           fontSize: FontSize.MediumSmall,
         }}
-        message={PRACTITIONER_TEXT.SESSION_COMPLETED_DESCRIPTION}
-        time="02:45 PM"
+        message={COMMON_TEXT.MESSAGE}
+        time='02:45 PM'
       />
     </Wrapper>
   );

@@ -12,6 +12,4 @@ export const IMAGES = {
   PORTUGUESE: require('assets/images/languages/portuguese.png'),
 
 
-  //HOME
-
 };
