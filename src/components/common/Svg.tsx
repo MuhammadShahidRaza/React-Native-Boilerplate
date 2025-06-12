@@ -1,11 +1,6 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  ViewStyle,
-} from 'react-native';
-import {NumberProp, SvgProps} from 'react-native-svg';
-import {ChildrenType} from 'types/common';
+import { StyleSheet, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { NumberProp, SvgProps } from 'react-native-svg';
+import { ChildrenType, StyleType } from 'types/common';
 
 interface SvgComponentProps extends TouchableOpacityProps {
   Svg: React.FC<SvgProps>;
@@ -14,7 +9,7 @@ interface SvgComponentProps extends TouchableOpacityProps {
   onPress?: () => void;
   clickable?: boolean;
   borderRadius?: number;
-  containerStyle?: ViewStyle;
+  containerStyle?: StyleType;
   children?: ChildrenType;
 }
 
@@ -41,10 +36,11 @@ export const SvgComponent: React.FC<SvgComponentProps> = ({
       onPress={handlePress}
       style={[styles.container, containerStyle]}
       disabled={!clickable}
-      {...otherProps}>
+      {...otherProps}
+    >
       <Svg
-        {...(svgWidth !== undefined && {width: svgWidth})}
-        {...(svgHeight !== undefined && {height: svgHeight})}
+        {...(svgWidth !== undefined && { width: svgWidth })}
+        {...(svgHeight !== undefined && { height: svgHeight })}
       />
       {children}
     </TouchableOpacity>

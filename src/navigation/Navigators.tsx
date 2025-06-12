@@ -12,6 +12,26 @@ import { FontSize } from 'types/fontTypes';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
+  // User Screens
+  [SCREENS.HOME]: undefined;
+  [SCREENS.CART]: undefined;
+  [SCREENS.NOTIFICATIONS]: undefined;
+  [SCREENS.PROFILE]: undefined;
+  [SCREENS.SETTINGS]: undefined;
+  [SCREENS.HELP]: undefined;
+  [SCREENS.ABOUT]: undefined;
+  [SCREENS.CONTACT_US]: undefined;
+  [SCREENS.FAQ]: undefined;
+  [SCREENS.TASKS]: undefined;
+  [SCREENS.SHOP]: undefined;
+  [SCREENS.CART]: undefined;
+  [SCREENS.CHECKOUT]: undefined;
+  [SCREENS.ORDERS]: undefined;
+  [SCREENS.PAYMENTS]: undefined;
+  [SCREENS.INVOICES]: undefined;
+  [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
+
+  // Auth Screens
   [SCREENS.LOGIN]: undefined;
   [SCREENS.SIGN_UP]: undefined;
   [SCREENS.FORGOT_PASSWORD]: undefined;
@@ -62,6 +82,7 @@ export const screenOptions: NativeStackNavigationOptions = {
   headerTintColor: COLORS.PRIMARY,
   headerShadowVisible: false,
   headerLeft: () => <CustomBackIcon />,
+  headerTitleAlign: 'center',
 };
 
 export const CustomBackIcon = () => (

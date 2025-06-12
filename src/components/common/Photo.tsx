@@ -8,6 +8,7 @@ import {
   TouchableOpacityProps,
   ViewStyle,
 } from 'react-native';
+import { StyleType } from 'types/common';
 
 interface PhotoProps extends TouchableOpacityProps {
   source: string | number;
@@ -16,7 +17,7 @@ interface PhotoProps extends TouchableOpacityProps {
   disabled?: boolean;
   resizeMode?: ImageResizeMode;
   borderRadius?: number;
-  containerStyle?: ViewStyle;
+  containerStyle?: StyleType;
   imageStyle?: StyleProp<ImageStyle>;
 }
 
