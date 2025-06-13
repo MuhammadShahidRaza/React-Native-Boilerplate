@@ -20,6 +20,7 @@ import {
   Categories,
   Services,
   ServicesProvider,
+  ProviderDetails,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
@@ -29,9 +30,11 @@ import { ContactSupport } from 'screens/user/ContactSupport';
 import { PaymentInformation } from 'screens/user/PaymentInformation';
 
 const screens = {
+  [SCREENS.BOTTOM_STACK]: BottomNavigator,
+  [SCREENS.PROVIDER_DETAILS]: ProviderDetails,
+  [SCREENS.NOTIFICATIONS]: Notification,
   [SCREENS.SERVICES_PROVIDER]: ServicesProvider,
   [SCREENS.SERVICES]: Services,
-  [SCREENS.BOTTOM_STACK]: BottomNavigator,
   [SCREENS.CATEGORIES]: Categories,
   [SCREENS.NOTIFICATION_LISTING]: NotificationListing,
   [SCREENS.ABOUT]: AboutUs,
@@ -41,7 +44,6 @@ const screens = {
   [SCREENS.PROFILE]: Profile,
   [SCREENS.EDIT_PROFILE]: EditProfile,
   [SCREENS.SEARCH]: Search,
-  [SCREENS.NOTIFICATIONS]: Notification,
   [SCREENS.FILTER]: Filter,
   [SCREENS.CHANGE_LANGUAGE]:ChangeLanguage,
   [SCREENS.CHANGE_PASSWORD]:ChangePassword,

@@ -100,7 +100,6 @@ export const HomeHeader = ({
             componentName={VARIABLES.Feather}
             iconName={'bell'}
             size={20}
-            onPress={() => { }}
             iconStyle={{
               marginEnd: 10,
               color: COLORS.GREEN,
