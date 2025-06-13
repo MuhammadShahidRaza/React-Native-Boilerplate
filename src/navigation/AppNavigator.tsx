@@ -25,6 +25,7 @@ import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
 
 const screens = {
+  [SCREENS.NOTIFICATIONS]: Notification,
   [SCREENS.SERVICES_PROVIDER]: ServicesProvider,
   [SCREENS.SERVICES]: Services,
   [SCREENS.BOTTOM_STACK]: BottomNavigator,
@@ -37,7 +38,6 @@ const screens = {
   [SCREENS.PROFILE]: Profile,
   [SCREENS.EDIT_PROFILE]: EditProfile,
   [SCREENS.SEARCH]: Search,
-  [SCREENS.NOTIFICATIONS]: Notification,
   [SCREENS.FILTER]: Filter,
   [SCREENS.CHAT]: Chat,
   [SCREENS.MESSAGES]: Messages,

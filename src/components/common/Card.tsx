@@ -226,9 +226,6 @@ export const Card = ({
                             <Image style={styles.currencyNoteImage} source={IMAGES.CURRENCY_NOTE} />
                             <Typography style={styles.typeFourContentLocation}>{price}</Typography>
                         </RowComponent>
-
-
-
                     </View>
 
                     <Button
