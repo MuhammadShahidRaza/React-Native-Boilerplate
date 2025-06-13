@@ -25,3 +25,4 @@ export * from './Typography';
 // export * from './Autocomplete';
 export * from './DatesListing';
 export * from './MonthsListing';
+export * from './SkeletonLoader';

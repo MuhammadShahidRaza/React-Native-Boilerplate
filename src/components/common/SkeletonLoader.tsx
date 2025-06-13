@@ -1,14 +1,35 @@
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import {ChildrenType} from 'types/common';
+import { ChildrenType } from 'types/index';
 
 interface SkeletonLoaderProps {
   children: ChildrenType;
+  height?: number;
 }
 
-export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({children}) => {
+export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({ children, height }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+  }, []);
   return (
-    <SkeletonPlaceholder>
-      <>{children}</>
+    <SkeletonPlaceholder enabled={isLoading}>
+      <View
+        style={
+          isLoading
+            ? {
+                borderWidth: 0.8,
+                borderRadius: 20,
+                height
+              }
+            : {}
+        }
+      >
+        {children}
+      </View>
     </SkeletonPlaceholder>
   );
 };

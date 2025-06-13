@@ -16,6 +16,7 @@ export const SCREENS = {
   SETTINGS: 'Settings',
   NOTIFICATIONS: 'Notifications',
   SEARCH: 'Search',
+  VIEW_ALL: 'ViewAll',
   EXPLORE: 'Explore',
   FEED: 'Feed',
   FRIENDS: 'Friends',

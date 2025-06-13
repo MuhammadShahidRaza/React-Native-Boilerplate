@@ -31,6 +31,7 @@ export type RootStackParamList = {
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
   [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
+  [SCREENS.VIEW_ALL]: { data: any };
 
   // Auth Screens
   [SCREENS.LOGIN]: undefined;

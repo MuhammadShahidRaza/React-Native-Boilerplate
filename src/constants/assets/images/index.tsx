@@ -20,8 +20,9 @@ export const IMAGES = {
   ELECTRONICS: require('assets/images/homeCategory/electronics.png'),
   INTERIOR: require('assets/images/homeCategory/interior.png'),
 
-
-
-
+  //TEMPORARY:
   ADIDAS: require('assets/images/homeCategory/adidas.png'),
+  ZARA: require('assets/images/homeCategory/zara.png'),
+  WALMART: require('assets/images/homeCategory/walmart.png'),
+  PEACE_PHARMACY: require('assets/images/homeCategory/pharmacy.png'),
 };
