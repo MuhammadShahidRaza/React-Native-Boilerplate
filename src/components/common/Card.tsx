@@ -1,4 +1,4 @@
-import { View, StyleSheet, TextStyle, ImageBackground, Image, ImageStyle } from 'react-native';
+import { View, StyleSheet, TextStyle, ImageBackground, Image, ImageStyle, TouchableOpacity } from 'react-native';
 import { RowComponent } from './Row';
 import { Icon } from './Icon';
 import { VARIABLES } from 'constants/common';
@@ -24,7 +24,7 @@ type Props = {
     location?: string;
     rating?: string;
     price?: string;
-
+    onPress?: () => void
 
 };
 
@@ -41,7 +41,8 @@ export const Card = ({
     currency = '',
     location = '',
     rating = '',
-    price = ''
+    price = '',
+    onPress = () => { }
 }: Props) => {
 
     const [loading, setLoading] = useState(false)
@@ -53,18 +54,20 @@ export const Card = ({
                 <ActivityIndicator size={"large"} color={COLORS.GREEN} />
             </View> : null}
 
-            <ImageBackground
-                onLoadStart={() => setLoading(true)}
-                onPartialLoad={() => setLoading(false)}
-                onLoad={() => setLoading(false)}
-                onLoadEnd={() => setLoading(false)}
-                key={key}
-                style={[styles.container, { marginHorizontal: 20 }, containerStyle]} source={{ uri }}>
-                <View style={styles.overLay}>
-                    <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-                    <Typography style={styles.description}>{description}</Typography>
-                </View>
-            </ImageBackground>
+            <TouchableOpacity onPress={onPress}>
+                <ImageBackground
+                    onLoadStart={() => setLoading(true)}
+                    onPartialLoad={() => setLoading(false)}
+                    onLoad={() => setLoading(false)}
+                    onLoadEnd={() => setLoading(false)}
+                    key={key}
+                    style={[styles.container, { marginHorizontal: 20 }, containerStyle]} source={{ uri }}>
+                    <View style={styles.overLay}>
+                        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
+                        <Typography style={styles.description}>{description}</Typography>
+                    </View>
+                </ImageBackground>
+            </TouchableOpacity>
         </>
 
 
@@ -78,7 +81,7 @@ export const Card = ({
                 {loading ? <View style={[styles.container, { marginHorizontal: 20, justifyContent: 'center', alignItems: 'center' }, containerStyle]}>
                     <ActivityIndicator size={"small"} color={COLORS.GREEN} />
                 </View> : null}
-                <View key={key}>
+                <TouchableOpacity onPress={onPress} key={key}>
                     <Image
                         onLoadStart={() => setLoading(true)}
                         onLoad={() => setLoading(false)}
@@ -86,7 +89,12 @@ export const Card = ({
                         onPartialLoad={() => setLoading(false)}
                         style={[styles.container, containerStyle]} source={{ uri }} />
                     <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-                </View>
+
+                    {rating ? <RowComponent style={{ justifyContent: 'center' }}>
+                        <Image style={styles.ratingIcon} source={IMAGES.RATINGS} />
+                        <Typography style={styles.ratingText}>{rating}</Typography>
+                    </RowComponent> : null}
+                </TouchableOpacity>
             </>
         )
     }
@@ -98,7 +106,7 @@ export const Card = ({
                     <ActivityIndicator size={"small"} color={COLORS.GREEN} />
                 </View> : null}
 
-                <View style={[styles.container, styles.typeThreeContainer, containerStyle]} key={key}>
+                <TouchableOpacity onPress={onPress} style={[styles.container, styles.typeThreeContainer, containerStyle]} key={key}>
                     <Image
                         onLoadStart={() => setLoading(true)}
                         onLoad={() => setLoading(false)}
@@ -135,7 +143,7 @@ export const Card = ({
                         <Typography style={styles.currency}>{currency}</Typography>
                     </RowComponent>
 
-                </View>
+                </TouchableOpacity>
             </>
         )
     }
@@ -232,7 +240,7 @@ export const Card = ({
                         textStyle={styles.typeFourButtonText}
                         style={styles.typeFourButton}
                         title={COMMON_TEXT.BOOK_Now}
-                        onPress={() => { }} />
+                        onPress={onPress} />
                 </RowComponent>
             </>
         )

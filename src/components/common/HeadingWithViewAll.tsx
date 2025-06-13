@@ -8,7 +8,7 @@ import { COLORS } from 'utils/colors';
 
 
 type Props = {
-    onPress: () => void;
+    onPress?: () => void;
     title: string;
 };
 
@@ -19,9 +19,9 @@ export const HeadingWithViewAll = ({ title, onPress }: Props) => {
         <RowComponent style={styles.container}>
             <Typography style={styles.title}>{title}</Typography>
 
-            <TouchableOpacity onPress={onPress}>
+            {onPress ? <TouchableOpacity onPress={onPress}>
                 <Typography style={styles.viewAllText}>View all</Typography>
-            </TouchableOpacity>
+            </TouchableOpacity> : null}
         </RowComponent>
     )
 }

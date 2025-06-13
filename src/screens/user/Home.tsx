@@ -70,7 +70,7 @@ export const Home = () => {
         <HomeHeader
           setIsListView={() => setIsListView(!isListView)}
           isListView={isListView}
-          onBellPress={() => { }}
+          onBellPress={() => navigate(SCREENS.NOTIFICATIONS)}
           onLocationPress={() => refRBSheet?.current?.open()}
           title="Hey, Jacob 👋"
           location='408, Lorem ipsum set dud emit' />
@@ -92,7 +92,6 @@ export const Home = () => {
 
             <RadioButton
               containerStyle={styles.radioButtonContainer}
-              // optionsContainerStyle={styles.radioButtonOptionsContainer}
               options={languages}
               selectedOption={languages[0] || languages[0]?.name}
               onSelectOption={() => { }}
@@ -285,6 +284,7 @@ const ListView = () => {
   const renderItemTopRated = ({ item, index }: any) => {
     return (
       <Card
+        onPress={() => navigate(SCREENS.PROVIDER_DETAILS)}
         titleStyle={styles.topRatedTitle}
         key={index}
         containerStyle={[styles.topRatedCard, { marginEnd: index === services.length - 1 ? 12 : 0 }]}
@@ -360,7 +360,7 @@ const ListView = () => {
         description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.'
         type="1" />
 
-      <HeadingWithViewAll onPress={() => { }} title="Services" />
+      <HeadingWithViewAll onPress={() => navigate(SCREENS.SERVICES)} title="Services" />
 
       <FlatList
         showsHorizontalScrollIndicator={false}
@@ -370,7 +370,7 @@ const ListView = () => {
         horizontal
       />
 
-      <HeadingWithViewAll onPress={() => { }} title="Top rated service provider" />
+      <HeadingWithViewAll onPress={() => navigate(SCREENS.SERVICES_PROVIDER)} title="Top rated service provider" />
 
       <FlatList
         style={{ marginBottom: 20 }}

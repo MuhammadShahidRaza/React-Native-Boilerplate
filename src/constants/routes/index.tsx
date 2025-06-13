@@ -89,6 +89,8 @@ export const SCREENS = {
   CATEGORIES: "Categories",
   SERVICES: "Services",
   SERVICES_PROVIDER: "ServicesProvider",
+  PROVIDER_DETAILS: "ProviderDetails",
+
 
 
 } as const;

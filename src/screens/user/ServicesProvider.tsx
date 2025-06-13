@@ -72,6 +72,7 @@ export const ServicesProvider = () => {
 
     const renderItem = ({ item, index }: any) => {
         return <Card
+            onPress={() => navigate(SCREENS.PROVIDER_DETAILS)}
             titleStyle={styles.servicesTitle}
             containerStyle={[styles.servicesCard, { marginEnd: index === services.length - 1 ? 12 : 0 }]}
             key={index}
