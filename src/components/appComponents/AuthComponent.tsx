@@ -5,7 +5,7 @@ import { COMMON_TEXT } from 'constants/screens';
 import { reset } from 'navigation/Navigators';
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { ChildrenType, FontSize, FontWeight, StyleType, SvgNameType } from 'types/index';
-import { screenWidth, FLEX_CENTER, COLORS, screenHeight } from 'utils/index';
+import { screenWidth, FLEX_CENTER, COLORS, screenHeight, isIOS } from 'utils/index';
 
 type Props = {
   children: ChildrenType;
@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     textDecorationLine: 'underline',
     fontSize: FontSize.Medium,
+    marginBottom: isIOS() ? 0 : 5,
     fontWeight: FontWeight.Bold,
   },
   bottomTextStyle: {

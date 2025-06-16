@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { COLORS, isIOS } from 'utils/index';
+import { COLORS, isIOS, screenHeight } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
 
@@ -59,7 +59,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    height: 30,
+    height: isIOS() ? screenHeight(5) : 0,
   },
   container: {
     flex: 1,

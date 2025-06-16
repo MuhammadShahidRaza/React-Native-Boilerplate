@@ -1,43 +1,26 @@
-import {useState} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
-import {
-  FlatListComponent,
-  Typography,
-  Wrapper,
-  HomeHeader,
-  PractitionerBox,
-  SearchBar,
-} from 'components/index';
-import {COLORS} from 'utils/colors';
-import {TEMPORARY_TEXT} from 'constants/screens';
-import {screenWidth} from 'utils/index';
-import {User} from 'types/common';
-import {appointmentList, HeadingWithList} from './Home';
+import { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatListComponent, Typography, SearchBar } from 'components/index';
+import { COLORS } from 'utils/colors';
+import { TEMPORARY_TEXT } from 'constants/screens';
+import { screenHeight, screenWidth } from 'utils/index';
 
 const previousSearchList = [
-  {id: '1', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '2', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '3', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '4', searchName: TEMPORARY_TEXT.DR_KIM},
-  {id: '5', searchName: TEMPORARY_TEXT.DR_KIM},
+  { id: '1', searchName: TEMPORARY_TEXT.JOHN_DOE },
+  { id: '2', searchName: TEMPORARY_TEXT.JOHN_DOE },
+  { id: '3', searchName: TEMPORARY_TEXT.JOHN_DOE },
+  { id: '4', searchName: TEMPORARY_TEXT.JOHN_DOE },
+  { id: '5', searchName: TEMPORARY_TEXT.JOHN_DOE },
 ];
-
-const user: User = {
-  name: TEMPORARY_TEXT.SHAHID,
-  location: TEMPORARY_TEXT.DUBAI,
-};
 
 export const Search = () => {
   const [searchText, setSearchText] = useState<string>('');
-
   const handlePress = (searchName: string) => {
     // setSearchText(searchName);
   };
 
-  const renderItem = ({item}: {item: {id: string; searchName: string}}) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => handlePress(item.searchName)}>
+  const renderItem = ({ item }: { item: { id: string; searchName: string } }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => handlePress(item.searchName)}>
       <Typography numberOfLines={1} style={styles.itemText}>
         {item.searchName}
       </Typography>
@@ -45,24 +28,15 @@ export const Search = () => {
   );
 
   return (
-    <Wrapper useScrollView backgroundColor={COLORS.HEADER}>
-      <HomeHeader user={user} showSearch={false} />
-      <View style={styles.mainContent}>
-        <SearchBar value={searchText} onChangeText={setSearchText} />
-        <FlatListComponent
-          numColumns={3}
-          style={styles.flatList}
-          data={previousSearchList}
-          renderItem={renderItem}
-        />
-        <HeadingWithList
-          Component={PractitionerBox}
-          list={appointmentList}
-          itemsToShow={10}
-          onViewDetails={() => {}}
-        />
-      </View>
-    </Wrapper>
+    <View style={styles.mainContent}>
+      <SearchBar value={searchText} onChangeText={setSearchText} showBorder={false} />
+      <FlatListComponent
+        horizontal
+        style={styles.flatList}
+        data={previousSearchList}
+        renderItem={renderItem}
+      />
+    </View>
   );
 };
 
@@ -71,7 +45,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   flatList: {
-    marginBottom: 10,
+    marginVertical: 17,
   },
   itemContainer: {
     borderWidth: 1,
@@ -80,9 +54,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
     borderRadius: 10,
+    height: screenHeight(18),
     width: screenWidth(28),
   },
   itemText: {
     textAlign: 'center',
+    color: COLORS.PRIMARY,
   },
 });

@@ -3,6 +3,7 @@ import Permissions, { check, PERMISSIONS, RESULTS } from 'react-native-permissio
 import { Alert, Linking } from 'react-native';
 import { isIOS } from './helpers';
 import { ENV_CONSTANTS } from 'constants/common';
+// import { getUniqueId } from 'react-native-device-info';
 
 interface AddressComponents {
   long_name: string;
@@ -101,6 +102,73 @@ const getLocationPermission = async (): Promise<boolean> => {
     return false;
   }
 };
+
+// const getLocationPermission = async () => {
+//   try {
+//     const currentStatus = await check(
+//       isIOS() ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+//     );
+//     if (currentStatus === RESULTS.GRANTED) {
+//       const isGPSEnabled = await DeviceInfo.isLocationEnabled();
+//       const hasAsked = store?.getState()?.user?.hasAskPermission;
+//       if (!isGPSEnabled && (hasAsked == undefined || !hasAsked)) {
+//         Alert.alert('Turn on Location', 'Please enable GPS to access your location', [
+//           {
+//             text: 'Go to Settings',
+//             onPress: () => {
+//               store?.dispatch(setHasAskPermission(true));
+//               if (isIOS()) {
+//                 Linking.openURL('app-settings:');
+//               } else {
+//                 Linking.sendIntent('android.settings.LOCATION_SOURCE_SETTINGS');
+//               }
+//             },
+//           },
+//           {
+//             text: 'Cancel',
+//             style: 'cancel',
+//             onPress: () => {
+//               store?.dispatch(setHasAskPermission(true));
+//             },
+//           },
+//         ]);
+//         return false;
+//       }
+//       return true;
+//     }
+//     //   console.log('Location permission already granted');
+//     //   return true;
+//     // }
+//     // If permission is not granted, request it
+//     const permission = await request(
+//       isIOS() ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+//     );
+//     if (
+//       permission === RESULTS.BLOCKED ||
+//       permission === RESULTS.DENIED ||
+//       permission === RESULTS.UNAVAILABLE
+//     ) {
+//       Alert.alert(
+//         'Allow Permissions',
+//         'Please allow location permission to access your current location',
+//         [
+//           {
+//             text: 'Go to Settings',
+//             onPress: () => Linking.openSettings(),
+//           },
+//           {
+//             text: 'Cancel',
+//             onPress: () => onBack(),
+//           },
+//         ],
+//       );
+//     }
+//     return permission === RESULTS.GRANTED;
+//   } catch (error) {
+//     console.error('Error requesting location permission:', error);
+//     return false;
+//   }
+// };
 
 const getCurrentLocation = async (): Promise<GeolocationResponse | null> => {
   try {

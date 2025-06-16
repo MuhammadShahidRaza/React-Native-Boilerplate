@@ -74,7 +74,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const isErrorShown = touched && error;
-  const height = isTitleInLine ? 36 : 42;
+  const height = isTitleInLine ? (isIOS() ? 36 : 42) : isIOS() ? 42 : 48;
 
   const handleTextChange = (text: string) => {
     onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);

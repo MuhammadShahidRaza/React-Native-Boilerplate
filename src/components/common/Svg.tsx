@@ -1,11 +1,6 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  ViewStyle,
-} from 'react-native';
-import {NumberProp, SvgProps} from 'react-native-svg';
-import {ChildrenType} from 'types/common';
+import { StyleSheet, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { NumberProp, SvgProps } from 'react-native-svg';
+import { ChildrenType, StyleType } from 'types/common';
 
 interface SvgComponentProps extends TouchableOpacityProps {
   Svg: React.FC<SvgProps>;
@@ -14,8 +9,10 @@ interface SvgComponentProps extends TouchableOpacityProps {
   onPress?: () => void;
   clickable?: boolean;
   borderRadius?: number;
-  containerStyle?: ViewStyle;
+  containerStyle?: StyleType;
   children?: ChildrenType;
+  fill?: string;
+  stroke?: string;
 }
 
 export const SvgComponent: React.FC<SvgComponentProps> = ({
@@ -27,6 +24,8 @@ export const SvgComponent: React.FC<SvgComponentProps> = ({
   clickable = false,
   borderRadius = 0,
   containerStyle,
+  fill,
+  stroke,
   ...otherProps
 }) => {
   const handlePress = () => {
@@ -41,10 +40,13 @@ export const SvgComponent: React.FC<SvgComponentProps> = ({
       onPress={handlePress}
       style={[styles.container, containerStyle]}
       disabled={!clickable}
-      {...otherProps}>
+      {...otherProps}
+    >
       <Svg
-        {...(svgWidth !== undefined && {width: svgWidth})}
-        {...(svgHeight !== undefined && {height: svgHeight})}
+        {...(svgWidth !== undefined && { width: svgWidth })}
+        {...(svgHeight !== undefined && { height: svgHeight })}
+        {...(fill !== undefined && { fill: fill })}
+        {...(stroke !== undefined && { stroke: stroke })}
       />
       {children}
     </TouchableOpacity>

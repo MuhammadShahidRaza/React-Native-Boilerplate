@@ -20,6 +20,7 @@ interface FlatListComponentProps<T> {
   scrollEnabled?: boolean;
   bounces?: boolean;
   contentContainerStyle?: StyleType;
+  columnWrapperStyle?: StyleType;
   style?: StyleType;
   getItemLayout?: (
     data: ArrayLike<T> | null | undefined,
