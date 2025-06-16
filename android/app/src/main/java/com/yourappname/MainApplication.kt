@@ -1,4 +1,4 @@
-package com.yourappname
+package com.cmolds.xtrafind
 
 import android.app.Application
 import com.facebook.react.PackageList

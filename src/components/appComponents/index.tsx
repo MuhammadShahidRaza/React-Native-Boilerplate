@@ -4,3 +4,6 @@ export * from './CutomTabsBooking';
 export * from './AppointmentCancelModal';
 export * from './PaymentModal';
 export * from './Home/HomeComponent';
+export * from './Home';
+export * from './ItemCard';
+export * from './ItemLargeCard';

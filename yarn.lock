@@ -3556,9 +3556,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"YourAppName@workspace:.":
+"XtraFind@workspace:.":
   version: 0.0.0-use.local
-  resolution: "YourAppName@workspace:."
+  resolution: "XtraFind@workspace:."
   dependencies:
     "@babel/core": ^7.25.2
     "@babel/preset-env": ^7.25.3

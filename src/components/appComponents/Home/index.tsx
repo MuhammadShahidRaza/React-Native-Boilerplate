@@ -1,5 +1,10 @@
-import { IMAGES, SVG } from 'constants/index';
+import { ItemCard, Typography } from 'components/index';
+import { RowComponent } from 'components/common';
+import { COMMON_TEXT, IMAGES, SCREENS, SVG } from 'constants/index';
 import { SvgProps } from 'react-native-svg';
+import { COLORS, STYLES } from 'utils/index';
+import { FontSize, FontWeight } from 'types/index';
+import { navigate } from 'navigation/index';
 
 export type CategoryType = {
   id: string;
@@ -7,20 +12,25 @@ export type CategoryType = {
   image: React.FC<SvgProps>;
 };
 
+export type ItemType = {
+  id: string;
+  name: string;
+  image: string;
+  address: string;
+  city: string;
+  country: string;
+  distance?: string;
+  isOpen?: boolean;
+  openTime?: string;
+  isLiked?: boolean;
+  rating?: string;
+};
+
 export type SubCategoryType = {
   id: string;
   key: string;
   subCategories: { id: string; key: string; image: string }[];
-  items?: {
-    id: string;
-    name: string;
-    image: string;
-    city: string;
-    country: string;
-    distance?: string;
-    isOpen?: boolean;
-    openTime?: string;
-  }[];
+  items?: ItemType[];
 };
 
 export const categoriesList: CategoryType[] = [
@@ -43,6 +53,80 @@ export const subCategoriesList: SubCategoryType[] = [
       { id: '2', key: 'SPA', image: IMAGES.SPA },
       { id: '3', key: 'Saloons', image: IMAGES.SALOONS },
     ],
+    items: [
+      {
+        id: '1',
+        name: 'Walmart 1',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '2',
+        name: 'Walmart 2',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '3',
+        name: 'Walmart 3',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '4',
+        name: 'Walmart 4',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '5',
+        name: 'Walmart 5',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '6',
+        name: 'Walmart 6',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+    ],
   },
   {
     id: '2',
@@ -50,6 +134,80 @@ export const subCategoriesList: SubCategoryType[] = [
     subCategories: [
       { id: '1', key: 'Order Your Food', image: IMAGES.ORDER_FOOD },
       { id: '2', key: 'Restaurant Reservation', image: IMAGES.RESTAURANT_RESERVATION },
+    ],
+    items: [
+      {
+        id: '1',
+        name: 'Walmart 1',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '2',
+        name: 'Walmart 2',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '3',
+        name: 'Walmart 3',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '4',
+        name: 'Walmart 4',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '5',
+        name: 'Walmart 5',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
+      {
+        id: '6',
+        name: 'Walmart 6',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        isLiked: false,
+      },
     ],
   },
   {
@@ -61,61 +219,73 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '1',
         name: 'Walmart 1',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '2',
         name: 'Walmart 2',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '3',
         name: 'Walmart 3',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '4',
         name: 'Walmart 4',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '5',
         name: 'Walmart 5',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '6',
         name: 'Walmart 6',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
     ],
   },
@@ -128,61 +298,73 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '1',
         name: 'Zara 1',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: true,
       },
       {
         id: '2',
         name: 'Zara 2',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '3',
         name: 'Zara 3',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '4',
         name: 'Zara 4',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '5',
         name: 'Zara 5',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: true,
       },
       {
         id: '6',
         name: 'Zara 6',
         image: IMAGES.ZARA,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
     ],
   },
@@ -195,61 +377,73 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '1',
         name: 'Peace Pharmacy 1',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '2',
         name: 'Peace Pharmacy 2',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: true,
       },
       {
         id: '3',
         name: 'Peace Pharmacy 3',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '4',
         name: 'Peace Pharmacy 4',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
       {
         id: '5',
         name: 'Peace Pharmacy 5',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: true,
       },
       {
         id: '6',
         name: 'Peace Pharmacy 6',
         image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        isLiked: false,
       },
     ],
   },
@@ -262,43 +456,61 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '1',
         name: 'Walmart 1',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '2',
         name: 'Walmart 2',
         image: IMAGES.RESTAURANT_RESERVATION,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '3',
         name: 'Walmart 3',
         image: IMAGES.HOTELS,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        rating: '4.2',
+        isLiked: true,
       },
       {
         id: '4',
         name: 'Walmart 4',
         image: IMAGES.INTERIOR,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '5',
         name: 'Walmart 5',
         image: IMAGES.ORDER_FOOD,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
-        country: 'UK',  
+        country: 'UK',
+        rating: '4.2',
+        isLiked: true,
       },
       {
         id: '6',
         name: 'Walmart 6',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        rating: '4.2',
+        isLiked: false,
       },
     ],
   },
@@ -311,61 +523,79 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '1',
         name: 'Walmart 1',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: true,
       },
       {
         id: '2',
         name: 'Walmart 2',
         image: IMAGES.RESTAURANT_RESERVATION,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '3',
         name: 'Walmart 3',
         image: IMAGES.HOTELS,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '4',
         name: 'Walmart 4',
         image: IMAGES.INTERIOR,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: true,
       },
       {
         id: '5',
         name: 'Walmart 5',
         image: IMAGES.ORDER_FOOD,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: false,
       },
       {
         id: '6',
         name: 'Walmart 6',
         image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        rating: '4.2',
+        isLiked: true,
       },
     ],
   },
@@ -378,3 +608,35 @@ export const subCategoriesList: SubCategoryType[] = [
     ],
   },
 ];
+
+export const renderSeeAll = ({
+  heading,
+  items,
+  itemHeading,
+}: {
+  heading: string;
+  items: ItemType[];
+  itemHeading: string;
+}) => {
+  return (
+    <RowComponent style={{ marginBottom: 15, ...STYLES.CONTAINER }}>
+      <Typography style={{ fontWeight: FontWeight.SemiBold }}>{heading}</Typography>
+      <Typography
+        onPress={() => {
+          navigate(SCREENS.VIEW_ALL, { data: { items, headerTitle: itemHeading } });
+        }}
+        style={{
+          color: COLORS.BORDER,
+          fontSize: FontSize.Small,
+          fontWeight: FontWeight.SemiBold,
+        }}
+      >
+        {COMMON_TEXT.VIEW_ALL}
+      </Typography>
+    </RowComponent>
+  );
+};
+
+export const renderItems = ({ item }: { item: ItemType }) => (
+  <ItemCard item={item} key={item?.id} />
+);

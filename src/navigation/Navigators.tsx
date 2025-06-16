@@ -4,6 +4,7 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
+import { ItemType } from 'components/appComponents/Home';
 import { Icon } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
@@ -31,7 +32,15 @@ export type RootStackParamList = {
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
   [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
-  [SCREENS.VIEW_ALL]: { data: any };
+  [SCREENS.VIEW_ALL]: { data: { items: ItemType[]; headerTitle: string } };
+  [SCREENS.VIEW_DETAILS]: { data: ItemType };
+  [SCREENS.SUB_CATEGORY_ITEMS]: {
+    data: {
+      heading: string;
+      items: ItemType[];
+      itemHeading: string;
+    };
+  };
 
   // Auth Screens
   [SCREENS.LOGIN]: undefined;

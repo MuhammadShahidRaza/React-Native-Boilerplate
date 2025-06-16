@@ -12,19 +12,25 @@ export const SearchBar = ({
   showBorder = true,
   onPress = () => {},
   containerStyle,
+  secondContainerStyle
 }: {
   value?: string;
   showBorder?: boolean;
   onPress?: voidFuntionType | null;
   onChangeText?: SetStateType<string>;
   containerStyle?: StyleType;
+  secondContainerStyle?: StyleType;
 }) => {
   return (
     <Input
       value={value}
       placeholder={COMMON_TEXT.SEARCH}
       onChangeText={onChangeText}
-      secondContainerStyle={[styles.inputSecondContainer, { borderWidth: showBorder ? 1 : 0 }]}
+      secondContainerStyle={[
+        styles.inputSecondContainer,
+        { borderWidth: showBorder ? 1 : 0 },
+        secondContainerStyle,
+      ]}
       startIcon={{
         componentName: VARIABLES.Ionicons,
         iconName: 'search',

@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
-import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/colors';
-import { screenHeight, screenWidth } from 'utils/helpers';
+import { FontSize, FontWeight } from 'types/index';
+import { COLORS, STYLES } from 'utils/index';
+import { screenHeight, screenWidth } from 'utils/index';
 
 export const styles = StyleSheet.create({
   container: {
@@ -26,12 +26,6 @@ export const styles = StyleSheet.create({
     gap: 20,
   },
   categoryItemContainer: {
-    elevation: 2,
-    shadowColor: COLORS.BLACK,
-    backgroundColor: COLORS.WHITE,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     padding: 12,
     gap: 20,
     marginRight: 10,
@@ -39,34 +33,25 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     height: screenHeight(18),
     width: screenWidth(30),
+    ...STYLES.SHADOW,
   },
   subCategoryItemContainer: {
-    elevation: 2,
-    shadowColor: COLORS.BLACK,
-    backgroundColor: COLORS.WHITE,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     padding: 5,
     borderRadius: 20,
     overflow: 'hidden',
     height: screenHeight(25),
     width: screenWidth(42),
+    ...STYLES.SHADOW,
   },
   itemContainer: {
-    elevation: 2,
-    shadowColor: COLORS.BLACK,
-    backgroundColor: COLORS.WHITE,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...STYLES.SHADOW,
     padding: 5,
     borderRadius: 20,
     width: screenWidth(42),
   },
   itemImage: {
     height: screenHeight(14),
-    borderRadius: 20,
+    borderRadius: 15,
     width: screenWidth(40),
   },
   itemText: {
@@ -113,5 +98,29 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  heartIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    zIndex: 100,
+    backgroundColor: COLORS.WHITE_OPACITY,
+    padding: 8,
+    borderRadius: 100,
+    borderWidth: 0.5,
+    borderColor: COLORS.SECONDARY,
+  },
+  ratingContainer: {
+    top: 8,
+    left: 5,
+    position: 'absolute',
+    backgroundColor: COLORS.DARK_BLACK_OPACITY,
+    zIndex: 100,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    gap: 5,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    borderColor: COLORS.SECONDARY,
   },
 });

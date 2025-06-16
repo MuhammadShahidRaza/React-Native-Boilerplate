@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "YourAppName.app"
-               BlueprintName = "YourAppName"
-               ReferencedContainer = "container:YourAppName.xcodeproj">
+               BuildableName = "XtraFind.app"
+               BlueprintName = "XtraFind"
+               ReferencedContainer = "container:XtraFind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "YourAppNameTests.xctest"
-               BlueprintName = "YourAppNameTests"
-               ReferencedContainer = "container:YourAppName.xcodeproj">
+               BuildableName = "XtraFindTests.xctest"
+               BlueprintName = "XtraFindTests"
+               ReferencedContainer = "container:XtraFind.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "YourAppName.app"
-            BlueprintName = "YourAppName"
-            ReferencedContainer = "container:YourAppName.xcodeproj">
+            BuildableName = "XtraFind.app"
+            BlueprintName = "XtraFind"
+            ReferencedContainer = "container:XtraFind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "YourAppName.app"
-            BlueprintName = "YourAppName"
-            ReferencedContainer = "container:YourAppName.xcodeproj">
+            BuildableName = "XtraFind.app"
+            BlueprintName = "XtraFind"
+            ReferencedContainer = "container:XtraFind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

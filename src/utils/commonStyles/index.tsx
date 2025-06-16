@@ -1,4 +1,5 @@
-import {ViewStyle} from 'react-native';
+import { ViewStyle } from 'react-native';
+import { COLORS } from 'utils/colors';
 
 export const FLEX_BETWEEN: ViewStyle = {
   alignItems: 'center',
@@ -26,6 +27,14 @@ export const CENTER: ViewStyle = {
 export const STYLES = {
   CONTAINER: {
     marginHorizontal: 20,
+  },
+  SHADOW: {
+    elevation: 2,
+    shadowColor: COLORS.BLACK,
+    backgroundColor: COLORS.WHITE,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   USER_IMAGE: {
     width: 40,

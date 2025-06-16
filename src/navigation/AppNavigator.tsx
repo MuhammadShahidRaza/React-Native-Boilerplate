@@ -18,6 +18,7 @@ import {
   Help,
   Location,
   Home,
+  SubCategoryItems,
 } from 'screens/user';
 // import {BottomNavigator} from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
@@ -66,6 +67,10 @@ export const AppNavigator = () => {
       component: EditProfile,
       options: { headerShown: false },
     },
+    [SCREENS.SUB_CATEGORY_ITEMS]: {
+      component: SubCategoryItems,
+      options: { headerShown: true },
+    },
     [SCREENS.SEARCH]: {
       component: Search,
       options: { headerShown: false },
@@ -80,7 +85,7 @@ export const AppNavigator = () => {
     },
     [SCREENS.VIEW_ALL]: {
       component: ViewAll,
-      options: { headerShown: true, headerTitle: t(COMMON_TEXT.FORGOT_PASSWORD) },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.VIEW_ALL) },
     },
     [SCREENS.MESSAGES]: {
       component: Messages,
@@ -109,17 +114,19 @@ export const AppNavigator = () => {
   };
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      {Object.entries(screens).map(([name, { component, options }]) => (
-        <Stack.Screen
-          key={name}
-          name={name}
-          component={component}
-          options={{
-            headerBackButtonDisplayMode: 'minimal',
-            ...options,
-          }}
-        />
-      ))}
+      {Object.entries(screens).map(
+        ([name, { component, options }]: [string, { component: any; options: any }]) => (
+          <Stack.Screen
+            key={name}
+            name={name}
+            component={component}
+            options={{
+              headerBackButtonDisplayMode: 'minimal',
+              ...options,
+            }}
+          />
+        ),
+      )}
     </Stack.Navigator>
   );
 };

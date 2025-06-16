@@ -47,10 +47,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const handleSubmit = async (values: PaymentFormValues) => {
     setShowPaymentModal(false);
     if (isFromBooking) {
-      replace(SCREENS.BOOKING_DETAILS);
+      // replace(SCREENS.BOOKING_DETAILS);
       return;
     }
-    replace(SCREENS.COURSE_DETAILS);
+    // replace(SCREENS.COURSE_DETAILS);
   };
 
   const formik = useFormikForm<PaymentFormValues>({
@@ -114,6 +114,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             placeholder={COMMON_TEXT.ENTER_YOUR_NAME}
             error={formik.errors.name}
             touched={Boolean(formik.touched.name && formik.submitCount)}
+            startIcon={{
+              componentName: VARIABLES.AntDesign,
+              iconName: 'user',
+              size: 25,
+            }}
           />
           <Input
             titleStyle={styles.title}
@@ -127,6 +132,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             placeholder={COMMON_TEXT.ENTER_CARD_NUMBER}
             error={formik.errors.cardNumber}
             touched={Boolean(formik.touched.cardNumber && formik.submitCount)}
+            startIcon={{
+              componentName: VARIABLES.AntDesign,
+              iconName: 'credit-card',
+              size: 25,
+            }}
           />
           <RowComponent style={styles.inputRow}>
             <Input
@@ -142,6 +152,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               placeholder={COMMON_TEXT.ENTER_EXPIRY_DATE}
               error={formik.errors.expiryDate}
               touched={Boolean(formik.touched.expiryDate && formik.submitCount)}
+              startIcon={{
+                componentName: VARIABLES.AntDesign,
+                iconName: 'calendar',
+                size: 25,
+              }}
             />
             <Input
               titleStyle={styles.title}
@@ -156,6 +171,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               placeholder={COMMON_TEXT.ENTER_YOUR_CVV}
               error={formik.errors.cvv}
               touched={Boolean(formik.touched.cvv && formik.submitCount)}
+              startIcon={{
+                componentName: VARIABLES.AntDesign,
+                iconName: 'lock',
+                size: 25,
+              }}
             />
           </RowComponent>
         </FocusProvider>

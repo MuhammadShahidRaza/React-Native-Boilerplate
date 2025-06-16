@@ -17,6 +17,7 @@ export const SCREENS = {
   NOTIFICATIONS: 'Notifications',
   SEARCH: 'Search',
   VIEW_ALL: 'ViewAll',
+  VIEW_DETAILS: 'ViewDetails',
   EXPLORE: 'Explore',
   FEED: 'Feed',
   FRIENDS: 'Friends',
@@ -79,6 +80,7 @@ export const SCREENS = {
   CONFIRMATION_BOOKING: 'ConfirmationBooking',
   NOTIFICATION_LISTING: 'NotificationListing',
   LOCATION: 'Location',
+  SUB_CATEGORY_ITEMS: 'SubCategoryItems',
 
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',
