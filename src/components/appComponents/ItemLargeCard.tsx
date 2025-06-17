@@ -12,7 +12,7 @@ export const ItemLargeCard = ({ item }: { item: ItemType }) => {
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
       <TouchableOpacity
-        onPress={() => navigate(SCREENS.VIEW_DETAILS, { data: item })}
+        onPress={() => navigate(SCREENS.DETAILS, { data: item })}
         style={styles.itemContainer}
       >
         <View>

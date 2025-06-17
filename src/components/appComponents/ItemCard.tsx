@@ -106,7 +106,7 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
           )}
         </View>
         <Typography
-          onPress={() => navigate(SCREENS.VIEW_DETAILS, { data: item })}
+          onPress={() => navigate(SCREENS.DETAILS, { data: item })}
           numberOfLines={1}
           style={{
             color: COLORS.SECONDARY,

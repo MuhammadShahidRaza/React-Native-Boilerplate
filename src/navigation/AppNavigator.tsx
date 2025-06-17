@@ -19,6 +19,7 @@ import {
   Location,
   Home,
   SubCategoryItems,
+  Details
 } from 'screens/user';
 // import {BottomNavigator} from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
@@ -110,6 +111,10 @@ export const AppNavigator = () => {
     [SCREENS.REVIEWS]: {
       component: Reviews,
       options: { headerShown: false },
+    },
+    [SCREENS.DETAILS]: {
+      component: Details,
+      options: { headerShown: true },
     },
   };
   return (

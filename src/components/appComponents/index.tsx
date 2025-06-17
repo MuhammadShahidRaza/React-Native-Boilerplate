@@ -7,3 +7,4 @@ export * from './Home/HomeComponent';
 export * from './Home';
 export * from './ItemCard';
 export * from './ItemLargeCard';
+export * from './BusinessCard';

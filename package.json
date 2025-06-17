@@ -52,6 +52,8 @@
     "react-i18next": "^15.5.2",
     "react-native": "0.79.2",
     "react-native-dotenv": "^3.4.11",
+    "react-native-get-random-values": "^1.11.0",
+    "react-native-google-places-autocomplete": "^2.5.7",
     "react-native-image-crop-picker": "^0.50.1",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-permissions": "^5.4.1",

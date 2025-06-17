@@ -9,39 +9,33 @@ import {
 import { COMMON_TEXT } from 'constants/screens';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { FontSize } from 'types/fontTypes';
-import { Icon } from './Icon';
+import { Icon, IconComponentProps } from './Icon';
 import { Typography } from './Typography';
-import { StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { SetStateType } from 'types/common';
-import i18n from 'i18n/index';
+import { useTranslation } from 'hooks/useTranslation';
 
 interface AutoCompleteProps {
   title?: string;
+  placeholder?: string;
   titleStyle?: TextStyle;
   containerStyle?: ViewStyle;
+  lineAfterIcon?: boolean;
+  startIcon?: IconComponentProps;
   setReverseGeocodedAddress: SetStateType<AddressDetails | null>;
 }
-
-// interface LatLng {
-//   latitude?: number;
-//   longitude?: number;
-// }
 
 export const Autocomplete = ({
   title,
   titleStyle,
   containerStyle,
+  lineAfterIcon = true,
+  placeholder = COMMON_TEXT.ENTER_YOUR_LOCATION,
+  startIcon,
   setReverseGeocodedAddress,
 }: AutoCompleteProps) => {
+  const { t } = useTranslation();
   const inputRef = useRef<GooglePlacesAutocompleteRef>(null);
-
-  // const [reverseGeocodedAddress, setReverseGeocodedAddress] =
-  //   useState<LatLng | null>(null);
-
-  // const [userLocation, setUserLocation] = useState<LatLng>({
-  //   latitude: INITIAL_LAT_LNG.lat,
-  //   longitude: INITIAL_LAT_LNG.lng,
-  // });
 
   const getUserCurrentLocation = async () => {
     try {
@@ -54,7 +48,6 @@ export const Autocomplete = ({
         console.log(response);
         inputRef?.current?.setAddressText(response?.fullAddress);
         setReverseGeocodedAddress(response);
-        // setUserLocation({latitude, longitude});
       }
     } catch (error) {
       console.error('Error getting user current location:', error);
@@ -68,8 +61,9 @@ export const Autocomplete = ({
           {
             // height: 42,
             alignItems: 'flex-start',
-            borderWidth: 1,
+            borderWidth: 0.5,
             borderRadius: 10,
+            paddingHorizontal: 8,
             backgroundColor: COLORS.WHITE,
             marginBottom: 10,
             borderColor: COLORS.BORDER,
@@ -77,14 +71,18 @@ export const Autocomplete = ({
           containerStyle,
         ]}
       >
+        {startIcon && <Icon {...startIcon} iconStyle={styles.iconStyle} />}
+        {lineAfterIcon && <View style={styles.lineStyle} />}
         <GooglePlacesAutocomplete
           ref={inputRef}
-          placeholder={i18n.t(COMMON_TEXT.ENTER_YOUR_LOCATION)}
+          placeholder={t(placeholder)}
           fetchDetails={true}
           onFail={e => console.log(e)}
           enableHighAccuracyLocation={true}
           isRowScrollable={true}
+          predefinedPlaces={[]}
           onPress={async (_, details) => {
+            console.log(details);
             const lat = details?.geometry?.location?.lat;
             const lng = details?.geometry?.location?.lng;
             if (lat && lng) {
@@ -126,11 +124,7 @@ export const Autocomplete = ({
           iconName={'my-location'}
           size={25}
           onPress={() => getUserCurrentLocation()}
-          iconStyle={{
-            marginHorizontal: 10,
-            marginVertical: 10,
-            color: COLORS.SECONDARY,
-          }}
+          iconStyle={styles.iconStyle}
         />
       </RowComponent>
     </>
@@ -140,5 +134,16 @@ export const Autocomplete = ({
 const styles = StyleSheet.create({
   title: {
     marginBottom: 8,
+  },
+  lineStyle: {
+    backgroundColor: COLORS.BORDER,
+    width: 1,
+    marginHorizontal: 10,
+    height: '100%',
+  },
+  iconStyle: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+    color: COLORS.PRIMARY,
   },
 });

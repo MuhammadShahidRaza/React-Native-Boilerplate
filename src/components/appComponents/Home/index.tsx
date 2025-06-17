@@ -1,10 +1,11 @@
 import { ItemCard, Typography } from 'components/index';
-import { RowComponent } from 'components/common';
-import { COMMON_TEXT, IMAGES, SCREENS, SVG } from 'constants/index';
+import { FlatListComponent, RowComponent } from 'components/common';
+import { COMMON_TEXT, IMAGES, SCREENS, SVG, TEMPORARY_TEXT } from 'constants/index';
 import { SvgProps } from 'react-native-svg';
 import { COLORS, STYLES } from 'utils/index';
 import { FontSize, FontWeight } from 'types/index';
 import { navigate } from 'navigation/index';
+import { styles } from './styles';
 
 export type CategoryType = {
   id: string;
@@ -23,7 +24,10 @@ export type ItemType = {
   isOpen?: boolean;
   openTime?: string;
   isLiked?: boolean;
+  description?: string;
   rating?: string;
+  phoneNumber?: string;
+  totalRatings?: string;
 };
 
 export type SubCategoryType = {
@@ -62,6 +66,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -76,6 +81,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isLiked: false,
       },
       {
@@ -86,6 +92,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -93,6 +100,7 @@ export const subCategoriesList: SubCategoryType[] = [
       {
         id: '4',
         name: 'Walmart 4',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         image: IMAGES.WALMART,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
@@ -109,6 +117,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -122,6 +131,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -143,6 +153,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -155,6 +166,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -168,6 +180,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -179,6 +192,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -193,6 +207,7 @@ export const subCategoriesList: SubCategoryType[] = [
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         openTime: '2 pm - 8 pm',
         isLiked: false,
       },
@@ -202,6 +217,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.WALMART,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
@@ -223,6 +239,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -235,6 +252,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -247,6 +265,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -259,6 +278,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -270,6 +290,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -281,6 +302,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.WALMART,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
@@ -300,6 +322,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.ZARA,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
@@ -315,6 +338,7 @@ export const subCategoriesList: SubCategoryType[] = [
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         openTime: '2 pm - 8 pm',
         isLiked: false,
       },
@@ -325,6 +349,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -338,6 +363,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         isLiked: false,
@@ -349,6 +375,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -358,6 +385,7 @@ export const subCategoriesList: SubCategoryType[] = [
         id: '6',
         name: 'Zara 6',
         image: IMAGES.ZARA,
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
@@ -378,6 +406,7 @@ export const subCategoriesList: SubCategoryType[] = [
         name: 'Peace Pharmacy 1',
         image: IMAGES.PEACE_PHARMACY,
         address: '123 Maplewood Lane Springfield',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
@@ -388,6 +417,7 @@ export const subCategoriesList: SubCategoryType[] = [
       {
         id: '2',
         name: 'Peace Pharmacy 2',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         image: IMAGES.PEACE_PHARMACY,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
@@ -404,6 +434,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -414,6 +445,7 @@ export const subCategoriesList: SubCategoryType[] = [
         name: 'Peace Pharmacy 4',
         image: IMAGES.PEACE_PHARMACY,
         address: '123 Maplewood Lane Springfield',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
@@ -427,6 +459,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.PEACE_PHARMACY,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
@@ -440,6 +473,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -458,6 +492,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.WALMART,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
         isLiked: false,
@@ -468,6 +503,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.RESTAURANT_RESERVATION,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
         isLiked: false,
@@ -479,6 +515,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         rating: '4.2',
         isLiked: true,
       },
@@ -489,6 +526,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         rating: '4.2',
         isLiked: false,
       },
@@ -500,6 +538,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         rating: '4.2',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isLiked: true,
       },
       {
@@ -508,6 +547,7 @@ export const subCategoriesList: SubCategoryType[] = [
         image: IMAGES.WALMART,
         address: '123 Maplewood Lane Springfield',
         city: 'London',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
         isLiked: false,
@@ -528,6 +568,7 @@ export const subCategoriesList: SubCategoryType[] = [
         country: 'UK',
         distance: '4.5 Miles',
         isOpen: true,
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
         isLiked: true,
@@ -543,6 +584,7 @@ export const subCategoriesList: SubCategoryType[] = [
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isLiked: false,
       },
       {
@@ -553,6 +595,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
@@ -566,6 +609,7 @@ export const subCategoriesList: SubCategoryType[] = [
         city: 'London',
         country: 'UK',
         distance: '4.5 Miles',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
@@ -578,6 +622,7 @@ export const subCategoriesList: SubCategoryType[] = [
         address: '123 Maplewood Lane Springfield',
         city: 'London',
         country: 'UK',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
@@ -595,6 +640,7 @@ export const subCategoriesList: SubCategoryType[] = [
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
         isLiked: true,
       },
     ],
@@ -609,7 +655,7 @@ export const subCategoriesList: SubCategoryType[] = [
   },
 ];
 
-export const renderSeeAll = ({
+const renderSeeAll = ({
   heading,
   items,
   itemHeading,
@@ -620,7 +666,9 @@ export const renderSeeAll = ({
 }) => {
   return (
     <RowComponent style={{ marginBottom: 15, ...STYLES.CONTAINER }}>
-      <Typography style={{ fontWeight: FontWeight.SemiBold }}>{heading}</Typography>
+      <Typography numberOfLines={1} style={{ fontWeight: FontWeight.SemiBold, width: '80%' }}>
+        {heading}
+      </Typography>
       <Typography
         onPress={() => {
           navigate(SCREENS.VIEW_ALL, { data: { items, headerTitle: itemHeading } });
@@ -640,3 +688,30 @@ export const renderSeeAll = ({
 export const renderItems = ({ item }: { item: ItemType }) => (
   <ItemCard item={item} key={item?.id} />
 );
+
+export const renderHorizontalItemsWithRow = ({
+  data,
+  heading,
+  rowHeading,
+}: {
+  data: ItemType[];
+  heading: string;
+  rowHeading: string;
+}) => {
+  return (
+    <>
+      {renderSeeAll({
+        heading: rowHeading,
+        items: data ?? [],
+        itemHeading: heading,
+      })}
+      <FlatListComponent
+        scrollEnabled={true}
+        horizontal={true}
+        contentContainerStyle={styles.subCategoriesContentContainer}
+        data={data?.slice(0, 3) ?? []}
+        renderItem={renderItems}
+      />
+    </>
+  );
+};

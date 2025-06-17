@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { COLORS, STYLES } from 'utils/index';
-import { FlatListComponent, renderItems, renderSeeAll, SearchBar, Wrapper } from 'components/index';
-import { AppScreenProps } from 'types/index';
-import { COMMON_TEXT, SCREENS } from 'constants/index';
-import { styles } from 'components/appComponents/Home/styles';
+import { renderHorizontalItemsWithRow, SearchBar, Wrapper } from 'components/index';
+import { AppScreenProps, FontSize } from 'types/index';
+import { SCREENS, VARIABLES } from 'constants/index';
+import { Autocomplete } from 'components/common/Autocomplete';
+import { AddressDetails } from 'utils/location';
 
 export const SubCategoryItems = ({
   navigation,
   route,
 }: AppScreenProps<typeof SCREENS.SUB_CATEGORY_ITEMS>) => {
   const data = route?.params?.data;
+  const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState<AddressDetails | null>(null);
   const [search, setSearch] = useState('');
   useEffect(() => {
     navigation.setOptions({
@@ -18,12 +20,17 @@ export const SubCategoryItems = ({
   }, []);
 
   return (
-    <Wrapper backgroundColor={COLORS.RED} useSafeArea={false} useScrollView={true}>
-      <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
-        showBorder={false}
+    <Wrapper useSafeArea={false} useScrollView={true}>
+      <Autocomplete
+        containerStyle={STYLES.CONTAINER}
+        setReverseGeocodedAddress={setReverseGeocodedAddress}
+        placeholder={'Enter Your Destination'}
+        startIcon={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'map-marker-distance',
+          color: COLORS.SECONDARY,
+          size: FontSize.ExtraLarge,
+        }}
       />
       <SearchBar
         value={search}
@@ -31,30 +38,17 @@ export const SubCategoryItems = ({
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
       />
-      {renderSeeAll({
-        heading: `Near By ${data.heading}`,
-        items: data.items ?? [],
-        itemHeading: data.itemHeading,
+
+      {renderHorizontalItemsWithRow({
+        data: data.items ?? [],
+        heading: data.itemHeading,
+        rowHeading: `Near By ${data.heading}`,
       })}
-      <FlatListComponent
-        scrollEnabled={true}
-        horizontal={true}
-        contentContainerStyle={styles.subCategoriesContentContainer}
-        data={data.items?.slice(0, 3) ?? []}
-        renderItem={renderItems}
-      />
-      {renderSeeAll({
-        heading: `Trending ${data.itemHeading}`,
-        items: data.items ?? [],
-        itemHeading: data.itemHeading,
+      {renderHorizontalItemsWithRow({
+        data: data.items ?? [],
+        heading: data.itemHeading,
+        rowHeading: `Trending ${data.heading}`,
       })}
-      <FlatListComponent
-        scrollEnabled={true}
-        horizontal={true}
-        contentContainerStyle={styles.subCategoriesContentContainer}
-        data={data.items?.slice(0, 3) ?? []}
-        renderItem={renderItems}
-      />
     </Wrapper>
   );
 };

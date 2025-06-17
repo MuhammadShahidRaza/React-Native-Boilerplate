@@ -81,6 +81,7 @@ export const SCREENS = {
   NOTIFICATION_LISTING: 'NotificationListing',
   LOCATION: 'Location',
   SUB_CATEGORY_ITEMS: 'SubCategoryItems',
+  DETAILS: 'Details',
 
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',

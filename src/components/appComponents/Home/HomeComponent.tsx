@@ -7,8 +7,7 @@ import {
   SvgComponent,
   Photo,
   SkeletonLoader,
-  renderSeeAll,
-  renderItems,
+  renderHorizontalItemsWithRow,
 } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { isIOS, screenHeight, screenWidth } from 'utils/index';
@@ -115,30 +114,16 @@ export const HomeComponent = () => {
         )}
         {!hasSubCategories && hasItems && (
           <ScrollView style={{ height: screenHeight(isIOS() ? 52 : 59) }}>
-            {renderSeeAll({
-              heading: `Upcoming ${itemHeading}`,
-              items: selectedData.items ?? [],
-              itemHeading: itemHeading,
+            {renderHorizontalItemsWithRow({
+              data: selectedData.items ?? [],
+              heading: itemHeading,
+              rowHeading: `Upcoming ${itemHeading}`,
             })}
-            <FlatListComponent
-              scrollEnabled={true}
-              horizontal={true}
-              contentContainerStyle={styles.subCategoriesContentContainer}
-              data={selectedData.items?.slice(0, 3) ?? []}
-              renderItem={renderItems}
-            />
-            {renderSeeAll({
-              heading: `Trending ${itemHeading}`,
-              items: selectedData.items ?? [],
-              itemHeading: itemHeading,
+            {renderHorizontalItemsWithRow({
+              data: selectedData.items ?? [],
+              heading: itemHeading,
+              rowHeading: `Trending ${itemHeading}`,
             })}
-            <FlatListComponent
-              scrollEnabled={true}
-              horizontal={true}
-              contentContainerStyle={styles.subCategoriesContentContainer}
-              data={selectedData.items?.slice(0, 3) ?? []}
-              renderItem={renderItems}
-            />
           </ScrollView>
         )}
       </>

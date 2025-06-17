@@ -34,6 +34,7 @@ export type RootStackParamList = {
   [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
   [SCREENS.VIEW_ALL]: { data: { items: ItemType[]; headerTitle: string } };
   [SCREENS.VIEW_DETAILS]: { data: ItemType };
+  [SCREENS.DETAILS]: { data: ItemType; heading: string };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: string;

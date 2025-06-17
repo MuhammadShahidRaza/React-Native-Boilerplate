@@ -12,7 +12,7 @@ export const SearchBar = ({
   showBorder = true,
   onPress = () => {},
   containerStyle,
-  secondContainerStyle
+  secondContainerStyle,
 }: {
   value?: string;
   showBorder?: boolean;
@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   },
   inputSecondContainer: {
     marginBottom: 0,
+    borderRadius: 10,
     borderColor: COLORS.BORDER,
   },
 });
