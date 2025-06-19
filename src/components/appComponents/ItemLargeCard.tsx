@@ -12,7 +12,7 @@ export const ItemLargeCard = ({ item }: { item: ItemType }) => {
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
       <TouchableOpacity
-        onPress={() => navigate(SCREENS.DETAILS, { data: item })}
+        onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: item?.category })}
         style={styles.itemContainer}
       >
         <View>
@@ -110,7 +110,7 @@ export const ItemLargeCard = ({ item }: { item: ItemType }) => {
   );
 };
 
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   itemContainer: {
     ...STYLES.SHADOW,
     paddingHorizontal: 5,

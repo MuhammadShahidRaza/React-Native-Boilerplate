@@ -1,13 +1,6 @@
-import {LegacyRef} from 'react';
-import {
-  FlatList,
-  ListRenderItem,
-  ViewStyle,
-  TextStyle,
-  RefreshControl,
-  View,
-} from 'react-native';
-import {StyleType} from 'types/common';
+import { LegacyRef } from 'react';
+import { FlatList, ListRenderItem, ViewStyle, TextStyle, RefreshControl, View } from 'react-native';
+import { StyleType } from 'types/common';
 import NoItemFound from './NoItemFound';
 
 interface FlatListComponentProps<T> {
@@ -22,10 +15,11 @@ interface FlatListComponentProps<T> {
   contentContainerStyle?: StyleType;
   columnWrapperStyle?: StyleType;
   style?: StyleType;
+  keyExtractor?: (item: T, index: number) => string;
   getItemLayout?: (
     data: ArrayLike<T> | null | undefined,
     index: number,
-  ) => {length: number; offset: number; index: number};
+  ) => { length: number; offset: number; index: number };
   itemTextStyle?: TextStyle;
   HeaderComponent?: React.FC;
   FooterComponent?: React.FC;
@@ -54,6 +48,7 @@ export const FlatListComponent = <T,>({
   getItemLayout,
   onRefresh,
   stickyHeaderIndices,
+  keyExtractor,
   refreshing = false,
   scrollEnabled = horizontal ?? false,
   pagination = false,
@@ -62,11 +57,7 @@ export const FlatListComponent = <T,>({
 }: FlatListComponentProps<T>) => {
   const renderHeader = HeaderComponent ? <HeaderComponent /> : null;
   const renderFooter = FooterComponent ? <FooterComponent /> : null;
-  const renderEmpty = EmptyComponent ? (
-    <EmptyComponent />
-  ) : (
-    <NoItemFound {...noItemProps} />
-  );
+  const renderEmpty = EmptyComponent ? <EmptyComponent /> : <NoItemFound {...noItemProps} />;
 
   return (
     <View>
@@ -82,7 +73,7 @@ export const FlatListComponent = <T,>({
         showsVerticalScrollIndicator={false}
         numColumns={numColumns}
         getItemLayout={getItemLayout}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={keyExtractor ?? ((_, index) => index.toString())}
         contentContainerStyle={contentContainerStyle}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
@@ -92,9 +83,7 @@ export const FlatListComponent = <T,>({
         nestedScrollEnabled={nestedScrollEnabled}
         scrollEnabled={scrollEnabled}
         refreshControl={
-          onRefresh && (
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          )
+          onRefresh && <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         onEndReached={pagination ? onRefresh : undefined}
         onEndReachedThreshold={0.5}

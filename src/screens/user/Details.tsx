@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { COLORS, STYLES } from 'utils/index';
-import { BusinessCard, SearchBar, Wrapper } from 'components/index';
+import { BusinessCard, FlatListComponent, SearchBar, Wrapper } from 'components/index';
 import { AppScreenProps } from 'types/index';
 import { SCREENS } from 'constants/index';
+import { View } from 'react-native';
 
 export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
@@ -13,10 +14,13 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     });
   }, []);
 
-  return (
-    <Wrapper backgroundColor={COLORS.RED} useSafeArea={false} useScrollView={true}>
-      <BusinessCard data={params?.data} />
+  const renderItem = ({ item }: { item: any }) => {
+    return <View style={{ height: 100, backgroundColor: COLORS.WHITE }} />;
+  };
 
+  return (
+    <Wrapper useSafeArea={false} useScrollView={true}>
+      <BusinessCard data={params?.data} />
       <SearchBar
         value={search}
         onChangeText={setSearch}
@@ -24,11 +28,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
         showBorder={false}
       />
 
-      {/* {renderHorizontalItemsWithRow({
-        data: data.items ?? [],
-        heading: data.itemHeading,
-        rowHeading: `Near By adsads ahg ajgdhja gdhj ad  ${data.heading}`,
-      })} */}
+      <FlatListComponent data={[]} renderItem={renderItem} />
     </Wrapper>
   );
 };

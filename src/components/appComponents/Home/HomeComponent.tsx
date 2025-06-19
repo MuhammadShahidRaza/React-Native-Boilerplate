@@ -101,19 +101,20 @@ export const HomeComponent = () => {
     const hasItems = (selectedData.items?.length ?? 0) > 0;
 
     return (
-      <>
+      <ScrollView style={{ height: screenHeight(isIOS() ? 47 : 52) }}>
         {hasSubCategories && (
           <FlatListComponent
+            keyExtractor={item => item?.key}
             numColumns={2}
-            scrollEnabled={true}
             columnWrapperStyle={styles.subCategoriesColumnWrapper}
             contentContainerStyle={styles.subCategoriesContentContainer}
             data={selectedData.subCategories ?? []}
             renderItem={renderSubCategoryItem}
           />
         )}
+
         {!hasSubCategories && hasItems && (
-          <ScrollView style={{ height: screenHeight(isIOS() ? 52 : 59) }}>
+          <>
             {renderHorizontalItemsWithRow({
               data: selectedData.items ?? [],
               heading: itemHeading,
@@ -124,9 +125,9 @@ export const HomeComponent = () => {
               heading: itemHeading,
               rowHeading: `Trending ${itemHeading}`,
             })}
-          </ScrollView>
+          </>
         )}
-      </>
+      </ScrollView>
     );
   };
 

@@ -29,7 +29,7 @@ export const ViewAll = () => {
   }, [search]);
 
   return (
-    <Wrapper backgroundColor={COLORS.RED} useSafeArea={false}>
+    <Wrapper  useSafeArea={false}>
       <Autocomplete
         containerStyle={STYLES.CONTAINER}
         setReverseGeocodedAddress={setReverseGeocodedAddress}

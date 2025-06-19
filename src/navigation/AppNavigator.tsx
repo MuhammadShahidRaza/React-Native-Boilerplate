@@ -19,9 +19,9 @@ import {
   Location,
   Home,
   SubCategoryItems,
-  Details
+  Details,
 } from 'screens/user';
-// import {BottomNavigator} from './BottomNavigator';
+import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
 import { ViewAll } from 'screens/user/ViewAll';
 import { screenOptions } from '.';
@@ -32,10 +32,10 @@ export const AppNavigator = () => {
   const { t } = useTranslation();
 
   const screens = {
-    // [SCREENS.BOTTOM_STACK]: {
-    //   component: BottomNavigator,
-    //   options: { headerShown: false },
-    // },
+    [SCREENS.BOTTOM_STACK]: {
+      component: BottomNavigator,
+      options: { headerShown: false },
+    },
     [SCREENS.HOME]: {
       component: Home,
       options: { headerShown: false },

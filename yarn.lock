@@ -2703,6 +2703,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-navigation/bottom-tabs@npm:^7.3.15":
+  version: 7.3.15
+  resolution: "@react-navigation/bottom-tabs@npm:7.3.15"
+  dependencies:
+    "@react-navigation/elements": ^2.4.4
+    color: ^4.2.3
+  peerDependencies:
+    "@react-navigation/native": ^7.1.11
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+    react-native-screens: ">= 4.0.0"
+  checksum: 176ef109f03dd7bbd1ad2da526c82bd65332a009a09e9fb053aa1dcd23e95ef98ee5d66905dcdd33070f3b29e64e28a85b0d09b18dd993eb2d9f9a30f0bdc20b
+  languageName: node
+  linkType: hard
+
 "@react-navigation/core@npm:^7.10.0":
   version: 7.10.0
   resolution: "@react-navigation/core@npm:7.10.0"
@@ -2735,6 +2751,25 @@ __metadata:
     "@react-native-masked-view/masked-view":
       optional: true
   checksum: da5950fbb8040f2266dbeb09c89249d759fb9dfdb475707115a2b2ec7ce9b78df253c7851cb6207bb38d624d2506573b8a1cbdc01ce3901c68db74da960c291f
+  languageName: node
+  linkType: hard
+
+"@react-navigation/elements@npm:^2.4.4":
+  version: 2.4.4
+  resolution: "@react-navigation/elements@npm:2.4.4"
+  dependencies:
+    color: ^4.2.3
+    use-latest-callback: ^0.2.4
+  peerDependencies:
+    "@react-native-masked-view/masked-view": ">= 0.2.0"
+    "@react-navigation/native": ^7.1.11
+    react: ">= 18.2.0"
+    react-native: "*"
+    react-native-safe-area-context: ">= 4.0.0"
+  peerDependenciesMeta:
+    "@react-native-masked-view/masked-view":
+      optional: true
+  checksum: 785908b35bca4d4153e770d41c75197fbe5506d7ff2aa3e6f9b25d66a192ce298205c8b9ecb199ad8b902b14dda4c846c6350d7ac89feb7958e4d1d93f80e725
   languageName: node
   linkType: hard
 
@@ -3576,6 +3611,7 @@ __metadata:
     "@react-native/eslint-config": 0.79.2
     "@react-native/metro-config": 0.79.2
     "@react-native/typescript-config": 0.79.2
+    "@react-navigation/bottom-tabs": ^7.3.15
     "@react-navigation/native": ^7.1.10
     "@react-navigation/native-stack": ^7.3.14
     "@reduxjs/toolkit": ^2.8.2
@@ -3613,6 +3649,7 @@ __metadata:
     react-native-safe-area-context: ^5.4.1
     react-native-screens: ^4.11.1
     react-native-skeleton-placeholder: ^5.2.4
+    react-native-star-rating-widget: ^1.9.2
     react-native-svg: ^15.12.0
     react-native-svg-transformer: ^1.5.1
     react-native-toast-message: ^2.3.0
@@ -9837,6 +9874,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-star-rating-widget@npm:^1.9.2":
+  version: 1.9.2
+  resolution: "react-native-star-rating-widget@npm:1.9.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-svg: "*"
+  checksum: adcc6b931b12c2fb1aa72a483dc31295de1076dc6406824a62b748a94d38a50657ef6ede56b435e36100c755336df839be3d26f67520be990b9757684beea205
+  languageName: node
+  linkType: hard
+
 "react-native-svg-transformer@npm:^1.5.1":
   version: 1.5.1
   resolution: "react-native-svg-transformer@npm:1.5.1"
@@ -11422,6 +11470,15 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 5db2dc0d414508c768ba4d1a337bd73dd0fb2a77eccc9dd7051517b28cd71c849c5e9230b5c97fc76a3811c1500f210cb4e4ebb95fe20347e5f910509a8e533c
+  languageName: node
+  linkType: hard
+
+"use-latest-callback@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "use-latest-callback@npm:0.2.4"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 60c3a6b1b6567e1794f9e48cd86b8cde8a149485cc2fed60570f69ec3b157f6812e0ff0a877f0b971592fb9254b1363cc21c120fd1fc993b1dad1406c69211df
   languageName: node
   linkType: hard
 
