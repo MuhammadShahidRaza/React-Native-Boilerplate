@@ -8,7 +8,13 @@ import { StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/index';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
 
-export const ItemLargeCard = ({ item }: { item: ItemType }) => {
+export const ItemLargeCard = ({
+  item,
+  showCategory = false,
+}: {
+  item: ItemType;
+  showCategory?: boolean;
+}) => {
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
       <TouchableOpacity
@@ -17,11 +23,31 @@ export const ItemLargeCard = ({ item }: { item: ItemType }) => {
       >
         <View>
           <RowComponent style={{ zIndex: 100 }}>
+            {showCategory && (
+              <View
+                style={{
+                  backgroundColor: COLORS.DARK_BLACK_OPACITY,
+                  paddingHorizontal: 25,
+                  position: 'absolute',
+                  paddingVertical: 5,
+                  top: 1,
+                  left: -3,
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 20,
+                  borderTopLeftRadius: 15,
+                  borderTopRightRadius: 0,
+                }}
+              >
+                <Typography numberOfLines={1} style={{ color: COLORS.WHITE,fontWeight:FontWeight.SemiBold }}>
+                  {item?.category}
+                </Typography>
+              </View>
+            )}
             <Icon
               onPress={() => {}}
               componentName={VARIABLES.AntDesign}
               iconName={item?.isLiked ? 'heart' : 'hearto'}
-              color={item?.isLiked ? COLORS.PRIMARY : COLORS.SECONDARY}
+              color={item?.isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
               size={FontSize.MediumLarge}
               iconStyle={styles.heartIcon}
             />

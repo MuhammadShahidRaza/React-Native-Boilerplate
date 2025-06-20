@@ -22,7 +22,7 @@ export type IconComponentProps = {
 };
 
 // Map icon component based on componentName
-const IconComponentMapping = {
+export const IconComponentMapping = {
   FontAwesome: FontAwesome,
   Entypo: Entypo,
   Feather: Feather,

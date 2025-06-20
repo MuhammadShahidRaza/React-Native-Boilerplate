@@ -35,7 +35,7 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
               onPress={() => {}}
               componentName={VARIABLES.AntDesign}
               iconName={item?.isLiked ? 'heart' : 'hearto'}
-              color={item?.isLiked ? COLORS.PRIMARY : COLORS.SECONDARY}
+              color={item?.isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
               size={FontSize.MediumLarge}
               iconStyle={styles.heartIcon}
             />

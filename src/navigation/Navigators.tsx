@@ -27,6 +27,7 @@ export type RootStackParamList = {
   [SCREENS.TASKS]: undefined;
   [SCREENS.SHOP]: undefined;
   [SCREENS.CART]: undefined;
+  [SCREENS.FAVORITES]: undefined;
   [SCREENS.CHECKOUT]: undefined;
   [SCREENS.ORDERS]: undefined;
   [SCREENS.PAYMENTS]: undefined;

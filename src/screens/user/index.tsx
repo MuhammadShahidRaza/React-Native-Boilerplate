@@ -17,3 +17,5 @@ export * from './Location';
 export * from './Help';
 export * from './SubCategoryItems';
 export * from './Details';
+export * from './Favorites';
+export * from './Orders';

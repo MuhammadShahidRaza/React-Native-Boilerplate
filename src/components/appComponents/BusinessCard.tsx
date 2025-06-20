@@ -55,7 +55,7 @@ export const BusinessCard = ({ data }: { data: ItemType }) => {
             </RowComponent>
           )}
           {data?.description && (
-            <Typography style={styles.address} numberOfLines={1}>
+            <Typography style={styles.address} numberOfLines={2}>
               {data?.description}
             </Typography>
           )}

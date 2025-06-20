@@ -1,18 +1,19 @@
-import {View, StyleSheet, StyleProp, TextStyle} from 'react-native';
-import {RowComponent} from './Row';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {FontSize, FontWeight, ChildrenType} from 'types/index';
-import {Typography} from './Typography';
-import {onBack} from 'navigation/index';
-import {Photo} from './Photo';
-import {COLORS} from 'utils/colors';
-import {useTranslation} from 'hooks/useTranslation';
+import { View, StyleSheet, StyleProp, TextStyle } from 'react-native';
+import { RowComponent } from './Row';
+import { Icon } from './Icon';
+import { VARIABLES } from 'constants/common';
+import { FontSize, FontWeight, ChildrenType } from 'types/index';
+import { Typography } from './Typography';
+import { onBack } from 'navigation/index';
+import { Photo } from './Photo';
+import { COLORS } from 'utils/colors';
+import { useTranslation } from 'hooks/useTranslation';
 
 type Props = {
   endIcon?: ChildrenType;
   backIconStyle?: StyleProp<TextStyle>;
   title?: string;
+  showBackButton?: boolean;
   centerImage?: string;
   onPressBack?: () => void;
 };
@@ -23,25 +24,28 @@ export const Header = ({
   backIconStyle,
   centerImage = '',
   onPressBack = () => onBack(),
+  showBackButton = false,
 }: Props) => {
-  const {isLangRTL} = useTranslation();
+  const { isLangRTL } = useTranslation();
   return (
     <RowComponent style={styles.headerContainer}>
-      <Icon
-        iconStyle={[
-          styles.iconStyle,
-          {transform: [{scaleX: isLangRTL ? -1 : 1}]},
-          backIconStyle,
-        ]}
-        componentName={VARIABLES.Ionicons}
-        iconName={'chevron-back-sharp'}
-        size={FontSize.Large}
-        onPress={onPressBack}
-      />
+      {showBackButton ? (
+        <Icon
+          iconStyle={[
+            styles.iconStyle,
+            { transform: [{ scaleX: isLangRTL ? -1 : 1 }] },
+            backIconStyle,
+          ]}
+          componentName={VARIABLES.Ionicons}
+          iconName={'chevron-back-sharp'}
+          size={FontSize.Large}
+          onPress={onPressBack}
+        />
+      ) : (
+        <View style={styles.iconStyle} />
+      )}
       <RowComponent style={styles.titleContainer}>
-        {centerImage && (
-          <Photo source={centerImage} imageStyle={styles.image} />
-        )}
+        {centerImage && <Photo source={centerImage} imageStyle={styles.image} />}
         <Typography style={styles.headerText}>{title}</Typography>
       </RowComponent>
       <View style={styles.endIconContainer}>{endIcon}</View>

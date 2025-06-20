@@ -50,7 +50,7 @@ export const AppNavigator = () => {
     },
     [SCREENS.ADD_REVIEW]: {
       component: AddReview,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.REVIEW) },
     },
     [SCREENS.LOCATION]: {
       component: Location,
