@@ -1,4 +1,3 @@
-import { View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { FlatListComponent, Wrapper, ItemType, ItemLargeCard, SearchBar } from 'components/index';
 import { COLORS, STYLES } from 'utils/index';
@@ -29,34 +28,33 @@ export const ViewAll = () => {
   }, [search]);
 
   return (
-    <Wrapper  useSafeArea={false}>
-      <Autocomplete
-        containerStyle={STYLES.CONTAINER}
-        setReverseGeocodedAddress={setReverseGeocodedAddress}
-        placeholder={'Enter Your Destination'}
-        startIcon={{
-          componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'map-marker-distance',
-          color: COLORS.SECONDARY,
-          size: FontSize.ExtraLarge,
-        }}
-      />
+    <Wrapper useSafeArea={false}>
+      {data?.headerTitle === 'Hotels' && (
+        <Autocomplete
+          containerStyle={STYLES.CONTAINER}
+          setReverseGeocodedAddress={setReverseGeocodedAddress}
+          placeholder={'Enter Your Destination'}
+          startIcon={{
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'map-marker-distance',
+            color: COLORS.SECONDARY,
+            size: FontSize.ExtraLarge,
+          }}
+        />
+      )}
       <SearchBar
         value={search}
         onChangeText={setSearch}
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
       />
-      <View style={STYLES.CONTAINER}>
-        <FlatListComponent
-          scrollEnabled={true}
-          data={filteredData}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          renderItem={({ item }: { item: ItemType }) => (
-            <ItemLargeCard item={item} key={item?.id} />
-          )}
-        />
-      </View>
+
+      <FlatListComponent
+        scrollEnabled={true}
+        data={filteredData}
+        contentContainerStyle={{ paddingBottom: 100, ...STYLES.CONTAINER }}
+        renderItem={({ item }: { item: ItemType }) => <ItemLargeCard item={item} key={item?.id} />}
+      />
     </Wrapper>
   );
 };

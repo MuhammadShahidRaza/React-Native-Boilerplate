@@ -18,7 +18,15 @@ export const ItemLargeCard = ({
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
       <TouchableOpacity
-        onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: item?.category })}
+        activeOpacity={
+          item?.category === 'Order Your Food' || item?.category === undefined ? 1 : 0.5
+        }
+        onPress={() => {
+          if (item?.category === 'Order Your Food' || item?.category === undefined) {
+            return;
+          }
+          navigate(SCREENS.DETAILS, { data: item, heading: item?.category });
+        }}
         style={styles.itemContainer}
       >
         <View>
@@ -38,7 +46,10 @@ export const ItemLargeCard = ({
                   borderTopRightRadius: 0,
                 }}
               >
-                <Typography numberOfLines={1} style={{ color: COLORS.WHITE,fontWeight:FontWeight.SemiBold }}>
+                <Typography
+                  numberOfLines={1}
+                  style={{ color: COLORS.WHITE, fontWeight: FontWeight.SemiBold }}
+                >
                   {item?.category}
                 </Typography>
               </View>
@@ -152,6 +163,8 @@ const styles = StyleSheet.create({
   itemText: {
     color: COLORS.PRIMARY,
     fontSize: FontSize.MediumSmall,
+    flex: 1,
+    marginRight: 15,
     fontWeight: FontWeight.Bold,
   },
   heartIcon: {

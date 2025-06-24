@@ -5,14 +5,15 @@ import { Icon, Typography } from 'components/common';
 import { View, StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { isIOS, screenHeight } from 'utils/index';
-import { Home, Profile, Favorites, Orders } from 'screens/user';
+import { Home, MyAccount, Favorites, Orders } from 'screens/user';
 import { useTranslation } from 'hooks/useTranslation';
+import { screenOptions } from './Navigators';
 
 const screens = {
   [SCREENS.HOME]: Home,
   [SCREENS.FAVORITES]: Favorites,
   [SCREENS.ORDERS]: Orders,
-  [SCREENS.PROFILE]: Profile,
+  [SCREENS.MY_ACCOUNT]: MyAccount,
 };
 
 const getIconConfig = (routeName: string) => {
@@ -26,7 +27,7 @@ const getIconConfig = (routeName: string) => {
         iconName: 'book-outline',
         componentName: VARIABLES.Ionicons,
       };
-    case SCREENS.PROFILE:
+    case SCREENS.MY_ACCOUNT:
       return { iconName: 'person-outline', componentName: VARIABLES.Ionicons };
     default:
       return { iconName: 'calendar-alt', componentName: VARIABLES.FontAwesome5 };
@@ -66,7 +67,7 @@ export const BottomNavigator = () => {
             focused && (
               <>
                 <Typography style={styles.label}>
-                  {route.name === SCREENS.PROFILE ? 'My Account' : route.name}
+                  {route.name === SCREENS.MY_ACCOUNT ? 'My Account' : route.name}
                 </Typography>
                 <View
                   style={[

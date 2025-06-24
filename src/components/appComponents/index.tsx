@@ -6,5 +6,8 @@ export * from './PaymentModal';
 export * from './Home/HomeComponent';
 export * from './Home';
 export * from './ItemCard';
+export * from './CartItemCard';
+export * from './OrderCard';
 export * from './ItemLargeCard';
 export * from './BusinessCard';
+export * from './ServiceCard';

@@ -5,17 +5,13 @@ import {
   deviceDetails,
   // getFCMToken,
   screenWidth,
-  setItem,
   signUpValidationSchema,
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Input, AuthComponent, PhoneInputComponent } from 'components/index';
-import { signUpUser } from 'api/functions/auth';
 import { getCurrentLocation, reverseGeocode } from 'utils/location';
 import { useAppDispatch } from 'types/reduxTypes';
-import { setIsUserLoggedIn } from 'store/slices/appSettings';
-import { setUserDetails } from 'store/slices/user';
 import { navigate } from 'navigation/Navigators';
 
 interface SignUpFormValues {
@@ -37,7 +33,7 @@ export const SignUp = () => {
     password: __DEV__ ? 'Passward123!' : '',
     full_name: __DEV__ ? 'Shahid Raza' : '',
     username: __DEV__ ? 'shahid26' : '',
-    country: __DEV__ ? 'Pakistan' : '',
+    country: __DEV__ ? 'Nigeria' : '',
     phoneNumber: __DEV__ ? '24244562' : '',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
@@ -52,6 +48,7 @@ export const SignUp = () => {
       username: values?.username,
       country: values?.country,
       phone: values?.phoneNumber,
+      device_token: '1234567890',
       // device_token: await getFCMToken(),
       ...deviceDetails(),
     };

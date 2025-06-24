@@ -4,7 +4,6 @@ import {
   Chat,
   Filter,
   Messages,
-  Notification,
   Search,
   Reviews,
   AddReview,
@@ -13,18 +12,24 @@ import {
   EditProfile,
   Language,
   ContactUs,
-  AboutUs,
+  Cart,
   Settings,
   Help,
   Location,
   Home,
   SubCategoryItems,
+  ChangePassword,
   Details,
+  AddCard,
+  Wallet,
+  SelectRegion,
+  ViewAll,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
-import { ViewAll } from 'screens/user/ViewAll';
 import { screenOptions } from '.';
+import { PrivacyPolicy } from 'screens/common';
+import { SubCategoryFood } from 'screens/user/SubCategoryFood';
 
 export const AppNavigator = () => {
   useBackHandler();
@@ -44,13 +49,10 @@ export const AppNavigator = () => {
       component: NotificationListing,
       options: { headerShown: false },
     },
-    [SCREENS.ABOUT]: {
-      component: AboutUs,
-      options: { headerShown: false },
-    },
+
     [SCREENS.ADD_REVIEW]: {
       component: AddReview,
-      options: { headerShown: true, headerTitle: t(COMMON_TEXT.REVIEW) },
+      options: { headerShown: true, headerTitle: 'Add Review' },
     },
     [SCREENS.LOCATION]: {
       component: Location,
@@ -60,13 +62,37 @@ export const AppNavigator = () => {
       component: Chat,
       options: { headerShown: false },
     },
+    [SCREENS.ADD_CARD]: {
+      component: AddCard,
+      options: { headerShown: true, headerTitle: 'Payment Details' },
+    },
+    [SCREENS.WALLET]: {
+      component: Wallet,
+      options: { headerShown: true, headerTitle: 'My Wallet' },
+    },
+    [SCREENS.SUB_CATEGORY_FOOD]: {
+      component: SubCategoryFood,
+      options: { headerShown: true },
+    },
     [SCREENS.PROFILE]: {
       component: Profile,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: 'My Profile' },
     },
     [SCREENS.EDIT_PROFILE]: {
       component: EditProfile,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.EDIT_PROFILE) },
+    },
+    [SCREENS.PRIVACY_POLICY]: {
+      component: PrivacyPolicy,
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.PRIVACY_POLICY) },
+    },
+    [SCREENS.TERMS_AND_CONDITIONS]: {
+      component: EditProfile,
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.TERMS_AND_CONDITIONS) },
+    },
+    [SCREENS.CHANGE_PASSWORD]: {
+      component: ChangePassword,
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.CHANGE_PASSWORD) },
     },
     [SCREENS.SUB_CATEGORY_ITEMS]: {
       component: SubCategoryItems,
@@ -77,8 +103,8 @@ export const AppNavigator = () => {
       options: { headerShown: false },
     },
     [SCREENS.NOTIFICATIONS]: {
-      component: Notification,
-      options: { headerShown: false },
+      component: NotificationListing,
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.NOTIFICATIONS) },
     },
     [SCREENS.FILTER]: {
       component: Filter,
@@ -94,11 +120,15 @@ export const AppNavigator = () => {
     },
     [SCREENS.SETTINGS]: {
       component: Settings,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.SETTINGS) },
     },
     [SCREENS.LANGUAGE]: {
       component: Language,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.LANGUAGE) },
+    },
+    [SCREENS.SELECT_REGION]: {
+      component: SelectRegion,
+      options: { headerShown: true, headerTitle: 'Select Region' },
     },
     [SCREENS.HELP]: {
       component: Help,
@@ -106,7 +136,7 @@ export const AppNavigator = () => {
     },
     [SCREENS.CONTACT_US]: {
       component: ContactUs,
-      options: { headerShown: false },
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.CONTACT_US) },
     },
     [SCREENS.REVIEWS]: {
       component: Reviews,
@@ -115,6 +145,10 @@ export const AppNavigator = () => {
     [SCREENS.DETAILS]: {
       component: Details,
       options: { headerShown: true },
+    },
+    [SCREENS.CART]: {
+      component: Cart,
+      options: { headerShown: true, headerTitle: 'Cart' },
     },
   };
   return (

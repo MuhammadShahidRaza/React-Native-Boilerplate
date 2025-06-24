@@ -21,17 +21,19 @@ export const SubCategoryItems = ({
 
   return (
     <Wrapper useSafeArea={false} useScrollView={true}>
-      <Autocomplete
-        containerStyle={STYLES.CONTAINER}
-        setReverseGeocodedAddress={setReverseGeocodedAddress}
-        placeholder={'Enter Your Destination'}
-        startIcon={{
-          componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'map-marker-distance',
-          color: COLORS.SECONDARY,
-          size: FontSize.ExtraLarge,
-        }}
-      />
+      {data?.heading === 'Hotels' && (
+        <Autocomplete
+          containerStyle={STYLES.CONTAINER}
+          setReverseGeocodedAddress={setReverseGeocodedAddress}
+          placeholder={'Enter Your Destination'}
+          startIcon={{
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'map-marker-distance',
+            color: COLORS.SECONDARY,
+            size: FontSize.ExtraLarge,
+          }}
+        />
+      )}
       <SearchBar
         value={search}
         onChangeText={setSearch}

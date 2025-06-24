@@ -1,5 +1,3 @@
-import { View } from 'react-native';
-import React from 'react';
 import {
   FlatListComponent,
   Wrapper,
@@ -17,18 +15,16 @@ export const Favorites = () => {
   const navigation = useNavigation<AppNavigationProp<typeof SCREENS.FAVORITES>>();
 
   return (
-    <Wrapper useSafeArea={false}>
-      <Header title='Favorites' showBackButton={true} />
-      <View style={STYLES.CONTAINER}>
-        <FlatListComponent
-          scrollEnabled={true}
-          data={FavoritesList}
-          contentContainerStyle={{ paddingBottom: 100 }}
-          renderItem={({ item }: { item: ItemType }) => (
-            <ItemLargeCard item={item} key={item?.id} showCategory={true} />
-          )}
-        />
-      </View>
+    <Wrapper>
+      <Header title='Favorites' />
+      <FlatListComponent
+        scrollEnabled={true}
+        data={FavoritesList}
+        contentContainerStyle={{ paddingBottom: 100, ...STYLES.CONTAINER }}
+        renderItem={({ item }: { item: ItemType }) => (
+          <ItemLargeCard item={item} key={item?.id} showCategory={true} />
+        )}
+      />
     </Wrapper>
   );
 };

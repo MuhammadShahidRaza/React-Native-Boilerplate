@@ -11,7 +11,7 @@ import {
 } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { isIOS, screenHeight, screenWidth } from 'utils/index';
-import { categoriesList, CategoryType, subCategoriesList } from '.';
+import { categoriesList, CategoryType, ItemType, subCategoriesList } from '.';
 import { styles } from './styles';
 import { SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
@@ -39,14 +39,36 @@ export const HomeComponent = () => {
     setSelectedCategory(id);
   };
 
-  const handleSubCategoryPress = (key: string) => {
-    navigate(SCREENS.SUB_CATEGORY_ITEMS, {
-      data: {
-        heading: key,
-        items: selectedData?.items ?? [],
-        itemHeading: key,
-      },
-    });
+  const handleSubCategoryPress = (item: {
+    key: string;
+    items: ItemType[];
+    categories?: { id: string; name: string; image: string }[];
+  }) => {
+    if (item?.key === 'Order Your Food') {
+      navigate(SCREENS.SUB_CATEGORY_FOOD, {
+        data: {
+          heading: item?.key,
+          items: item?.items ?? [],
+          itemHeading: item?.key,
+          categories: item?.categories ?? [],
+        },
+      });
+    } else if (item?.key === 'Electronics' || item?.key === 'Interior') {
+      navigate(SCREENS.VIEW_ALL, {
+        data: {
+          headerTitle: item?.key,
+          items: item?.items ?? [],
+        },
+      });
+    } else {
+      navigate(SCREENS.SUB_CATEGORY_ITEMS, {
+        data: {
+          heading: item?.key,
+          items: item?.items ?? [],
+          itemHeading: item?.key,
+        },
+      });
+    }
   };
 
   const renderCategoryItem = ({ item }: { item: CategoryType }) => (
@@ -78,11 +100,15 @@ export const HomeComponent = () => {
     </TouchableOpacity>
   );
 
-  const renderSubCategoryItem = ({ item }: { item: { key: string; image: string } }) => (
+  const renderSubCategoryItem = ({
+    item,
+  }: {
+    item: { key: string; image: string; items: ItemType[] };
+  }) => (
     <SkeletonLoader key={item?.key}>
       <TouchableOpacity
         style={styles.subCategoryItemContainer}
-        onPress={() => handleSubCategoryPress(item?.key)}
+        onPress={() => handleSubCategoryPress(item)}
       >
         <Photo disabled imageStyle={styles.subCategoryItemImage} source={item?.image} />
         <View style={styles.textOverlay}>
@@ -101,7 +127,10 @@ export const HomeComponent = () => {
     const hasItems = (selectedData.items?.length ?? 0) > 0;
 
     return (
-      <ScrollView style={{ height: screenHeight(isIOS() ? 47 : 52) }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ height: screenHeight(isIOS() ? 45 : 51) }}
+      >
         {hasSubCategories && (
           <FlatListComponent
             keyExtractor={item => item?.key}

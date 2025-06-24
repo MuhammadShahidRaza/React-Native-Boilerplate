@@ -18,7 +18,7 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
   const [rating, setRating] = useState(isNotEditable ? 5 : 0);
 
   return (
-    <Wrapper useScrollView useSafeArea={false}>
+    <Wrapper useScrollView>
       <View style={styles.container}>
         <Photo source={IMAGES.USER} resizeMode='contain' imageStyle={styles.userImage} />
         <Typography

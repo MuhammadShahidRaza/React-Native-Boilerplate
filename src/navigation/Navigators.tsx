@@ -19,8 +19,12 @@ export type RootStackParamList = {
   [SCREENS.NOTIFICATIONS]: undefined;
   [SCREENS.NOTIFICATION_LISTING]: undefined;
   [SCREENS.PROFILE]: undefined;
+  [SCREENS.ADD_CARD]: undefined;
+  [SCREENS.BOTTOM_STACK]: undefined;
   [SCREENS.SETTINGS]: undefined;
+  [SCREENS.WALLET]: undefined;
   [SCREENS.HELP]: undefined;
+  [SCREENS.CHANGE_PASSWORD]: undefined;
   [SCREENS.ABOUT]: undefined;
   [SCREENS.CONTACT_US]: undefined;
   [SCREENS.FAQ]: undefined;
@@ -29,7 +33,11 @@ export type RootStackParamList = {
   [SCREENS.CART]: undefined;
   [SCREENS.FAVORITES]: undefined;
   [SCREENS.CHECKOUT]: undefined;
+  [SCREENS.EDIT_PROFILE]: undefined;
+  [SCREENS.SELECT_REGION]: undefined;
+  [SCREENS.LANGUAGE]: undefined;
   [SCREENS.ORDERS]: undefined;
+  [SCREENS.PRIVACY_POLICY]: { title: string };
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
   [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
@@ -43,7 +51,14 @@ export type RootStackParamList = {
       itemHeading: string;
     };
   };
-
+  [SCREENS.SUB_CATEGORY_FOOD]: {
+    data: {
+      heading: string;
+      items: ItemType[];
+      itemHeading: string;
+      categories?: { id: string; name: string; image: string }[];
+    };
+  };
   // Auth Screens
   [SCREENS.LOGIN]: undefined;
   [SCREENS.SIGN_UP]: undefined;

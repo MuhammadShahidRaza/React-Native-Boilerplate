@@ -287,70 +287,45 @@ export const cardValidationSchema = createObjectShape({
 
 export const contactUsValidationSchema = createObjectShape({
   email: emailSchema,
-  firstName: createStringValidationSchema({
-    name: COMMON_TEXT.FIRST_NAME,
-    regex: REGEX.FIRST_NAME,
-    regexMessage: getValidationMessageWithTranslation(
-      VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
-      {
-        name: COMMON_TEXT.FIRST_NAME,
-      },
-    ),
-    minLength: 3,
-    maxLength: 25,
-  }),
-  lastName: createStringValidationSchema({
-    name: COMMON_TEXT.LAST_NAME,
-    regex: REGEX.FIRST_NAME,
-    regexMessage: getValidationMessageWithTranslation(
-      VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
-      {
-        name: COMMON_TEXT.LAST_NAME,
-      },
-    ),
-    minLength: 3,
-    maxLength: 25,
+  subject: createStringValidationSchema({
+    name: 'Subject',
+    minLength: 5,
+    maxLength: 50,
   }),
   message: createStringValidationSchema({
     name: COMMON_TEXT.MESSAGE,
     minLength: 50,
     maxLength: 500,
   }),
-  phoneNumber: phoneNumberSchema,
 });
 
 export const editProfileValidationSchema = createObjectShape({
-  email: emailSchema,
-  firstName: createStringValidationSchema({
-    name: COMMON_TEXT.FIRST_NAME,
+  full_name: createStringValidationSchema({
+    name: COMMON_TEXT.FULL_NAME,
     regex: REGEX.FIRST_NAME,
     regexMessage: getValidationMessageWithTranslation(
       VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
       {
-        name: COMMON_TEXT.FIRST_NAME,
+        name: COMMON_TEXT.FULL_NAME,
       },
     ),
     minLength: 3,
     maxLength: 25,
   }),
-  lastName: createStringValidationSchema({
-    name: COMMON_TEXT.LAST_NAME,
+  username: userNameSchema,
+  country: createStringValidationSchema({
+    name: COMMON_TEXT.COUNTRY,
     regex: REGEX.FIRST_NAME,
     regexMessage: getValidationMessageWithTranslation(
       VALIDATION_MESSAGES.INVALID_NAME_WITH_HYPHEN,
       {
-        name: COMMON_TEXT.LAST_NAME,
+        name: COMMON_TEXT.COUNTRY,
       },
     ),
     minLength: 3,
     maxLength: 25,
   }),
   phoneNumber: phoneNumberSchema,
-  // location: createStringValidationSchema({
-  //   name: COMMON_TEXT.LOCATION,
-  //   minLength: 3,
-  //   maxLength: 20,
-  // }),
 });
 
 // Utility functions

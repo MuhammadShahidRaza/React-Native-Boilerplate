@@ -127,6 +127,10 @@ export const getCurrentDate = () => {
   const now = new Date();
   return now.getDate();
 };
+export const getCurrentDay = () => {
+  const now = new Date();
+  return now.getDay();
+};
 
 export const getHalfWeekdayName = (date: Date) => {
   return Object.values(WEEKDAYS_ABBR)[date.getDay()];

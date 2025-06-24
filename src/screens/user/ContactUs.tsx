@@ -1,28 +1,18 @@
-import {
-  Autocomplete,
-  Button,
-  Header,
-  Input,
-  PhoneInputComponent,
-  RowComponent,
-  Wrapper,
-} from 'components/common';
-import {COMMON_TEXT} from 'constants/screens';
-import {FocusProvider} from 'hooks/useFocus';
-import {useFormikForm} from 'hooks/useFormik';
-import {onBack} from 'navigation/Navigators';
-import {StyleSheet, View} from 'react-native';
-import {FontWeight} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
-import {STYLES} from 'utils/commonStyles';
-import {screenHeight, screenWidth} from 'utils/helpers';
-import {contactUsValidationSchema} from 'utils/validations';
+import { Button, Header, Input, Wrapper } from 'components/common';
+import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { FocusProvider } from 'hooks/useFocus';
+import { useFormikForm } from 'hooks/useFormik';
+import { onBack } from 'navigation/Navigators';
+import { StyleSheet, View } from 'react-native';
+import { FontSize } from 'types/fontTypes';
+import { STYLES } from 'utils/commonStyles';
+import { screenHeight } from 'utils/helpers';
+import { contactUsValidationSchema } from 'utils/validations';
 
 interface ContactUsFormValues {
   email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
+  subject: string;
   message: string;
 }
 
@@ -30,9 +20,7 @@ export const ContactUs = () => {
   //   const dispatch = useAppDispatch();
   const initialValues: ContactUsFormValues = {
     email: 'shahid@gmail.com',
-    firstName: 'Shahid',
-    lastName: 'Raza',
-    phoneNumber: '',
+    subject: '',
     message: '',
   };
 
@@ -48,37 +36,13 @@ export const ContactUs = () => {
 
   return (
     <Wrapper useScrollView>
-      <Header title={COMMON_TEXT.CONTACT_US} />
       <View style={STYLES.CONTAINER}>
         <FocusProvider>
-          <RowComponent style={styles.row}>
-            <Input
-              titleStyle={styles.title}
-              name={COMMON_TEXT.FIRST_NAME}
-              title={COMMON_TEXT.FIRST_NAME}
-              containerStyle={styles.nameinput}
-              onChangeText={formik.handleChange('firstName')}
-              onBlur={formik.handleBlur('firstName')}
-              value={formik.values.firstName}
-              placeholder={COMMON_TEXT.ENTER_FIRST_NAME}
-              error={formik.errors.firstName}
-              touched={Boolean(formik.touched.firstName && formik.submitCount)}
-            />
-            <Input
-              titleStyle={styles.title}
-              name={COMMON_TEXT.LAST_NAME}
-              title={COMMON_TEXT.LAST_NAME}
-              containerStyle={styles.nameinput}
-              onChangeText={formik.handleChange('lastName')}
-              onBlur={formik.handleBlur('lastName')}
-              value={formik.values.lastName}
-              placeholder={COMMON_TEXT.ENTER_LAST_NAME}
-              error={formik.errors.lastName}
-              touched={Boolean(formik.touched.lastName && formik.submitCount)}
-            />
-          </RowComponent>
           <Input
-            titleStyle={styles.title}
+            startIcon={{
+              componentName: VARIABLES.MaterialCommunityIcons,
+              iconName: 'email-outline',
+            }}
             name={COMMON_TEXT.EMAIL}
             title={COMMON_TEXT.EMAIL}
             editable={false}
@@ -91,65 +55,53 @@ export const ContactUs = () => {
             error={formik.errors.email}
             touched={Boolean(formik.touched.email && formik.submitCount)}
           />
-
-          <PhoneInputComponent
-            titleStyle={styles.title}
-            name={COMMON_TEXT.PHONE_NUMBER}
-            title={COMMON_TEXT.PHONE_NUMBER}
-            onChangeText={formik.handleChange('phoneNumber')}
-            value={formik.values.phoneNumber}
-            defaultCode={'PK'}
-            allowSpacing={false}
-            placeholder={COMMON_TEXT.ENTER_YOUR_PHONE_NUMBER}
-            error={formik.errors.phoneNumber}
-            touched={Boolean(formik.touched.phoneNumber && formik.submitCount)}
+          <Input
+            name={'Subject'}
+            title={'Subject'}
+            startIcon={{
+              componentName: VARIABLES.Feather,
+              iconName: 'message-circle',
+              iconStyle: {
+                padding: 10,
+                fontSize: FontSize.ExtraLarge,
+                transform: [{ scaleX: -1 }],
+              },
+            }}
+            onChangeText={formik.handleChange('subject')}
+            onBlur={formik.handleBlur('subject')}
+            value={formik.values.subject}
+            placeholder={'Enter Subject'}
+            error={formik.errors.subject}
+            touched={Boolean(formik.touched.subject && formik.submitCount)}
           />
 
           <Input
-            titleStyle={styles.title}
             name={COMMON_TEXT.MESSAGE}
+            startIcon={{
+              componentName: VARIABLES.MaterialCommunityIcons,
+              iconName: 'message-reply-text-outline',
+            }}
             title={COMMON_TEXT.MESSAGE}
             onChangeText={formik.handleChange('message')}
             onBlur={formik.handleBlur('message')}
             value={formik.values.message}
             placeholder={COMMON_TEXT.ENTER_YOUR_MESSAGE}
             maxLines={15}
-            style={{height: screenHeight(20)}}
-            textAlignVertical="top"
+            style={{ height: screenHeight(20) }}
+            textAlignVertical='top'
             error={formik.errors.message}
             touched={Boolean(formik.touched.message && formik.submitCount)}
           />
         </FocusProvider>
 
-        <Button
-          title={COMMON_TEXT.SUBMIT}
-          onPress={formik.handleSubmit}
-          style={styles.button}
-        />
+        <Button title={COMMON_TEXT.SUBMIT} onPress={formik.handleSubmit} style={styles.button} />
       </View>
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  nameinput: {
-    width: screenWidth(43),
-  },
-  row: {
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
   button: {
     marginVertical: 30,
   },
-  line: {
-    width: screenWidth(100),
-    height: 1,
-    backgroundColor: COLORS.BLACK,
-  },
-  title: {
-    fontWeight: FontWeight.Bold,
-  },
-  spacing: {marginBottom: 10},
 });

@@ -4,7 +4,10 @@ import { RootStackParamList } from 'navigation/Navigators';
 
 // Generic types that work for any screen
 export type AppRouteProp<T extends keyof RootStackParamList> = RouteProp<RootStackParamList, T>;
-export type AppNavigationProp<T extends keyof RootStackParamList> = NativeStackNavigationProp<RootStackParamList, T>;
+export type AppNavigationProp<T extends keyof RootStackParamList> = NativeStackNavigationProp<
+  RootStackParamList,
+  T
+>;
 
 // Generic screen props type
 export type AppScreenProps<T extends keyof RootStackParamList> = {
@@ -13,4 +16,4 @@ export type AppScreenProps<T extends keyof RootStackParamList> = {
 };
 
 // Utility type to get route params
-export type RouteParams<T extends keyof RootStackParamList> = RootStackParamList[T]; 
+export type RouteParams<T extends keyof RootStackParamList> = RootStackParamList[T];

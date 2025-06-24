@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 60,
+    ...STYLES.SHADOW,
   },
   infoContainer: {
     flex: 1,

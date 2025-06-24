@@ -1,6 +1,7 @@
-import {Switch, ViewStyle, TextStyle, StyleSheet, View} from 'react-native';
-import {FontSize} from 'types/fontTypes';
-import {Typography} from './Typography';
+import { Switch, ViewStyle, TextStyle, StyleSheet, View } from 'react-native';
+import { FontSize } from 'types/fontTypes';
+import { Typography } from './Typography';
+import { COLORS } from 'utils/colors';
 
 interface CustomSwitchProps {
   value: boolean;
@@ -22,23 +23,22 @@ const CustomSwitch: React.FC<CustomSwitchProps> = ({
   inactiveText,
   activeTextStyle,
   inactiveTextStyle,
-  activeTrackColor,
-  inactiveTrackColor,
-  thumbColor,
+  activeTrackColor = COLORS.PRIMARY,
+  inactiveTrackColor = COLORS.BORDER,
+  thumbColor = COLORS.WHITE,
   style,
 }) => {
   return (
     <View style={[styles.container, style]}>
       {inactiveText && (
-        <Typography
-          style={[styles.text, styles.inactiveText, inactiveTextStyle]}>
+        <Typography style={[styles.text, styles.inactiveText, inactiveTextStyle]}>
           {inactiveText}
         </Typography>
       )}
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{false: inactiveTrackColor, true: activeTrackColor}}
+        trackColor={{ false: inactiveTrackColor, true: activeTrackColor }}
         thumbColor={thumbColor}
       />
       {activeText && (
@@ -61,10 +61,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   activeText: {
-    color: 'green',
+    color: COLORS.PRIMARY,
   },
   inactiveText: {
-    color: 'red',
+    color: COLORS.BORDER,
   },
 });
 

@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     color: COLORS.SECONDARY,
   },
   headerText: {
-    fontSize: FontSize.Large,
-    fontWeight: FontWeight.Black,
+    // fontSize: FontSize.Large,
+    fontWeight: FontWeight.SemiBold,
     textAlign: 'center',
   },
   endIconContainer: {
