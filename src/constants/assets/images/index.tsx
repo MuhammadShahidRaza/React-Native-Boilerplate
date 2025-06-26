@@ -103,6 +103,9 @@ export const IMAGES = {
   WALL_ART_1: require('assets/images/temporary/wall.png'),
   WALL_ART_2: require('assets/images/temporary/wall2.png'),
 
+  MAP: require('assets/images/temporary/map.png'),
+  QR_CODE: require('assets/images/temporary/qrcode.png'),
+
 };
 
 

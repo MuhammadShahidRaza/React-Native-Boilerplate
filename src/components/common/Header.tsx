@@ -16,6 +16,7 @@ type Props = {
   showBackButton?: boolean;
   centerImage?: string;
   onPressBack?: () => void;
+  titleStyle?: StyleProp<TextStyle>;
 };
 
 export const Header = ({
@@ -25,6 +26,7 @@ export const Header = ({
   centerImage = '',
   onPressBack = () => onBack(),
   showBackButton = false,
+  titleStyle,
 }: Props) => {
   const { isLangRTL } = useTranslation();
   return (
@@ -46,7 +48,7 @@ export const Header = ({
       )}
       <RowComponent style={styles.titleContainer}>
         {centerImage && <Photo source={centerImage} imageStyle={styles.image} />}
-        <Typography style={styles.headerText}>{title}</Typography>
+        <Typography style={[styles.headerText, titleStyle]}>{title}</Typography>
       </RowComponent>
       <View style={styles.endIconContainer}>{endIcon}</View>
     </RowComponent>

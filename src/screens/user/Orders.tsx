@@ -8,12 +8,9 @@ import {
   OrderItem,
 } from 'components/index';
 import { STYLES } from 'utils/index';
-import { AppNavigationProp } from 'types/index';
-import { IMAGES, SCREENS } from 'constants/index';
-import { useNavigation } from '@react-navigation/native';
+import { IMAGES } from 'constants/index';
 
 export const Orders = () => {
-  const navigation = useNavigation<AppNavigationProp<typeof SCREENS.ORDERS>>();
   const [orders, setOrders] = useState<OrderItem[]>([
     {
       id: 1,

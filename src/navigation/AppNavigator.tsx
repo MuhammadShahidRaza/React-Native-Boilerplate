@@ -24,7 +24,9 @@ import {
   Wallet,
   SelectRegion,
   ViewAll,
-} from 'screens/user';
+  ProductDetail,
+  OrderDetail,
+    } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
 import { screenOptions } from '.';
@@ -60,6 +62,10 @@ export const AppNavigator = () => {
       component: Location,
       options: { headerShown: false },
     },
+    [SCREENS.ORDER_DETAIL]: {
+      component: OrderDetail,
+      options: { headerShown: false },
+    },
     [SCREENS.CHAT]: {
       component: Chat,
       options: { headerShown: false },
@@ -75,6 +81,10 @@ export const AppNavigator = () => {
     [SCREENS.SUB_CATEGORY_FOOD]: {
       component: SubCategoryFood,
       options: { headerShown: true },
+    },
+    [SCREENS.PRODUCT_DETAIL]: {
+      component: ProductDetail,
+      options: { headerShown: false },
     },
     [SCREENS.PROFILE]: {
       component: Profile,

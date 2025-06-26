@@ -91,7 +91,8 @@ export const SCREENS = {
   SELECT_REGION: 'SelectRegion',
   SUB_CATEGORY_FOOD: 'SubCategoryFood',
   VIEW_ALL_ECOMMERCE: 'ViewAllEcommerce',
-
+  PRODUCT_DETAIL: 'ProductDetail',
+  ORDER_DETAIL: 'OrderDetail',
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',
   BOTTOM_STACK: 'BottomStackScreen',

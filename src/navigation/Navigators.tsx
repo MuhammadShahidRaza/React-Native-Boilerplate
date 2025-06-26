@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { ItemType } from 'components/appComponents/Home';
-import { Icon } from 'components/index';
+import { Icon, OrderItem } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
@@ -45,6 +45,7 @@ export type RootStackParamList = {
   [SCREENS.VIEW_DETAILS]: { data: ItemType };
   [SCREENS.DETAILS]: { data: ItemType; heading: string };
   [SCREENS.ECOMMERCE_DETAILS]: { data: any; heading: string };
+  [SCREENS.ORDER_DETAIL]: { data: OrderItem };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: string;

@@ -26,3 +26,5 @@ export * from './AddCard';
 export * from './Wallet';
 export * from './SelectRegion';
 export * from './Cart';
+export * from './OrderDetail';
+export * from './ProductDetail';

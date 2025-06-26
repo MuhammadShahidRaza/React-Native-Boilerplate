@@ -36,6 +36,11 @@ export const STYLES = {
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  TEXT_SHADOW: {
+    textShadowColor: COLORS.DARK_BLACK_OPACITY,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
   USER_IMAGE: {
     width: 40,
     height: 40,

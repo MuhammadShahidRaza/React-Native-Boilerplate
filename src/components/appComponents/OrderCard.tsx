@@ -4,6 +4,8 @@ import { COLORS } from 'utils/colors';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { screenWidth, screenHeight } from 'utils/helpers';
 import { STYLES } from 'utils/commonStyles';
+import { SCREENS } from 'constants/index';
+import { navigate } from 'navigation/index';
 
 export interface OrderItem {
   id: number;
@@ -14,16 +16,18 @@ export interface OrderItem {
   created_at: string;
   status: string;
 }
+export const orderStatusColor = {
+  Ordered: COLORS.GREEN_STATUS,
+  Booked: COLORS.SECONDARY,
+  Requested: COLORS.PRIMARY,
+};
 
 export const OrderCard = ({ item }: { item: OrderItem }) => {
-  const statusColor = {
-    Ordered: COLORS.GREEN_STATUS,
-    Booked: COLORS.SECONDARY,
-    Requested: COLORS.PRIMARY,
-  };
-
   return (
-    <RowComponent style={styles.card}>
+    <RowComponent
+      onPress={() => navigate(SCREENS.ORDER_DETAIL, { data: item })}
+      style={styles.card}
+    >
       <RowComponent style={{ ...STYLES.GAP_10 }}>
         <Photo source={item?.image} imageStyle={styles.image} />
         <View style={styles.details}>
@@ -41,7 +45,7 @@ export const OrderCard = ({ item }: { item: OrderItem }) => {
           <View
             style={[
               styles.status,
-              { backgroundColor: statusColor[item?.status as keyof typeof statusColor] },
+              { backgroundColor: orderStatusColor[item?.status as keyof typeof orderStatusColor] },
             ]}
           >
             <Typography numberOfLines={1} style={styles.statusText}>
