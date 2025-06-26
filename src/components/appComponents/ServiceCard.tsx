@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StyleProp, TextStyle, ImageStyle, ViewStyle } from 'react-native';
 import React from 'react';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
 import { Icon, Photo, RowComponent, Typography } from 'components/index';
@@ -8,14 +8,37 @@ import { VARIABLES } from 'constants/common';
 export const ServiceCard = ({
   item,
   onPressItem,
+  nameStyle,
+  containerStyle,
+  imageStyle,
+  priceTitle,
+  priceStyle,
+  priceTitleStyle,
+  priceContainerStyle,
 }: {
   item: { image: string; name: string; price: string; description?: string; icon?: boolean };
   onPressItem?: (item: any) => void;
+  nameStyle?: StyleProp<TextStyle>;
+  imageStyle?: StyleProp<ImageStyle>;
+  containerStyle?: ViewStyle;
+  priceContainerStyle?: ViewStyle;
+  priceTitle?: string;
+  priceStyle?: TextStyle;
+  priceTitleStyle?: StyleProp<TextStyle>;
 }) => {
   return (
-    <View style={{ ...STYLES.SHADOW, marginBottom: 10, margin: 4, borderRadius: 10, padding: 3 }}>
+    <View
+      style={{
+        marginBottom: 10,
+        margin: 4,
+        borderRadius: 10,
+        padding: 3,
+        ...STYLES.SHADOW,
+        ...containerStyle,
+      }}
+    >
       <View style={styles.serviceImageContainer}>
-        <Photo source={item?.image} imageStyle={styles.photoGrid} />
+        <Photo source={item?.image} imageStyle={[styles.photoGrid, imageStyle]} />
         {onPressItem && (
           <Icon
             onPress={() => onPressItem(item)}
@@ -38,7 +61,7 @@ export const ServiceCard = ({
         )}
       </View>
       <View style={styles.serviceInfoContainer}>
-        <Typography numberOfLines={1} style={styles.serviceName}>
+        <Typography numberOfLines={1} style={[styles.serviceName, nameStyle]}>
           {item?.name}
         </Typography>
         {item?.description && (
@@ -56,11 +79,19 @@ export const ServiceCard = ({
             </Typography>
           </RowComponent>
         )}
-        <RowComponent style={styles.servicePriceContainer}>
-          <Typography>Price</Typography>
-          <Typography>-</Typography>
-          <Typography style={styles.servicePrice}>{`$${item?.price}`}</Typography>
-        </RowComponent>
+        {item?.price && (
+          <RowComponent
+            style={{
+              justifyContent: priceTitle ? 'space-between' : 'flex-end',
+              ...priceContainerStyle,
+            }}
+          >
+            {priceTitle && <Typography style={priceTitleStyle}>{priceTitle}</Typography>}
+            <Typography
+              style={{ ...styles.servicePrice, ...priceStyle }}
+            >{`$${item?.price}`}</Typography>
+          </RowComponent>
+        )}
       </View>
     </View>
   );
@@ -70,7 +101,7 @@ const styles = StyleSheet.create({
   serviceName: {
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.MediumSmall,
-    width: screenWidth(39),
+    maxWidth: screenWidth(39),
   },
   photoGrid: {
     width: screenWidth(42),
@@ -79,7 +110,7 @@ const styles = StyleSheet.create({
   },
   servicePrice: {
     fontWeight: FontWeight.SemiBold,
-    color: COLORS.SECONDARY,
+    color: COLORS.PRIMARY,
   },
   serviceDescription: {
     color: COLORS.DARK_GREY,

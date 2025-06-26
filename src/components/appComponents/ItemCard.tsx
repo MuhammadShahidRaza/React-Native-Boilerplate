@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, isIOS, screenHeight } from 'utils/index';
@@ -9,9 +9,25 @@ import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
 
 export const ItemCard = ({ item }: { item: ItemType }) => {
+  const isEcommerce =
+    item?.category === 'Order Your Food' ||
+    item?.category === 'Grocery' ||
+    item?.category === 'Wears' ||
+    item?.category === 'Health' ||
+    item?.category === 'Interior' ||
+    item?.category === 'Electronics';
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
-      <View style={styles.itemContainer}>
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onPress={() => {
+          if (isEcommerce) {
+            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: item?.category });
+            return;
+          }
+          navigate(SCREENS.DETAILS, { data: item, heading: item?.category });
+        }}
+      >
         <View>
           <RowComponent style={{ zIndex: 100 }}>
             {item?.rating && (
@@ -106,7 +122,7 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
           )}
         </View>
         <Typography
-          onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: item?.category })}
+          // onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: item?.category })}
           numberOfLines={1}
           style={{
             color: COLORS.SECONDARY,
@@ -118,7 +134,7 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
         >
           See Details
         </Typography>
-      </View>
+      </TouchableOpacity>
     </SkeletonLoader>
   );
 };

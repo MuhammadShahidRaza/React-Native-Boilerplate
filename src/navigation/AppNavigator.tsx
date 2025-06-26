@@ -30,7 +30,9 @@ import { useBackHandler, useTranslation } from 'hooks/index';
 import { screenOptions } from '.';
 import { PrivacyPolicy } from 'screens/common';
 import { SubCategoryFood } from 'screens/user/SubCategoryFood';
-
+import { EcommerceDetails } from 'screens/user/EcommerceDetails';
+import { ViewAllEcommerce } from 'screens/user/ViewAllEcommerce';
+  
 export const AppNavigator = () => {
   useBackHandler();
   const Stack = createNativeStackNavigator();
@@ -114,6 +116,10 @@ export const AppNavigator = () => {
       component: ViewAll,
       options: { headerShown: true, headerTitle: t(COMMON_TEXT.VIEW_ALL) },
     },
+    [SCREENS.VIEW_ALL_ECOMMERCE]: {
+      component: ViewAllEcommerce,
+      options: { headerShown: true, headerTitle: t(COMMON_TEXT.VIEW_ALL) },
+    },
     [SCREENS.MESSAGES]: {
       component: Messages,
       options: { headerShown: false },
@@ -144,6 +150,10 @@ export const AppNavigator = () => {
     },
     [SCREENS.DETAILS]: {
       component: Details,
+      options: { headerShown: true },
+    },
+    [SCREENS.ECOMMERCE_DETAILS]: {
+      component: EcommerceDetails,
       options: { headerShown: true },
     },
     [SCREENS.CART]: {

@@ -1,7 +1,7 @@
-import {View, StyleSheet, TextStyle} from 'react-native';
-import {COMMON_TEXT} from 'constants/index';
-import {COLORS, screenHeight} from 'utils/index';
-import {Typography} from './Typography';
+import { View, StyleSheet, TextStyle } from 'react-native';
+import { COMMON_TEXT } from 'constants/index';
+import { COLORS, screenHeight } from 'utils/index';
+import { Typography } from './Typography';
 
 type Props = {
   message?: string;
@@ -12,15 +12,11 @@ type Props = {
 const NoItemFound = ({
   message = COMMON_TEXT.NO_ITEM_FOUND,
   messageStyle,
-  containerHeight = screenHeight(50),
+  containerHeight = screenHeight(20),
   containerWidth,
 }: Props) => {
   return (
-    <View
-      style={[
-        styles.container,
-        {height: containerHeight, width: containerWidth},
-      ]}>
+    <View style={[styles.container, { height: containerHeight, width: containerWidth }]}>
       <Typography style={[styles.message, messageStyle]}>{message}</Typography>
     </View>
   );
@@ -33,6 +29,7 @@ const styles = StyleSheet.create({
   },
   message: {
     color: COLORS.PRIMARY,
+    textAlign: 'center',
   },
 });
 

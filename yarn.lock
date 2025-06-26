@@ -3654,6 +3654,7 @@ __metadata:
     react-native-svg-transformer: ^1.5.1
     react-native-toast-message: ^2.3.0
     react-native-vector-icons: ^10.2.0
+    react-native-video: ^6.15.0
     react-redux: ^9.2.0
     react-test-renderer: 19.0.0
     typescript: 5.0.4
@@ -9936,6 +9937,16 @@ __metadata:
     fa6-upgrade: bin/fa6-upgrade.sh
     generate-icon: bin/generate-icon.js
   checksum: fda930df4e63f12533268f5b339ebe4c77c691eae43503328466b3087ed868a06a4593fd246e75ac6b5ec955543eec35608c7922191bdcc3b3a94ed7f3575ef0
+  languageName: node
+  linkType: hard
+
+"react-native-video@npm:^6.15.0":
+  version: 6.15.0
+  resolution: "react-native-video@npm:6.15.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: c369af44b79790cbbcbabf4bd9d3e1e26a63ec00abc040caa1fb48f608bb066ef22af9fae0321eb99dc8875d861b568f97057e8609f0885bd52216f990ae6594
   languageName: node
   linkType: hard
 

@@ -87,8 +87,10 @@ export const SCREENS = {
   LOCATION: 'Location',
   SUB_CATEGORY_ITEMS: 'SubCategoryItems',
   DETAILS: 'Details',
+  ECOMMERCE_DETAILS: 'EcommerceDetails',
   SELECT_REGION: 'SelectRegion',
   SUB_CATEGORY_FOOD: 'SubCategoryFood',
+  VIEW_ALL_ECOMMERCE: 'ViewAllEcommerce',
 
   SEARCH_STACK: 'SearchStackScreen',
   CHAT_STACK: 'ChatStackScreen',

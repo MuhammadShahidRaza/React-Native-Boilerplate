@@ -8,14 +8,21 @@ import {
   IconComponentMapping,
   Photo,
   RowComponent,
-  SearchBar,
   Typography,
   Wrapper,
   ServiceCard,
 } from 'components/index';
 import { AppScreenProps } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
-import { View, StyleSheet, ScrollView, StyleProp, TextStyle, Clipboard } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StyleProp,
+  TextStyle,
+  Clipboard,
+  Linking,
+} from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { renderReviews, reviewsList } from './Reviews';
 import { IMAGES } from 'constants/assets';
@@ -26,7 +33,6 @@ import { BusinessHours } from 'components/appComponents/BusinessHours';
 
 export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
-  // const [search, setSearch] = useState('');
   useEffect(() => {
     navigation.setOptions({
       headerTitle: params?.heading,
@@ -141,7 +147,19 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     item: { image: string; name: string; price: string; description?: string; icon?: boolean };
     onPressItem?: (item: any) => void;
   }) => {
-    return <ServiceCard item={item} onPressItem={onPressItem} />;
+    return (
+      <ServiceCard
+        item={item}
+        onPressItem={onPressItem}
+        priceContainerStyle={{
+          justifyContent: 'flex-start',
+        }}
+        priceTitle={params?.heading !== 'Hotels' ? 'Price - ' : ''}
+        priceStyle={{
+          color: params?.heading !== 'Hotels' ? COLORS.SECONDARY : COLORS.DARK_GREY,
+        }}
+      />
+    );
   };
 
   const renderTabContent = () => {
@@ -214,11 +232,11 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
                   isRightIcon: true,
                   iconNameRight: 'location-arrow',
                   onPressRightIcon: () => {
-                    // openUrl(
-                    //   isIOS()
-                    //     ? `maps://maps.google.com/?q=${params?.data?.latitude},${params?.data?.longitude}`
-                    //     : `https://www.google.com/maps/search/?api=1&query=${params?.data?.latitude},${params?.data?.longitude}`,
-                    // );
+                    const lat = params?.data?.latitude;
+                    const lng = params?.data?.longitude;
+                    // const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                    const url = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=driving`;
+                    Linking.openURL(url);
                   },
                   rightIconStyle: {
                     backgroundColor: COLORS.PRIMARY,

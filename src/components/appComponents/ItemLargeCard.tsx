@@ -15,14 +15,20 @@ export const ItemLargeCard = ({
   item: ItemType;
   showCategory?: boolean;
 }) => {
+  const isEcommerce =
+    item?.category === 'Order Your Food' ||
+    item?.category === 'Grocery' ||
+    item?.category === 'Wears' ||
+    item?.category === 'Health' ||
+    item?.category === 'Interior' ||
+    item?.category === 'Electronics';
+
   return (
     <SkeletonLoader key={item?.name} height={screenHeight(25)}>
       <TouchableOpacity
-        activeOpacity={
-          item?.category === 'Order Your Food' || item?.category === undefined ? 1 : 0.5
-        }
         onPress={() => {
-          if (item?.category === 'Order Your Food' || item?.category === undefined) {
+          if (isEcommerce) {
+            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: item?.category });
             return;
           }
           navigate(SCREENS.DETAILS, { data: item, heading: item?.category });

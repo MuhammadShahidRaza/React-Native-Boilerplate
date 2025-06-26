@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getItem, requestNotificationPermission } from 'utils/index';
+import { getItem } from 'utils/index';
 import { VARIABLES } from 'constants/common';
 import { setAppLanguage, setIsUserLoggedIn, setIsUserVisitedApp } from 'store/slices/appSettings';
 import { RootState, useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { useTranslation } from './useTranslation';
-import { getUserDetails } from 'api/functions/app/user';
 
 interface UserLoginStatus {
   isUserLoggedIn: boolean;
@@ -44,7 +43,7 @@ export const useUserLoginStatus = (): UserLoginStatus => {
       } finally {
         setTimeout(() => {
           setIsLoading(false);
-        }, 2000);
+        }, 4000);
       }
     };
     checkUserIsLogin();

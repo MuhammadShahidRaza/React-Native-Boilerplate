@@ -6,6 +6,7 @@ import { AppScreenProps, FontSize } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { Autocomplete } from 'components/common/Autocomplete';
 import { AddressDetails } from 'utils/location';
+import { navigate } from 'navigation/Navigators';
 
 export const SubCategoryFood = ({
   navigation,
@@ -57,8 +58,10 @@ export const SubCategoryFood = ({
       {renderHorizontalFoodItemsWithRow({
         data: (data?.categories as ItemType[]) ?? [],
         heading: data.itemHeading,
+        onPressViewAll: () => {},
         rowHeading: `Categories`,
       })}
+      <View style={{ height: 30 }} />
     </Wrapper>
   );
 };

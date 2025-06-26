@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     textAlign: 'right',
     color: COLORS.ERROR,
+    fontSize: FontSize.Small,
   },
   innerContainer: {
     ...CENTER,

@@ -1,15 +1,24 @@
-import { View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { FontSize } from 'types/fontTypes';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
-import { Icon, Photo, RowComponent, Typography } from 'components/index';
+import { Icon, Photo, Typography } from 'components/index';
 import { styles } from './Home/styles';
 import { ItemType } from './Home';
-import { VARIABLES } from 'constants/index';
+import { SCREENS, VARIABLES } from 'constants/index';
+import { navigate } from 'navigation/index';
 
 export const FoodCard = ({ item }: { item: ItemType }) => {
+  const isFood = item?.category === 'Order Your Food';
   return (
-    <View>
+    <TouchableOpacity
+      activeOpacity={isFood ? 0.5 : 1}
+      onPress={() => {
+        if (isFood) {
+          navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: item?.category });
+        }
+      }}
+    >
       <View style={[styles.itemContainer, { padding: 0, width: screenWidth(38) }]}>
         {/* <SkeletonLoader key={item?.name} height={screenHeight(25)}> */}
         <View>
@@ -43,6 +52,6 @@ export const FoodCard = ({ item }: { item: ItemType }) => {
         {item?.name}
       </Typography>
       {/* // </SkeletonLoader> */}
-    </View>
+    </TouchableOpacity>
   );
 };

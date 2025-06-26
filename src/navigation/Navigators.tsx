@@ -44,11 +44,28 @@ export type RootStackParamList = {
   [SCREENS.VIEW_ALL]: { data: { items: ItemType[]; headerTitle: string } };
   [SCREENS.VIEW_DETAILS]: { data: ItemType };
   [SCREENS.DETAILS]: { data: ItemType; heading: string };
+  [SCREENS.ECOMMERCE_DETAILS]: { data: any; heading: string };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: string;
       items: ItemType[];
       itemHeading: string;
+    };
+  };
+  [SCREENS.VIEW_ALL_ECOMMERCE]: {
+    data: {
+      items: {
+        id: string;
+        name: string;
+        image: string;
+        products?: {
+          id: string;
+          name: string;
+          image: string;
+          price: string;
+        }[];
+      };
+      headerTitle: string;
     };
   };
   [SCREENS.SUB_CATEGORY_FOOD]: {

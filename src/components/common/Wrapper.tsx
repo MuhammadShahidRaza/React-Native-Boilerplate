@@ -1,7 +1,8 @@
-import { KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { COLORS, isIOS, screenHeight } from 'utils/index';
+import { KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet } from 'react-native';
+import { COLORS, isIOS } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
 
   return (
     <>
-      {useSafeArea && <View style={[styles.safeArea, { backgroundColor }]} />}
+      {useSafeArea && <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor }]} />}
       <StatusBar
         backgroundColor={backgroundColor}
         barStyle={darkMode ? 'dark-content' : 'light-content'}
@@ -59,7 +60,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    height: isIOS() ? screenHeight(5) : 0,
+    flex: 0,
   },
   container: {
     flex: 1,
