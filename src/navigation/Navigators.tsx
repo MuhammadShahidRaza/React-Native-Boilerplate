@@ -37,6 +37,11 @@ export type RootStackParamList = {
   [SCREENS.SELECT_REGION]: undefined;
   [SCREENS.LANGUAGE]: undefined;
   [SCREENS.ORDERS]: undefined;
+  [SCREENS.FILTER]: {
+    data: {
+      heading: string;
+    };
+  };
   [SCREENS.PRIVACY_POLICY]: { title: string };
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
