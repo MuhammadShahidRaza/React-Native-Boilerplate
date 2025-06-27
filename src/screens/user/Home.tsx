@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { HomeComponent, Icon, MessageBox, RowComponent, Wrapper } from 'components/index';
-import { screenHeight, screenWidth, STYLES, COLORS } from 'utils/index';
+import { screenHeight, screenWidth, STYLES, COLORS, greetings } from 'utils/index';
 import { IMAGES } from 'constants/assets';
 import { COMMON_TEXT, SCREENS, TEMPORARY_TEXT, VARIABLES } from 'constants/index';
 import { FontSize } from 'types/index';
@@ -22,7 +22,7 @@ export const Home = () => {
             userNameStyle={styles.userNameStyle}
             messageStyle={styles.messageStyle}
             userName={TEMPORARY_TEXT.JOHN_DOE}
-            message={COMMON_TEXT.NEED_A_HELP}
+            message={greetings()}
           />
           <RowComponent style={styles.iconContainer}>
             <Icon
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: COLORS.PRIMARY,
     borderBottomLeftRadius: 50,
-    height: screenHeight(30),
+    height: screenHeight(29),
     borderBottomRightRadius: 50,
   },
   messageBoxContainer: {
