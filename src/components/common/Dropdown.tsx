@@ -1,14 +1,14 @@
-import React, {useState, useCallback} from 'react';
-import {View, StyleSheet, TextStyle} from 'react-native';
-import {FontSize, StyleType} from 'types/index';
-import {Typography} from './Typography';
-import {COLORS, screenWidth} from 'utils/index';
-import {FlatListComponent} from './Flatlist';
-import {Photo} from './Photo';
-import {RowComponent} from './Row';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {COMMON_TEXT} from 'constants/screens';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, TextStyle } from 'react-native';
+import { FontSize, StyleType } from 'types/index';
+import { Typography } from './Typography';
+import { COLORS, screenWidth } from 'utils/index';
+import { FlatListComponent } from './Flatlist';
+import { Photo } from './Photo';
+import { RowComponent } from './Row';
+import { Icon } from './Icon';
+import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT } from 'constants/screens';
 
 export type DropdownItemProps = {
   name: string;
@@ -56,14 +56,13 @@ export const Dropdown: React.FC<DropdownProps> = ({
   );
 
   const renderDropdownItem = useCallback(
-    ({item, index}: RenderDropdownItemProps) => (
+    ({ item, index }: RenderDropdownItemProps) => (
       <RowComponent
         key={index}
         onPress={() => handleSelectOption(item.name)}
-        style={[styles.dropdownItem, styles.gap_10]}>
-        {item.image && (
-          <Photo disabled source={item.image} imageStyle={styles.imageStyle} />
-        )}
+        style={[styles.dropdownItem, styles.gap_10]}
+      >
+        {item.image && <Photo disabled source={item.image} imageStyle={styles.imageStyle} />}
         <Typography style={styles.option}>{item.name}</Typography>
       </RowComponent>
     ),
@@ -74,9 +73,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <>
-      {title && (
-        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-      )}
+      {title && <Typography style={[styles.title, titleStyle]}>{title}</Typography>}
       <View
         style={[
           styles.container,
@@ -86,45 +83,31 @@ export const Dropdown: React.FC<DropdownProps> = ({
             borderBottomStartRadius: isOpen ? 0 : 10,
             width,
           },
-        ]}>
-        <RowComponent
-          onPress={toggleDropdown}
-          style={[styles.selectedContainer, styles.gap_10]}>
+        ]}
+      >
+        <RowComponent onPress={toggleDropdown} style={[styles.selectedContainer, styles.gap_10]}>
           <RowComponent style={styles.gap_10}>
             {selectedOption?.image && (
-              <Photo
-                source={selectedOption.image}
-                imageStyle={styles.imageStyle}
-              />
+              <Photo source={selectedOption.image} imageStyle={styles.imageStyle} />
             )}
             {!selectedValue && (
-              <RowComponent style={{gap: 3}}>
-                <Typography style={styles.placeholderValue}>
-                  {COMMON_TEXT.SELECT}
-                </Typography>
-                <Typography style={styles.placeholderValue}>
-                  {title ?? ''}
-                </Typography>
+              <RowComponent style={{ gap: 3 }}>
+                <Typography style={styles.placeholderValue}>{COMMON_TEXT.SELECT}</Typography>
+                <Typography style={styles.placeholderValue}>{title ?? ''}</Typography>
               </RowComponent>
             )}
-            <Typography style={[styles.selectedValue, textStyle]}>
-              {selectedValue}
-            </Typography>
+            <Typography style={[styles.selectedValue, textStyle]}>{selectedValue}</Typography>
           </RowComponent>
-          <Icon
-            componentName={VARIABLES.AntDesign}
-            iconName={'down'}
-            color={COLORS.ICONS}
-          />
+          <Icon componentName={VARIABLES.AntDesign} iconName={'down'} color={COLORS.ICONS} />
         </RowComponent>
       </View>
-      <View style={{zIndex: 1, width, marginBottom: 10}}>
+      <View style={{ zIndex: 1, width, marginBottom: 10 }}>
         {isOpen && (
-          <View style={[styles.dropdown, {width}]}>
+          <View style={[styles.dropdown, { width }]}>
             <FlatListComponent
               data={options}
               scrollEnabled={true}
-              style={{height: screenWidth(30)}}
+              style={{ height: screenWidth(30) }}
               renderItem={renderDropdownItem}
             />
           </View>
@@ -178,7 +161,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: FontSize.Medium,
     textTransform: 'capitalize',
-    color: COLORS.SECONDARY,
+    color: COLORS.DARK_GREY,
   },
   imageStyle: {
     width: 35,
