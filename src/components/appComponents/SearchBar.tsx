@@ -1,10 +1,8 @@
-import { Input } from 'components/common';
-import { COMMON_TEXT } from 'constants/screens';
-import { FontSize } from 'types/fontTypes';
+import { IconComponentProps, Input } from 'components/index';
 import { COLORS } from 'utils/colors';
-import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT, VARIABLES } from 'constants/index';
 import { StyleSheet } from 'react-native';
-import { SetStateType, StyleType, voidFuntionType } from 'types/common';
+import { SetStateType, StyleType, voidFuntionType, FontSize } from 'types/index';
 
 export const SearchBar = ({
   value = '',
@@ -12,6 +10,7 @@ export const SearchBar = ({
   showBorder = true,
   onPress = () => {},
   containerStyle,
+  endIcon,
   secondContainerStyle,
 }: {
   value?: string;
@@ -19,6 +18,7 @@ export const SearchBar = ({
   onPress?: voidFuntionType | null;
   onChangeText?: SetStateType<string>;
   containerStyle?: StyleType;
+  endIcon?: IconComponentProps;
   secondContainerStyle?: StyleType;
 }) => {
   return (
@@ -37,6 +37,7 @@ export const SearchBar = ({
         color: COLORS.SECONDARY,
         size: FontSize.Large,
       }}
+      {...(endIcon && { endIcon: endIcon })}
       containerStyle={[styles.inputContainer, containerStyle]}
       onPress={onPress ? onPress : undefined}
       name='search'
