@@ -6,6 +6,7 @@ import { SCREENS, VARIABLES } from 'constants/index';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Autocomplete } from 'components/common/Autocomplete';
 import { AddressDetails } from 'utils/location';
+import { navigate } from 'navigation/index';
 
 export const ViewAll = () => {
   const navigation = useNavigation<AppNavigationProp<typeof SCREENS.VIEW_ALL>>();
@@ -47,6 +48,21 @@ export const ViewAll = () => {
         onChangeText={setSearch}
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
+        {...(['Hotels', 'Shortlet', 'Real Estate'].includes(data?.headerTitle) && {
+          endIcon: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'filter-variant',
+            color: COLORS.PRIMARY,
+            onPress: () => {
+              navigate(SCREENS.FILTER, {
+                data: {
+                  heading: data?.headerTitle,
+                },
+              });
+            },
+            size: FontSize.ExtraLarge,
+          },
+        })}
       />
 
       <FlatListComponent
