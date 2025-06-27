@@ -5,6 +5,7 @@ import { AppScreenProps, FontSize } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { Autocomplete } from 'components/common/Autocomplete';
 import { AddressDetails } from 'utils/location';
+import { navigate } from 'navigation/index';
 
 export const SubCategoryItems = ({
   navigation,
@@ -39,6 +40,21 @@ export const SubCategoryItems = ({
         onChangeText={setSearch}
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
+        {...(['Hotels', 'Shortlet', 'Real Estate'].includes(data?.heading) && {
+          endIcon: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'filter-variant',
+            color: COLORS.PRIMARY,
+            onPress: () => {
+              navigate(SCREENS.FILTER, {
+                data: {
+                  heading: data?.heading,
+                },
+              });
+            },
+            size: FontSize.ExtraLarge,
+          },
+        })}
       />
 
       {renderHorizontalItemsWithRow({
