@@ -15,6 +15,7 @@ import { categoriesList, CategoryType, ItemType, subCategoriesList } from '.';
 import { styles } from './styles';
 import { SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
+import { FontWeight } from 'types/fontTypes';
 
 export const HomeComponent = () => {
   const [searchText, setSearchText] = useState<string>('');
@@ -92,7 +93,10 @@ export const HomeComponent = () => {
         numberOfLines={1}
         style={[
           styles.categoryItemText,
-          { color: selectedCategory === item?.id ? COLORS.PRIMARY : COLORS.BORDER },
+          {
+            color: selectedCategory === item?.id ? COLORS.PRIMARY : COLORS.BORDER,
+            fontWeight: selectedCategory === item?.id ? FontWeight.Medium : FontWeight.Normal,
+          },
         ]}
       >
         {item?.name}
@@ -129,7 +133,7 @@ export const HomeComponent = () => {
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ minHeight: screenHeight(isIOS() ? 45 : 52) }}
+        style={{ minHeight: screenHeight(isIOS() ? 50 : 52) }}
       >
         {hasSubCategories && (
           <FlatListComponent
