@@ -18,7 +18,7 @@ export const ItemLargeCard = ({
   const isEcommerce =
     item?.category === 'Order Your Food' ||
     item?.category === 'Grocery' ||
-    item?.category === 'Wears' ||
+    item?.category === 'Fashion' ||
     item?.category === 'Health' ||
     item?.category === 'Interior' ||
     item?.category === 'Electronics';
