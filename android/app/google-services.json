@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128004684813",
+    "project_id": "xtrafind-d55a6",
+    "storage_bucket": "xtrafind-d55a6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128004684813:android:786721e5ab2a13eeece944",
+        "android_client_info": {
+          "package_name": "com.cmolds.xtrafind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgWdlQGG678Lknbq67ETiq7oPpTvXACXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
