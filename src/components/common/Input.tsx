@@ -78,7 +78,7 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const inputRef = useRef<TextInput>(null);
   const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
-  const height = isTitleInLine ? 36 : 42;
+  const height = isTitleInLine ? 40 : 42;
   const isErrorShown = touched && error;
   useEffect(() => {
     textInput(name, inputRef.current);

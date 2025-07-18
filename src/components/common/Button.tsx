@@ -33,7 +33,7 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   disabled,
   endIcon,
-  loading,
+  loading = false,
   startIcon,
   containerStyle,
   loaderColor = COLORS.WHITE,
@@ -53,7 +53,7 @@ export const Button: React.FC<ButtonProps> = ({
     <TouchableOpacity
       style={buttonStyles}
       onPress={onPress}
-      disabled={disabled || loading || isAppLoading}
+      disabled={disabled || (loading && isAppLoading)}
       {...props}
     >
       {loading || isAppLoading ? (
