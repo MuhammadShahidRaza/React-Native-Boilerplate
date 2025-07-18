@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/index';
-import { COLORS, STYLES } from 'utils/index';
+import { COLORS, isIOS, STYLES } from 'utils/index';
 import { screenHeight, screenWidth } from 'utils/index';
 
 export const styles = StyleSheet.create({
@@ -73,7 +73,7 @@ export const styles = StyleSheet.create({
   },
   textOverlay: {
     position: 'absolute',
-    top: screenWidth(19),
+    top: screenWidth(isIOS() ? 13 : 15),
     left: 12,
     right: 12,
     borderWidth: 1.5,
@@ -88,7 +88,7 @@ export const styles = StyleSheet.create({
     width: screenWidth(15),
   },
   subCategoryItemImage: {
-    height: screenHeight(22),
+    height: screenHeight(21),
     borderRadius: 20,
     width: screenWidth(40),
   },
