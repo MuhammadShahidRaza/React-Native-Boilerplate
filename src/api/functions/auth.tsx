@@ -1,16 +1,16 @@
-import {API_ROUTES} from 'api/routes';
-import {VARIABLES} from 'constants/common';
-import {SCREENS} from 'constants/routes';
-import {COMMON_TEXT} from 'constants/screens';
+import { API_ROUTES } from 'api/routes';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
+import { SCREENS } from 'constants/routes';
+import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
-import {navigate} from 'navigation/Navigators';
-import {setIsUserLoggedIn} from 'store/slices/appSettings';
-import {setUserDetails} from 'store/slices/user';
+import { navigate } from 'navigation/Navigators';
+import { setIsUserLoggedIn } from 'store/slices/appSettings';
+import { setUserDetails } from 'store/slices/user';
 import store from 'store/store';
-import {MessageResponse, User} from 'types/response';
-import {post} from 'utils/axios';
-import {setItem} from 'utils/storage';
-import {showToast} from 'utils/toast';
+import { MessageResponse, User } from 'types/response';
+import { post } from 'utils/axios';
+import { setItem } from 'utils/storage';
+import { showToast } from 'utils/toast';
 
 // R type for Return
 // A type for Accept
@@ -19,23 +19,24 @@ const handleApiRequest = async <R extends object, A extends object>(
   url: string,
   data: A,
   token?: boolean,
+  showLoader?: boolean,
 ): Promise<R | undefined> => {
   try {
     const response = await post({
       url,
       data,
       includeToken: token ? true : false,
+      showLoader,
     });
     return (
-      response?.data.user ?? {
+      response?.data ?? {
         message: response?.messages?.[0],
         code: response?.code,
       }
     );
   } catch (error) {
     const errorMessage =
-      (error instanceof Error && error.message) ||
-      i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);
+      (error instanceof Error && error.message) || i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);
     showToast({
       message: errorMessage,
     });
@@ -48,10 +49,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
 }: {
   data: A;
 }) => {
-  const user: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.SOCIAL_LOGIN,
-    data,
-  );
+  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.SOCIAL_LOGIN, data);
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     store.dispatch(setIsUserLoggedIn(true));
@@ -59,10 +57,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
   }
 };
 
-const resetUserPassword = async <
-  R extends MessageResponse,
-  A extends ResetPassword,
->({
+const resetUserPassword = async <R extends MessageResponse, A extends ResetPassword>({
   data,
 }: {
   data: A;
@@ -73,60 +68,68 @@ const resetUserPassword = async <
     true,
   );
   if (response) {
-    showToast({message: response?.message, isError: false});
+    showToast({ message: response?.message, isError: false });
     navigate(SCREENS.LOGIN);
   }
 };
 
-const sendOtpToEmail = async <
-  R extends MessageResponse,
-  A extends {email: string},
->({
+const verifyEmailCode = async <R extends MessageResponse, A extends { token: string }>({
   data,
 }: {
   data: A;
 }) => {
-  const response: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.VERIFY_EMAIL,
-    data,
-  );
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
+    store.dispatch(setIsUserLoggedIn(true));
+    return;
+  }
+  const response: R | undefined = await handleApiRequest<R, A>(API_ROUTES.VERIFY_EMAIL, data, true);
   if (response) {
-    const body = {
-      email: data?.email,
-      code: '9999',
-    };
-    verifyOtpCode({data: body});
+    showToast({ message: response?.message, isError: false });
+    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
+    store.dispatch(setIsUserLoggedIn(true));
   }
 };
-const verifyOtpCode = async <R extends User, A extends VerifyOtp>({
+const resendEmailCode = async <R extends MessageResponse, A extends { email: string }>({
   data,
 }: {
   data: A;
 }) => {
-  const user: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.VERIFY_OTP,
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return;
+  }
+  const response: R | undefined = await handleApiRequest<R, A>(
+    API_ROUTES.RESEND_VERFICATION,
     data,
+    true,
+    false,
   );
+  if (response) {
+    showToast({ message: response?.message, isError: false });
+  }
+};
+
+const verifyOtpCode = async <R extends User, A extends VerifyOtp>({ data }: { data: A }) => {
+  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.VERIFY_OTP, data);
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     navigate(SCREENS.RESET_PASSWORD);
   }
 };
 
-const signUpUser = async <R extends User, A extends Login_SignUp>({
-  data,
-}: {
-  data: A;
-}) => {
-  const user: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.REGISTER,
-    data,
-  );
+const signUpUser = async <R extends User, A extends Login_SignUp>({ data }: { data: A }) => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    navigate(SCREENS.VERIFICATION, {
+      email: data?.email,
+    });
+    return;
+  }
+  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.REGISTER, data);
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
-    store.dispatch(setIsUserLoggedIn(true));
-    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
-    store.dispatch(setUserDetails(user));
+    navigate(SCREENS.VERIFICATION, {
+      email: data?.email,
+    });
   }
 };
 
@@ -137,12 +140,21 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
   data: A;
   rememberMe: boolean;
 }) => {
-  const user: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.LOGIN,
-    data,
-  );
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
+    store.dispatch(setIsUserLoggedIn(true));
+    return;
+  }
+  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.LOGIN, data);
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
+    if (!user?.is_email_verified) {
+      resendEmailCode({data:{email:data?.email}})
+      navigate(SCREENS.VERIFICATION, {
+        email: data?.email,
+      });
+      return;
+    }
     store.dispatch(setIsUserLoggedIn(true));
     store.dispatch(setUserDetails(user));
     if (rememberMe) {
@@ -154,8 +166,9 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
 export {
   signUpUser,
   loginUser,
-  sendOtpToEmail,
+  verifyEmailCode,
   verifyOtpCode,
+  resendEmailCode,
   loginUserThroughSocial,
   resetUserPassword,
 };
