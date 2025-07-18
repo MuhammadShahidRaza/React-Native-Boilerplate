@@ -14,4 +14,5 @@ declare module '@env' {
   export const ANDROID_CHANNEL_ZENDESK: string;
   export const IOS_CHANNEL_ZENDESK: string;
   export const MAP_API_KEY: string;
+  export const IS_ALPHA_PHASE: string;
 }

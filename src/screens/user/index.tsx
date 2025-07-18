@@ -28,3 +28,7 @@ export * from './SelectRegion';
 export * from './Cart';
 export * from './OrderDetail';
 export * from './ProductDetail';
+export * from './SubCategoryFood';
+export * from './EcommerceDetails';
+export * from './ViewAllEcommerce';
+export * from './Checkout';

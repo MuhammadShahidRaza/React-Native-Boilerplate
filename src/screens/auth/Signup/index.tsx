@@ -1,18 +1,17 @@
 import { StyleSheet } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
 import {
   COLORS,
   deviceDetails,
-  // getFCMToken,
   screenWidth,
   signUpValidationSchema,
+  getFCMToken,
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Input, AuthComponent, PhoneInputComponent } from 'components/index';
 import { getCurrentLocation, reverseGeocode } from 'utils/location';
-import { useAppDispatch } from 'types/reduxTypes';
-import { navigate } from 'navigation/Navigators';
+import { signUpUser } from 'api/functions/auth';
 
 interface SignUpFormValues {
   email: string;
@@ -27,7 +26,6 @@ interface SignUpFormValues {
 }
 
 export const SignUp = () => {
-  const dispatch = useAppDispatch();
   const initialValues: SignUpFormValues = {
     email: __DEV__ ? 'shahid@mailinator.com' : '',
     password: __DEV__ ? 'Passward123!' : '',
@@ -45,17 +43,13 @@ export const SignUp = () => {
       email: values?.email,
       password: values?.password,
       full_name: values?.full_name,
-      username: values?.username,
+      user_name: values?.username,
       country: values?.country,
       phone: values?.phoneNumber,
-      device_token: '1234567890',
-      // device_token: await getFCMToken(),
+      device_token: await getFCMToken(),
       ...deviceDetails(),
     };
-    navigate(SCREENS.VERIFICATION);
-    // dispatch(setIsUserLoggedIn(true));
-    // setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
-    // signUpUser({ data });
+    signUpUser({ data });
   };
   const formik = useFormikForm<SignUpFormValues>({
     initialValues,

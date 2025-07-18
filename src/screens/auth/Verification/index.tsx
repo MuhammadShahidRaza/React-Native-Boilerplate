@@ -8,18 +8,15 @@ import { useRoute } from '@react-navigation/native';
 import { navigate } from 'navigation/Navigators';
 import { AppRouteProp } from 'types/navigation';
 import { SCREENS } from 'constants/routes';
-import { setItem } from 'utils/storage';
-import { VARIABLES } from 'constants/common';
-import { useAppDispatch } from 'types/reduxTypes';
-import { setIsUserLoggedIn } from 'store/slices/appSettings';
+import { resendEmailCode, verifyEmailCode } from 'api/functions/auth';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
 
 export const Verification = () => {
-  const dispatch = useAppDispatch();
   const route = useRoute<AppRouteProp<typeof SCREENS.VERIFICATION>>();
   const isFromForgot = route.params?.isFromForgot;
+  const email = route.params?.email;
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(TIMER_SECONDS);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
@@ -31,6 +28,7 @@ export const Verification = () => {
       return () => clearInterval(interval);
     } else {
       setIsResendEnabled(true);
+      return;
     }
   }, [timer]);
 
@@ -45,9 +43,7 @@ export const Verification = () => {
       navigate(SCREENS.RESET_PASSWORD);
       return;
     }
-    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
-    dispatch(setIsUserLoggedIn(true));
-    // Add verification logic here
+    verifyEmailCode({ data: { token: code } });
   };
 
   const handleResend = () => {
@@ -56,7 +52,7 @@ export const Verification = () => {
       setIsResendEnabled(false);
       setCode('');
       inputRef.current?.focus();
-      // Add resend logic here
+      resendEmailCode({data:{email}})
     }
   };
 

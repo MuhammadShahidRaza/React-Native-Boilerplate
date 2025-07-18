@@ -7,5 +7,5 @@ export * from './toast';
 export * from './axios';
 // export * from './location';
 export * from './linking';
-// export * from './notifications';
+export * from './notifications';
 export * from './helpers/index';

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { HomeComponent, Icon, MessageBox, RowComponent, Wrapper } from 'components/index';
 import { screenHeight, screenWidth, STYLES, COLORS, greetings } from 'utils/index';
 import { IMAGES } from 'constants/assets';
-import { COMMON_TEXT, SCREENS, TEMPORARY_TEXT, VARIABLES } from 'constants/index';
+import { SCREENS, TEMPORARY_TEXT, VARIABLES } from 'constants/index';
 import { FontSize } from 'types/index';
 import { navigate } from 'navigation/index';
 

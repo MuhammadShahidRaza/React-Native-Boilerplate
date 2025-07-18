@@ -156,11 +156,11 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
           },
           containerStyle: {
             borderRadius: 8,
-            shadowColor: params?.heading == 'Wears' ? COLORS.TRANSPARENT : COLORS.BLACK,
+            shadowColor: params?.heading == 'Fashion' ? COLORS.TRANSPARENT : COLORS.BLACK,
           },
           imageStyle: {
-            width: screenWidth(params?.heading == 'Wears' && isIOS() ? 36 : 35),
-            height: screenHeight(params?.heading == 'Wears' ? 16 : 10),
+            width: screenWidth(params?.heading == 'Fashion' && isIOS() ? 36 : 35),
+            height: screenHeight(params?.heading == 'Fashion' ? 16 : 10),
           },
         })}
         <RowComponent

@@ -1,12 +1,12 @@
 interface Login_SignUp {
   first_name?: string;
   last_name?: string;
-  username?: string;
+  user_name?: string;
   full_name?: string;
   email: string;
   phone?: string;
   password: string;
-  country: string;
+  country?: string;
   picture?: string | null;
   device_type?: string;
   device_token: string;

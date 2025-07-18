@@ -1,8 +1,8 @@
-import axios, {AxiosError, AxiosRequestConfig} from 'axios';
-import {getItem, removeMultipleItem} from './index';
-import {ENV_CONSTANTS, VARIABLES} from 'constants/common';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { getItem, removeMultipleItem } from './index';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import store from 'store/store';
-import {setIsAppLoading, setIsUserLoggedIn} from 'store/slices/appSettings';
+import { setIsAppLoading, setIsUserLoggedIn } from 'store/slices/appSettings';
 
 interface RequestOptions {
   url: string;
@@ -12,12 +12,14 @@ interface RequestOptions {
   showLoader?: boolean;
 }
 
-interface ErrorResponse {
+export interface ErrorResponse {
   error?: {
     messages: string[];
   };
-  errors?: string | string[];
   message?: string;
+  messages?: string[];
+  errors?: string[] | { field: string; message: string }[];
+  success?: boolean;
 }
 
 export interface ErrorMessage {
@@ -51,11 +53,7 @@ const setAuthToken = async () => {
 class HttpError extends Error {
   status: number;
   errors?: string[] | string;
-  constructor(
-    message: string | undefined,
-    status: number,
-    errors?: string[] | string,
-  ) {
+  constructor(message: string | undefined, status: number, errors?: string[] | string) {
     super(message);
     this.status = status;
     this.errors = errors;
@@ -77,39 +75,53 @@ class SocketError extends Error {
 const checkUnAuth = async (error?: string) => {
   if (error === 'Unauthenticated') {
     store.dispatch(setIsUserLoggedIn(false));
-    await removeMultipleItem([
-      VARIABLES.IS_USER_LOGGED_IN,
-      VARIABLES.USER_TOKEN,
-    ]);
+    await removeMultipleItem([VARIABLES.IS_USER_LOGGED_IN, VARIABLES.USER_TOKEN]);
   }
 };
 
 const handleRequestError = (error: AxiosError<ErrorResponse>) => {
   store.dispatch(setIsAppLoading(false));
+
   if (axios.isAxiosError(error)) {
+    // 🌐 Network or socket error
     if (!error.response) {
-      // Check for network error or socket timeout
       if (error.code === 'ECONNABORTED') {
-        throw new SocketError(
-          'Socket timeout: The request took too long to complete.',
-        );
+        throw new SocketError('Socket timeout: The request took too long to complete.');
       }
       throw new NetworkError('No Internet Connection');
     }
-    const status: number = error.response.status;
-    if (status) {
-      const responseData = error.response.data;
-      if (responseData.error) {
-        checkUnAuth(responseData.error.messages[0]);
-        throw new HttpError(responseData.error.messages[0], status);
-      } else if (responseData.errors || responseData.message) {
-        checkUnAuth(responseData.message);
-        throw new HttpError(responseData.message, status, responseData.errors);
-      } else {
-        throw new HttpError(error.response.statusText, status);
-      }
+
+    const status = error.response.status;
+    const responseData = error.response.data;
+
+    // 1️⃣ Check deep nested error: { error: { messages: [...] } }
+    if (responseData?.error?.messages?.[0]) {
+      const message = responseData.error.messages[0];
+      checkUnAuth(message);
+      throw new HttpError(message, status);
     }
+
+    // 2️⃣ Check for general messages: { messages: [...] }
+    if (responseData?.messages?.[0]) {
+      const message = responseData.messages[0];
+      checkUnAuth(message);
+      throw new HttpError(message, status, responseData.errors);
+    }
+
+    // 3️⃣ Field validation or fallback single message
+    if (responseData?.errors?.length > 0 || responseData?.message) {
+      const fallbackMessage =
+        responseData.message || responseData.errors?.[0]?.message || 'An unknown error occurred';
+
+      checkUnAuth(fallbackMessage);
+      throw new HttpError(fallbackMessage, status, responseData.errors);
+    }
+
+    // 4️⃣ Fallback to status text
+    throw new HttpError(error.response.statusText, status);
   }
+
+  // ❌ Not an Axios error
   throw error;
 };
 
@@ -133,10 +145,7 @@ const makeHttpRequest = async (
       return response?.data;
     }
   } catch (error) {
-    if (
-      error instanceof AxiosError &&
-      error?.response?.data?.error?.type === 'card_error'
-    ) {
+    if (error instanceof AxiosError && error?.response?.data?.error?.type === 'card_error') {
       throw new HttpError(
         error?.response?.data?.error?.message,
         error?.response?.data?.error?.code,
@@ -154,11 +163,7 @@ const get = async ({
   includeToken = true,
   showLoader = true,
 }: RequestOptions) => {
-  return makeHttpRequest(
-    {method: 'GET', url, ...config},
-    includeToken,
-    showLoader,
-  );
+  return makeHttpRequest({ method: 'GET', url, ...config }, includeToken, showLoader);
 };
 
 const post = async ({
@@ -168,11 +173,7 @@ const post = async ({
   includeToken = true,
   showLoader = true,
 }: RequestOptions) => {
-  return makeHttpRequest(
-    {method: 'POST', url, data, ...config},
-    includeToken,
-    showLoader,
-  );
+  return makeHttpRequest({ method: 'POST', url, data, ...config }, includeToken, showLoader);
 };
 
 const put = async ({
@@ -182,11 +183,7 @@ const put = async ({
   includeToken = true,
   showLoader = true,
 }: RequestOptions) => {
-  return makeHttpRequest(
-    {method: 'PUT', url, data, ...config},
-    includeToken,
-    showLoader,
-  );
+  return makeHttpRequest({ method: 'PUT', url, data, ...config }, includeToken, showLoader);
 };
 
 const patch = async ({
@@ -196,11 +193,7 @@ const patch = async ({
   includeToken = true,
   showLoader = true,
 }: RequestOptions) => {
-  return makeHttpRequest(
-    {method: 'PATCH', url, data, ...config},
-    includeToken,
-    showLoader,
-  );
+  return makeHttpRequest({ method: 'PATCH', url, data, ...config }, includeToken, showLoader);
 };
 
 // const remove = async (url, config={}, includeToken = true) => {
@@ -288,13 +281,4 @@ const patchWithSingleFile = async ({
   );
 };
 
-export {
-  setAuthToken,
-  get,
-  post,
-  put,
-  patch,
-  remove,
-  postWithSingleFile,
-  patchWithSingleFile,
-};
+export { setAuthToken, get, post, put, patch, remove, postWithSingleFile, patchWithSingleFile };

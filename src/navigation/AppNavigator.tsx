@@ -25,15 +25,16 @@ import {
   SelectRegion,
   ViewAll,
   ProductDetail,
+  SubCategoryFood,
+  EcommerceDetails,
+  ViewAllEcommerce,
   OrderDetail,
+  Checkout,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler, useTranslation } from 'hooks/index';
 import { screenOptions } from '.';
 import { PrivacyPolicy } from 'screens/common';
-import { SubCategoryFood } from 'screens/user/SubCategoryFood';
-import { EcommerceDetails } from 'screens/user/EcommerceDetails';
-import { ViewAllEcommerce } from 'screens/user/ViewAllEcommerce';
 
 export const AppNavigator = () => {
   useBackHandler();
@@ -169,6 +170,10 @@ export const AppNavigator = () => {
     [SCREENS.CART]: {
       component: Cart,
       options: { headerShown: true, headerTitle: 'Cart' },
+    },
+    [SCREENS.CHECKOUT]: {
+      component: Checkout,
+      options: { headerShown: true, headerTitle: 'Checkout' },
     },
   };
   return (

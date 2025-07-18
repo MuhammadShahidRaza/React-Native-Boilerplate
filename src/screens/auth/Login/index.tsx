@@ -1,19 +1,12 @@
 import { StyleSheet } from 'react-native';
 import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
-import {
-  loginValidationSchema,
-  COLORS,
-  screenWidth,
-  setItem,
-  // getFCMToken,
-  // deviceDetails,
-} from 'utils/index';
+import { loginValidationSchema, COLORS, screenWidth, deviceDetails } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
 import { navigate } from 'navigation/index';
-import { useAppDispatch } from 'types/reduxTypes';
-import { setIsUserLoggedIn } from 'store/slices/appSettings';
+import { loginUser } from 'api/functions/auth';
+import { getFCMToken } from 'utils/notifications';
 
 interface LoginFormValues {
   email: string;
@@ -23,7 +16,6 @@ interface LoginFormValues {
 }
 
 export const Login = () => {
-  const dispatch = useAppDispatch();
   const initialValues: LoginFormValues = {
     email: __DEV__ ? 'shahid@mailinator.com' : '',
     password: __DEV__ ? 'Passward123!' : '',
@@ -35,12 +27,11 @@ export const Login = () => {
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
-      // device_token: await getFCMToken(),
-      // ...deviceDetails(),
+      device_token: await getFCMToken(),
+      ...deviceDetails(),
     };
-    setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
-    dispatch(setIsUserLoggedIn(true));
-    // loginUser({ data, rememberMe: values?.rememberMe });
+
+    loginUser({ data, rememberMe: values?.rememberMe });
   };
 
   const formik = useFormikForm<LoginFormValues>({

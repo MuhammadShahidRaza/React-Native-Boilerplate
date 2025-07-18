@@ -7,7 +7,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { isIOS, screenHeight } from 'utils/index';
 import { Home, MyAccount, Favorites, Orders } from 'screens/user';
 import { useTranslation } from 'hooks/useTranslation';
-import { screenOptions } from './Navigators';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const screens = {
   [SCREENS.HOME]: Home,
@@ -35,6 +35,7 @@ const getIconConfig = (routeName: string) => {
 };
 
 export const BottomNavigator = () => {
+  const insets = useSafeAreaInsets();
   const { isLangRTL } = useTranslation();
   const Bottom = createBottomTabNavigator();
 
@@ -48,7 +49,7 @@ export const BottomNavigator = () => {
           headerShown: false,
           tabBarStyle: {
             backgroundColor: COLORS.PRIMARY,
-            height: screenHeight(isIOS() ? 10 : 8.5),
+            height: screenHeight(isIOS() ? 10 : 8.5) + insets.bottom,
             borderTopLeftRadius: 15,
             borderTopRightRadius: 15,
             paddingTop: 5,

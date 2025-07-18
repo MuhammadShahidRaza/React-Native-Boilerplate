@@ -87,7 +87,7 @@ export type RootStackParamList = {
   [SCREENS.SIGN_UP]: undefined;
   [SCREENS.FORGOT_PASSWORD]: undefined;
   [SCREENS.RESET_PASSWORD]: { token: string };
-  [SCREENS.VERIFICATION]: { isFromForgot: boolean };
+  [SCREENS.VERIFICATION]: { isFromForgot?: boolean; email: string };
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();

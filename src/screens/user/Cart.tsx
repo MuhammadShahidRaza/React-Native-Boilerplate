@@ -7,34 +7,33 @@ import {
   Wrapper,
 } from 'components/index';
 import { IMAGES, SCREENS } from 'constants/index';
-import { reset } from 'navigation/index';
+import { navigate } from 'navigation/index';
 import { useState } from 'react';
 import { StyleProp, StyleSheet, TextStyle, View } from 'react-native';
 import { FontSize, StyleType, FontWeight } from 'types/index';
 import { STYLES } from 'utils/index';
 
+export const renderSubPriceItem = ({
+  title,
+  value,
+  style,
+  titleStyle,
+  valueStyle,
+}: {
+  title: string;
+  value: string;
+  style: StyleType;
+  titleStyle: StyleProp<TextStyle>;
+  valueStyle: StyleProp<TextStyle>;
+}) => {
+  return (
+    <RowComponent style={style}>
+      <Typography style={titleStyle}>{title}</Typography>
+      <Typography style={valueStyle}>{`$${Number(value)?.toFixed(2)}`}</Typography>
+    </RowComponent>
+  );
+};
 export const Cart = () => {
-  const renderSubItem = ({
-    title,
-    value,
-    style,
-    titleStyle,
-    valueStyle,
-  }: {
-    title: string;
-    value: string;
-    style: StyleType;
-    titleStyle: StyleProp<TextStyle>;
-    valueStyle: StyleProp<TextStyle>;
-  }) => {
-    return (
-      <RowComponent style={style}>
-        <Typography style={titleStyle}>{title}</Typography>
-        <Typography style={valueStyle}>{`$${Number(value)?.toFixed(2)}`}</Typography>
-      </RowComponent>
-    );
-  };
-
   const [cartItems, setCartItems] = useState<any[]>([
     {
       image: IMAGES.HOTELS,
@@ -95,22 +94,22 @@ export const Cart = () => {
       />
       <View style={styles.container}>
         <View style={styles.subItemContainer}>
-          {renderSubItem({
+          {renderSubPriceItem({
             title: 'Sub Total',
             value: '100',
             style: styles.subItem,
             titleStyle: styles.heading,
             valueStyle: styles.heading,
           })}
-          {renderSubItem({
+          {renderSubPriceItem({
             title: 'Standard Delivery',
             value: '93',
             style: styles.subItem,
             titleStyle: styles.title,
             valueStyle: styles.title,
           })}
-          {renderSubItem({
-            title: 'Platform Free',
+          {renderSubPriceItem({
+            title: 'Platform Fee',
             value: '7',
             style: styles.subItem,
             titleStyle: styles.title,
@@ -118,7 +117,7 @@ export const Cart = () => {
           })}
         </View>
         <View style={styles.subItemContainer}>
-          {renderSubItem({
+          {renderSubPriceItem({
             title: 'Total (Incl. fees and tax)',
             value: '200',
             style: styles.subItem,
@@ -129,7 +128,7 @@ export const Cart = () => {
         <Button
           title={'Confirm Payment Address'}
           onPress={() => {
-            reset(SCREENS.BOTTOM_STACK);
+            navigate(SCREENS.CHECKOUT);
           }}
           style={styles.button}
         />

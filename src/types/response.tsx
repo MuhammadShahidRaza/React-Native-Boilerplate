@@ -27,6 +27,7 @@ export interface User {
   country: string | null;
   city: string | null;
   state: string | null;
+  is_email_verified: string | boolean;
   address: string | null;
   longitude: number | null;
   latitude: number | null;
