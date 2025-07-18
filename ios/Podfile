@@ -18,7 +18,7 @@ end
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
@@ -56,7 +56,8 @@ end
 
 target 'XtraFind' do
   config = use_native_modules!
-
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
