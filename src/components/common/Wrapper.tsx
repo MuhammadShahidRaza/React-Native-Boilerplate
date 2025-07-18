@@ -2,7 +2,7 @@ import { KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet } from 'react-n
 import { COLORS, isIOS } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -26,10 +26,12 @@ export const Wrapper: React.FC<WrapperProps> = ({
   showAppLoader = false,
 }) => {
   const isAppLoading = useAppSelector((state: RootState) => state.app.isAppLoading);
-
+  const insets = useSafeAreaInsets();
   return (
     <>
-      {useSafeArea && <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor }]} />}
+      {useSafeArea && (
+        <SafeAreaView edges={['top']} style={[styles.safeArea, { backgroundColor }]} />
+      )}
       <StatusBar
         backgroundColor={backgroundColor}
         barStyle={darkMode ? 'dark-content' : 'light-content'}
@@ -38,7 +40,14 @@ export const Wrapper: React.FC<WrapperProps> = ({
       {showAppLoader && isAppLoading && <Loader />}
       <KeyboardAvoidingView
         behavior={isIOS() ? 'padding' : 'height'}
-        style={[styles.container, { backgroundColor: COLORS.WHITE }]}
+        style={[
+          styles.container,
+          {
+            backgroundColor: COLORS.WHITE,
+            paddingBottom: insets.bottom,
+          },
+        ]}
+        // keyboardVerticalOffset={isIOS() ? 0 : 80}
       >
         {useScrollView ? (
           <ScrollView
