@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableOpacityProps,
-  ViewStyle,
 } from 'react-native';
 import { StyleType } from 'types/common';
 
@@ -33,11 +32,7 @@ export const Photo: React.FC<PhotoProps> = ({
   ...otherProps
 }) => {
   const imageSource =
-    typeof source === 'string'
-      ? {uri: source}
-      : typeof source === 'number'
-      ? source
-      : undefined;
+    typeof source === 'string' ? { uri: source } : typeof source === 'number' ? source : undefined;
 
   const handlePress = () => {
     if (onPress) {
@@ -51,15 +46,12 @@ export const Photo: React.FC<PhotoProps> = ({
       onPress={handlePress}
       style={[styles.container, containerStyle]}
       disabled={disabled}
-      {...otherProps}>
+      {...otherProps}
+    >
       <Image
         source={imageSource}
         resizeMode={resizeMode}
-        style={[
-          styles.image,
-          {width: size, height: size, borderRadius},
-          imageStyle,
-        ]}
+        style={[styles.image, { width: size, height: size, borderRadius }, imageStyle]}
       />
     </TouchableOpacity>
   );
