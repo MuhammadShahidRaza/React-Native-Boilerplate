@@ -1,13 +1,14 @@
-import {API_ROUTES} from 'api/routes';
-import {handleGetApiRequest} from '.';
+import { API_ROUTES } from 'api/routes';
+import { handleGetApiRequest } from '.';
 import store from 'store/store';
-import {User} from 'types/response';
-import {setUserDetails} from 'store/slices/user';
+import { User } from 'types/response';
+import { setUserDetails } from 'store/slices/user';
+// import crashlytics from '@react-native-firebase/crashlytics';
 
-const getUserDetails = async <R extends {user: User}>() => {
+const getUserDetails = async <R extends { user: User }>() => {
   const user = await handleGetApiRequest<R>(API_ROUTES.GET_PROFILE);
   if (user) {
-    store.dispatch(setUserDetails(user?.user));
+    // crashlytics().setUserId(String(user.user.id)), store.dispatch(setUserDetails(user?.user));
     // store.dispatch(
     //   setUserDetails({
     //     id: 19,
@@ -59,4 +60,4 @@ const getUserDetails = async <R extends {user: User}>() => {
   }
 };
 
-export {getUserDetails};
+export { getUserDetails };
