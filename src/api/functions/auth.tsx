@@ -7,7 +7,7 @@ import { navigate } from 'navigation/Navigators';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
 import { setUserDetails } from 'store/slices/user';
 import store from 'store/store';
-import { MessageResponse, User } from 'types/response';
+import { MessageResponse, User } from 'types/responseTypes';
 import { post } from 'utils/axios';
 import { setItem } from 'utils/storage';
 import { showToast } from 'utils/toast';
@@ -15,17 +15,22 @@ import { showToast } from 'utils/toast';
 // R type for Return
 // A type for Accept
 
-const handleApiRequest = async <R extends object, A extends object>(
-  url: string,
-  data: A,
-  token?: boolean,
-  showLoader?: boolean,
-): Promise<R | undefined> => {
+const handleApiRequest = async <R extends object, A extends object>({
+  url,
+  data,
+  wantToken,
+  showLoader,
+}: {
+  url: string;
+  data: A;
+  wantToken?: boolean;
+  showLoader?: boolean;
+}): Promise<R | undefined> => {
   try {
     const response = await post({
       url,
       data,
-      includeToken: token ? true : false,
+      includeToken: wantToken ? true : false,
       showLoader,
     });
     return (
@@ -49,11 +54,10 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
 }: {
   data: A;
 }) => {
-  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.SOCIAL_LOGIN, data);
+  const user: R | undefined = await handleApiRequest<R, A>({ url: API_ROUTES.SOCIAL_LOGIN, data });
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     store.dispatch(setIsUserLoggedIn(true));
-    store.dispatch(setUserDetails(user));
   }
 };
 
@@ -62,11 +66,11 @@ const resetUserPassword = async <R extends MessageResponse, A extends ResetPassw
 }: {
   data: A;
 }) => {
-  const response: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.RESET_PASSWORD,
+  const response: R | undefined = await handleApiRequest<R, A>({
+    url: API_ROUTES.RESET_PASSWORD,
     data,
-    true,
-  );
+    wantToken: true,
+  });
   if (response) {
     showToast({ message: response?.message, isError: false });
     navigate(SCREENS.LOGIN);
@@ -83,7 +87,11 @@ const verifyEmailCode = async <R extends MessageResponse, A extends { token: str
     store.dispatch(setIsUserLoggedIn(true));
     return;
   }
-  const response: R | undefined = await handleApiRequest<R, A>(API_ROUTES.VERIFY_EMAIL, data, true);
+  const response: R | undefined = await handleApiRequest<R, A>({
+    url: API_ROUTES.VERIFY_EMAIL,
+    data,
+    wantToken: true,
+  });
   if (response) {
     showToast({ message: response?.message, isError: false });
     setItem(VARIABLES.IS_USER_LOGGED_IN, VARIABLES.IS_USER_LOGGED_IN);
@@ -98,19 +106,19 @@ const resendEmailCode = async <R extends MessageResponse, A extends { email: str
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     return;
   }
-  const response: R | undefined = await handleApiRequest<R, A>(
-    API_ROUTES.RESEND_VERFICATION,
+  const response: R | undefined = await handleApiRequest<R, A>({
+    url: API_ROUTES.RESEND_VERFICATION,
     data,
-    true,
-    false,
-  );
+    wantToken: true,
+    showLoader: false,
+  });
   if (response) {
     showToast({ message: response?.message, isError: false });
   }
 };
 
 const verifyOtpCode = async <R extends User, A extends VerifyOtp>({ data }: { data: A }) => {
-  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.VERIFY_OTP, data);
+  const user: R | undefined = await handleApiRequest<R, A>({ url: API_ROUTES.VERIFY_OTP, data });
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     navigate(SCREENS.RESET_PASSWORD);
@@ -124,7 +132,7 @@ const signUpUser = async <R extends User, A extends Login_SignUp>({ data }: { da
     });
     return;
   }
-  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.REGISTER, data);
+  const user: R | undefined = await handleApiRequest<R, A>({ url: API_ROUTES.REGISTER, data });
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     navigate(SCREENS.VERIFICATION, {
@@ -145,11 +153,11 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
     store.dispatch(setIsUserLoggedIn(true));
     return;
   }
-  const user: R | undefined = await handleApiRequest<R, A>(API_ROUTES.LOGIN, data);
+  const user: R | undefined = await handleApiRequest<R, A>({ url: API_ROUTES.LOGIN, data });
   if (user) {
     setItem(VARIABLES.USER_TOKEN, user?.token);
     if (!user?.is_email_verified) {
-      resendEmailCode({data:{email:data?.email}})
+      resendEmailCode({ data: { email: data?.email } });
       navigate(SCREENS.VERIFICATION, {
         email: data?.email,
       });
