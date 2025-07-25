@@ -1,31 +1,38 @@
-import { Button, Header, Input, Wrapper } from 'components/common';
+import { contactUs } from 'api/functions/app/settings';
+import { Button, Input, Wrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { COMMON_TEXT } from 'constants/screens';
 import { FocusProvider } from 'hooks/useFocus';
 import { useFormikForm } from 'hooks/useFormik';
-import { onBack } from 'navigation/Navigators';
 import { StyleSheet, View } from 'react-native';
+import { useSelector } from 'react-redux';
 import { FontSize } from 'types/fontTypes';
+import { RootState } from 'types/reduxTypes';
 import { STYLES } from 'utils/commonStyles';
 import { screenHeight } from 'utils/helpers';
 import { contactUsValidationSchema } from 'utils/validations';
 
-interface ContactUsFormValues {
+export interface ContactUsFormValues {
+  name: string;
   email: string;
   subject: string;
   message: string;
 }
 
 export const ContactUs = () => {
-  //   const dispatch = useAppDispatch();
+  const { userDetails } = useSelector((state: RootState) => state?.user);
+
   const initialValues: ContactUsFormValues = {
-    email: 'shahid@gmail.com',
-    subject: '',
-    message: '',
+    name: userDetails?.full_name ?? '',
+    email: userDetails?.email ?? '',
+    subject: __DEV__ ? 'testing' : '',
+    message: __DEV__
+      ? 'My account has been blocked by the admin. I apologize for any inconvenience caused and kindly request to have it reopened.'
+      : '',
   };
 
   const handleSubmit = async (values: ContactUsFormValues) => {
-    onBack();
+    await contactUs(values);
   };
 
   const formik = useFormikForm<ContactUsFormValues>({
@@ -94,7 +101,12 @@ export const ContactUs = () => {
           />
         </FocusProvider>
 
-        <Button title={COMMON_TEXT.SUBMIT} onPress={formik.handleSubmit} style={styles.button} />
+        <Button
+          loading={true}
+          title={COMMON_TEXT.SUBMIT}
+          onPress={formik.handleSubmit}
+          style={styles.button}
+        />
       </View>
     </Wrapper>
   );

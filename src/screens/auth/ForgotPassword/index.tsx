@@ -57,7 +57,12 @@ export const ForgotPassword = () => {
           }}
         />
       </FocusProvider>
-      <Button title={COMMON_TEXT.SUBMIT} onPress={formik.handleSubmit} style={styles.button} />
+      <Button
+        loading={true}
+        title={COMMON_TEXT.SUBMIT}
+        onPress={formik.handleSubmit}
+        style={styles.button}
+      />
     </AuthComponent>
   );
 };

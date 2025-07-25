@@ -1,7 +1,7 @@
-import {Linking} from 'react-native';
+import { Linking } from 'react-native';
 
-export async function openUrl(url) {
-  await Linking.openURL(`https://${url}`)
+export async function openUrl(url: string) {
+  await Linking.openURL(`${url}`)
     .then(() => {
       // URL opened successfully
     })
@@ -10,7 +10,7 @@ export async function openUrl(url) {
     });
 }
 
-export async function openEmail(email) {
+export async function openEmail(email: string) {
   await Linking.openURL(`mailto:${email}`)
     .then(() => {
       // URL opened successfully
@@ -20,7 +20,7 @@ export async function openEmail(email) {
     });
 }
 
-export async function openPhoneNumber(phoneNumber) {
+export async function openPhoneNumber(phoneNumber: string) {
   await Linking.openURL(`tel:${phoneNumber}`)
     .then(() => {
       // URL opened successfully
@@ -30,7 +30,7 @@ export async function openPhoneNumber(phoneNumber) {
     });
 }
 
-export async function openMessage(phoneNumber) {
+export async function openMessage(phoneNumber: string) {
   const messageUrl = `sms:${phoneNumber}`;
 
   try {

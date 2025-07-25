@@ -93,6 +93,7 @@ const handleRequestError = (error: AxiosError<ErrorResponse>) => {
 
     const status = error.response.status;
     const responseData = error.response.data;
+    console.log(responseData);
 
     // 1️⃣ Check deep nested error: { error: { messages: [...] } }
     if (responseData?.error?.messages?.[0]) {

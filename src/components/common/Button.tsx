@@ -41,7 +41,11 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const isAppLoading = useAppSelector((state: RootState) => state.app.isAppLoading);
-  const buttonStyles = [styles.button, disabled || loading ? styles.disabledButton : null, style];
+  const buttonStyles = [
+    styles.button,
+    disabled || (loading && isAppLoading) ? styles.disabledButton : null,
+    style,
+  ];
 
   const textStyles = [
     styles.text,
@@ -56,7 +60,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || (loading && isAppLoading)}
       {...props}
     >
-      {loading || isAppLoading ? (
+      {loading && isAppLoading ? (
         <ActivityIndicator color={loaderColor} size={loaderSize} />
       ) : (
         <RowComponent style={[{ gap: 10, justifyContent: 'center' }, containerStyle]}>

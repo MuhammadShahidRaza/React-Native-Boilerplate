@@ -4,91 +4,99 @@ import {
   FlatListComponent,
   Typography,
   SearchBar,
-  SvgComponent,
   Photo,
   SkeletonLoader,
   renderHorizontalItemsWithRow,
 } from 'components/index';
 import { COLORS } from 'utils/colors';
 import { isIOS, screenHeight, screenWidth } from 'utils/index';
-import { categoriesList, CategoryType, ItemType, subCategoriesList } from '.';
 import { styles } from './styles';
-import { SCREENS } from 'constants/index';
-import { navigate } from 'navigation/index';
 import { FontWeight } from 'types/fontTypes';
+import { useAppSelector } from 'types/reduxTypes';
+import { Category, Subcategory } from 'types/responseTypes';
+import { getMainCategoriesHomeItems } from 'api/functions/app/home';
 
 export const HomeComponent = () => {
+  const { categoriesList } = useAppSelector(state => state.category);
   const [searchText, setSearchText] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('1');
+  const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const [itemHeading, setItemHeading] = useState<string>('');
-
-  // Memoize the selected category data to prevent unnecessary recalculations
-  const selectedData = useMemo(() => {
+  const activeCategory = useMemo(() => {
     const mainCategory = categoriesList.find(cat => cat.id === selectedCategory);
     if (!mainCategory) return null;
-    return subCategoriesList.find(cat => cat.key === mainCategory.name);
-  }, [selectedCategory]);
+    return mainCategory;
+  }, [selectedCategory, categoriesList]);
 
   useEffect(() => {
-    if (!selectedData) return;
-    const mainCategory = categoriesList.find(cat => cat.id === selectedCategory);
+    if (!activeCategory) return;
+    const mainCategory = categoriesList.find(cat => cat?.id == selectedCategory);
     if (!mainCategory) return;
-    setItemHeading(mainCategory.name);
-  }, [selectedCategory, selectedData]);
+    setItemHeading(mainCategory?.title);
+  }, [selectedCategory, activeCategory, categoriesList]);
 
-  const handlePress = (id: string) => {
-    setSelectedCategory(id);
-  };
-
-  const handleSubCategoryPress = (item: {
-    key: string;
-    items: ItemType[];
-    categories?: { id: string; name: string; image: string }[];
-  }) => {
-    if (item?.key === 'Order Your Food') {
-      navigate(SCREENS.SUB_CATEGORY_FOOD, {
-        data: {
-          heading: item?.key,
-          items: item?.items ?? [],
-          itemHeading: item?.key,
-          categories: item?.categories ?? [],
-        },
-      });
-    } else if (item?.key === 'Electronics' || item?.key === 'Interior') {
-      navigate(SCREENS.VIEW_ALL, {
-        data: {
-          headerTitle: item?.key,
-          items: item?.items ?? [],
-        },
-      });
-    } else {
-      navigate(SCREENS.SUB_CATEGORY_ITEMS, {
-        data: {
-          heading: item?.key,
-          items: item?.items ?? [],
-          itemHeading: item?.key,
-        },
-      });
+  const handlePress = (item: Category) => {
+    if (item?.id == selectedCategory) return;
+    if (item?.is_subcategory) {
+      setSelectedCategory(item?.id);
+      return;
     }
+    // getMainCategoriesHomeItems({ id: item?.id, page: 1, limit: 3 });
+    getMainCategoriesHomeItems({ id: 1, page: 1, limit: 3 });
+    setSelectedCategory(item?.id);
   };
 
-  const renderCategoryItem = ({ item }: { item: CategoryType }) => (
+  // const handleSubCategoryPress = (item: {
+  //   key: string;
+  //   items: ItemType[];
+  //   categories?: { id: string; name: string; image: string }[];
+  // }) => {
+  //   if (item?.key === 'Order Your Food') {
+  //     navigate(SCREENS.SUB_CATEGORY_FOOD, {
+  //       data: {
+  //         heading: item?.key,
+  //         items: item?.items ?? [],
+  //         itemHeading: item?.key,
+  //         categories: item?.categories ?? [],
+  //       },
+  //     });
+  //   } else if (item?.key === 'Electronics' || item?.key === 'Interior') {
+  //     navigate(SCREENS.VIEW_ALL, {
+  //       data: {
+  //         headerTitle: item?.key,
+  //         items: item?.items ?? [],
+  //       },
+  //     });
+  //   } else {
+  //     navigate(SCREENS.SUB_CATEGORY_ITEMS, {
+  //       data: {
+  //         heading: item?.key,
+  //         items: item?.items ?? [],
+  //         itemHeading: item?.key,
+  //       },
+  //     });
+  //   }
+  // };
+
+  const renderCategoryItem = ({ item }: { item: Category }) => (
     <TouchableOpacity
       key={item?.id}
       style={styles.categoryItemContainer}
-      onPress={() => handlePress(item.id)}
+      onPress={() => handlePress(item)}
     >
-      <SvgComponent
-        containerStyle={[
+      <Photo
+        source={item?.icon}
+        disabled
+        imageStyle={{
+          width: screenWidth(isIOS() ? 13 : 15),
+          height: screenHeight(5),
+          resizeMode: 'contain',
+          tintColor: selectedCategory === item?.id ? COLORS.WHITE : COLORS.BORDER,
+        }}
+        style={[
           styles.categoryItemImageContainer,
           { backgroundColor: selectedCategory === item?.id ? COLORS.PRIMARY : COLORS.WHITE },
         ]}
-        Svg={item?.image}
-        svgHeight={screenHeight(5)}
-        svgWidth={screenWidth(isIOS() ? 13 : 15)}
-        fill={selectedCategory === item?.id ? COLORS.WHITE : COLORS.BORDER}
       />
-
       <Typography
         numberOfLines={1}
         style={[
@@ -99,25 +107,21 @@ export const HomeComponent = () => {
           },
         ]}
       >
-        {item?.name}
+        {item?.title}
       </Typography>
     </TouchableOpacity>
   );
 
-  const renderSubCategoryItem = ({
-    item,
-  }: {
-    item: { key: string; image: string; items: ItemType[] };
-  }) => (
-    <SkeletonLoader key={item?.key}>
+  const renderSubCategoryItem = ({ item }: { item: Subcategory }) => (
+    <SkeletonLoader key={item?.id}>
       <TouchableOpacity
         style={styles.subCategoryItemContainer}
-        onPress={() => handleSubCategoryPress(item)}
+        // onPress={() => handleSubCategoryPress(item)}
       >
-        <Photo disabled imageStyle={styles.subCategoryItemImage} source={item?.image} />
+        <Photo disabled imageStyle={styles.subCategoryItemImage} source={item?.thumbnail} />
         <View style={styles.textOverlay}>
           <Typography numberOfLines={1} style={styles.subCategoryItemText}>
-            {item?.key}
+            {item?.title}
           </Typography>
         </View>
       </TouchableOpacity>
@@ -125,10 +129,10 @@ export const HomeComponent = () => {
   );
 
   const renderCategoryContent = () => {
-    if (!selectedData) return null;
+    if (!activeCategory) return null;
 
-    const hasSubCategories = (selectedData.subCategories?.length ?? 0) > 0;
-    const hasItems = (selectedData.items?.length ?? 0) > 0;
+    const hasSubCategories = (activeCategory?.subcategories?.length ?? 0) > 0;
+    const hasItems = (activeCategory?.items?.length ?? 0) > 0;
 
     return (
       <ScrollView
@@ -137,11 +141,13 @@ export const HomeComponent = () => {
       >
         {hasSubCategories && (
           <FlatListComponent
-            keyExtractor={item => item?.key}
+            keyExtractor={item => item?.title}
             numColumns={2}
+            refreshing={false}
+            onRefresh={() => {}}
             columnWrapperStyle={styles.subCategoriesColumnWrapper}
             contentContainerStyle={styles.subCategoriesContentContainer}
-            data={selectedData.subCategories ?? []}
+            data={activeCategory?.subcategories}
             renderItem={renderSubCategoryItem}
           />
         )}
@@ -149,12 +155,12 @@ export const HomeComponent = () => {
         {!hasSubCategories && hasItems && (
           <>
             {renderHorizontalItemsWithRow({
-              data: selectedData.items ?? [],
+              data: activeCategory.items ?? [],
               heading: itemHeading,
               rowHeading: `Upcoming ${itemHeading}`,
             })}
             {renderHorizontalItemsWithRow({
-              data: selectedData.items ?? [],
+              data: activeCategory.items ?? [],
               heading: itemHeading,
               rowHeading: `Trending ${itemHeading}`,
             })}

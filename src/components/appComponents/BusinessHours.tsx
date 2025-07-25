@@ -1,5 +1,4 @@
 import { View, StyleSheet } from 'react-native';
-import React from 'react';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { FlatListComponent, RowComponent, Typography } from 'components/index';
 import { FontWeight } from 'types/fontTypes';

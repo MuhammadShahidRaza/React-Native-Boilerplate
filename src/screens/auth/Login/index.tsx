@@ -120,7 +120,7 @@ export const Login = () => {
           </Typography>
         </RowComponent>
       </RowComponent>
-      <Button title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
+      <Button  loading={true} title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
     </AuthComponent>
   );
 };

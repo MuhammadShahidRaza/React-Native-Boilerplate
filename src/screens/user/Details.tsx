@@ -26,13 +26,14 @@ import {
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { renderReviews, reviewsList } from './Reviews';
 import { IMAGES } from 'constants/assets';
-import { screenHeight, screenWidth } from 'utils/helpers';
+import { formatEventDateTimeRange, screenHeight, screenWidth } from 'utils/helpers';
 import StarRating from 'react-native-star-rating-widget';
 import { navigate } from 'navigation/index';
 import { BusinessHours } from 'components/appComponents/BusinessHours';
 
 export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
+  const vendor = params?.data?.vendor;
   useEffect(() => {
     navigation.setOptions({
       headerTitle: params?.heading,
@@ -80,6 +81,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     componentNameRight,
     rightIconStyle,
     isRightIcon = false,
+    translate = true,
     onPressRightIcon,
   }: {
     iconName: string;
@@ -88,6 +90,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     isRightIcon?: boolean;
     descriptionStyle?: StyleProp<TextStyle>;
     iconNameRight?: string;
+    translate?: boolean;
     rightIconStyle?: StyleProp<TextStyle>;
     componentNameRight?: keyof typeof IconComponentMapping;
     onPressRightIcon?: () => void;
@@ -95,7 +98,9 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     return (
       <RowComponent style={styles.infoRow}>
         <Icon iconName={iconName} componentName={componentName} size={18} color={COLORS.PRIMARY} />
-        <Typography style={[styles.infoDescription, descriptionStyle]}>{title}</Typography>
+        <Typography translate={translate} style={[styles.infoDescription, descriptionStyle]}>
+          {title}
+        </Typography>
         {isRightIcon && (
           <Icon
             iconName={iconNameRight ?? ''}
@@ -192,11 +197,20 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
                       componentName={VARIABLES.FontAwesome}
                       color={COLORS.DARK_GREY}
                     />
-                    <Typography style={styles.description}>24 May, 8:00 pm</Typography>
+                    <Typography style={styles.description}>
+                      {formatEventDateTimeRange({
+                        date: params?.data?.eventDetail?.date,
+                        startTime: params?.data?.eventDetail?.start_time,
+                        endTime: params?.data?.eventDetail?.end_time,
+                      })}
+                    </Typography>
                   </RowComponent>
 
                   <Typography style={styles.sectionTitle}>Tickets Price</Typography>
-                  <Typography style={styles.description}>$ 100</Typography>
+                  <RowComponent style={{ justifyContent: 'flex-start', ...STYLES.GAP_5 }}>
+                    <Typography style={styles.description}>{params?.data?.price}</Typography>
+                    <Typography style={styles.description}>{params?.data?.currency}</Typography>
+                  </RowComponent>
 
                   <View style={styles.divider} />
                 </>
@@ -204,36 +218,37 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
 
               <Typography style={styles.sectionTitle}>Additional Information</Typography>
               <View style={styles.infoContainer}>
-                {params?.data?.telephone &&
+                {vendor?.phone_number &&
                   additionalInfoLine({
                     iconName: 'phone',
-                    title: params?.data?.telephone,
+                    title: vendor?.phone_number,
                     componentName: VARIABLES.Feather,
                     isRightIcon: true,
                     descriptionStyle: {
                       flex: 0,
                     },
                     onPressRightIcon: () => {
-                      Clipboard.setString(params?.data?.telephone ?? '');
+                      Clipboard.setString(vendor?.phone_number ?? '');
                     },
                     iconNameRight: 'copy',
                     componentNameRight: VARIABLES.Feather,
                   })}
-                {params?.data?.website &&
+                {vendor?.website_url &&
                   additionalInfoLine({
                     iconName: 'link-2',
-                    title: params?.data?.website,
+                    translate: false,
+                    title: vendor?.website_url,
                     componentName: VARIABLES.Feather,
                   })}
                 {additionalInfoLine({
                   iconName: 'location-outline',
-                  title: params?.data?.address,
+                  title: vendor?.address,
                   componentName: VARIABLES.Ionicons,
                   isRightIcon: true,
                   iconNameRight: 'location-arrow',
                   onPressRightIcon: () => {
-                    const lat = params?.data?.latitude;
-                    const lng = params?.data?.longitude;
+                    const lat = vendor?.latitude;
+                    const lng = vendor?.longitude;
                     // const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
                     const url = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=driving`;
                     Linking.openURL(url);

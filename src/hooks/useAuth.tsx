@@ -4,9 +4,10 @@ import { VARIABLES } from 'constants/common';
 import { setAppLanguage, setIsUserLoggedIn, setIsUserVisitedApp } from 'store/slices/appSettings';
 import { RootState, useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { useTranslation } from './useTranslation';
-// import crashlytics from '@react-native-firebase/crashlytics';
+import crashlytics from '@react-native-firebase/crashlytics';
 import { requestNotificationPermission } from 'utils/notifications';
 import { getUserDetails } from 'api/functions/app/user';
+import { getMainCategories } from 'api/functions/app/home';
 
 interface UserLoginStatus {
   isUserLoggedIn: boolean;
@@ -26,7 +27,7 @@ export const useUserLoginStatus = (): UserLoginStatus => {
   useEffect(() => {
     const checkUserIsLogin = async () => {
       try {
-        // crashlytics().log('App mounted.');
+        crashlytics().log('App mounted.');
         const hasUserVisitedTheApp = await getItem(VARIABLES.IS_USER_VISITED_THE_APP);
         const userSelectedLanguage = await getItem(VARIABLES.LANGUAGE);
         if (hasUserVisitedTheApp) {
@@ -38,20 +39,21 @@ export const useUserLoginStatus = (): UserLoginStatus => {
         }
         const isUserLoggedInApp = await getItem(VARIABLES.IS_USER_LOGGED_IN);
         if (isUserLoggedInApp) {
+          await getMainCategories();
+          await getUserDetails();
           dispatch(setIsUserLoggedIn(true));
-          // await requestNotificationPermission();
-          // await getUserDetails();
+          await requestNotificationPermission();
         }
       } catch (error) {
         console.error('Error checking user login status:', error);
       } finally {
         setTimeout(() => {
           setIsLoading(false);
-        }, 4000);
+        }, 2000);
       }
     };
     checkUserIsLogin();
-  }, []);
+  }, [isUserLoggedIn]);
 
   return {
     isUserLoggedIn: isUserLoggedIn,

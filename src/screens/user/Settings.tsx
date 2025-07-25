@@ -11,6 +11,7 @@ import { removeMultipleItem } from 'utils/storage';
 import { useAppDispatch } from 'types/reduxTypes';
 import CustomSwitch from 'components/common/SwitchButton';
 import { useState } from 'react';
+import { COMMON_TEXT } from 'constants/screens';
 
 export const Settings = () => {
   const dispatch = useAppDispatch();
@@ -25,11 +26,11 @@ export const Settings = () => {
       onPress: () => navigate(SCREENS.SELECT_REGION),
     },
     {
-      title: 'Language',
+      title: COMMON_TEXT.LANGUAGE,
       onPress: () => navigate(SCREENS.LANGUAGE),
     },
     {
-      title: 'Notifications',
+      title: COMMON_TEXT.NOTIFICATIONS,
       onPress: () => {},
       endIcon: (
         <CustomSwitch
@@ -40,32 +41,32 @@ export const Settings = () => {
       ),
     },
     {
-      title: 'Privacy Policy',
+      title: COMMON_TEXT.PRIVACY_POLICY,
       onPress: () =>
         navigate(SCREENS.PRIVACY_POLICY, {
-          title: 'Privacy Policy',
+          title: COMMON_TEXT.PRIVACY_POLICY,
         }),
     },
     {
-      title: 'Terms & Conditions',
+      title: COMMON_TEXT.TERMS_AND_CONDITIONS,
       onPress: () =>
         navigate(SCREENS.PRIVACY_POLICY, {
-          title: 'Terms & Conditions',
+          title: COMMON_TEXT.TERMS_AND_CONDITIONS,
         }),
     },
     {
-      title: 'About Us',
+      title: COMMON_TEXT.ABOUT_US,
       onPress: () =>
         navigate(SCREENS.PRIVACY_POLICY, {
-          title: 'About Us',
+          title: COMMON_TEXT.ABOUT_US,
         }),
     },
     {
-      title: 'Contact Us',
+      title: COMMON_TEXT.CONTACT_US,
       onPress: () => navigate(SCREENS.CONTACT_US),
     },
     {
-      title: 'Logout',
+      title: COMMON_TEXT.LOGOUT,
       onPress: handleDeactivateAccount,
       color: COLORS.RED,
     },
@@ -77,7 +78,7 @@ export const Settings = () => {
   ];
 
   return (
-    <Wrapper useScrollView useSafeArea={false}>
+    <Wrapper useScrollView useSafeArea={false} showAppLoader>
       <View style={styles.tabsContainer}>
         {tabs.map(({ title, onPress, endIcon, color = COLORS.PRIMARY }) => (
           <RowComponent style={styles.rowContainer} onPress={onPress} key={title}>

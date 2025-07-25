@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FlatListComponent, Wrapper, ItemType, ItemLargeCard, SearchBar } from 'components/index';
+import { FlatListComponent, Wrapper, ItemLargeCard, SearchBar } from 'components/index';
 import { COLORS, STYLES } from 'utils/index';
-import { AppNavigationProp, AppRouteProp, FontSize } from 'types/index';
+import { AppNavigationProp, AppRouteProp, CategoryItem, FontSize } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Autocomplete } from 'components/common/Autocomplete';
@@ -22,8 +22,8 @@ export const ViewAll = () => {
 
   useEffect(() => {
     setFilteredData(
-      data?.items?.filter((item: ItemType) =>
-        item?.name?.toLowerCase().includes(search.toLowerCase()),
+      data?.items?.filter((item: CategoryItem) =>
+        item?.title?.toLowerCase().includes(search.toLowerCase()),
       ),
     );
   }, [search]);
@@ -68,8 +68,12 @@ export const ViewAll = () => {
       <FlatListComponent
         scrollEnabled={true}
         data={filteredData}
+        onRefresh={() => {}}
+        refreshing={false}
         contentContainerStyle={{ paddingBottom: 100, ...STYLES.CONTAINER }}
-        renderItem={({ item }: { item: ItemType }) => <ItemLargeCard item={item} key={item?.id} />}
+        renderItem={({ item }: { item: CategoryItem }) => (
+          <ItemLargeCard item={item} key={item?.id} />
+        )}
       />
     </Wrapper>
   );

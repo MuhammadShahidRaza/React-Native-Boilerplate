@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Photo, Typography, Icon, RowComponent } from 'components/index';
 import { COLORS } from 'utils/colors';

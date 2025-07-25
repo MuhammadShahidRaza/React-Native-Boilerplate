@@ -1,12 +1,12 @@
 import { StyleSheet, View } from 'react-native';
 import { HomeComponent, Icon, MessageBox, RowComponent, Wrapper } from 'components/index';
 import { screenHeight, screenWidth, STYLES, COLORS, greetings } from 'utils/index';
-import { IMAGES } from 'constants/assets';
-import { SCREENS, TEMPORARY_TEXT, VARIABLES } from 'constants/index';
-import { FontSize } from 'types/index';
+import { SCREENS, VARIABLES } from 'constants/index';
+import { FontSize, useAppSelector } from 'types/index';
 import { navigate } from 'navigation/index';
 
 export const Home = () => {
+  const { userDetails } = useAppSelector(state => state?.user);
   return (
     <Wrapper backgroundColor={COLORS.PRIMARY} darkMode={false}>
       <View style={styles.headerContainer}>
@@ -16,12 +16,12 @@ export const Home = () => {
               navigate(SCREENS.PROFILE);
             }}
             containerStyle={styles.messageBoxContainer}
-            userImage={IMAGES.USER}
+            userImage={userDetails?.profile_image}
             imageStyle={styles.messageImageStyle}
             hideBorder={true}
             userNameStyle={styles.userNameStyle}
             messageStyle={styles.messageStyle}
-            userName={TEMPORARY_TEXT.JOHN_DOE}
+            userName={userDetails?.full_name}
             message={greetings()}
           />
           <RowComponent style={styles.iconContainer}>
@@ -46,7 +46,7 @@ export const Home = () => {
                 iconStyle={styles.iconStyle}
                 color={COLORS.PRIMARY}
               />
-              <View style={styles.notificationDot} />
+              {userDetails?.is_notify && <View style={styles.notificationDot} />}
             </View>
           </RowComponent>
         </RowComponent>

@@ -4,8 +4,8 @@ import { COLORS, changePasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Input, Wrapper } from 'components/index';
-import { onBack } from 'navigation/index';
 import { STYLES } from 'utils/commonStyles';
+import { updatePassword } from 'api/functions/app/user';
 
 interface ChangePasswordFormValues {
   current_password: string;
@@ -26,8 +26,11 @@ export const ChangePassword = () => {
     showCurrentPassword: false,
   };
 
-  const handleSubmit = async (_: ChangePasswordFormValues) => {
-    onBack();
+  const handleSubmit = async (values: ChangePasswordFormValues) => {
+    updatePassword({
+      current_password: values.current_password,
+      new_password: values.new_password,
+    });
   };
 
   const formik = useFormikForm<ChangePasswordFormValues>({
@@ -117,7 +120,12 @@ export const ChangePassword = () => {
           </FocusProvider>
         </View>
       </Wrapper>
-      <Button title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
+      <Button
+        loading={true}
+        title={COMMON_TEXT.UPDATE}
+        onPress={formik.handleSubmit}
+        style={styles.button}
+      />
     </>
   );
 };

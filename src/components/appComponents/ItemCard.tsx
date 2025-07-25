@@ -1,36 +1,39 @@
 import { TouchableOpacity, View } from 'react-native';
-import React from 'react';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, isIOS, screenHeight } from 'utils/index';
 import { Icon, Photo, RowComponent, SkeletonLoader, Typography } from 'components/index';
 import { styles } from './Home/styles';
-import { ItemType } from './Home';
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
+import { CategoryItem } from 'types/responseTypes';
+import { useState } from 'react';
+import { toggleFavourite } from 'api/functions/app/home';
 
-export const ItemCard = ({ item }: { item: ItemType }) => {
+export const ItemCard = ({ item }: { item: CategoryItem }) => {
+  const [isLiked, setIsLiked] = useState<boolean>(item?.is_liked);
+  const categoryName = item?.itemCategory?.category?.title;
   const isEcommerce =
-    item?.category === 'Order Your Food' ||
-    item?.category === 'Grocery' ||
-    item?.category === 'Fashion' ||
-    item?.category === 'Health' ||
-    item?.category === 'Interior' ||
-    item?.category === 'Electronics';
+    categoryName === 'Order Your Food' ||
+    categoryName === 'Grocery' ||
+    categoryName === 'Fashion' ||
+    categoryName === 'Health' ||
+    categoryName === 'Interior' ||
+    categoryName === 'Electronics';
   return (
-    <SkeletonLoader key={item?.name} height={screenHeight(25)}>
+    <SkeletonLoader key={item?.title} height={screenHeight(25)}>
       <TouchableOpacity
         style={styles.itemContainer}
         onPress={() => {
           if (isEcommerce) {
-            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: item?.category });
+            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: categoryName });
             return;
           }
-          navigate(SCREENS.DETAILS, { data: item, heading: item?.category });
+          navigate(SCREENS.DETAILS, { data: item, heading: categoryName });
         }}
       >
         <View>
           <RowComponent style={{ zIndex: 100 }}>
-            {item?.rating && (
+            {item?.rating_avg && (
               <RowComponent style={styles.ratingContainer}>
                 <Icon
                   onPress={() => {}}
@@ -42,43 +45,52 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
                 />
 
                 <Typography style={{ color: COLORS.WHITE, fontSize: FontSize.ExtraSmall }}>
-                  {item?.rating}
+                  {String(item?.rating_avg ?? '0.0')}
                 </Typography>
               </RowComponent>
             )}
 
             <Icon
-              onPress={() => {}}
+              onPress={() => {
+                setIsLiked(!isLiked);
+                toggleFavourite({
+                  object_id: item?.id,
+                  object_type: 'item',
+                  category_id: item?.category_id,
+                });
+              }}
               componentName={VARIABLES.AntDesign}
-              iconName={item?.isLiked ? 'heart' : 'hearto'}
-              color={item?.isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
+              iconName={isLiked ? 'heart' : 'hearto'}
+              color={isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
               size={FontSize.MediumLarge}
               iconStyle={styles.heartIcon}
             />
           </RowComponent>
-          <Photo disabled imageStyle={styles.itemImage} source={item?.image} />
+          <Photo disabled imageStyle={styles.itemImage} source={item?.media?.[0]?.media_url} />
         </View>
-        <View style={{ paddingHorizontal: 10, paddingTop: 5, gap: isIOS() ? 4 : 2 }}>
+        <View
+          style={{ paddingHorizontal: 10, paddingTop: 5, gap: isIOS() ? 4 : 2, overflow: 'hidden' }}
+        >
           <Typography numberOfLines={1} style={styles.itemText}>
-            {item?.name}
+            {item?.title}
           </Typography>
           <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 5 }}>
             <Typography
               numberOfLines={1}
-              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.MediumSmall }}
+              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.city + ' - '}
+              {item?.eventDetail?.city + ' - '}
             </Typography>
             <Typography
               numberOfLines={1}
-              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.MediumSmall }}
+              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.country}
+              {item?.eventDetail?.country}
             </Typography>
           </RowComponent>
-          {item?.openTime && (
+          {item?.eventDetail?.start_time && (
             <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 10 }}>
-              <Typography
+              {/* <Typography
                 numberOfLines={1}
                 style={{
                   color: COLORS.SECONDARY,
@@ -87,12 +99,18 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
                 }}
               >
                 {item?.isOpen ? 'OPEN' : 'CLOSED'}
+              </Typography> */}
+              <Typography
+                numberOfLines={1}
+                style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+              >
+                {item?.eventDetail?.start_time + ' - '}
               </Typography>
               <Typography
                 numberOfLines={1}
                 style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
               >
-                {item?.openTime}
+                {item?.eventDetail?.end_time}
               </Typography>
             </RowComponent>
           )}
@@ -122,7 +140,7 @@ export const ItemCard = ({ item }: { item: ItemType }) => {
           )}
         </View>
         <Typography
-          // onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: item?.category })}
+          // onPress={() => navigate(SCREENS.DETAILS, { data: item, heading: categoryName })}
           numberOfLines={1}
           style={{
             color: COLORS.SECONDARY,

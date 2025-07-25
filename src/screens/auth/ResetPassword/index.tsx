@@ -99,7 +99,7 @@ export const ResetPassword = () => {
           touched={Boolean(formik.touched.confirm_password && formik.submitCount)}
         />
       </FocusProvider>
-      <Button title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
+      <Button  loading={true} title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
     </AuthComponent>
   );
 };

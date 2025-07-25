@@ -1,33 +1,34 @@
-import { Button, Icon, Input, PhoneInputComponent, Photo, Wrapper } from 'components/common';
-import { IMAGES, VARIABLES } from 'constants/index';
-import { COMMON_TEXT } from 'constants/screens';
-import { FocusProvider } from 'hooks/useFocus';
-import { useFormikForm } from 'hooks/useFormik';
-import { onBack } from 'navigation/Navigators';
 import { StyleSheet, View } from 'react-native';
-import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/colors';
-import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { screenHeight, screenWidth } from 'utils/helpers';
-import { getCurrentLocation, reverseGeocode } from 'utils/location';
-import { editProfileValidationSchema } from 'utils/validations';
-
-interface EditProfileFormValues {
-  email: string;
-  full_name: string;
-  username: string;
-  phoneNumber: string;
-  country: string;
-}
+import { Button, Icon, Input, PhoneInputComponent, Photo, Wrapper } from 'components/index';
+import { IMAGES, VARIABLES } from 'constants/index';
+import { COMMON_TEXT } from 'constants/index';
+import { FocusProvider, useFormikForm } from 'hooks/index';
+import { FontSize, FontWeight, useAppSelector } from 'types/index';
+import {
+  editProfileValidationSchema,
+  getCurrentLocation,
+  reverseGeocode,
+  screenHeight,
+  screenWidth,
+  COLORS,
+  FLEX_CENTER,
+  STYLES,
+  safeString,
+  splitPhoneNumberWithCode,
+  openCameraOrGallery,
+} from 'utils/index';
+import { updateUserDetails } from 'api/functions/app/user';
+import { EditProfileFormExtended } from './Profile';
 
 export const EditProfile = () => {
-  //   const dispatch = useAppDispatch();
-  const initialValues: EditProfileFormValues = {
-    email: __DEV__ ? 'john@mailinator.com' : 'john@mailinator.com',
-    full_name: __DEV__ ? 'John Doe' : '',
-    username: __DEV__ ? 'john26' : '',
-    country: __DEV__ ? 'Nigeria' : '',
-    phoneNumber: __DEV__ ? '324244242' : '',
+  const { userDetails } = useAppSelector(state => state?.user);
+  const initialValues: EditProfileFormExtended = {
+    email: safeString(userDetails?.email),
+    full_name: safeString(userDetails?.full_name),
+    username: safeString(userDetails?.user_name),
+    country: safeString(userDetails?.country),
+    phoneNumber: safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number),
+    country_code: safeString(userDetails?.country_code),
   };
 
   const getCountry = async () => {
@@ -41,12 +42,13 @@ export const EditProfile = () => {
     }
   };
 
-  const handleSubmit = async (values: EditProfileFormValues) => {
-    onBack();
+  const handleSubmit = async (values: EditProfileFormExtended) => {
+    updateUserDetails(values);
   };
 
-  const formik = useFormikForm<EditProfileFormValues>({
+  const formik = useFormikForm<EditProfileFormExtended>({
     initialValues,
+    enableReinitialize: true,
     validationSchema: editProfileValidationSchema,
     onSubmit: handleSubmit,
   });
@@ -61,7 +63,9 @@ export const EditProfile = () => {
               <Icon
                 componentName={VARIABLES.Entypo}
                 iconName={'camera'}
-                onPress={() => {}}
+                onPress={() => {
+                  openCameraOrGallery();
+                }}
                 color={COLORS.PRIMARY}
                 iconStyle={styles.editIcon}
               />
@@ -140,7 +144,8 @@ export const EditProfile = () => {
             onChangeText={formik.handleChange('phoneNumber')}
             value={formik.values.phoneNumber}
             allowSpacing={false}
-            defaultCode={__DEV__ ? 'PK' : 'NG'}
+            defaultCode={formik.values.country_code as any}
+            onChangeCountryCode={formik.handleChange('country_code')}
             startIcon={{
               componentName: VARIABLES.Feather,
               iconName: 'phone',
@@ -150,7 +155,12 @@ export const EditProfile = () => {
             touched={Boolean(formik.touched.phoneNumber && formik.submitCount)}
           />
         </FocusProvider>
-        <Button title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
+        <Button
+          loading={true}
+          title={COMMON_TEXT.UPDATE}
+          onPress={formik.handleSubmit}
+          style={styles.button}
+        />
       </View>
     </Wrapper>
   );
@@ -180,8 +190,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.WHITE,
     borderWidth: 1,
     borderColor: COLORS.PRIMARY,
-    padding: 7,
-    borderRadius: 20,
+    padding: 5,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   photo: {

@@ -1,17 +1,17 @@
-import {View, StyleSheet, ImageStyle, TextStyle} from 'react-native';
-import {Photo} from './Photo';
-import {RowComponent} from './Row';
-import {COLORS} from 'utils/colors';
-import {Typography} from './Typography';
-import {FontSize, FontWeight, StyleType, voidFuntionType} from 'types/index';
-import {isIOS} from 'utils/helpers';
-import {Icon, IconComponentProps} from './Icon';
-import {STYLES} from 'utils/commonStyles';
+import { View, StyleSheet, ImageStyle, TextStyle } from 'react-native';
+import { Photo } from './Photo';
+import { RowComponent } from './Row';
+import { COLORS } from 'utils/colors';
+import { Typography } from './Typography';
+import { FontSize, FontWeight, StyleType, voidFuntionType } from 'types/index';
+import { isIOS } from 'utils/helpers';
+import { Icon, IconComponentProps } from './Icon';
+import { STYLES } from 'utils/commonStyles';
 
 type Props = {
-  userImage: string | number;
+  userImage: string | number | null | undefined;
   messageNumLine?: number;
-  userName: string;
+  userName: string | undefined;
   userNameDescription?: string;
   message: string;
   time?: string;
@@ -49,17 +49,12 @@ export const MessageBox = ({
           borderBottomWidth: hideBorder ? 0 : 1,
         },
         containerStyle,
-      ]}>
-      <Photo
-        disabled
-        source={userImage}
-        imageStyle={[styles.userImage, imageStyle]}
-      />
+      ]}
+    >
+      <Photo disabled source={userImage} imageStyle={[styles.userImage, imageStyle]} />
       <View style={styles.messageContent}>
-        <RowComponent style={{justifyContent: 'flex-start', gap: 5}}>
-          <Typography
-            numberOfLines={1}
-            style={[styles.userName, userNameStyle]}>
+        <RowComponent style={{ justifyContent: 'flex-start', gap: 5 }}>
+          <Typography numberOfLines={1} style={[styles.userName, userNameStyle]}>
             {userName}
           </Typography>
           {userNameDescription && (
@@ -68,9 +63,7 @@ export const MessageBox = ({
             </Typography>
           )}
         </RowComponent>
-        <Typography
-          numberOfLines={messageNumLine}
-          style={[styles.message, messageStyle]}>
+        <Typography numberOfLines={messageNumLine} style={[styles.message, messageStyle]}>
           {message}
         </Typography>
       </View>

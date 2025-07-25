@@ -1,36 +1,40 @@
 import { StyleSheet, View } from 'react-native';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatListComponent, Photo, RowComponent, Typography, Wrapper } from 'components/common';
-import { useAppDispatch } from 'types/reduxTypes';
 import { STYLES } from 'utils/commonStyles';
 import { onBack } from 'navigation/Navigators';
 import { SearchBar } from 'components/appComponents';
-import { IMAGES } from 'constants/assets';
 import { FontSize } from 'types/fontTypes';
+import { getRegionList } from 'api/functions/app/settings';
+
+export type Region = {
+  name: string;
+  flag: string;
+  code?: string;
+  id?: string;
+};
 
 export const SelectRegion = () => {
-  const dispatch = useAppDispatch();
   const [searchValue, setSearchValue] = useState('');
+  const [regions, setRegions] = useState<Region[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const response = await getRegionList();
+      if (response) {
+        setRegions(response);
+      }
+    })();
+  }, []);
 
   const handleSubmit = () => {
     onBack();
   };
 
-  const regions = [
-    {
-      name: 'United Kingdom (UK)',
-      image: IMAGES.ENGLISH,
-    },
-    {
-      name: 'Nigeria',
-      image: IMAGES.NIGERIA,
-    },
-  ];
-
-  const renderItem = ({ item }: { item: any }) => {
+  const renderItem = ({ item }: { item: Region }) => {
     return (
       <RowComponent style={styles.rowComponent} onPress={handleSubmit}>
-        <Photo source={item?.image} style={STYLES.USER_IMAGE} resizeMode='contain' />
+        <Photo source={item?.flag} style={STYLES.USER_IMAGE} resizeMode='contain' />
         <Typography style={styles.regionName}>{item?.name}</Typography>
       </RowComponent>
     );

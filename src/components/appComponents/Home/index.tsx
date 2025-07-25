@@ -1,21 +1,14 @@
 import { ItemCard, Typography } from 'components/index';
 import { FlatListComponent, RowComponent } from 'components/common';
-import { COMMON_TEXT, IMAGES, SCREENS, SVG, TEMPORARY_TEXT } from 'constants/index';
-import { SvgProps } from 'react-native-svg';
+import { COMMON_TEXT, IMAGES, SCREENS, TEMPORARY_TEXT } from 'constants/index';
 import { COLORS, STYLES } from 'utils/index';
-import { FontSize, FontWeight } from 'types/index';
+import { CategoryItem, FontSize, FontWeight } from 'types/index';
 import { navigate } from 'navigation/index';
 import { styles } from './styles';
 import { FoodCard } from '../FoodCard';
 
-export type CategoryType = {
-  id: string;
-  name: string;
-  image: React.FC<SvgProps>;
-};
-
 export type ItemType = {
-  id: string;
+  id: number;
   name: string;
   image: string;
   address: string;
@@ -24,7 +17,7 @@ export type ItemType = {
   distance?: string;
   isOpen?: boolean;
   openTime?: string;
-  isLiked?: boolean;
+  is_liked?: boolean;
   website?: string;
   latitude?: string;
   longitude?: string;
@@ -86,155 +79,157 @@ export type SubCategoryType = {
   items?: ItemType[];
 };
 
-export const categoriesList: CategoryType[] = [
-  { id: '7', name: 'Events', image: SVG.EVENTS },
-  { id: '1', name: 'Lifestyle', image: SVG.LIFE_STYLE },
-  { id: '2', name: 'Food', image: SVG.FOOD },
-  { id: '3', name: 'Groceries', image: SVG.GROCERIES },
-  { id: '4', name: 'Fashion', image: SVG.WEARS },
-  { id: '5', name: 'Health', image: SVG.HEALTH },
-  { id: '6', name: 'Real Estate', image: SVG.REAL_STATE },
-  { id: '8', name: 'Others', image: SVG.OTHERS },
-];
+// export const categoriesList: CategoryType[] = [
+//   { id: '7', name: 'Events', image: SVG.EVENTS },
+//   { id: '1', name: 'Lifestyle', image: SVG.LIFE_STYLE },
+//   { id: '2', name: 'Food', image: SVG.FOOD },
+//   { id: '3', name: 'Groceries', image: SVG.GROCERIES },
+//   { id: '4', name: 'Fashion', image: SVG.WEARS },
+//   { id: '5', name: 'Health', image: SVG.HEALTH },
+//   { id: '6', name: 'Real Estate', image: SVG.REAL_STATE },
+//   { id: '8', name: 'Others', image: SVG.OTHERS },
+// ];
 
-export const FavoritesList: ItemType[] = [
-  {
-    id: '1',
-    name: 'Golden Sands Boutique Hotel',
-    image: IMAGES.HOTELS,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    country: 'UK',
-    website: 'www.goldensands.com',
-    telephone: '(480) 000-0010',
-    email: 'goldensands@gmail.com',
-    phoneNumber: '1234567890',
-    category: 'Lifestyle',
-    distance: '4.5 Miles',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    isLiked: true,
-  },
-  {
-    id: '2',
-    name: 'Golden Boutique Hotel',
-    image: IMAGES.HOTEL_1,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    category: 'Lifestyle',
-    country: 'UK',
-    website: 'www.goldensandsboutiquehotel.com',
-    telephone: '(480) 000-0010',
-    email: 'goldensands@gmail.com',
-    phoneNumber: '1234567890',
-    distance: '4.5 Miles',
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    isLiked: true,
-  },
-  {
-    id: '3',
-    name: 'Saloon',
-    image: IMAGES.SALOONS,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    country: 'UK',
-    category: 'Lifestyle',
-    website: 'www.walmart.com',
-    telephone: '(480) 000-0010',
-    email: 'walmart@gmail.com',
-    phoneNumber: '1234567890',
-    distance: '4.5 Miles',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    isLiked: true,
-    services: [
-      { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
-      { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
-      { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOONS, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOON_1, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Peace Pharmacy',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    image: IMAGES.PEACE_PHARMACY,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    country: 'UK',
-    category: 'Pharmacy',
-    website: 'www.peacepharmacy.com',
-    telephone: '(480) 000-0010',
-    email: 'peacepharmacy@gmail.com',
-    phoneNumber: '1234567890',
-    distance: '4.5 Miles',
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    isLiked: true,
-  },
-  {
-    id: '5',
-    name: 'Walmart',
-    image: IMAGES.WALMART,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    country: 'UK',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    website: 'www.walmart.com',
-    telephone: '(480) 000-0010',
-    email: 'walmart@gmail.com',
-    phoneNumber: '1234567890',
-    distance: '4.5 Miles',
-    category: 'Lifestyle',
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    isLiked: true,
-  },
-  {
-    id: '6',
-    name: 'Saloon 6',
-    image: IMAGES.SALOONS,
-    address: '123 Maplewood Lane Springfield',
-    city: 'London',
-    country: 'UK',
-    website: 'www.saloon.com',
-    telephone: '(480) 000-0010',
-    email: 'saloon@gmail.com',
-    phoneNumber: '1234567890',
-    distance: '4.5 Miles',
-    category: 'Fashion',
-    latitude: '24.9172',
-    longitude: '67.0924',
-    description: TEMPORARY_TEXT.LORUM_IPSUM,
-    isOpen: true,
-    openTime: '2 pm - 8 pm',
-    isLiked: true,
-    services: [
-      { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
-      { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
-      { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOONS, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOON_1, name: 'Head Massage', price: '30' },
-      { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
-    ],
-  },
-];
+export const FavoritesList: ItemType[] | [] = __DEV__
+  ? [
+      {
+        id: '1',
+        name: 'Golden Sands Boutique Hotel',
+        image: IMAGES.HOTELS,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        website: 'www.goldensands.com',
+        telephone: '(480) 000-0010',
+        email: 'goldensands@gmail.com',
+        phoneNumber: '1234567890',
+        category: 'Lifestyle',
+        distance: '4.5 Miles',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        is_liked: true,
+      },
+      {
+        id: '2',
+        name: 'Golden Boutique Hotel',
+        image: IMAGES.HOTEL_1,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        category: 'Lifestyle',
+        country: 'UK',
+        website: 'www.goldensandsboutiquehotel.com',
+        telephone: '(480) 000-0010',
+        email: 'goldensands@gmail.com',
+        phoneNumber: '1234567890',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        is_liked: true,
+      },
+      {
+        id: '3',
+        name: 'Saloon',
+        image: IMAGES.SALOONS,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        category: 'Lifestyle',
+        website: 'www.walmart.com',
+        telephone: '(480) 000-0010',
+        email: 'walmart@gmail.com',
+        phoneNumber: '1234567890',
+        distance: '4.5 Miles',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        is_liked: true,
+        services: [
+          { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
+          { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
+          { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOONS, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOON_1, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
+        ],
+      },
+      {
+        id: '4',
+        name: 'Peace Pharmacy',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        image: IMAGES.PEACE_PHARMACY,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        category: 'Pharmacy',
+        website: 'www.peacepharmacy.com',
+        telephone: '(480) 000-0010',
+        email: 'peacepharmacy@gmail.com',
+        phoneNumber: '1234567890',
+        distance: '4.5 Miles',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        is_liked: true,
+      },
+      {
+        id: '5',
+        name: 'Walmart',
+        image: IMAGES.WALMART,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        website: 'www.walmart.com',
+        telephone: '(480) 000-0010',
+        email: 'walmart@gmail.com',
+        phoneNumber: '1234567890',
+        distance: '4.5 Miles',
+        category: 'Lifestyle',
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        is_liked: true,
+      },
+      {
+        id: '6',
+        name: 'Saloon 6',
+        image: IMAGES.SALOONS,
+        address: '123 Maplewood Lane Springfield',
+        city: 'London',
+        country: 'UK',
+        website: 'www.saloon.com',
+        telephone: '(480) 000-0010',
+        email: 'saloon@gmail.com',
+        phoneNumber: '1234567890',
+        distance: '4.5 Miles',
+        category: 'Fashion',
+        latitude: '24.9172',
+        longitude: '67.0924',
+        description: TEMPORARY_TEXT.LORUM_IPSUM,
+        isOpen: true,
+        openTime: '2 pm - 8 pm',
+        is_liked: true,
+        services: [
+          { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
+          { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
+          { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOONS, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOON_1, name: 'Head Massage', price: '30' },
+          { image: IMAGES.SALOON_2, name: 'Head Massage', price: '30' },
+        ],
+      },
+    ]
+  : [];
 
 export const subCategoriesList: SubCategoryType[] = [
   {
@@ -264,7 +259,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -334,7 +329,7 @@ export const subCategoriesList: SubCategoryType[] = [
             latitude: '24.9172',
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -404,7 +399,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -474,7 +469,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -544,7 +539,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Hotels',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -614,7 +609,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -691,7 +686,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -761,7 +756,7 @@ export const subCategoriesList: SubCategoryType[] = [
             latitude: '24.9172',
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -831,7 +826,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -901,7 +896,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -971,7 +966,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Hotels',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -1041,7 +1036,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             rooms: [
               {
                 id: '1',
@@ -1119,7 +1114,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1156,7 +1151,7 @@ export const subCategoriesList: SubCategoryType[] = [
             latitude: '24.9172',
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1193,7 +1188,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1230,7 +1225,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1267,7 +1262,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'SPA',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1304,7 +1299,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SPA, name: 'Aesthetician 1', price: '10' },
               { image: IMAGES.SPA, name: 'Aesthetician 2', price: '20' },
@@ -1349,7 +1344,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1386,7 +1381,7 @@ export const subCategoriesList: SubCategoryType[] = [
             latitude: '24.9172',
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1423,7 +1418,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1460,7 +1455,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1498,7 +1493,7 @@ export const subCategoriesList: SubCategoryType[] = [
 
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1536,7 +1531,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             services: [
               { image: IMAGES.SALOONS, name: 'Head Massage', price: '10' },
               { image: IMAGES.SALOON_1, name: 'Head Massage', price: '20' },
@@ -1671,7 +1666,7 @@ export const subCategoriesList: SubCategoryType[] = [
             isOpen: true,
             category: 'Order Your Food',
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -1908,7 +1903,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Order Your Food',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -2145,7 +2140,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -2382,7 +2377,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -2620,7 +2615,7 @@ export const subCategoriesList: SubCategoryType[] = [
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -2857,7 +2852,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
             categories: [
               {
                 id: '1',
@@ -3101,7 +3096,7 @@ export const subCategoriesList: SubCategoryType[] = [
             isOpen: true,
             category: 'Restaurant Reservation',
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '2',
@@ -3121,7 +3116,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Restaurant Reservation',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '3',
@@ -3141,7 +3136,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '4',
@@ -3161,7 +3156,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '5',
@@ -3181,7 +3176,7 @@ export const subCategoriesList: SubCategoryType[] = [
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '6',
@@ -3201,7 +3196,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
         ],
       },
@@ -3519,7 +3514,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '2',
@@ -3829,7 +3824,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '3',
@@ -4139,7 +4134,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '4',
@@ -4448,7 +4443,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '5',
@@ -4758,7 +4753,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '6',
@@ -5067,7 +5062,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
         category: 'Grocery',
       },
     ],
@@ -5390,7 +5385,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: true,
+        is_liked: true,
       },
       {
         id: '2',
@@ -5705,7 +5700,7 @@ export const subCategoriesList: SubCategoryType[] = [
         ],
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '3',
@@ -6020,7 +6015,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '4',
@@ -6335,7 +6330,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '5',
@@ -6650,7 +6645,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: true,
+        is_liked: true,
       },
       {
         id: '6',
@@ -6965,7 +6960,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
     ],
   },
@@ -7288,7 +7283,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '2',
@@ -7604,7 +7599,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: true,
+        is_liked: true,
       },
       {
         id: '3',
@@ -7920,7 +7915,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '4',
@@ -8236,7 +8231,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: false,
+        is_liked: false,
       },
       {
         id: '5',
@@ -8552,7 +8547,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: true,
+        is_liked: true,
       },
       {
         id: '6',
@@ -8868,7 +8863,7 @@ export const subCategoriesList: SubCategoryType[] = [
         distance: '4.5 Miles',
         isOpen: true,
         openTime: '2 pm - 8 pm',
-        isLiked: true,
+        is_liked: true,
       },
     ],
   },
@@ -8892,7 +8887,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Real Estate',
       },
       {
@@ -8910,7 +8905,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Real Estate',
       },
       {
@@ -8928,7 +8923,7 @@ export const subCategoriesList: SubCategoryType[] = [
         phoneNumber: '1234567890',
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         rating: '4.2',
-        isLiked: true,
+        is_liked: true,
         category: 'Real Estate',
       },
       {
@@ -8946,7 +8941,7 @@ export const subCategoriesList: SubCategoryType[] = [
         phoneNumber: '1234567890',
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Real Estate',
       },
       {
@@ -8964,7 +8959,7 @@ export const subCategoriesList: SubCategoryType[] = [
         email: 'property5@gmail.com',
         phoneNumber: '1234567890',
         description: TEMPORARY_TEXT.LORUM_IPSUM,
-        isLiked: true,
+        is_liked: true,
         category: 'Real Estate',
       },
       {
@@ -8982,7 +8977,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         country: 'UK',
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Real Estate',
       },
     ],
@@ -9010,7 +9005,7 @@ export const subCategoriesList: SubCategoryType[] = [
         description: TEMPORARY_TEXT.LORUM_IPSUM,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
-        isLiked: true,
+        is_liked: true,
         category: 'Events',
       },
       {
@@ -9031,7 +9026,7 @@ export const subCategoriesList: SubCategoryType[] = [
         email: 'event2@gmail.com',
         phoneNumber: '1234567890',
         description: TEMPORARY_TEXT.LORUM_IPSUM,
-        isLiked: false,
+        is_liked: false,
         category: 'Events',
       },
       {
@@ -9052,7 +9047,7 @@ export const subCategoriesList: SubCategoryType[] = [
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Events',
       },
       {
@@ -9073,7 +9068,7 @@ export const subCategoriesList: SubCategoryType[] = [
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
-        isLiked: true,
+        is_liked: true,
         category: 'Events',
       },
       {
@@ -9094,7 +9089,7 @@ export const subCategoriesList: SubCategoryType[] = [
         isOpen: true,
         openTime: '2 pm - 8 pm',
         rating: '4.2',
-        isLiked: false,
+        is_liked: false,
         category: 'Events',
       },
       {
@@ -9116,7 +9111,7 @@ export const subCategoriesList: SubCategoryType[] = [
         email: 'event6@gmail.com',
         phoneNumber: '1234567890',
         description: TEMPORARY_TEXT.LORUM_IPSUM,
-        isLiked: true,
+        is_liked: true,
       },
     ],
   },
@@ -9447,7 +9442,7 @@ export const subCategoriesList: SubCategoryType[] = [
             isOpen: true,
             category: 'Electronics',
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '2',
@@ -9765,7 +9760,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Electronics',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '3',
@@ -10083,7 +10078,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '4',
@@ -10401,7 +10396,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '5',
@@ -10719,7 +10714,7 @@ export const subCategoriesList: SubCategoryType[] = [
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '6',
@@ -11037,7 +11032,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
         ],
       },
@@ -11363,7 +11358,7 @@ export const subCategoriesList: SubCategoryType[] = [
             isOpen: true,
             category: 'Interior',
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '2',
@@ -11681,7 +11676,7 @@ export const subCategoriesList: SubCategoryType[] = [
             category: 'Interior',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '3',
@@ -11999,7 +11994,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '4',
@@ -12317,7 +12312,7 @@ export const subCategoriesList: SubCategoryType[] = [
             distance: '4.5 Miles',
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '5',
@@ -12635,7 +12630,7 @@ export const subCategoriesList: SubCategoryType[] = [
             longitude: '67.0924',
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
           {
             id: '6',
@@ -12953,7 +12948,7 @@ export const subCategoriesList: SubCategoryType[] = [
             description: TEMPORARY_TEXT.LORUM_IPSUM,
             isOpen: true,
             openTime: '2 pm - 8 pm',
-            isLiked: false,
+            is_liked: false,
           },
         ],
       },
@@ -12969,7 +12964,7 @@ export const renderSeeAll = ({
   showSeeAll = true,
 }: {
   heading: string;
-  items: ItemType[];
+  items: CategoryItem[];
   itemHeading: string;
   showSeeAll?: boolean;
   onPressViewAll?: () => void;
@@ -12999,7 +12994,7 @@ export const renderSeeAll = ({
   );
 };
 
-export const renderItems = ({ item }: { item: ItemType }) => (
+export const renderItems = ({ item }: { item: CategoryItem }) => (
   <ItemCard item={item} key={item?.id} />
 );
 export const renderFoodItems = ({ item }: { item: ItemType }) => (
@@ -13012,7 +13007,7 @@ export const renderHorizontalItemsWithRow = ({
   rowHeading,
   onPressViewAll,
 }: {
-  data: ItemType[];
+  data: CategoryItem[];
   heading: string;
   rowHeading: string;
   onPressViewAll?: () => void;
@@ -13027,7 +13022,7 @@ export const renderHorizontalItemsWithRow = ({
       })}
       <FlatListComponent
         horizontal={true}
-        keyExtractor={item => item?.id}
+        keyExtractor={item => String(item?.id)}
         contentContainerStyle={styles.subCategoriesContentContainer}
         data={data?.slice(0, 3) ?? []}
         renderItem={renderItems}

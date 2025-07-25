@@ -1,4 +1,4 @@
-import { string, StringSchema, object, ref, Schema } from 'yup';
+import { string, StringSchema, object, ref, ObjectShape } from 'yup';
 import { VALIDATION_MESSAGES } from 'constants/validationMessages';
 import { REGEX } from '../regex';
 import { COMMON_TEXT } from 'constants/screens';
@@ -14,10 +14,6 @@ type StringValidationOptions = {
   minLength?: number;
   maxLength?: number;
 };
-
-interface FieldObject {
-  [key: string]: StringSchema<string | null | undefined>;
-}
 
 type Values = {
   [key: string]: string | number;
@@ -58,22 +54,74 @@ const getValidationMessageWithTranslation = (key: string, values: Values): strin
   }
 };
 
-const createObjectShape = (fields: FieldObject): Schema<object> => {
-  return object().shape(fields);
+const createObjectShape = <T extends ObjectShape>(fields: T) => {
+  return object(fields);
 };
 
-const createStringValidationSchema = ({
+// const createStringValidationSchema = ({
+//   regex,
+//   regexMessage,
+//   isRequired = true,
+//   name,
+//   nullable = false,
+//   minLength,
+//   maxLength,
+// }: StringValidationOptions): StringSchema<string | null | undefined> => {
+//   let schema: StringSchema<string | null | undefined> = string().transform((_, originalValue) =>
+//     typeof originalValue === 'string' ? originalValue.trim() : originalValue,
+//   );
+
+//   if (isRequired && name && !nullable) {
+//     schema = schema.required(() =>
+//       getValidationMessageWithTranslation(VALIDATION_MESSAGES.IS_REQUIRED, {
+//         name,
+//       }),
+//     );
+//   }
+
+//   if (regex && regexMessage) {
+//     schema = schema.matches(regex, () => getValidationMessageWithTranslation(regexMessage, {}));
+//   }
+
+//   if (minLength !== undefined) {
+//     schema = schema.min(minLength, () =>
+//       getValidationMessageWithTranslation(VALIDATION_MESSAGES.MIN_LENGTH, {
+//         minLength,
+//       }),
+//     );
+//   }
+
+//   if (maxLength !== undefined) {
+//     schema = schema.max(maxLength, () =>
+//       getValidationMessageWithTranslation(VALIDATION_MESSAGES.MAX_LENGTH, {
+//         maxLength,
+//       }),
+//     );
+//   }
+
+//   if (nullable) {
+//     schema = schema.nullable();
+//   }
+//   return schema;
+// };
+
+// Common schemas
+
+
+function createStringValidationSchema<TNullable extends boolean = false>({
   regex,
   regexMessage,
   isRequired = true,
   name,
-  nullable = false,
+  nullable = false as TNullable,
   minLength,
   maxLength,
-}: StringValidationOptions): StringSchema<string | null | undefined> => {
-  let schema: StringSchema<string | null | undefined> = string().transform((_, originalValue) =>
+}: StringValidationOptions & { nullable?: TNullable }): TNullable extends true
+  ? StringSchema<string | null>
+  : StringSchema<string> {
+  let schema = string().transform((_, originalValue) =>
     typeof originalValue === 'string' ? originalValue.trim() : originalValue,
-  );
+  ) as any;
 
   if (isRequired && name && !nullable) {
     schema = schema.required(() =>
@@ -106,10 +154,10 @@ const createStringValidationSchema = ({
   if (nullable) {
     schema = schema.nullable();
   }
-  return schema;
-};
 
-// Common schemas
+  return schema;
+}
+
 const emailSchema = createStringValidationSchema({
   regex: REGEX.EMAIL,
   regexMessage: VALIDATION_MESSAGES.INVALID_EMAIL_FORMAT,
@@ -326,6 +374,7 @@ export const editProfileValidationSchema = createObjectShape({
     maxLength: 25,
   }),
   phoneNumber: phoneNumberSchema,
+  email: emailSchema,
 });
 
 // Utility functions
@@ -340,212 +389,3 @@ export const formatExpiryDate = (value: string): string => {
   const cleanedValue = value.replace(/\D/g, '');
   return cleanedValue.replace(/(.{2})/, '$1/').trim();
 };
-
-// import {string, StringSchema, object, ref, Schema} from 'yup';
-// import {VALIDATION_MESSAGES} from 'constants/validationMessages';
-// import {REGEX} from '../regex';
-
-// type StringValidationOptions = {
-//   regex?: RegExp;
-//   regexMessage?: string;
-//   isRequired?: boolean;
-//   nullable?: boolean;
-//   name?: string;
-//   minLength?: number;
-//   maxLength?: number;
-// };
-
-// interface FieldObject {
-//   [key: string]: StringSchema<string | null | undefined>;
-// }
-
-// const createObjectShape = (fields: FieldObject): Schema<object> => {
-//   return object().shape(fields);
-// };
-
-// const createStringValidationSchema = ({
-//   regex,
-//   regexMessage,
-//   isRequired = true,
-//   name,
-//   nullable = false,
-//   minLength,
-//   maxLength,
-// }: StringValidationOptions): StringSchema<string | null | undefined> => {
-//   let schema: StringSchema<string | null | undefined> = string().transform(
-//     (_, originalValue) =>
-//       typeof originalValue === 'string' ? originalValue.trim() : originalValue,
-//   );
-
-//   if (isRequired && name && !nullable) {
-//     schema = schema.required(VALIDATION_MESSAGES.IS_REQUIRED({name}));
-//   }
-
-//   if (regex && regexMessage) {
-//     schema = schema.matches(regex, regexMessage);
-//   }
-
-//   if (minLength !== undefined) {
-//     schema = schema.min(
-//       minLength,
-//       VALIDATION_MESSAGES.MIN_LENGTH({minLength: minLength}),
-//     );
-//   }
-
-//   if (maxLength !== undefined) {
-//     schema = schema.max(
-//       maxLength,
-//       VALIDATION_MESSAGES.MAX_LENGTH({maxLength: maxLength}),
-//     );
-//   }
-
-//   if (nullable) {
-//     schema = schema.nullable();
-//   }
-//   return schema;
-// };
-
-// // Common schemas
-// const emailSchema = createStringValidationSchema({
-//   regex: REGEX.EMAIL,
-//   regexMessage: VALIDATION_MESSAGES.INVALID_EMAIL_FORMAT,
-//   name: 'Email field',
-// });
-
-// const passwordSchema = createStringValidationSchema({
-//   regex: REGEX.PASSWORD,
-//   regexMessage: VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN({}),
-//   name: 'Password field',
-//   minLength: 8,
-// });
-
-// const phoneNumberSchema = createStringValidationSchema({
-//   regex: REGEX.PHONE_NUMBER,
-//   name: 'Phone Number field',
-//   minLength: 11,
-//   maxLength: 17,
-// });
-
-// const userNameSchema = createStringValidationSchema({
-//   regex: REGEX.USERNAME,
-//   name: 'Username',
-//   minLength: 3,
-//   maxLength: 20,
-// });
-
-// const verificationCodeSchema = createStringValidationSchema({
-//   regex: REGEX.VERIFICATION,
-//   name: 'Verification code',
-//   minLength: 6,
-//   maxLength: 6,
-// });
-
-// const linkSchema = createStringValidationSchema({
-//   regex: REGEX.URL,
-//   regexMessage: VALIDATION_MESSAGES.INVALID_URL_FORMAT,
-//   nullable: true,
-// });
-
-// // Validation schemas
-// export const loginValidationSchema = createObjectShape({
-//   email: emailSchema,
-//   password: passwordSchema,
-// });
-
-// export const signUpValidationSchema = createObjectShape({
-//   email: emailSchema,
-//   username: userNameSchema,
-// });
-// export const verificationValidationSchema = createObjectShape({
-//   code: verificationCodeSchema,
-// });
-
-// export const changePasswordValidationSchema = createObjectShape({
-//   current_password: createStringValidationSchema({
-//     regex: REGEX.PASSWORD,
-//     regexMessage: VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN({
-//       name: 'Current',
-//     }),
-//     name: 'Current Password',
-//     minLength: 8,
-//   }),
-//   new_password: createStringValidationSchema({
-//     regex: REGEX.PASSWORD,
-//     regexMessage: VALIDATION_MESSAGES.PASSWORD_MUST_CONTAIN({name: 'New'}),
-//     name: 'New Password',
-//     minLength: 8,
-//   }),
-//   confirm_password: string()
-//     .oneOf([ref('new_password')], 'Passwords must match')
-//     .transform((_, originalValue) =>
-//       typeof originalValue === 'string' ? originalValue.trim() : originalValue,
-//     )
-//     .required(VALIDATION_MESSAGES.IS_REQUIRED({name: 'Confirm Password'})),
-// });
-
-// export const cardValidationSchema = createObjectShape({
-//   cardNumber: createStringValidationSchema({
-//     name: 'Card number',
-//     regex: REGEX.CARD_NUMBER,
-//   }),
-//   cvv: createStringValidationSchema({
-//     name: 'CVV',
-//     regex: REGEX.CVV,
-//   }),
-//   expiryDate: createStringValidationSchema({
-//     name: 'Expiry date',
-//     regex: REGEX.EXPIRY_DATE,
-//   }),
-// });
-
-// export const contactUsValidationSchema = createObjectShape({
-//   email: emailSchema,
-//   name: createStringValidationSchema({
-//     name: 'Name',
-//   }),
-//   message: createStringValidationSchema({
-//     name: 'Message',
-//     minLength: 50,
-//     maxLength: 500,
-//   }),
-//   phone: phoneNumberSchema,
-// });
-
-// export const editProfileValidationSchema = createObjectShape({
-//   username: userNameSchema,
-//   phone: phoneNumberSchema,
-//   twitter: linkSchema,
-//   website: linkSchema,
-//   linkedin: linkSchema,
-//   name: createStringValidationSchema({
-//     name: 'Name',
-//   }),
-//   location: createStringValidationSchema({
-//     name: 'Location',
-//     minLength: 3,
-//     maxLength: 20,
-//   }),
-//   bio: createStringValidationSchema({
-//     name: 'Bio',
-//     minLength: 3,
-//     maxLength: 25,
-//   }),
-//   about: createStringValidationSchema({
-//     name: 'Description',
-//     minLength: 10,
-//     maxLength: 500,
-//   }),
-// });
-
-// // Utility functions
-// export const formatCardNumber = (value: string): string => {
-//   return value
-//     .replace(/\s/g, '')
-//     .replace(/(.{4})/g, '$1 ')
-//     .trim();
-// };
-
-// export const formatExpiryDate = (value: string): string => {
-//   const cleanedValue = value.replace(/\D/g, '');
-//   return cleanedValue.replace(/(.{2})/, '$1/').trim();
-// };

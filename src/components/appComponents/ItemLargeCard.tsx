@@ -1,37 +1,39 @@
 import { TouchableOpacity, View } from 'react-native';
-import React from 'react';
 import { Icon, Photo, RowComponent, SkeletonLoader, Typography } from 'components/index';
-import { ItemType } from './Home';
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
 import { StyleSheet } from 'react-native';
-import { FontSize, FontWeight } from 'types/index';
+import { CategoryItem, FontSize, FontWeight } from 'types/index';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
+import { useState } from 'react';
+import { toggleFavourite } from 'api/functions/app/home';
 
 export const ItemLargeCard = ({
   item,
   showCategory = false,
 }: {
-  item: ItemType;
+  item: CategoryItem;
   showCategory?: boolean;
 }) => {
+  const [isLiked, setIsLiked] = useState<boolean>(item?.is_liked);
+  const categoryName = item?.itemCategory?.category?.title;
   const isEcommerce =
-    item?.category === 'Order Your Food' ||
-    item?.category === 'Grocery' ||
-    item?.category === 'Fashion' ||
-    item?.category === 'Health' ||
-    item?.category === 'Interior' ||
-    item?.category === 'Electronics';
+    categoryName === 'Order Your Food' ||
+    categoryName === 'Grocery' ||
+    categoryName === 'Fashion' ||
+    categoryName === 'Health' ||
+    categoryName === 'Interior' ||
+    categoryName === 'Electronics';
 
   return (
-    <SkeletonLoader key={item?.name} height={screenHeight(25)}>
+    <SkeletonLoader key={item?.title} height={screenHeight(25)}>
       <TouchableOpacity
         onPress={() => {
           if (isEcommerce) {
-            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: item?.category });
+            navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: categoryName });
             return;
           }
-          navigate(SCREENS.DETAILS, { data: item, heading: item?.category });
+          navigate(SCREENS.DETAILS, { data: item, heading: categoryName });
         }}
         style={styles.itemContainer}
       >
@@ -56,29 +58,36 @@ export const ItemLargeCard = ({
                   numberOfLines={1}
                   style={{ color: COLORS.WHITE, fontWeight: FontWeight.SemiBold }}
                 >
-                  {item?.category}
+                  {categoryName}
                 </Typography>
               </View>
             )}
             <Icon
-              onPress={() => {}}
+              onPress={() => {
+                setIsLiked(!isLiked);
+                toggleFavourite({
+                  object_id: item?.id,
+                  object_type: 'item',
+                  category_id: item?.category_id,
+                });
+              }}
               componentName={VARIABLES.AntDesign}
-              iconName={item?.isLiked ? 'heart' : 'hearto'}
-              color={item?.isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
+              iconName={isLiked ? 'heart' : 'hearto'}
+              color={isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
               size={FontSize.MediumLarge}
               iconStyle={styles.heartIcon}
             />
           </RowComponent>
-          <Photo disabled imageStyle={styles.itemImage} source={item?.image} />
+          <Photo disabled imageStyle={styles.itemImage} source={item?.media?.[0]?.media_url} />
         </View>
-        <View style={{ paddingHorizontal: 10, paddingVertical: 12, gap: isIOS() ? 5 : 3 }}>
+        <View style={{ paddingHorizontal: 10, paddingVertical: 12, gap: isIOS() ? 3 : 3 }}>
           <RowComponent>
             <Typography numberOfLines={1} style={styles.itemText}>
-              {item?.name}
+              {item?.title}
             </Typography>
-            {item?.openTime && (
-              <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 10 }}>
-                <Typography
+            {item?.eventDetail?.start_time && (
+              <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 5 }}>
+                {/* <Typography
                   numberOfLines={1}
                   style={{
                     color: COLORS.SECONDARY,
@@ -87,23 +96,55 @@ export const ItemLargeCard = ({
                   }}
                 >
                   {item?.isOpen ? 'OPEN' : 'CLOSED'}
+                </Typography> */}
+                <Typography
+                  numberOfLines={1}
+                  style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+                >
+                  {new Date(item?.eventDetail?.date)?.toLocaleDateString()}
                 </Typography>
                 <Typography
                   numberOfLines={1}
                   style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
                 >
-                  {item?.openTime}
+                  {item?.eventDetail?.start_time + '  -'}
+                </Typography>
+                <Typography
+                  numberOfLines={1}
+                  style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+                >
+                  {item?.eventDetail?.end_time}
                 </Typography>
               </RowComponent>
             )}
           </RowComponent>
 
-          <Typography
+          <RowComponent
+            style={{
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 5,
+            }}
+          >
+            <Typography
+              numberOfLines={1}
+              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+            >
+              {item?.eventDetail?.city + ' - '}
+            </Typography>
+            <Typography
+              numberOfLines={1}
+              style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+            >
+              {item?.eventDetail?.country}
+            </Typography>
+          </RowComponent>
+          {/* <Typography
             numberOfLines={1}
             style={{ color: COLORS.DARK_GREY, fontSize: FontSize.MediumSmall }}
           >
-            {item?.address}
-          </Typography>
+            {"item?.address"}
+          </Typography> */}
           <RowComponent>
             {item?.distance && (
               <RowComponent
@@ -130,7 +171,7 @@ export const ItemLargeCard = ({
               </RowComponent>
             )}
 
-            {!item?.rating && (
+            {!item?.rating_avg && (
               <RowComponent style={styles.ratingContainer}>
                 <Icon
                   onPress={() => {}}
@@ -142,7 +183,7 @@ export const ItemLargeCard = ({
                 />
 
                 <Typography style={{ color: COLORS.WHITE, fontSize: FontSize.ExtraSmall }}>
-                  {item?.rating ?? '4.2' + ' Rating'}
+                  {String(item?.rating_avg ?? '0.0') + ' Rating'}
                 </Typography>
               </RowComponent>
             )}
@@ -187,8 +228,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     backgroundColor: COLORS.PRIMARY,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginBottom: 3,
+    paddingVertical: 3,
     gap: 5,
     borderRadius: 30,
   },

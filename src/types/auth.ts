@@ -3,6 +3,7 @@ interface Login_SignUp {
   last_name?: string;
   user_name?: string;
   full_name?: string;
+  country_code?: string;
   email: string;
   phone?: string;
   password: string;

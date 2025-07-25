@@ -1,14 +1,14 @@
-import {View, ActivityIndicator, ViewStyle, StyleSheet} from 'react-native';
-import {COLORS, screenHeight, screenWidth} from 'utils/index';
+import { View, ActivityIndicator, ViewStyle, StyleSheet } from 'react-native';
+import { COLORS, screenHeight, screenWidth } from 'utils/index';
 
 interface LoaderProps {
   containerStyle?: ViewStyle;
 }
 
-export const Loader: React.FC<LoaderProps> = ({containerStyle}) => {
+export const Loader: React.FC<LoaderProps> = ({ containerStyle }) => {
   return (
     <View style={[styles.container, containerStyle]}>
-      <ActivityIndicator color={COLORS.WHITE} size={'large'} />
+      <ActivityIndicator color={COLORS.PRIMARY} size={'large'} />
     </View>
   );
 };
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: screenHeight(100),
     width: screenWidth(100),
-    backgroundColor: COLORS.SECONDARY,
+    backgroundColor: COLORS.WHITE,
     opacity: 0.5,
     zIndex: 999,
     elevation: 10,

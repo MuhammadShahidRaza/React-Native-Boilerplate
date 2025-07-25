@@ -4,6 +4,7 @@ import {
   NotificationReducer,
   PaymentReducer,
   UserReducer,
+  CategoryReducer,
 } from '../slices/index';
 
 export const REDUCERS = {
@@ -11,5 +12,6 @@ export const REDUCERS = {
   app: AppReducer,
   notification: NotificationReducer,
   address: AddressReducer,
+  category: CategoryReducer,
   payment: PaymentReducer,
 };

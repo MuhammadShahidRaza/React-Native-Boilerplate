@@ -4,12 +4,12 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { ItemType } from 'components/appComponents/Home';
 import { Icon, OrderItem } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
 import { FontSize } from 'types/fontTypes';
+import { CategoryItem } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
@@ -46,15 +46,15 @@ export type RootStackParamList = {
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
   [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
-  [SCREENS.VIEW_ALL]: { data: { items: ItemType[]; headerTitle: string } };
-  [SCREENS.VIEW_DETAILS]: { data: ItemType };
-  [SCREENS.DETAILS]: { data: ItemType; heading: string };
+  [SCREENS.VIEW_ALL]: { data: { items: CategoryItem[]; headerTitle: string } };
+  [SCREENS.VIEW_DETAILS]: { data: CategoryItem };
+  [SCREENS.DETAILS]: { data: CategoryItem; heading: string };
   [SCREENS.ECOMMERCE_DETAILS]: { data: any; heading: string };
   [SCREENS.ORDER_DETAIL]: { data: OrderItem };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: string;
-      items: ItemType[];
+      items: CategoryItem[];
       itemHeading: string;
     };
   };
@@ -77,7 +77,7 @@ export type RootStackParamList = {
   [SCREENS.SUB_CATEGORY_FOOD]: {
     data: {
       heading: string;
-      items: ItemType[];
+      items: CategoryItem[];
       itemHeading: string;
       categories?: { id: string; name: string; image: string }[];
     };

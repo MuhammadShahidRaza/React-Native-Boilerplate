@@ -1,14 +1,107 @@
-import {Photo, RowComponent, Typography} from 'components/common';
-import {MONTHS, WEEKDAYS, WEEKDAYS_ABBR} from 'constants/common';
-import {COMMON_TEXT} from 'constants/screens';
-import {Dimensions, NativeModules, Platform} from 'react-native';
-import {ChildrenType, voidFuntionType} from 'types/common';
-import {User} from 'types/response';
-import {COLORS} from 'utils/colors';
-import {FLEX_CENTER, STYLES} from 'utils/commonStyles';
-// import {getFCMToken} from '..';
+import { Photo, RowComponent, Typography } from 'components/common';
+import { MONTHS, WEEKDAYS, WEEKDAYS_ABBR } from 'constants/common';
+import { COMMON_TEXT } from 'constants/screens';
+import { Alert, Dimensions, NativeModules, Platform } from 'react-native';
+import { ChildrenType, voidFuntionType } from 'types/common';
+import { User } from 'types/responseTypes';
+import { COLORS } from 'utils/colors';
+import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
 // import { getUniqueId } from 'react-native-device-info';
-import {IMAGES} from 'constants/assets';
+import { IMAGES } from 'constants/assets';
+import parsePhoneNumber from 'libphonenumber-js';
+import { openCamera } from 'react-native-image-crop-picker';
+
+export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined) {
+  try {
+    const parsed = parsePhoneNumber(phoneNumber ?? '');
+    return {
+      countryCode: '+' + parsed?.countryCallingCode,
+      number: parsed?.nationalNumber,
+    };
+  } catch {
+    return {
+      countryCode: '',
+      number: phoneNumber,
+    };
+  }
+}
+
+export const openCameraOrGallery = () => {
+  Alert.alert(
+    'Choose Option',
+    'Select an option to upload a photo',
+    [
+      {
+        text: 'Camera',
+        onPress: () => {},
+      },
+      {
+        text: 'Gallery',
+        onPress: () => {},
+      },
+      { text: 'Cancel', style: 'cancel' },
+    ],
+    { cancelable: true },
+  );
+};
+
+export const formatEventDateTimeRange = ({
+  date,
+  startTime,
+  endTime,
+}: {
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+}): string => {
+  if (!date || !startTime) return '';
+
+  const getDateWithTime = (baseDate: string, time: string) => {
+    try {
+      const base = new Date(baseDate);
+      if (isNaN(base.getTime())) return null;
+
+      const [hours, minutes, seconds] = time.split(':').map(Number);
+      base.setHours(hours || 0);
+      base.setMinutes(minutes || 0);
+      base.setSeconds(seconds || 0);
+      return base;
+    } catch {
+      return null;
+    }
+  };
+
+  const formatTime = (date: Date) =>
+    date
+      .toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+      .replace(':', '.')
+      .toLowerCase(); // 8.00 pm
+
+  const formatDate = (date: Date) =>
+    date.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+    }); // 28 May
+
+  const startDate = getDateWithTime(date, startTime);
+  if (!startDate) return '';
+
+  const endDate = endTime ? getDateWithTime(date, endTime) : null;
+
+  const formattedDate = formatDate(startDate);
+  const formattedStartTime = formatTime(startDate);
+  const formattedEndTime = endDate ? formatTime(endDate) : '';
+
+  return formattedEndTime
+    ? `${formattedDate}, ${formattedStartTime} - ${formattedEndTime}`
+    : `${formattedDate}, ${formattedStartTime}`;
+};
+
+export const safeString = (val?: string | null): string => val ?? '';
 
 export const screenHeight = (percent: number) => {
   const screenHeight = Dimensions.get('window').height;
@@ -59,22 +152,22 @@ export const deviceType = () => {
 };
 export const deviceUdid = () => {
   // const deviceUdid = getUniqueId();
-  const deviceUdid = '';
+  const deviceUdid = 'abcd';
   return deviceUdid;
 };
 export const appVersion = () => {
   // const deviceUdid = getUniqueId();
-  const appVersion = '';
+  const appVersion = '1.0.0';
   return appVersion;
 };
 export const deviceOS = () => {
   // const deviceUdid = getUniqueId();
-  const deviceOS = '';
+  const deviceOS = Platform.OS;
   return deviceOS;
 };
 export const deviceBrand = () => {
   // const deviceUdid = getUniqueId();
-  const deviceBrand = '';
+  const deviceBrand = 'vivo';
   return deviceBrand;
 };
 
@@ -86,7 +179,7 @@ export const deviceDetails = () => {
     device_os: deviceOS(),
     app_version: appVersion(),
   };
-  
+
   return data;
 };
 
@@ -96,9 +189,7 @@ export const getDeviceLang = () => {
       NativeModules.SettingsManager.settings.AppleLanguages[0]
     : NativeModules.I18nManager.localeIdentifier;
 
-  return appLanguage.search(/-|_/g) !== -1
-    ? appLanguage.slice(0, 2)
-    : appLanguage;
+  return appLanguage.search(/-|_/g) !== -1 ? appLanguage.slice(0, 2) : appLanguage;
 };
 
 export const capitalizeFirstCharacter = (string: string) => {
@@ -168,7 +259,7 @@ export const getUserProfilePicture = (
     return (
       <Photo
         onPress={onPress}
-        source={user?.profile_image ? {uri: user?.profile_image} : IMAGES.USER}
+        source={user?.profile_image ? { uri: user?.profile_image } : IMAGES.USER}
         imageStyle={STYLES.USER_IMAGE}
       />
     );
@@ -182,10 +273,9 @@ export const getUserProfilePicture = (
           {
             backgroundColor: COLORS.PRIMARY,
           },
-        ]}>
-        <Typography style={{color: COLORS.WHITE}}>
-          {getFirstCharactersOfName(user)}
-        </Typography>
+        ]}
+      >
+        <Typography style={{ color: COLORS.WHITE }}>{getFirstCharactersOfName(user)}</Typography>
       </RowComponent>
     );
   }

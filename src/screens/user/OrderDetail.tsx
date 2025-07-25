@@ -1,10 +1,7 @@
-import React from 'react';
 import { Wrapper } from 'components/common/Wrapper';
 import {
-  FlatListComponent,
   Header,
   Icon,
-  MessageBox,
   orderStatusColor,
   Photo,
   RowComponent,
@@ -18,9 +15,30 @@ import { StyleSheet, View } from 'react-native';
 import { STYLES } from 'utils/commonStyles';
 import { COLORS } from 'utils/colors';
 import { TEMPORARY_TEXT } from 'constants/screens';
-import { Map } from 'components/common/Map';
 import { IMAGES } from 'constants/assets/images';
 import { VARIABLES } from 'constants/common';
+
+const MAX_DISPLAY = 3;
+
+const ImageStack = ({ images }) => {
+  const displayImages = images.slice(0, MAX_DISPLAY);
+  const extraCount = images.length - MAX_DISPLAY;
+
+  return (
+    <View style={styles.stack}>
+      {displayImages.map((img, idx) => (
+        <View key={idx} style={styles.card}>
+          <Photo source={img} style={{}} />
+          {idx === MAX_DISPLAY - 1 && extraCount > 0 && (
+            <View style={styles.overlay}>
+              <Typography style={styles.overlayText}>{`+${extraCount}`}</Typography>
+            </View>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+};
 
 export const OrderDetail = ({ route }: AppScreenProps<typeof SCREENS.ORDER_DETAIL>) => {
   const data = route.params.data;
@@ -59,28 +77,8 @@ export const OrderDetail = ({ route }: AppScreenProps<typeof SCREENS.ORDER_DETAI
         />
 
         <View style={styles.headerContent}>
-          <FlatListComponent
-            data={[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]}
-            contentContainerStyle={{
-              gap: 10,
-            }}
-            style={{
-              marginTop: 10,
-              backgroundColor: 'red',
-            }}
-            renderItem={({ item }) => {
-              return (
-                <Photo
-                  source={data.image}
-                  imageStyle={{
-                    width: 100,
-                    height: 50,
-                    borderRadius: 20,
-                    ...STYLES.SHADOW,
-                  }}
-                />
-              );
-            }}
+          <ImageStack
+            images={[data.image, data.image, data.image, data.image, data.image, data.image]}
           />
           <Typography
             style={{
@@ -112,7 +110,7 @@ export const OrderDetail = ({ route }: AppScreenProps<typeof SCREENS.ORDER_DETAI
               gap: 10,
             }}
           >
-            {/* {item?.rating && ( */}
+            {/* {item?.rating_count && ( */}
             <RowComponent
               style={{
                 justifyContent: 'flex-start',
@@ -257,5 +255,42 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     color: COLORS.DARK_GREY,
     fontSize: FontSize.MediumSmall,
+  },
+  stack: {
+    flexDirection: 'column',
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  card: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#fff',
+    marginBottom: 8,
+    backgroundColor: '#222',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4, // for Android shadow
+    shadowColor: '#000', // for iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
 });

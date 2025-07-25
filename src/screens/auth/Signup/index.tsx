@@ -21,6 +21,7 @@ interface SignUpFormValues {
   password: string;
   country: string;
   confirmPassword: string;
+  country_code: string;
   showPassword: boolean;
   showConfirmPassword: boolean;
 }
@@ -31,8 +32,9 @@ export const SignUp = () => {
     password: __DEV__ ? 'Passward123!' : '',
     full_name: __DEV__ ? 'Shahid Raza' : '',
     username: __DEV__ ? 'shahid26' : '',
-    country: __DEV__ ? 'Nigeria' : '',
+    country: __DEV__ ? 'Pakistan' : '',
     phoneNumber: __DEV__ ? '24244562' : '',
+    country_code: __DEV__ ? 'PK' : 'NG',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
     showConfirmPassword: false,
@@ -45,6 +47,7 @@ export const SignUp = () => {
       full_name: values?.full_name,
       user_name: values?.username,
       country: values?.country,
+      country_code: values.country_code,
       phone: values?.phoneNumber,
       device_token: await getFCMToken(),
       ...deviceDetails(),
@@ -145,6 +148,7 @@ export const SignUp = () => {
           title={COMMON_TEXT.PHONE_NUMBER}
           onChangeText={formik.handleChange('phoneNumber')}
           value={formik.values.phoneNumber}
+          onChangeCountryCode={formik.handleChange('country_code')}
           allowSpacing={false}
           defaultCode={__DEV__ ? 'PK' : 'NG'}
           startIcon={{
@@ -205,7 +209,12 @@ export const SignUp = () => {
           touched={Boolean(formik.touched.confirmPassword && formik.submitCount)}
         />
       </FocusProvider>
-      <Button title={COMMON_TEXT.REGISTER} onPress={formik.handleSubmit} style={styles.button} />
+      <Button
+        loading={true}
+        title={COMMON_TEXT.REGISTER}
+        onPress={formik.handleSubmit}
+        style={styles.button}
+      />
     </AuthComponent>
   );
 };

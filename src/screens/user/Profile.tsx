@@ -6,33 +6,31 @@ import { useFormikForm } from 'hooks/useFormik';
 import { navigate } from 'navigation/Navigators';
 import { StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { useAppSelector } from 'types/reduxTypes';
+import { EditProfileFormTypes } from 'types/screenTypes';
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { screenHeight, screenWidth } from 'utils/helpers';
+import { safeString, screenHeight, screenWidth, splitPhoneNumberWithCode } from 'utils/helpers';
 import * as yup from 'yup';
-interface EditProfileFormValues {
-  email: string;
-  full_name: string;
-  username: string;
-  phoneNumber: string;
-  country: string;
-}
+
+export type EditProfileFormExtended = EditProfileFormTypes & { country_code?: string };
 
 export const Profile = () => {
-  //   const dispatch = useAppDispatch();
-  const initialValues: EditProfileFormValues = {
-    email: __DEV__ ? 'john@mailinator.com' : 'john@mailinator.com',
-    full_name: __DEV__ ? 'John Doe' : 'John Doe',
-    username: __DEV__ ? 'john26' : 'john26',
-    country: __DEV__ ? 'Nigeria' : 'Nigeria',
-    phoneNumber: __DEV__ ? '3242445623' : '',
-  };
+  const { userDetails } = useAppSelector(state => state?.user);
 
-  const handleSubmit = async (values: EditProfileFormValues) => {
+  const initialValues: EditProfileFormExtended = {
+    email: safeString(userDetails?.email),
+    full_name: safeString(userDetails?.full_name),
+    username: safeString(userDetails?.user_name),
+    country: safeString(userDetails?.country),
+    phoneNumber: safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number),
+    country_code: safeString(userDetails?.country_code),
+  };
+  const handleSubmit = async () => {
     navigate(SCREENS.EDIT_PROFILE);
   };
 
-  const formik = useFormikForm<EditProfileFormValues>({
+  const formik = useFormikForm<EditProfileFormExtended>({
     initialValues,
     validationSchema: yup.object().shape({}),
     onSubmit: handleSubmit,
@@ -119,7 +117,8 @@ export const Profile = () => {
             onChangeText={formik.handleChange('phoneNumber')}
             value={formik.values.phoneNumber}
             allowSpacing={false}
-            defaultCode={__DEV__ ? 'PK' : 'NG'}
+            onChangeCountryCode={formik.handleChange('country_code')}
+            defaultCode={formik.values.country_code as any}
             startIcon={{
               componentName: VARIABLES.Feather,
               iconName: 'phone',

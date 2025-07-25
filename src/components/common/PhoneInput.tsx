@@ -24,6 +24,7 @@ interface PhoneInputProp extends PhoneInputProps {
   value: string;
   placeholder: string;
   onChangeText: (text: string) => void;
+  onChangeCountryCode: (text: string) => void;
   style?: StyleProp<TextStyle>;
   returnKeyType?: TextInputProps['returnKeyType'];
   onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
@@ -62,6 +63,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   allowSpacing = true,
   name,
   startIcon,
+  onChangeCountryCode,
   endIcon,
   darkTheme,
   titleStyle,
@@ -133,6 +135,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
               textContainerStyle={[{ height }, styles.textContainerStyle]}
               onChangeCountry={country => {
                 setCountryCode(country.callingCode?.[0]);
+                onChangeCountryCode(country.cca2);
               }}
               onChangeFormattedText={(text: string) => {
                 const isValid = phoneRef.current?.isValidNumber(text);

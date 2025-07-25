@@ -1,5 +1,4 @@
 import { View, StyleSheet, StyleProp, TextStyle, ImageStyle, ViewStyle } from 'react-native';
-import React from 'react';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
 import { Icon, Photo, RowComponent, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';

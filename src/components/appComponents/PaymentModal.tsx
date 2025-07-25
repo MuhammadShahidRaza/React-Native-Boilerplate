@@ -1,23 +1,19 @@
-import {View, StyleSheet} from 'react-native';
-import {ModalComponent} from '../common/Modal';
-import {Typography} from '../common/Typography';
-import {COMMON_TEXT} from '../../constants/screens/index';
-import {screenWidth} from '../../utils/helpers/functions';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {SocialButton} from './AuthComponent';
-import {IMAGES, SVG} from 'constants/assets';
-import {Button, Input, Photo, RowComponent} from 'components/common';
-import {VARIABLES} from 'constants/common';
-import {COLORS} from 'utils/colors';
-import {useFormikForm} from 'hooks/useFormik';
-import {
-  cardValidationSchema,
-  formatCardNumber,
-  formatExpiryDate,
-} from 'utils/validations';
-import {FocusProvider} from 'hooks/useFocus';
-import {replace} from 'navigation/Navigators';
-import {SCREENS} from 'constants/routes';
+import { View, StyleSheet } from 'react-native';
+import { ModalComponent } from '../common/Modal';
+import { Typography } from '../common/Typography';
+import { COMMON_TEXT } from '../../constants/screens/index';
+import { screenWidth } from '../../utils/helpers/functions';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { SocialButton } from './AuthComponent';
+import { IMAGES, SVG } from 'constants/assets';
+import { Button, Input, Photo, RowComponent } from 'components/common';
+import { VARIABLES } from 'constants/common';
+import { COLORS } from 'utils/colors';
+import { useFormikForm } from 'hooks/useFormik';
+import { cardValidationSchema, formatCardNumber, formatExpiryDate } from 'utils/validations';
+import { FocusProvider } from 'hooks/useFocus';
+import { replace } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
 
 interface PaymentModalProps {
   showPaymentModal: boolean;
@@ -75,13 +71,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       wantToCloseOnBack
       scroll
       wantToCloseOnTop
-      modalContainer={{flex: 2}}
+      modalContainer={{ flex: 2 }}
       modalVisible={showPaymentModal}
-      setModalVisible={setShowPaymentModal}>
+      setModalVisible={setShowPaymentModal}
+    >
       <View style={styles.modalContent}>
-        <Typography style={styles.modalTitle}>
-          {COMMON_TEXT.CHOOSE_PAYMENT_METHOD}
-        </Typography>
+        <Typography style={styles.modalTitle}>{COMMON_TEXT.CHOOSE_PAYMENT_METHOD}</Typography>
         <RowComponent style={styles.buttonRow}>
           <SocialButton
             textStyle={styles.socialButtonText}
@@ -122,7 +117,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           />
           <Input
             titleStyle={styles.title}
-            keyboardType="number-pad"
+            keyboardType='number-pad'
             name={COMMON_TEXT.CARD_NUMBER}
             title={COMMON_TEXT.CARD_NUMBER}
             onChangeText={handleCardNunber}
@@ -141,7 +136,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <RowComponent style={styles.inputRow}>
             <Input
               titleStyle={styles.title}
-              keyboardType="number-pad"
+              keyboardType='number-pad'
               name={COMMON_TEXT.EXPIRY_DATE}
               maxLength={5}
               title={COMMON_TEXT.EXPIRY_DATE}
@@ -160,7 +155,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             />
             <Input
               titleStyle={styles.title}
-              keyboardType="number-pad"
+              keyboardType='number-pad'
               name={COMMON_TEXT.CVV}
               title={COMMON_TEXT.CVV}
               containerStyle={styles.inputField}
@@ -183,6 +178,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         <Button
           title={COMMON_TEXT.PAY_NOW}
           onPress={formik.handleSubmit}
+          loading={true}
           style={styles.payNowButton}
         />
       </View>
