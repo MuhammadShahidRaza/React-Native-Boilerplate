@@ -91,4 +91,11 @@ export const API_ROUTES = {
   GET_ABOUT_US: 'contents/about',
   SEND_FEEDBACK: 'feedback/send',
   GET_FAQ: 'faq',
+
+  //XTRA FIND
+  GET_REGIONS_LIST: 'static/regions',
+  GET_CATEGORIES: 'static/categories',
+  TOGGLE_FAVOURITE: 'favourites/toggle',
+  GET_CATEGORIES_ITEM: 'items/events/tickets/?',
+  GET_SUB_CATEGORIES: '',
 };
