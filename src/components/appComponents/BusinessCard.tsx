@@ -4,84 +4,109 @@ import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { VARIABLES } from 'constants/common';
-import { ItemType } from './Home/index';
 import { screenWidth } from 'utils/helpers';
 import { openPhoneNumber, openUrl } from 'utils/linking';
+import { CategoryItem } from 'types/responseTypes';
+import StarRating from 'react-native-star-rating-widget';
+import { toggleFavourite } from 'api/functions/app/home';
+import { useState } from 'react';
 
-export const BusinessCard = ({ data }: { data: ItemType }) => {
+export const BusinessCard = ({ data }: { data: CategoryItem }) => {
+  const [isLiked, setIsLiked] = useState<boolean>(data?.is_liked);
+  const vendorDetails = data?.vendor;
   return (
     <View style={styles.container}>
       <RowComponent style={styles.contentContainer}>
-        <Photo source={data?.image} imageStyle={styles.image} />
+        <Photo
+          source={vendorDetails?.business_logo ?? vendorDetails?.profile_image}
+          imageStyle={styles.image}
+        />
         <View style={styles.infoContainer}>
           <RowComponent style={styles.headerRow}>
             <Typography numberOfLines={1} style={styles.name}>
-              {data?.name}
+              {vendorDetails?.business_name ?? vendorDetails?.full_name}
             </Typography>
             <Icon
               componentName={VARIABLES.AntDesign}
-              iconName={data?.isLiked ? 'heart' : 'hearto'}
+              iconName={isLiked ? 'heart' : 'hearto'}
               size={20}
-              color={data?.isLiked ? COLORS.PRIMARY : COLORS.SECONDARY}
-              onPress={() => {}}
+              color={isLiked ? COLORS.PRIMARY : COLORS.SECONDARY}
+              onPress={() => {
+                setIsLiked(!isLiked);
+                toggleFavourite({
+                  object_id: data?.id,
+                  object_type: 'item',
+                  category_id: data?.category_id,
+                });
+              }}
             />
           </RowComponent>
 
-          {data?.address && (
+          {vendorDetails?.address && (
             <RowComponent style={styles.addressContainer}>
               <Icon
                 componentName={VARIABLES.Ionicons}
                 iconName='location-outline'
-                size={14}
+                size={FontSize.MediumSmall}
                 color={COLORS.DARK_GREY}
               />
               <Typography style={styles.address} numberOfLines={1}>
-                {data?.address}
+                {vendorDetails?.address}
               </Typography>
             </RowComponent>
           )}
 
-          {data?.openTime && (
-            <RowComponent style={styles.statusRow}>
-              <Typography
-                style={[
-                  styles.openStatus,
-                  { color: data?.isOpen ? COLORS.SECONDARY : COLORS.BORDER },
-                ]}
-              >
-                {data?.isOpen ? 'OPEN' : 'CLOSED'}
-              </Typography>
-              {data?.openTime && <Typography style={styles.hours}>{data?.openTime}</Typography>}
-            </RowComponent>
-          )}
-          {data?.description && (
+          {/* <RowComponent style={styles.statusRow}> */}
+          {/* <Typography
+              style={[
+                styles.openStatus,
+                { color: data?.is_available ? COLORS.SECONDARY : COLORS.BORDER },
+              ]}
+            >
+              {data?.is_available ? 'OPEN' : 'CLOSED'}
+            </Typography> */}
+          {/* {data?.eventDetail?.event_date && (
+              <>
+                <Icon
+                  componentName={VARIABLES.EvilIcons}
+                  iconName='calendar'
+                  size={FontSize.Medium}
+                  color={COLORS.DARK_GREY}
+                />
+                <Typography style={styles.hours}>{data?.eventDetail?.event_date}</Typography>
+              </>
+            )} */}
+          {/* </RowComponent> */}
+          {vendorDetails?.bio && (
             <Typography style={styles.address} numberOfLines={2}>
-              {data?.description}
+              {vendorDetails?.bio}
             </Typography>
           )}
 
           <RowComponent style={styles.ratingContainer}>
-            {[1, 2, 3, 4, 5].map(star => (
-              <Icon
-                key={star}
-                componentName={VARIABLES.AntDesign}
-                iconName='star'
-                size={14}
-                color={star <= Number(data?.rating ?? 4) ? COLORS.PRIMARY : COLORS.BORDER}
-              />
-            ))}
+            <StarRating
+              emptyColor={COLORS.BORDER}
+              rating={data?.rating_avg}
+              starSize={13}
+              color={COLORS.PRIMARY}
+              starStyle={{
+                marginLeft: -4,
+              }}
+              onChange={() => {}}
+            />
+
             <Typography style={styles.ratingText}>
-              {`${data?.rating ?? '4.0'}  (${data?.totalRatings ?? '2'} Ratings)`}
+              {`${data?.rating_avg ?? '0.0'}  (${data?.rating_count} Ratings)`}
             </Typography>
           </RowComponent>
         </View>
       </RowComponent>
-      {data?.phoneNumber && (
+      {vendorDetails?.phone_number && (
         <RowComponent style={styles.buttonContainer}>
           <Button
             title='Call'
             onPress={() => {
-              openPhoneNumber(data?.phoneNumber ?? '');
+              openPhoneNumber(vendorDetails?.phone_number);
             }}
             startIcon={{
               componentName: VARIABLES.Ionicons,
@@ -95,7 +120,7 @@ export const BusinessCard = ({ data }: { data: ItemType }) => {
           <Button
             title='Whatsapp'
             onPress={() => {
-              openUrl(`https://wa.me/${data?.phoneNumber ?? ''}`);
+              openUrl(`https://wa.me/${data?.vendor?.whatsapp_number ?? ''}`);
             }}
             startIcon={{
               componentName: VARIABLES.FontAwesome,
