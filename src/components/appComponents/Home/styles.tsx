@@ -73,7 +73,7 @@ export const styles = StyleSheet.create({
   },
   textOverlay: {
     position: 'absolute',
-    top: screenWidth(isIOS() ? 13 : 15),
+    top: screenHeight(8),
     left: 12,
     right: 12,
     borderWidth: 1.5,
