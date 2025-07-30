@@ -3,7 +3,7 @@ import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
-import { navigate } from 'navigation/Navigators';
+import { navigate, reset } from 'navigation/Navigators';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
 import { setUserDetails } from 'store/slices/user';
 import store from 'store/store';
@@ -61,7 +61,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
   }
 };
 
-const resetUserPassword = async <R extends MessageResponse, A extends ResetPassword>({
+const resetUserPassword = async <R extends MessageResponse, A extends { password: string }>({
   data,
 }: {
   data: A;
@@ -73,10 +73,35 @@ const resetUserPassword = async <R extends MessageResponse, A extends ResetPassw
   });
   if (response) {
     showToast({ message: response?.message, isError: false });
-    navigate(SCREENS.LOGIN);
+    reset(SCREENS.LOGIN);
+    setItem(VARIABLES.USER_TOKEN, null);
   }
 };
 
+const forgotPassword = async <R extends MessageResponse, A extends { email: string }>({
+  data,
+}: {
+  data: A;
+}) => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    navigate(SCREENS.VERIFICATION, {
+      isFromForgot: true,
+      email: data?.email,
+    });
+    return;
+  }
+  const response: R | undefined = await handleApiRequest<R, A>({
+    url: API_ROUTES.FORGOT_PASSWORD,
+    data,
+  });
+  if (response) {
+    showToast({ message: response?.message, isError: false });
+    navigate(SCREENS.VERIFICATION, {
+      isFromForgot: true,
+      email: data?.email,
+    });
+  }
+};
 const verifyEmailCode = async <R extends MessageResponse, A extends { token: string }>({
   data,
 }: {
@@ -176,6 +201,7 @@ export {
   loginUser,
   verifyEmailCode,
   verifyOtpCode,
+  forgotPassword,
   resendEmailCode,
   loginUserThroughSocial,
   resetUserPassword,

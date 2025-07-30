@@ -7,7 +7,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { IMAGES, SCREENS } from 'constants/index';
-import { navigate } from 'navigation/index';
+import { reset } from 'navigation/index';
 import { useState } from 'react';
 import { StyleProp, StyleSheet, TextStyle, View } from 'react-native';
 import { FontSize, StyleType, FontWeight } from 'types/index';
@@ -128,7 +128,8 @@ export const Cart = () => {
         <Button
           title={'Confirm Payment Address'}
           onPress={() => {
-            navigate(SCREENS.CHECKOUT);
+            // navigate(SCREENS.CHECKOUT);
+            reset(SCREENS.BOTTOM_STACK);
           }}
           style={styles.button}
         />

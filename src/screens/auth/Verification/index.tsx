@@ -5,10 +5,9 @@ import { COLORS } from 'utils/colors';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COMMON_TEXT } from 'constants/screens';
 import { useRoute } from '@react-navigation/native';
-import { navigate } from 'navigation/Navigators';
 import { AppRouteProp } from 'types/navigation';
 import { SCREENS } from 'constants/routes';
-import { resendEmailCode, verifyEmailCode } from 'api/functions/auth';
+import { resendEmailCode, verifyEmailCode, verifyOtpCode } from 'api/functions/auth';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
@@ -40,7 +39,7 @@ export const Verification = () => {
 
   const handleVerify = () => {
     if (isFromForgot) {
-      navigate(SCREENS.RESET_PASSWORD);
+      verifyOtpCode({ data: { email, token: code } });
       return;
     }
     verifyEmailCode({ data: { token: code } });
@@ -52,7 +51,7 @@ export const Verification = () => {
       setIsResendEnabled(false);
       setCode('');
       inputRef.current?.focus();
-      resendEmailCode({data:{email}})
+      resendEmailCode({ data: { email } });
     }
   };
 

@@ -37,7 +37,7 @@ interface SocialLogin {
 
 interface VerifyOtp {
   email: string;
-  code: string;
+  token: string;
 }
 
 interface ResetPassword {

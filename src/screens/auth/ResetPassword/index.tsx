@@ -1,11 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { COMMON_TEXT, VARIABLES } from 'constants/index';
 import { COLORS, resetPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import { Button, Input, AuthComponent } from 'components/index';
-import { reset } from 'navigation/Navigators';
-// import { resetUserPassword } from 'api/functions/auth';
+import { resetUserPassword } from 'api/functions/auth';
 
 interface ResetPasswordFormValues {
   new_password: string;
@@ -25,11 +24,8 @@ export const ResetPassword = () => {
   const handleSubmit = async (values: ResetPasswordFormValues) => {
     const data = {
       password: values?.new_password,
-      password_confirmation: values?.confirm_password,
     };
-    // resetUserPassword({data});
-
-    reset(SCREENS.LOGIN);
+    resetUserPassword({ data });
   };
 
   const formik = useFormikForm<ResetPasswordFormValues>({
@@ -99,7 +95,12 @@ export const ResetPassword = () => {
           touched={Boolean(formik.touched.confirm_password && formik.submitCount)}
         />
       </FocusProvider>
-      <Button  loading={true} title={COMMON_TEXT.UPDATE} onPress={formik.handleSubmit} style={styles.button} />
+      <Button
+        loading={true}
+        title={COMMON_TEXT.UPDATE}
+        onPress={formik.handleSubmit}
+        style={styles.button}
+      />
     </AuthComponent>
   );
 };

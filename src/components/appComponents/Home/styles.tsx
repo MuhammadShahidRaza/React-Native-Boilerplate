@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/index';
-import { COLORS, isIOS, STYLES } from 'utils/index';
+import { COLORS, STYLES } from 'utils/index';
 import { screenHeight, screenWidth } from 'utils/index';
 
 export const styles = StyleSheet.create({

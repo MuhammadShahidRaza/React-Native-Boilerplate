@@ -137,14 +137,14 @@ export const HomeComponent = () => {
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ minHeight: screenHeight(isIOS() ? 50 : 52) }}
+        style={{ minHeight: screenHeight(isIOS() ? 50 : 52)}}
       >
         {hasSubCategories && (
           <FlatListComponent
             keyExtractor={item => item?.title}
             numColumns={2}
-            refreshing={false}
-            onRefresh={() => {}}
+            // refreshing={false}
+            // onRefresh={() => {}}
             columnWrapperStyle={styles.subCategoriesColumnWrapper}
             contentContainerStyle={styles.subCategoriesContentContainer}
             data={activeCategory?.subcategories}

@@ -7,7 +7,7 @@ export const API_ROUTES = {
   GET_LANGUAGES: 'languages',
   VERIFY_EMAIL: 'auth/verify-email',
   RESET_PASSWORD: 'auth/reset-password',
-  VERIFY_OTP: 'user/verify-code',
+  VERIFY_OTP: 'auth/verify-token',
   HOME: 'user/home',
   GET_PROFILE: 'user/user',
   RESEND_VERFICATION: 'auth/resend-verification',

@@ -86,7 +86,7 @@ export const BusinessCard = ({ data }: { data: CategoryItem }) => {
           <RowComponent style={styles.ratingContainer}>
             <StarRating
               emptyColor={COLORS.BORDER}
-              rating={data?.rating_avg}
+              rating={4} //TODO:    rating={data?.rating_avg} crashing
               starSize={13}
               color={COLORS.PRIMARY}
               starStyle={{

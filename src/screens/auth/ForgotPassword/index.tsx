@@ -5,6 +5,7 @@ import { FocusProvider, useFormikForm } from 'hooks/index';
 import { Button, Input, AuthComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
 import { navigate } from 'navigation/Navigators';
+import { forgotPassword } from 'api/functions/auth';
 
 interface ForgotPasswordFormValues {
   email: string;
@@ -19,10 +20,11 @@ export const ForgotPassword = () => {
     const data = {
       email: values?.email,
     };
-    // sendOtpToEmail({ data });
-    navigate(SCREENS.VERIFICATION, {
-      isFromForgot: true,
-    });
+
+    forgotPassword({ data });
+    // navigate(SCREENS.VERIFICATION, {
+    //   isFromForgot: true,
+    // });
   };
 
   const formik = useFormikForm<ForgotPasswordFormValues>({

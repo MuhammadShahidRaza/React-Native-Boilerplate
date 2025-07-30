@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   },
   userNameStyle: {
     color: COLORS.WHITE,
+    textTransform:"capitalize"
   },
   iconStyle: {
     backgroundColor: COLORS.WHITE,
