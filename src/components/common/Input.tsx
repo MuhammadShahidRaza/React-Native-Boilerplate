@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { StyleProp } from 'react-native';
+import { StyleProp, useColorScheme } from 'react-native';
 import {
   TextInput,
   StyleSheet,
@@ -97,7 +97,7 @@ export const Input: React.FC<InputProps> = ({
       focusNextInput(); // Focus next input
     }
   };
-
+  const isDarkMode = useColorScheme() == 'dark';
   return (
     <View style={[styles.container, containerStyle]}>
       {!isTitleInLine && title && (
@@ -134,7 +134,7 @@ export const Input: React.FC<InputProps> = ({
               placeholder={i18n.t(placeholder)}
               value={value}
               onPress={onPress}
-              placeholderTextColor={COLORS.TEXT}
+              placeholderTextColor={isDarkMode ? COLORS.ICONS : COLORS.TEXT}
               onChangeText={handleTextChange}
               multiline={!!maxLines}
               numberOfLines={maxLines}

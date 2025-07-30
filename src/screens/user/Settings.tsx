@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Icon, RowComponent, Wrapper } from 'components/common';
+import { Button, Icon, ModalComponent, RowComponent, Typography, Wrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
@@ -13,12 +13,27 @@ import CustomSwitch from 'components/common/SwitchButton';
 import { useState } from 'react';
 import { COMMON_TEXT } from 'constants/screens';
 
+const showLogoutModal = ({ isVisible = false, setIsVisible = () => {}, isDelete = false }) => {
+  return (
+    <ModalComponent modalVisible={isVisible} setModalVisible={setIsVisible}>
+      <Icon
+        componentName={isDelete ? 'MaterialIcons' : 'AntDesign'}
+        iconName={isDelete ? 'delete-outline' : 'logout'}
+      />
+      <Typography>Are you sure</Typography>
+      <Typography>{`You want to ${isDelete ? 'delete' : 'logout'} your account`}</Typography>
+    </ModalComponent>
+  );
+};
+
 export const Settings = () => {
   const dispatch = useAppDispatch();
   const handleDeactivateAccount = async () => {
     dispatch(setIsUserLoggedIn(false));
     await removeMultipleItem([VARIABLES.USER_TOKEN, VARIABLES.IS_USER_LOGGED_IN]);
   };
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
+
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const tabs = [
     {
@@ -104,6 +119,11 @@ export const Settings = () => {
           </RowComponent>
         ))}
       </View>
+      {showLogoutModal({
+        isDelete: false,
+        isVisible: isLogoutModalVisible,
+        setIsVisible: setIsLogoutModalVisible,
+      })}
     </Wrapper>
   );
 };

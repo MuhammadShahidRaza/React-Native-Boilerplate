@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { StyleProp } from 'react-native';
+import { StyleProp, useColorScheme } from 'react-native';
 import {
   StyleSheet,
   TextInputProps,
@@ -76,8 +76,8 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const isErrorShown = touched && error;
-  const height = isTitleInLine ? (isIOS() ? 36 : 44) : isIOS() ? 44 : 48;
-
+  const height = isTitleInLine ? (isIOS() ? 36 : 40) : isIOS() ? 44 : 48;
+  const isDarkMode = useColorScheme() == 'dark';
   const handleTextChange = (text: string) => {
     onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);
   };
@@ -121,7 +121,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
               containerStyle={[{ height }, styles.innerContainer]}
               countryPickerButtonStyle={styles.countryPickerButtonStyle}
               textInputProps={{
-                placeholderTextColor: COLORS.TEXT,
+                placeholderTextColor: isDarkMode ? COLORS.ICONS : COLORS.TEXT,
                 editable: editable,
                 returnKeyType: returnKeyType,
                 maxLength: 12,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textContainerStyle: {
-    maxWidth: '65%',
+    maxWidth: isIOS() ? '66%' : '68%',
     backgroundColor: COLORS.INPUT_BACKGROUND,
   },
   textInputStyle: {

@@ -49,7 +49,7 @@ export const useUserLoginStatus = (): UserLoginStatus => {
       } finally {
         setTimeout(() => {
           setIsLoading(false);
-        }, 2000);
+        },isUserLoggedIn ? 2000 : 4000);
       }
     };
     checkUserIsLogin();
