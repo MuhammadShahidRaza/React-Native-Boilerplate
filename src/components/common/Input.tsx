@@ -53,7 +53,7 @@ export const Input: React.FC<InputProps> = ({
   value,
   placeholder,
   error,
-  onChangeText,
+  onChangeText = () => {},
   style,
   endImage,
   touched,

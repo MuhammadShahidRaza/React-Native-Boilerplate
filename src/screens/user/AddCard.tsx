@@ -55,7 +55,6 @@ export const AddCard = () => {
     onSubmit: handleSubmit,
   });
 
-  console.log(formik.errors);
   const handleCardNunber = (text: string) => {
     const formattedText = formatCardNumber(text);
     formik.setFieldValue('cardNumber', formattedText);

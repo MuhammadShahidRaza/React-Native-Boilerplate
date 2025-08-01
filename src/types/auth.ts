@@ -5,7 +5,7 @@ interface Login_SignUp {
   full_name?: string;
   country_code?: string;
   email: string;
-  phone?: string;
+  phone_number?: string;
   password: string;
   country?: string;
   picture?: string | null;

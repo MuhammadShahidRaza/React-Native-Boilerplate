@@ -6,9 +6,10 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
 } from 'react-native';
-import {StyleType} from 'types/common';
-import {COLORS} from 'utils/colors';
-import {isIOS} from 'utils/helpers';
+import { StyleType } from 'types/common';
+import { COLORS } from 'utils/colors';
+import { STYLES } from 'utils/commonStyles';
+import { isIOS } from 'utils/helpers';
 
 interface ModalComponentProps {
   children: React.ReactNode;
@@ -17,10 +18,11 @@ interface ModalComponentProps {
   scroll?: boolean;
   transparent?: boolean;
   statusBarTranslucent?: boolean;
-  modalContainer?: StyleType;
+  modalContainerStyle?: StyleType;
   wantToCloseOnBack?: boolean;
   wantToCloseOnTop?: boolean;
   onRequestClose?: () => void;
+  position?: 'center' | 'bottom';
 }
 
 export const ModalComponent: React.FC<ModalComponentProps> = ({
@@ -29,15 +31,16 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
   setModalVisible,
   scroll = false,
   transparent = true,
-  modalContainer,
+  modalContainerStyle,
   statusBarTranslucent = true,
   wantToCloseOnBack = false,
   wantToCloseOnTop = false,
   onRequestClose,
+  position = 'bottom',
 }) => {
   return (
     <Modal
-      animationType="slide"
+      animationType='slide'
       transparent={transparent}
       visible={modalVisible}
       statusBarTranslucent={statusBarTranslucent}
@@ -47,21 +50,39 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
         } else if (wantToCloseOnBack) {
           setModalVisible(false);
         }
-      }}>
+      }}
+    >
       <KeyboardAvoidingView
         behavior={isIOS() ? 'padding' : 'height'}
-        style={[styles.modalContainer, modalContainer]}>
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            if (wantToCloseOnTop) {
-              setModalVisible(false);
-            }
-          }}
-          style={styles.overlay}
-        />
-        <View style={[styles.modalContainer, modalContainer]}>
-          <View style={styles.modalContent}>
+        style={[
+          styles.modalContainer,
+          position === 'center' ? styles.centeredContainer : styles.bottomContainer,
+          modalContainerStyle,
+        ]}
+      >
+        <View
+          style={[
+            { flex: 1 },
+            position === 'center' ? styles.centeredContainer : styles.bottomContainer,
+          ]}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => {
+              if (wantToCloseOnTop) {
+                setModalVisible(false);
+              }
+            }}
+            style={StyleSheet.absoluteFill}
+          />
+
+          <View
+            style={[
+              styles.modalInnerWrapper,
+              position === 'center' ? styles.centeredModal : styles.bottomModal,
+              position === 'center' && styles.centeredModalLayout,
+            ]}
+          >
             {scroll ? (
               <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
                 {children}
@@ -77,20 +98,38 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: COLORS.DARK_BLACK_OPACITY,
-  },
   modalContainer: {
     flex: 1,
+    backgroundColor: COLORS.MEDIUM_BLACK_OPACITY,
+  },
+  bottomContainer: {
     justifyContent: 'flex-end',
-    backgroundColor: COLORS.DARK_BLACK_OPACITY,
+  },
+  centeredContainer: {
+    justifyContent: 'center',
+  },
+  bottomModal: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  centeredModal: {
+    borderRadius: 20,
+  },
+  centeredModalLayout: {
+    alignSelf: 'center',
+    width: '90%',
+    maxWidth: 400,
   },
   modalContent: {
     backgroundColor: COLORS.WHITE,
-    borderTopEndRadius: 20,
-    borderTopStartRadius: 20,
     paddingVertical: 20,
     paddingHorizontal: 20,
+  },
+  modalInnerWrapper: {
+    marginHorizontal: 20,
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    ...STYLES.SHADOW,
   },
 });

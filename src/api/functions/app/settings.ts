@@ -2,31 +2,28 @@ import { API_ROUTES } from 'api/routes';
 import { handleGetApiRequest, handlePostApiRequest } from '.';
 import { ContactUsFormValues, Region } from 'screens/user';
 import { onBack } from 'navigation/index';
-import { clearAllStorageItems, showToast } from 'utils/index';
+import { showToast } from 'utils/index';
 import { StaticPage, StaticPageType } from 'screens/common';
 import { COMMON_TEXT } from 'constants/screens';
-import store from 'store/store';
-import { setIsUserLoggedIn } from 'store/slices/appSettings';
-import { setUserDetails } from 'store/slices/user';
 
 const logout = async (data: { device_udid: string }) => {
-  store.dispatch(setIsUserLoggedIn(false));
-  store.dispatch(setUserDetails(null));
-  await clearAllStorageItems();
-  await handlePostApiRequest({
+  const response = await handlePostApiRequest({
     url: API_ROUTES.LOGOUT,
     data,
+    showLoader: false,
   });
+  if (response) {
+    console.log(response);
+  }
 };
 const deleteAccount = async (data: {}) => {
   const response = await handlePostApiRequest({
     url: API_ROUTES.DELETE_ACCOUNT,
     data,
+    showLoader: false,
   });
   if (response) {
-    store.dispatch(setIsUserLoggedIn(false));
-    store.dispatch(setUserDetails(null));
-    await clearAllStorageItems();
+    console.log(response);
   }
 };
 const contactUs = async (data: ContactUsFormValues) => {

@@ -1,5 +1,10 @@
 import { API_ROUTES } from 'api/routes';
-import { handleGetApiRequest, handlePostApiRequest, handlePutApiRequest } from '.';
+import {
+  handleFormDataPutRequest,
+  handleGetApiRequest,
+  handlePostApiRequest,
+  handlePutApiRequest,
+} from '.';
 import store from 'store/store';
 import { MessageResponse, User } from 'types/responseTypes';
 import { setUserDetails } from 'store/slices/user';
@@ -16,9 +21,7 @@ const getUserDetails = async <R extends { user: User }>() => {
   }
 };
 
-const updatePassword = async <R extends { response: MessageResponse }>(
-  data: ChangePasswordFormTypes,
-) => {
+const updatePassword = async <R extends MessageResponse>(data: ChangePasswordFormTypes) => {
   const response = await handlePostApiRequest<R, ChangePasswordFormTypes>({
     url: API_ROUTES.CHANGE_PASSWORD,
     data,
@@ -29,7 +32,7 @@ const updatePassword = async <R extends { response: MessageResponse }>(
   }
 };
 const updateUserDetails = async <R extends { user: User }>(data: EditProfileFormTypes) => {
-  const user = await handlePutApiRequest<R, EditProfileFormTypes>({
+  const user = await handleFormDataPutRequest<R, EditProfileFormTypes>({
     url: API_ROUTES.UPDATE_PROFILE,
     data,
   });

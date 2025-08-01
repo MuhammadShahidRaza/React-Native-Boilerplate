@@ -4331,6 +4331,7 @@ __metadata:
     react: 19.0.0
     react-i18next: ^15.5.2
     react-native: 0.79.2
+    react-native-device-info: ^14.0.4
     react-native-dotenv: ^3.4.11
     react-native-get-random-values: ^1.11.0
     react-native-google-places-autocomplete: ^2.5.7
@@ -10499,6 +10500,15 @@ __metadata:
     react-native: "*"
     react-native-web: "*"
   checksum: e808169b45c5e8021462a6914f7c3fb28e84ae8d58097ed7b3418fee41efa2bc44012abc09ff3f3bd6ee14427b9efe1b0f8d8b3a19cc01325b2f2cd0137d5d00
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^14.0.4":
+  version: 14.0.4
+  resolution: "react-native-device-info@npm:14.0.4"
+  peerDependencies:
+    react-native: "*"
+  checksum: aa839dbe7df1246a4b5f9bcfeb3d4cc4be585f13a0d3ff6a03f57a0c2cfe7590291ac292dda4c51fd8765f94c870857676463e8e2f1660b057f3ae2b4335db29
   languageName: node
   linkType: hard
 

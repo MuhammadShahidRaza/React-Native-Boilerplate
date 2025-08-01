@@ -16,8 +16,8 @@ import { signUpUser } from 'api/functions/auth';
 interface SignUpFormValues {
   email: string;
   full_name: string;
-  username: string;
-  phoneNumber: string;
+  user_name: string;
+  phone_number: string;
   password: string;
   country: string;
   confirmPassword: string;
@@ -31,9 +31,9 @@ export const SignUp = () => {
     email: __DEV__ ? 'shahid@mailinator.com' : '',
     password: __DEV__ ? 'Passward123!' : '',
     full_name: __DEV__ ? 'Shahid Raza' : '',
-    username: __DEV__ ? 'shahid26' : '',
+    user_name: __DEV__ ? 'shahid26' : '',
     country: __DEV__ ? 'Pakistan' : '',
-    phoneNumber: __DEV__ ? '24244562' : '',
+    phone_number: __DEV__ ? '3242445623' : '',
     country_code: __DEV__ ? 'PK' : 'NG',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
@@ -45,15 +45,17 @@ export const SignUp = () => {
       email: values?.email,
       password: values?.password,
       full_name: values?.full_name,
-      user_name: values?.username,
+      user_name: values?.user_name,
       country: values?.country,
       country_code: values.country_code,
-      phone: values?.phoneNumber,
+      phone_number: values?.phone_number,
       device_token: await getFCMToken(),
+      // referal_id:""
       ...deviceDetails(),
     };
     signUpUser({ data });
   };
+
   const formik = useFormikForm<SignUpFormValues>({
     initialValues,
     validationSchema: signUpValidationSchema,
@@ -94,16 +96,16 @@ export const SignUp = () => {
         <Input
           name={COMMON_TEXT.USERNAME}
           title={COMMON_TEXT.USERNAME}
-          onChangeText={formik.handleChange('username')}
-          onBlur={formik.handleBlur('username')}
-          value={formik.values.username}
+          onChangeText={formik.handleChange('user_name')}
+          onBlur={formik.handleBlur('user_name')}
+          value={formik.values.user_name}
           placeholder={COMMON_TEXT.ENTER_USER_NAME}
           startIcon={{
             componentName: VARIABLES.Feather,
             iconName: 'user',
           }}
-          error={formik.errors.username}
-          touched={Boolean(formik.touched.username && formik.submitCount)}
+          error={formik.errors.user_name}
+          touched={Boolean(formik.touched.user_name && formik.submitCount)}
         />
         <Input
           name={COMMON_TEXT.EMAIL}
@@ -146,8 +148,8 @@ export const SignUp = () => {
         <PhoneInputComponent
           name={COMMON_TEXT.PHONE_NUMBER}
           title={COMMON_TEXT.PHONE_NUMBER}
-          onChangeText={formik.handleChange('phoneNumber')}
-          value={formik.values.phoneNumber}
+          onChangeText={formik.handleChange('phone_number')}
+          value={formik.values.phone_number}
           onChangeCountryCode={formik.handleChange('country_code')}
           allowSpacing={false}
           defaultCode={__DEV__ ? 'PK' : 'NG'}
@@ -156,8 +158,8 @@ export const SignUp = () => {
             iconName: 'phone',
           }}
           placeholder={COMMON_TEXT.PHONE_NUMBER}
-          error={formik.errors.phoneNumber}
-          touched={Boolean(formik.touched.phoneNumber && formik.submitCount)}
+          error={formik.errors.phone_number}
+          touched={Boolean(formik.touched.phone_number && formik.submitCount)}
         />
 
         <Input

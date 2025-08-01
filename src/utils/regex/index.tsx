@@ -18,7 +18,7 @@ export const REGEX = {
   PASSWORD: /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/u, // Adjusted to include at least 8 characters and allow any letter.
   URL: /^((?!https:\/\/|http:\/\/).)*www\.[\p{L}\p{M}\p{N}-]+\.com$/u,
   CARD_NUMBER: /^\d{4} \d{4} \d{4} \d{4}$/,
-  PHONE_NUMBER: /^\+[0-9]{10,16}$/,
+  PHONE_NUMBER: /^[0-9]{7,16}$/,
   USERNAME: /^[\p{L}\p{N}_]+$/u,
   VERIFICATION: /^\d{6}$/,
   EXPIRY_DATE: /^(0[1-9]|1[0-2])\/\d{2}$/,

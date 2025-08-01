@@ -58,7 +58,8 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     } else if (params?.heading === 'Events') {
       return [
         { id: 1, name: 'About' },
-        { id: 3, name: 'Gallery' },
+        { id: 2, name: 'Gallery' },
+        { id: 3, name: 'Reviews' },
       ];
     } else {
       return [

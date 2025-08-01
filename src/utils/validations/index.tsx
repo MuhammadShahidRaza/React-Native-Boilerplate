@@ -8,6 +8,8 @@ import { LANGUAGES } from 'constants/common';
 type StringValidationOptions = {
   regex?: RegExp;
   regexMessage?: string;
+  minLengthMessage?: string;
+  maxLengthMessage?: string;
   isRequired?: boolean;
   nullable?: boolean;
   name?: string;
@@ -107,7 +109,6 @@ const createObjectShape = <T extends ObjectShape>(fields: T) => {
 
 // Common schemas
 
-
 function createStringValidationSchema<TNullable extends boolean = false>({
   regex,
   regexMessage,
@@ -115,7 +116,9 @@ function createStringValidationSchema<TNullable extends boolean = false>({
   name,
   nullable = false as TNullable,
   minLength,
+  minLengthMessage,
   maxLength,
+  maxLengthMessage,
 }: StringValidationOptions & { nullable?: TNullable }): TNullable extends true
   ? StringSchema<string | null>
   : StringSchema<string> {
@@ -136,18 +139,26 @@ function createStringValidationSchema<TNullable extends boolean = false>({
   }
 
   if (minLength !== undefined) {
-    schema = schema.min(minLength, () =>
-      getValidationMessageWithTranslation(VALIDATION_MESSAGES.MIN_LENGTH, {
-        minLength,
-      }),
+    schema = schema.min(
+      minLength,
+      minLengthMessage
+        ? minLengthMessage
+        : () =>
+            getValidationMessageWithTranslation(VALIDATION_MESSAGES.MIN_LENGTH, {
+              minLength,
+            }),
     );
   }
 
   if (maxLength !== undefined) {
-    schema = schema.max(maxLength, () =>
-      getValidationMessageWithTranslation(VALIDATION_MESSAGES.MAX_LENGTH, {
-        maxLength,
-      }),
+    schema = schema.max(
+      maxLength,
+      maxLengthMessage
+        ? minLengthMessage
+        : () =>
+            getValidationMessageWithTranslation(VALIDATION_MESSAGES.MAX_LENGTH, {
+              maxLength,
+            }),
     );
   }
 
@@ -197,10 +208,10 @@ const currentPasswordSchema = createStringValidationSchema({
   ...passwordValidation,
 });
 const phoneNumberSchema = createStringValidationSchema({
-  regex: REGEX.PHONE_NUMBER,
   name: COMMON_TEXT.PHONE_NUMBER,
-  regexMessage: VALIDATION_MESSAGES.WRONG_PHONE_NUMBER,
-  minLength: 11,
+  minLengthMessage: VALIDATION_MESSAGES.WRONG_PHONE_NUMBER,
+  maxLengthMessage: VALIDATION_MESSAGES.WRONG_PHONE_NUMBER,
+  minLength: 7,
   maxLength: 17,
 });
 
@@ -247,7 +258,7 @@ export const signUpValidationSchema = createObjectShape({
     minLength: 3,
     maxLength: 25,
   }),
-  username: userNameSchema,
+  user_name: userNameSchema,
   country: createStringValidationSchema({
     name: COMMON_TEXT.COUNTRY,
     regex: REGEX.FIRST_NAME,
@@ -260,7 +271,7 @@ export const signUpValidationSchema = createObjectShape({
     minLength: 3,
     maxLength: 25,
   }),
-  phoneNumber: phoneNumberSchema,
+  phone_number: phoneNumberSchema,
   confirmPassword: confirmPasswordSchema({ name: 'password' }),
 });
 
@@ -360,7 +371,7 @@ export const editProfileValidationSchema = createObjectShape({
     minLength: 3,
     maxLength: 25,
   }),
-  username: userNameSchema,
+  user_name: userNameSchema,
   country: createStringValidationSchema({
     name: COMMON_TEXT.COUNTRY,
     regex: REGEX.FIRST_NAME,
@@ -373,7 +384,7 @@ export const editProfileValidationSchema = createObjectShape({
     minLength: 3,
     maxLength: 25,
   }),
-  phoneNumber: phoneNumberSchema,
+  phone_number: phoneNumberSchema,
   email: emailSchema,
 });
 

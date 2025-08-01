@@ -93,7 +93,6 @@ const handleRequestError = (error: AxiosError<ErrorResponse>) => {
 
     const status = error.response.status;
     const responseData = error.response.data;
-    console.log(responseData);
 
     // 1️⃣ Check deep nested error: { error: { messages: [...] } }
     if (responseData?.error?.messages?.[0]) {
@@ -252,6 +251,34 @@ const postWithSingleFile = async ({
     showLoader,
   );
 };
+const putWithSingleFile = async ({
+  url,
+  data,
+  config = {},
+  includeToken = true,
+  showLoader = true,
+}: RequestOptions) => {
+  const formData = new FormData();
+  if (data) {
+    Object.entries(data).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+  }
+
+  return makeHttpRequest(
+    {
+      method: 'PUT',
+      url,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      ...config,
+    },
+    includeToken,
+    showLoader,
+  );
+};
 
 const patchWithSingleFile = async ({
   url,
@@ -282,4 +309,14 @@ const patchWithSingleFile = async ({
   );
 };
 
-export { setAuthToken, get, post, put, patch, remove, postWithSingleFile, patchWithSingleFile };
+export {
+  setAuthToken,
+  get,
+  post,
+  put,
+  patch,
+  remove,
+  postWithSingleFile,
+  patchWithSingleFile,
+  putWithSingleFile,
+};

@@ -1860,6 +1860,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - RNDeviceInfo (14.0.4):
+    - React-Core
   - RNFastImage (8.10.0):
     - libavif/core (~> 0.11.1)
     - libavif/libdav1d (~> 0.11.1)
@@ -2207,6 +2209,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-masked-view/masked-view`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - "RNFastImage (from `../node_modules/@d11/react-native-fast-image`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
@@ -2399,6 +2402,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCMaskedView:
     :path: "../node_modules/@react-native-masked-view/masked-view"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNFastImage:
     :path: "../node_modules/@d11/react-native-fast-image"
   RNFBApp:
@@ -2518,6 +2523,7 @@ SPEC CHECKSUMS:
   ReactCommon: 35a5629d7159876dd048c63751eaeb3aa3a6a53b
   RNCAsyncStorage: 23e56519cc41d3bade3c8d4479f7760cb1c11996
   RNCMaskedView: 42f3684c136239957b410dbfa81978b25f2c0e18
+  RNDeviceInfo: feea80a690d2bde1fe51461cf548039258bd03f2
   RNFastImage: 033865806ab31d808ba60a49605f1b515d13e1b2
   RNFBApp: 2c88b4fc4bcecf25ff9077abde08f4b1cbaff4c6
   RNFBCrashlytics: 409549adeef1eec4fd132e9ae6df341f031a65e4

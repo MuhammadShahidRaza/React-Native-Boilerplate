@@ -19,15 +19,17 @@ import {
 } from 'utils/index';
 import { updateUserDetails } from 'api/functions/app/user';
 import { EditProfileFormExtended } from './Profile';
+import { useMediaPicker, UseMediaPickerOptions } from 'hooks/useMediaPicker';
 
 export const EditProfile = () => {
+  const { pickMedia, selectedMedia } = useMediaPicker();
   const { userDetails } = useAppSelector(state => state?.user);
   const initialValues: EditProfileFormExtended = {
     email: safeString(userDetails?.email),
     full_name: safeString(userDetails?.full_name),
-    username: safeString(userDetails?.user_name),
+    user_name: safeString(userDetails?.user_name),
     country: safeString(userDetails?.country),
-    phoneNumber: safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number),
+    phone_number: safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number),
     country_code: safeString(userDetails?.country_code),
   };
 
@@ -43,7 +45,12 @@ export const EditProfile = () => {
   };
 
   const handleSubmit = async (values: EditProfileFormExtended) => {
-    updateUserDetails(values);
+    updateUserDetails({
+      ...values,
+      ...(selectedMedia?.[0]?.uri && {
+        profile_image: selectedMedia?.[0],
+      }),
+    });
   };
 
   const formik = useFormikForm<EditProfileFormExtended>({
@@ -52,19 +59,39 @@ export const EditProfile = () => {
     validationSchema: editProfileValidationSchema,
     onSubmit: handleSubmit,
   });
-
+  const imageConfig: UseMediaPickerOptions = {
+    mediaType: 'image',
+    cropping: true,
+    width: 300,
+    height: 300,
+    cropperCircleOverlay: true,
+  };
   return (
     <Wrapper useScrollView={true} useSafeArea={false}>
       <View style={STYLES.CONTAINER}>
         <FocusProvider>
           <View style={styles.profileHeader}>
             <View style={styles.photoContainer}>
-              <Photo source={IMAGES.USER_IMAGE} resizeMode='contain' imageStyle={styles.photo} />
+              <Photo
+                source={selectedMedia?.[0]?.uri ?? userDetails?.profile_image ?? IMAGES.USER_IMAGE}
+                resizeMode='contain'
+                imageStyle={styles.photo}
+              />
               <Icon
                 componentName={VARIABLES.Entypo}
                 iconName={'camera'}
                 onPress={() => {
-                  openCameraOrGallery();
+                  openCameraOrGallery({
+                    cameraPress: () => {
+                      pickMedia({ ...imageConfig, source: 'camera' });
+                    },
+                    galleryPress: () => {
+                      pickMedia({
+                        ...imageConfig,
+                        source: 'gallery',
+                      });
+                    },
+                  });
                 }}
                 color={COLORS.PRIMARY}
                 iconStyle={styles.editIcon}
@@ -88,16 +115,16 @@ export const EditProfile = () => {
           <Input
             name={COMMON_TEXT.USERNAME}
             title={COMMON_TEXT.USERNAME}
-            onChangeText={formik.handleChange('username')}
-            onBlur={formik.handleBlur('username')}
-            value={formik.values.username}
+            onChangeText={formik.handleChange('user_name')}
+            onBlur={formik.handleBlur('user_name')}
+            value={formik.values.user_name}
             placeholder={COMMON_TEXT.ENTER_USER_NAME}
             startIcon={{
               componentName: VARIABLES.Feather,
               iconName: 'user',
             }}
-            error={formik.errors.username}
-            touched={Boolean(formik.touched.username && formik.submitCount)}
+            error={formik.errors.user_name}
+            touched={Boolean(formik.touched.user_name && formik.submitCount)}
           />
           <Input
             name={COMMON_TEXT.EMAIL}
@@ -141,8 +168,8 @@ export const EditProfile = () => {
           <PhoneInputComponent
             name={COMMON_TEXT.PHONE_NUMBER}
             title={COMMON_TEXT.PHONE_NUMBER}
-            onChangeText={formik.handleChange('phoneNumber')}
-            value={formik.values.phoneNumber}
+            onChangeText={formik.handleChange('phone_number')}
+            value={formik.values.phone_number}
             allowSpacing={false}
             defaultCode={formik.values.country_code as any}
             onChangeCountryCode={formik.handleChange('country_code')}
@@ -151,8 +178,8 @@ export const EditProfile = () => {
               iconName: 'phone',
             }}
             placeholder={COMMON_TEXT.PHONE_NUMBER}
-            error={formik.errors.phoneNumber}
-            touched={Boolean(formik.touched.phoneNumber && formik.submitCount)}
+            error={formik.errors.phone_number}
+            touched={Boolean(formik.touched.phone_number && formik.submitCount)}
           />
         </FocusProvider>
         <Button

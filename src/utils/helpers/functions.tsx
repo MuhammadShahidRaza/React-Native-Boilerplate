@@ -9,7 +9,6 @@ import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
 // import { getUniqueId } from 'react-native-device-info';
 import { IMAGES } from 'constants/assets';
 import parsePhoneNumber from 'libphonenumber-js';
-import { openCamera } from 'react-native-image-crop-picker';
 
 export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined) {
   try {
@@ -26,18 +25,24 @@ export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined)
   }
 }
 
-export const openCameraOrGallery = () => {
+export const openCameraOrGallery = ({
+  cameraPress,
+  galleryPress,
+}: {
+  cameraPress: voidFuntionType;
+  galleryPress: voidFuntionType;
+}) => {
   Alert.alert(
     'Choose Option',
     'Select an option to upload a photo',
     [
       {
         text: 'Camera',
-        onPress: () => {},
+        onPress: cameraPress,
       },
       {
         text: 'Gallery',
-        onPress: () => {},
+        onPress: galleryPress,
       },
       { text: 'Cancel', style: 'cancel' },
     ],

@@ -42,10 +42,7 @@ export const Autocomplete = ({
       const position = await getCurrentLocation();
       if (position) {
         const { latitude, longitude } = position.coords;
-        console.log(position);
-
         const response = await reverseGeocode({ latitude, longitude });
-        console.log(response);
         inputRef?.current?.setAddressText(response?.fullAddress);
         setReverseGeocodedAddress(response);
       }

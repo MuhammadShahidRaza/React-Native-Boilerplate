@@ -35,6 +35,8 @@ export const Photo: React.FC<PhotoProps> = ({
   const imageSource =
     typeof source === 'string'
       ? { uri: source }
+      : typeof source === 'object'
+      ? source
       : typeof source === 'number'
       ? source
       : IMAGES.USER;
@@ -44,7 +46,6 @@ export const Photo: React.FC<PhotoProps> = ({
       onPress();
     }
   };
-
   return (
     <TouchableOpacity
       activeOpacity={onPress ? 0.5 : 1}
@@ -69,12 +70,6 @@ const styles = StyleSheet.create({
   },
   image: {},
 });
-
-
-
-
-
-
 
 // import { useState } from 'react';
 // import {

@@ -137,7 +137,7 @@ export const HomeComponent = () => {
     return (
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{ minHeight: screenHeight(isIOS() ? 50 : 52)}}
+        style={{ minHeight: screenHeight(isIOS() ? 50 : 52) }}
       >
         {hasSubCategories && (
           <FlatListComponent

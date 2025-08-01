@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Icon, ModalComponent, RowComponent, Typography, Wrapper } from 'components/common';
+import { Button, Icon, RowComponent, Wrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
@@ -7,34 +7,32 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
-import { removeMultipleItem } from 'utils/storage';
+import { clearAllStorageItems } from 'utils/storage';
 import { useAppDispatch } from 'types/reduxTypes';
 import CustomSwitch from 'components/common/SwitchButton';
 import { useState } from 'react';
 import { COMMON_TEXT } from 'constants/screens';
-
-const showLogoutModal = ({ isVisible = false, setIsVisible = () => {}, isDelete = false }) => {
-  return (
-    <ModalComponent modalVisible={isVisible} setModalVisible={setIsVisible}>
-      <Icon
-        componentName={isDelete ? 'MaterialIcons' : 'AntDesign'}
-        iconName={isDelete ? 'delete-outline' : 'logout'}
-      />
-      <Typography>Are you sure</Typography>
-      <Typography>{`You want to ${isDelete ? 'delete' : 'logout'} your account`}</Typography>
-    </ModalComponent>
-  );
-};
+import { deleteAccount, logout } from 'api/functions/app/settings';
+import { LogoutModal } from 'components/common/LogoutModal';
+import { setUserDetails } from 'store/slices/user';
 
 export const Settings = () => {
   const dispatch = useAppDispatch();
-  const handleDeactivateAccount = async () => {
-    dispatch(setIsUserLoggedIn(false));
-    await removeMultipleItem([VARIABLES.USER_TOKEN, VARIABLES.IS_USER_LOGGED_IN]);
-  };
-  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
-
+  const [isDeleteSelected, setIsDeleteSelected] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
+
+  const handleAccount = async ({ isDelete }: { isDelete: boolean }) => {
+    dispatch(setIsUserLoggedIn(false));
+    dispatch(setUserDetails(null));
+    if (isDelete) {
+      deleteAccount({});
+    } else {
+      logout({ device_udid: 'ewe' });
+    }
+    clearAllStorageItems();
+  };
+
   const tabs = [
     {
       title: 'Select Region',
@@ -82,12 +80,18 @@ export const Settings = () => {
     },
     {
       title: COMMON_TEXT.LOGOUT,
-      onPress: handleDeactivateAccount,
+      onPress: () => {
+        setIsDeleteSelected(false);
+        setIsModalVisible(true);
+      },
       color: COLORS.RED,
     },
     {
       title: 'Delete Account',
-      onPress: handleDeactivateAccount,
+      onPress: () => {
+        setIsDeleteSelected(true);
+        setIsModalVisible(true);
+      },
       color: COLORS.RED,
     },
   ];
@@ -119,11 +123,12 @@ export const Settings = () => {
           </RowComponent>
         ))}
       </View>
-      {showLogoutModal({
-        isDelete: false,
-        isVisible: isLogoutModalVisible,
-        setIsVisible: setIsLogoutModalVisible,
-      })}
+      <LogoutModal
+        isVisible={isModalVisible}
+        setIsVisible={setIsModalVisible}
+        isDelete={isDeleteSelected}
+        onConfirm={() => handleAccount({ isDelete: isDeleteSelected })}
+      />
     </Wrapper>
   );
 };

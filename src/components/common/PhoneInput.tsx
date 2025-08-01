@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleProp, useColorScheme } from 'react-native';
 import {
   StyleSheet,
@@ -86,6 +86,20 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
     if (onSubmitEditing) onSubmitEditing(e);
   };
 
+  const validateNumber = (text: string) => {
+    const isValid = phoneRef.current?.isValidNumber(text);
+    const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
+    if ((touched && !isValid) || (touched && startsWithPlusZero)) {
+      setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
+    } else {
+      setShowError('');
+    }
+  };
+
+  useEffect(() => {
+    validateNumber(value);
+  }, []);
+
   return (
     <View style={[styles.container, containerStyle]}>
       {!isTitleInLine && title && (
@@ -138,16 +152,8 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 onChangeCountryCode(country.cca2);
               }}
               onChangeFormattedText={(text: string) => {
-                const isValid = phoneRef.current?.isValidNumber(text);
-                const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
-
-                if ((touched && !isValid) || (touched && startsWithPlusZero)) {
-                  setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
-                } else {
-                  setShowError('');
-                }
-
                 handleTextChange(text);
+                validateNumber(text);
               }}
               withDarkTheme={darkTheme}
               autoFocus={autoFocus}
