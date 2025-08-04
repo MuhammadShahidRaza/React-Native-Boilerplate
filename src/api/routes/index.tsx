@@ -97,5 +97,7 @@ export const API_ROUTES = {
   GET_CATEGORIES: 'static/categories',
   TOGGLE_FAVOURITE: 'favourites/toggle',
   GET_CATEGORIES_ITEM: 'items/events/tickets/?',
+  GET_RATING_BY_ITEM_ID: 'reviews/item/',
+  POST_RATING: 'reviews',
   GET_SUB_CATEGORIES: '',
 };

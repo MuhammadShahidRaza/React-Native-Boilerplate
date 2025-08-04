@@ -8,8 +8,9 @@ import { Icon, OrderItem } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
+import { ReviewItem } from 'screens/user';
 import { FontSize } from 'types/fontTypes';
-import { CategoryItem } from 'types/responseTypes';
+import { CategoryItem, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   [SCREENS.CHANGE_PASSWORD]: undefined;
   [SCREENS.ABOUT]: undefined;
   [SCREENS.CONTACT_US]: undefined;
+  [SCREENS.REVIEWS]: undefined;
   [SCREENS.FAQ]: undefined;
   [SCREENS.TASKS]: undefined;
   [SCREENS.SHOP]: undefined;
@@ -45,7 +47,13 @@ export type RootStackParamList = {
   [SCREENS.PRIVACY_POLICY]: { title: string };
   [SCREENS.PAYMENTS]: undefined;
   [SCREENS.INVOICES]: undefined;
-  [SCREENS.ADD_REVIEW]: { isNotEditable: boolean };
+  [SCREENS.ADD_REVIEW]: {
+    isNotEditable: boolean;
+    data?: {
+      vendor: Vendor;
+      item?: ReviewItem;
+    };
+  };
   [SCREENS.VIEW_ALL]: { data: { items: CategoryItem[]; headerTitle: string } };
   [SCREENS.VIEW_DETAILS]: { data: CategoryItem };
   [SCREENS.DETAILS]: { data: CategoryItem; heading: string };

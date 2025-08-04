@@ -7,6 +7,8 @@ import {
   setCategoriesList,
   updateItemLikedStatus,
 } from 'store/slices/categories';
+import { showToast } from 'utils/toast';
+import { onBack } from 'navigation/index';
 
 const getMainCategories = async () => {
   const data = await handleGetApiRequest<CategoryListResponse>({
@@ -60,12 +62,56 @@ const getMainCategoriesHomeItems = async ({
   const data = await handleGetApiRequest<any>({
     url: `${API_ROUTES.GET_CATEGORIES_ITEM}search=${search}&page=${page}&limit=${limit}`,
   });
-  store.dispatch(
-    setCategoriesItemList({
-      categoryId: id,
-      items: data?.result ?? [],
-    }),
-  );
+  if (data?.result) {
+    store.dispatch(
+      setCategoriesItemList({
+        categoryId: id,
+        items: data?.result ?? [],
+      }),
+    );
+  }
+};
+const getRatinglist = async ({
+  id,
+  page = 1,
+  limit = 10,
+}: {
+  id: number;
+  page?: number;
+  limit?: number;
+}) => {
+  const response = await handleGetApiRequest<any>({
+    url: `${API_ROUTES.GET_RATING_BY_ITEM_ID}${id}`,
+    // url: `${API_ROUTES.GET_RATING_BY_ITEM_ID}${id}&page=${page}&limit=${limit}`,
+  });
+
+  return response;
+  // store.dispatch(
+  //   setCategoriesItemList({
+  //     categoryId: id,
+  //     items: data?.result ?? [],
+  //   }),
+  // );
+};
+const giveRating = async ({ data }: { data: any }) => {
+  const response = await handlePostApiRequest({
+    url: `${API_ROUTES.POST_RATING}`,
+    data,
+    showLoader: true,
+  });
+  if (response) {
+    onBack();
+    showToast({
+      message: '✅ Thanks for your feedback! We appreciate your input.',
+      isError: false,
+    });
+  }
 };
 
-export { getMainCategories, getMainCategoriesHomeItems, toggleFavourite };
+export {
+  getMainCategories,
+  getMainCategoriesHomeItems,
+  toggleFavourite,
+  getRatinglist,
+  giveRating,
+};

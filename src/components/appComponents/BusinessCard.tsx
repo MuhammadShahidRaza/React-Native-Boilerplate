@@ -4,7 +4,7 @@ import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { VARIABLES } from 'constants/common';
-import { screenWidth } from 'utils/helpers';
+import { roundToNearestHalf, screenWidth } from 'utils/helpers';
 import { openPhoneNumber, openUrl } from 'utils/linking';
 import { CategoryItem } from 'types/responseTypes';
 import StarRating from 'react-native-star-rating-widget';
@@ -86,7 +86,7 @@ export const BusinessCard = ({ data }: { data: CategoryItem }) => {
           <RowComponent style={styles.ratingContainer}>
             <StarRating
               emptyColor={COLORS.BORDER}
-              rating={4} //TODO:    rating={data?.rating_avg} crashing
+              rating={roundToNearestHalf(data?.rating_avg)}
               starSize={13}
               color={COLORS.PRIMARY}
               starStyle={{

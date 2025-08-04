@@ -1,6 +1,14 @@
 import { LegacyRef } from 'react';
-import { FlatList, ListRenderItem, ViewStyle, TextStyle, RefreshControl, View } from 'react-native';
-import { StyleType } from 'types/common';
+import {
+  FlatList,
+  ListRenderItem,
+  ViewStyle,
+  TextStyle,
+  RefreshControl,
+  View,
+  ActivityIndicator,
+} from 'react-native';
+import { StyleType, voidFuntionType } from 'types/common';
 import NoItemFound from './NoItemFound';
 
 interface FlatListComponentProps<T> {
@@ -24,12 +32,14 @@ interface FlatListComponentProps<T> {
   HeaderComponent?: React.FC;
   FooterComponent?: React.FC;
   EmptyComponent?: React.FC;
-  onRefresh?: () => void;
+  onRefresh?: voidFuntionType;
   refreshing?: boolean;
   nestedScrollEnabled?: boolean;
-  pagination?: boolean;
   stickyHeaderIndices?: number[];
   noItemProps?: any;
+  pagination?: boolean;
+  onLoadMore?: voidFuntionType;
+  isLoadingMore?: boolean;
 }
 
 export const FlatListComponent = <T,>({
@@ -52,11 +62,26 @@ export const FlatListComponent = <T,>({
   refreshing = false,
   scrollEnabled = horizontal ?? false,
   pagination = false,
+  onLoadMore,
+  isLoadingMore = false,
   noItemProps,
   ...otherProps
 }: FlatListComponentProps<T>) => {
   const renderHeader = HeaderComponent ? <HeaderComponent /> : null;
-  const renderFooter = FooterComponent ? <FooterComponent /> : null;
+  // const renderFooter = FooterComponent ? <FooterComponent /> : null;
+
+  const renderFooter = () => {
+    if (FooterComponent) return <FooterComponent />;
+    if (pagination && isLoadingMore) {
+      return (
+        <View style={{ paddingVertical: 12, alignItems: 'center' }}>
+          <ActivityIndicator size='small' />
+        </View>
+      );
+    }
+    return null;
+  };
+
   const renderEmpty = EmptyComponent ? <EmptyComponent /> : <NoItemFound {...noItemProps} />;
 
   return (
@@ -82,10 +107,10 @@ export const FlatListComponent = <T,>({
         onScrollToIndexFailed={() => {}}
         nestedScrollEnabled={nestedScrollEnabled}
         scrollEnabled={scrollEnabled}
+        onEndReached={pagination ? onLoadMore : undefined}
         refreshControl={
           onRefresh && <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onEndReached={pagination ? onRefresh : undefined}
         onEndReachedThreshold={0.5}
         {...otherProps}
       />

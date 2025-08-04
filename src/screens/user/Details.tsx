@@ -24,10 +24,9 @@ import {
   Linking,
 } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { renderReviews, reviewsList } from './Reviews';
+import { Reviews } from './Reviews';
 import { IMAGES } from 'constants/assets';
 import { formatEventDateTimeRange, screenHeight, screenWidth } from 'utils/helpers';
-import StarRating from 'react-native-star-rating-widget';
 import { navigate } from 'navigation/index';
 import { BusinessHours } from 'components/appComponents/BusinessHours';
 
@@ -138,13 +137,13 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
     );
   };
 
-  const renderRatingBar = (percentage: number) => {
-    return (
-      <View style={styles.ratingBarContainer}>
-        <View style={[styles.ratingBar, { width: `${percentage}%` }]} />
-      </View>
-    );
-  };
+  // const renderRatingBar = (percentage: number) => {
+  //   return (
+  //     <View style={styles.ratingBarContainer}>
+  //       <View style={[styles.ratingBar, { width: `${percentage}%` }]} />
+  //     </View>
+  //   );
+  // };
 
   const renderServices = ({
     item,
@@ -268,64 +267,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
           </ScrollView>
         );
       case 'Reviews':
-        return (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.tabContent}>
-              <RowComponent
-                style={{
-                  justifyContent: 'flex-start',
-                  gap: 5,
-                }}
-              >
-                <View style={styles.overallRatingContainer}>
-                  <Typography style={styles.overallRating}>4.0</Typography>
-                  <StarRating
-                    emptyColor={COLORS.BORDER}
-                    rating={4.0}
-                    starSize={22}
-                    color={COLORS.PRIMARY}
-                    starStyle={{ marginLeft: -5 }}
-                    onChange={() => {}}
-                  />
-                  <Typography style={styles.totalRatings}>(27)</Typography>
-                </View>
-                <View style={styles.ratingDistribution}>
-                  {[5, 4, 3, 2, 1].map(stars => (
-                    <RowComponent key={stars} style={styles.ratingRow}>
-                      {renderRatingBar((100 / 5) * stars)}
-                    </RowComponent>
-                  ))}
-                </View>
-                <Icon
-                  iconName='info'
-                  componentName={VARIABLES.Feather}
-                  size={16}
-                  color={COLORS.BORDER}
-                />
-              </RowComponent>
-              <RowComponent style={{ justifyContent: 'space-between', marginTop: 20 }}>
-                <Typography style={styles.reviewsTitle}>Reviews</Typography>
-                <RowComponent
-                  onPress={() => {
-                    navigate(SCREENS.ADD_REVIEW, {
-                      isNotEditable: false,
-                    });
-                  }}
-                  style={{ gap: 5 }}
-                >
-                  <Icon
-                    iconName='plus'
-                    componentName={VARIABLES.Feather}
-                    size={16}
-                    color={COLORS.SECONDARY}
-                  />
-                  <Typography style={styles.addReview}>Add Review</Typography>
-                </RowComponent>
-              </RowComponent>
-              <FlatListComponent data={reviewsList} renderItem={renderReviews} />
-            </View>
-          </ScrollView>
-        );
+        return <Reviews data={vendor} />;
       case 'Gallery':
         return (
           <View style={styles.tabContent}>
@@ -344,6 +286,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
             />
           </View>
         );
+      // return <Gallery data={vendor} />;
       case 'Rooms':
         return (
           <View style={styles.tabContent}>

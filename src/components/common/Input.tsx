@@ -40,7 +40,7 @@ interface InputProps extends TextInputProps {
   isTitleInLine?: boolean;
   error?: string;
   lineAfterIcon?: boolean;
-  startIcon: IconComponentProps;
+  startIcon?: IconComponentProps;
   endIcon?: IconComponentProps;
   containerStyle?: StyleType;
   secondContainerStyle?: StyleType;
@@ -119,11 +119,13 @@ export const Input: React.FC<InputProps> = ({
         ]}
       >
         {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
-        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
+        {startIcon && <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />}
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
 
-        <View style={styles.inputContainerWithTitle}>
+        <View
+          style={isTitleInLine ? styles.inputContainerWithoutTitle : styles.inputContainerWithTitle}
+        >
           {isTitleInLine && title && (
             <Typography style={[styles.title, titleStyle]}>{title}</Typography>
           )}
@@ -169,6 +171,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputContainerWithTitle: { width: '80%' },
+  inputContainerWithoutTitle: { width: '100%' },
   label: {
     backgroundColor: COLORS.WHITE,
     top: -9,

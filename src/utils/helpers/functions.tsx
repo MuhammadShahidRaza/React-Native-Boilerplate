@@ -141,11 +141,31 @@ export const fontScale = (percent: number) => {
 //   // return (scale * percent) / 2;
 // };
 
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long', // Monday
+    year: 'numeric', // 2025
+    month: 'long', // July
+    day: 'numeric', // 29
+    hour: 'numeric', // 9
+    minute: '2-digit', // 49
+    hour12: true, // AM/PM
+  };
+
+  return date.toLocaleString('en-US', options).replace(',', '');
+};
+
 export const isIOS = () => {
   const isIOS = Platform.OS === 'ios';
   return isIOS;
 };
 
+
+export const roundToNearestHalf = (num: number) => {
+  return Math.round(num * 2) / 2;
+};
 // export const isAndroid13 = () => {
 //   const isAndroid13 = Platform.constants?.Release >= 13;
 //   return isAndroid13;
@@ -157,7 +177,6 @@ export const deviceType = () => {
 };
 export const deviceUdid = () => {
   // const deviceUdid = getUniqueId();
-  const deviceUdid = 'abcd';
   return deviceUdid;
 };
 export const appVersion = () => {

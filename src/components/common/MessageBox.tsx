@@ -85,6 +85,8 @@ const styles = StyleSheet.create({
   userImage: {
     width: 40,
     height: 40,
+    borderWidth: 0.5,
+    borderColor: COLORS.BORDER,
     borderRadius: 20,
   },
   messageContent: {

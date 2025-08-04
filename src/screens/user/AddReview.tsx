@@ -1,33 +1,45 @@
 import { Button, Input, Photo, RowComponent, Typography, Wrapper } from 'components/common';
-import { COMMON_TEXT, VARIABLES, IMAGES, TEMPORARY_TEXT, SCREENS } from 'constants/index';
+import { COMMON_TEXT, SCREENS } from 'constants/index';
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { FontSize, FontWeight } from 'types/index';
-import { COLORS, FLEX_CENTER, STYLES, screenHeight, screenWidth } from 'utils/index';
-import { onBack } from 'navigation/Navigators';
+import { FontSize, FontWeight, useAppSelector } from 'types/index';
+import {
+  COLORS,
+  FLEX_CENTER,
+  STYLES,
+  roundToNearestHalf,
+  safeString,
+  screenWidth,
+} from 'utils/index';
 import { AppScreenProps } from 'types/navigation';
 import StarRating from 'react-native-star-rating-widget';
+import { giveRating } from 'api/functions/app/home';
 
 export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) => {
+  const { userDetails } = useAppSelector(state => state?.user);
   const isNotEditable = route?.params?.isNotEditable;
+  const vendorDetails = route?.params?.data?.vendor;
+  const ratingDetails = route?.params?.data?.item;
   const [remarks, setRemarks] = useState<string>(
-    isNotEditable
-      ? 'Great Experience At Friendly Staff, Skilled Service Providers, and a relaxing atmosphere. Highly Recommended.'
-      : '',
+    isNotEditable ? safeString(ratingDetails?.review) : '',
   );
-  const [rating, setRating] = useState(isNotEditable ? 5 : 0);
+  const [rating, setRating] = useState(isNotEditable ? ratingDetails?.rating ?? 0 : 0);
 
   return (
     <Wrapper useScrollView>
       <View style={styles.container}>
-        <Photo source={IMAGES.USER} resizeMode='contain' imageStyle={styles.userImage} />
+        <Photo
+          source={isNotEditable ? ratingDetails?.user?.profile_image : userDetails?.profile_image}
+          resizeMode='contain'
+          imageStyle={styles.userImage}
+        />
         <Typography
           style={{
             fontSize: FontSize.Large,
             fontWeight: FontWeight.Bold,
           }}
         >
-          {TEMPORARY_TEXT.JOHN_DOE}
+          {isNotEditable ? ratingDetails?.user?.full_name : userDetails?.full_name}
         </Typography>
 
         {!isNotEditable && (
@@ -38,9 +50,11 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
               <Typography
                 style={{
                   fontWeight: FontWeight.Bold,
+                  width: screenWidth(50),
                 }}
+                numberOfLines={1}
               >
-                {'XYZ'}
+                {vendorDetails?.business_name ?? vendorDetails?.full_name}
               </Typography>
             </RowComponent>
             <Typography style={{ textAlign: 'center' }}>
@@ -51,7 +65,7 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
 
         <StarRating
           emptyColor={COLORS.BORDER}
-          rating={rating}
+          rating={isNotEditable ? roundToNearestHalf(rating) : rating}
           starSize={40}
           color={COLORS.SECONDARY}
           starStyle={{
@@ -60,18 +74,14 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
           onChange={isNotEditable ? () => {} : setRating}
         />
         <Input
-          startIcon={{
-            componentName: VARIABLES.Feather,
-            iconName: 'star',
-            size: 25,
-          }}
+          lineAfterIcon={false}
           value={remarks}
           editable={!isNotEditable}
           placeholder={'Write a review'}
           multiline={true}
           numberOfLines={4}
           style={{
-            height: 100,
+            height: 150,
             padding: 10,
             textAlignVertical: 'top',
           }}
@@ -81,9 +91,16 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
       </View>
       <Button
         title={COMMON_TEXT.SUBMIT}
+        loading={true}
         disabled={isNotEditable || rating == 0 || remarks.length < 3}
         onPress={() => {
-          onBack();
+          const data = {
+            object_id: vendorDetails?.id,
+            object_type: 'item',
+            rating: rating,
+            review: remarks,
+          };
+          giveRating({ data });
         }}
         style={{ marginVertical: 25, marginHorizontal: 20 }}
       />
@@ -99,8 +116,10 @@ const styles = StyleSheet.create({
     ...STYLES.CONTAINER,
   },
   userImage: {
-    width: screenWidth(20),
-    height: screenHeight(10),
-    borderRadius: screenWidth(30),
+    borderWidth: 0.5,
+    borderColor: COLORS.LIGHT_GREY,
+    width: 100,
+    height: 100,
+    borderRadius: 100,
   },
 });

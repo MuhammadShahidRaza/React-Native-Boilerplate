@@ -1,10 +1,5 @@
 import { API_ROUTES } from 'api/routes';
-import {
-  handleFormDataPutRequest,
-  handleGetApiRequest,
-  handlePostApiRequest,
-  handlePutApiRequest,
-} from '.';
+import { handleFormDataPutRequest, handleGetApiRequest, handlePostApiRequest } from '.';
 import store from 'store/store';
 import { MessageResponse, User } from 'types/responseTypes';
 import { setUserDetails } from 'store/slices/user';
