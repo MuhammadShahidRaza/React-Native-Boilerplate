@@ -26,7 +26,7 @@ export const API_ROUTES = {
   UPDATE_ADDRESS: 'user/profile/address',
   GET_USER_SETTINGS: 'user/settings',
   UPDATE_USER_SETTINGS: 'user/settings/update',
-  DELETE_ACCOUNT: 'user/delete-account',
+  DELETE_ACCOUNT: 'auth/delete-account',
   DEACTIVATE_ACCOUNT: 'user/account/deactivate',
   GET_NOTIFICATIONS: 'notifications',
   MARK_NOTIFICATION_AS_READ: 'notifications/read',
@@ -97,7 +97,9 @@ export const API_ROUTES = {
   GET_CATEGORIES: 'static/categories',
   TOGGLE_FAVOURITE: 'favourites/toggle',
   GET_CATEGORIES_ITEM: 'items/events/tickets/?',
+  GET_CATEGORIES_VENDOR: 'vendor/',
   GET_RATING_BY_ITEM_ID: 'reviews/item/',
+  GET_GALLERY_BY_ITEM_ID: 'gallery/item/',
   POST_RATING: 'reviews',
   GET_SUB_CATEGORIES: '',
 };

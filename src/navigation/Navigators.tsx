@@ -10,7 +10,7 @@ import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
 import { ReviewItem } from 'screens/user';
 import { FontSize } from 'types/fontTypes';
-import { CategoryItem, Vendor } from 'types/responseTypes';
+import { Category, CategoryItem, CategoryNameTypes, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
@@ -61,9 +61,9 @@ export type RootStackParamList = {
   [SCREENS.ORDER_DETAIL]: { data: OrderItem };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
-      heading: string;
-      items: CategoryItem[];
-      itemHeading: string;
+      heading: CategoryNameTypes;
+      item: Category;
+      itemHeading: CategoryNameTypes;
     };
   };
   [SCREENS.VIEW_ALL_ECOMMERCE]: {
@@ -87,7 +87,7 @@ export type RootStackParamList = {
       heading: string;
       items: CategoryItem[];
       itemHeading: string;
-      categories?: { id: string; name: string; image: string }[];
+      categories?: Category;
     };
   };
   // Auth Screens

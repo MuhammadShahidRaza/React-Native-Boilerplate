@@ -1,8 +1,9 @@
-import { KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet } from 'react-native';
 import { COLORS, isIOS } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -27,6 +28,23 @@ export const Wrapper: React.FC<WrapperProps> = ({
 }) => {
   const isAppLoading = useAppSelector((state: RootState) => state.app.isAppLoading);
   const insets = useSafeAreaInsets();
+
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true); // or some other action
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false); // or some other action
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   return (
     <>
       {useSafeArea && (
@@ -39,7 +57,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
       {loader && <Loader />}
       {showAppLoader && isAppLoading && <Loader />}
       <KeyboardAvoidingView
-        behavior={isIOS() ? 'padding' : 'height'}
+        behavior={isIOS() ? 'padding' : isKeyboardVisible ? 'height' : undefined}
         style={[
           styles.container,
           {

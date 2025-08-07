@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
-import { getRatinglist } from 'api/functions/app/home';
+import { getGallerylist } from 'api/functions/app/home';
 import { FlatListComponent, Photo } from 'components/common';
-import { IMAGES } from 'constants/index';
 import { StyleSheet, View } from 'react-native';
-import { User, Vendor } from 'types/responseTypes';
+import { CategoryItem, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import { screenHeight, screenWidth } from 'utils/helpers';
+
 export interface GalleryItem {
   id: number;
-  object_id: number;
-  object_type: string;
-  rating: number;
-  review: string;
-  created_at: string;
-  user: User;
+  title: string;
+  media_url: string;
+  media_type: 'image';
+  createdAt: string;
+  updatedAt: string;
 }
 
-export const Gallery = ({ data }: { data: Vendor }) => {
+export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
   const [_, setGalleryListPage] = useState(1);
   const [galleryData, setGalleryData] = useState<GalleryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,26 +24,26 @@ export const Gallery = ({ data }: { data: Vendor }) => {
   const [didLoad, setDidLoad] = useState(false);
 
   useEffect(() => {
-    if (!didLoad && data?.id) {
+    if ((!didLoad && data?.id) || (!didLoad && itemData?.id)) {
       fetchGallery(1);
       setGalleryListPage(1);
     }
-  }, [data?.id]);
+  }, [data?.id, itemData?.id]);
 
   const fetchGallery = async (page: number) => {
-    if (isLoading || !data?.id || !hasMore) return;
+    if (isLoading || !data?.id || !hasMore || !itemData?.id) return;
     try {
-      const response = await getRatinglist({ id: data.id, page });
-      const newReviews = response?.gallery ?? [];
-      const meta = response?.meta;
+      const response = await getGallerylist({ id: itemData?.id ?? data?.id, page });
+      const gallery = response?.galleries ?? [];
+      const pagination = response?.pagination;
 
-      setGalleryData(prev => [...prev, ...newReviews]);
-      if (meta?.current_page >= meta?.last_page) {
+      setGalleryData(prev => [...prev, ...gallery]);
+      if (pagination?.current_page >= pagination?.last_page) {
         setHasMore(false);
       }
       if (page === 1) setDidLoad(true);
     } catch (error) {
-      console.error('Failed to load reviews:', error);
+      console.error('Failed to load gallery:', error);
     } finally {
       setIsLoading(false);
     }
@@ -56,9 +55,10 @@ export const Gallery = ({ data }: { data: Vendor }) => {
         data={galleryData}
         numColumns={2}
         scrollEnabled={true}
-        renderItem={() => (
+        renderItem={({ item }) => (
           <Photo
-            source={IMAGES.HOTELS}
+            key={item?.id}
+            source={item?.media_url}
             imageStyle={styles.photoGrid}
             containerStyle={styles.photoContainer}
           />

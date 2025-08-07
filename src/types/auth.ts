@@ -4,6 +4,7 @@ interface Login_SignUp {
   user_name?: string;
   full_name?: string;
   country_code?: string;
+  calling_code?: string;
   email: string;
   phone_number?: string;
   password: string;

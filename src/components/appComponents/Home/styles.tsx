@@ -68,6 +68,7 @@ export const styles = StyleSheet.create({
   subCategoryItemText: {
     textAlign: 'center',
     color: COLORS.WHITE,
+    textTransform: 'capitalize',
     fontSize: FontSize.Small,
     fontWeight: FontWeight.SemiBold,
   },

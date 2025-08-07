@@ -14,7 +14,8 @@
 // };
 
 export const REGEX = {
-  EMAIL: /^[\p{L}\p{M}\p{N}_%+-]+@[\p{L}\p{M}\p{N}.-]+\.[\p{L}]{2,}$/u,
+  EMAIL:
+    /^(?![.])([\p{L}\p{M}\p{N}_%+]+(?:\.[\p{L}\p{M}\p{N}_%+]+)*)@[\p{L}\p{M}\p{N}-]+(?:\.[\p{L}\p{M}\p{N}-]+)*\.[\p{L}]{2,}$/u,
   PASSWORD: /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/u, // Adjusted to include at least 8 characters and allow any letter.
   URL: /^((?!https:\/\/|http:\/\/).)*www\.[\p{L}\p{M}\p{N}-]+\.com$/u,
   CARD_NUMBER: /^\d{4} \d{4} \d{4} \d{4}$/,

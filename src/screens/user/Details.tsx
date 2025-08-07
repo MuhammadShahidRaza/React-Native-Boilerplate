@@ -5,8 +5,6 @@ import {
   Button,
   FlatListComponent,
   Icon,
-  IconComponentMapping,
-  Photo,
   RowComponent,
   Typography,
   Wrapper,
@@ -14,24 +12,18 @@ import {
 } from 'components/index';
 import { AppScreenProps } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  StyleProp,
-  TextStyle,
-  Clipboard,
-  Linking,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { Reviews } from './Reviews';
-import { IMAGES } from 'constants/assets';
-import { formatEventDateTimeRange, screenHeight, screenWidth } from 'utils/helpers';
+import { screenHeight, screenWidth } from 'utils/helpers';
 import { navigate } from 'navigation/index';
-import { BusinessHours } from 'components/appComponents/BusinessHours';
+import { Gallery } from './Gallery';
+import { AboutSection } from './AboutSection';
 
 export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
+
+  const itemData = params?.data;
   const vendor = params?.data?.vendor;
   useEffect(() => {
     navigation.setOptions({
@@ -72,49 +64,6 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
   const [selectedTab, setSelectedTab] = useState(getTabs()[0]?.name);
   const [showCartButton, setShowCartButton] = useState<any>(null);
 
-  const additionalInfoLine = ({
-    iconName,
-    title,
-    componentName,
-    iconNameRight,
-    descriptionStyle,
-    componentNameRight,
-    rightIconStyle,
-    isRightIcon = false,
-    translate = true,
-    onPressRightIcon,
-  }: {
-    iconName: string;
-    title: string;
-    componentName: keyof typeof IconComponentMapping;
-    isRightIcon?: boolean;
-    descriptionStyle?: StyleProp<TextStyle>;
-    iconNameRight?: string;
-    translate?: boolean;
-    rightIconStyle?: StyleProp<TextStyle>;
-    componentNameRight?: keyof typeof IconComponentMapping;
-    onPressRightIcon?: () => void;
-  }) => {
-    return (
-      <RowComponent style={styles.infoRow}>
-        <Icon iconName={iconName} componentName={componentName} size={18} color={COLORS.PRIMARY} />
-        <Typography translate={translate} style={[styles.infoDescription, descriptionStyle]}>
-          {title}
-        </Typography>
-        {isRightIcon && (
-          <Icon
-            iconName={iconNameRight ?? ''}
-            componentName={componentNameRight ?? componentName}
-            size={18}
-            color={COLORS.BORDER}
-            iconStyle={rightIconStyle}
-            onPress={onPressRightIcon}
-          />
-        )}
-      </RowComponent>
-    );
-  };
-
   const renderTabItem = ({ item }: { item: { name: string } }) => {
     const isSelected = item.name === selectedTab;
     return (
@@ -136,15 +85,6 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
       />
     );
   };
-
-  // const renderRatingBar = (percentage: number) => {
-  //   return (
-  //     <View style={styles.ratingBarContainer}>
-  //       <View style={[styles.ratingBar, { width: `${percentage}%` }]} />
-  //     </View>
-  //   );
-  // };
-
   const renderServices = ({
     item,
     onPressItem,
@@ -170,123 +110,11 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
   const renderTabContent = () => {
     switch (selectedTab) {
       case 'About':
-        return (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.photosGrid}
-          >
-            <View style={styles.tabContent}>
-              <Typography style={styles.sectionTitle}>{`About ${params?.heading}`}</Typography>
-              <Typography style={styles.description}>
-                {params?.data?.description || 'No description available.'}
-              </Typography>
-              <View style={styles.divider} />
-              {params?.data?.businessHours && (
-                <>
-                  <Typography style={styles.sectionTitle}>Business Hours</Typography>
-                  <BusinessHours data={params?.data?.businessHours} />
-                  <View style={styles.divider} />
-                </>
-              )}
-              {params?.heading === 'Events' && (
-                <>
-                  <Typography style={styles.sectionTitle}>Event Start Date</Typography>
-                  <RowComponent style={{ justifyContent: 'flex-start', gap: 10 }}>
-                    <Icon
-                      iconName='calendar'
-                      componentName={VARIABLES.FontAwesome}
-                      color={COLORS.DARK_GREY}
-                    />
-                    <Typography style={styles.description}>
-                      {formatEventDateTimeRange({
-                        date: params?.data?.eventDetail?.date,
-                        startTime: params?.data?.eventDetail?.start_time,
-                        endTime: params?.data?.eventDetail?.end_time,
-                      })}
-                    </Typography>
-                  </RowComponent>
-
-                  <Typography style={styles.sectionTitle}>Tickets Price</Typography>
-                  <RowComponent style={{ justifyContent: 'flex-start', ...STYLES.GAP_5 }}>
-                    <Typography style={styles.description}>{params?.data?.price}</Typography>
-                    <Typography style={styles.description}>{params?.data?.currency}</Typography>
-                  </RowComponent>
-
-                  <View style={styles.divider} />
-                </>
-              )}
-
-              <Typography style={styles.sectionTitle}>Additional Information</Typography>
-              <View style={styles.infoContainer}>
-                {vendor?.phone_number &&
-                  additionalInfoLine({
-                    iconName: 'phone',
-                    title: vendor?.phone_number,
-                    componentName: VARIABLES.Feather,
-                    isRightIcon: true,
-                    descriptionStyle: {
-                      flex: 0,
-                    },
-                    onPressRightIcon: () => {
-                      Clipboard.setString(vendor?.phone_number ?? '');
-                    },
-                    iconNameRight: 'copy',
-                    componentNameRight: VARIABLES.Feather,
-                  })}
-                {vendor?.website_url &&
-                  additionalInfoLine({
-                    iconName: 'link-2',
-                    translate: false,
-                    title: vendor?.website_url,
-                    componentName: VARIABLES.Feather,
-                  })}
-                {additionalInfoLine({
-                  iconName: 'location-outline',
-                  title: vendor?.address,
-                  componentName: VARIABLES.Ionicons,
-                  isRightIcon: true,
-                  iconNameRight: 'location-arrow',
-                  onPressRightIcon: () => {
-                    const lat = vendor?.latitude;
-                    const lng = vendor?.longitude;
-                    // const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-                    const url = `https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=${lat},${lng}&travelmode=driving`;
-                    Linking.openURL(url);
-                  },
-                  rightIconStyle: {
-                    backgroundColor: COLORS.PRIMARY,
-                    padding: 10,
-                    borderRadius: 10,
-                    fontSize: FontSize.Large,
-                    color: COLORS.WHITE,
-                  },
-                  componentNameRight: VARIABLES.FontAwesome,
-                })}
-              </View>
-            </View>
-          </ScrollView>
-        );
+        return <AboutSection data={vendor} itemData={itemData} heading={params?.heading} />;
       case 'Reviews':
-        return <Reviews data={vendor} />;
+        return <Reviews data={vendor} itemData={itemData} />;
       case 'Gallery':
-        return (
-          <View style={styles.tabContent}>
-            <FlatListComponent
-              data={[1, 2, 3, 4, 5, 6]}
-              numColumns={2}
-              scrollEnabled={true}
-              renderItem={() => (
-                <Photo
-                  source={params?.data?.image ?? IMAGES.HOTELS}
-                  imageStyle={styles.photoGrid}
-                  containerStyle={styles.photoContainer}
-                />
-              )}
-              contentContainerStyle={styles.photosGrid}
-            />
-          </View>
-        );
-      // return <Gallery data={vendor} />;
+        return <Gallery data={vendor} itemData={itemData} />;
       case 'Rooms':
         return (
           <View style={styles.tabContent}>
@@ -331,7 +159,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
               </RowComponent>
             </RowComponent>
             <FlatListComponent
-              data={params?.data?.rooms ?? []}
+              data={itemData?.rooms ?? []}
               numColumns={2}
               scrollEnabled={true}
               renderItem={({ item }) =>
@@ -426,7 +254,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
         return (
           <View style={styles.tabContent}>
             <FlatListComponent
-              data={params?.data?.services ?? []}
+              data={itemData?.services ?? []}
               numColumns={2}
               scrollEnabled={true}
               renderItem={renderServices}
@@ -442,14 +270,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
 
   return (
     <Wrapper useSafeArea={false}>
-      <BusinessCard data={params?.data} />
-      {/* <SearchBar
-        value={search}
-        onChangeText={setSearch}
-        secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
-        showBorder={false}
-      /> */}
-
+      <BusinessCard data={itemData} />
       <FlatListComponent
         horizontal
         data={getTabs()}
@@ -457,7 +278,6 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
         style={styles.tabBar}
         contentContainerStyle={styles.tabBarContent}
       />
-
       {renderTabContent()}
     </Wrapper>
   );

@@ -1,6 +1,13 @@
 import { API_ROUTES } from 'api/routes';
 import { handleGetApiRequest, handlePostApiRequest } from '.';
-import { Category, CategoryListResponse, FavoriteResponse } from 'types/responseTypes';
+import {
+  BUSINESS_FLOW_SLUGS,
+  Category,
+  CategoryListResponse,
+  FavoriteResponse,
+  FILTER_NAMES,
+  filterTypes,
+} from 'types/responseTypes';
 import store from 'store/store';
 import {
   setCategoriesItemList,
@@ -14,8 +21,27 @@ const getMainCategories = async () => {
   const data = await handleGetApiRequest<CategoryListResponse>({
     url: API_ROUTES.GET_CATEGORIES,
   });
-  store.dispatch(setCategoriesList(data?.categories ?? []));
-  getMainCategoriesHomeItems({ id: 1, page: 1, limit: 5 });
+  const categories = data?.categories ?? [];
+  store.dispatch(setCategoriesList(categories));
+  const firstCategory = categories?.[0];
+  // Safe check: ensure business_flow exists and slug matches
+  if (firstCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE) {
+    const { id } = firstCategory;
+    getMainCategoriesHomeItems({
+      id,
+      page: 1,
+      limit: 5,
+      type: FILTER_NAMES?.UPCOMING,
+      isTicketPurchase: true,
+    });
+    getMainCategoriesHomeItems({
+      id,
+      page: 1,
+      limit: 5,
+      type: FILTER_NAMES?.TRENDING,
+      isTicketPurchase: true,
+    });
+  }
 };
 
 const toggleFavourite = async ({
@@ -45,28 +71,48 @@ const toggleFavourite = async ({
 const getMainCategoriesHomeItems = async ({
   id,
   page = 1,
-  limit = 10,
+  limit = 5,
   search = '',
+  type = FILTER_NAMES.TRENDING,
+  isTicketPurchase = false,
 }: {
   id: number;
   page: number;
-  limit: number;
+  limit?: number;
   search?: string;
+  type: filterTypes;
+  isTicketPurchase?: boolean;
 }) => {
+  const query = new URLSearchParams({
+    search,
+    page: String(page),
+    limit: String(limit),
+    [type]: 'true',
+  });
+
   const existingItems = store
     .getState()
-    .category?.categoriesList?.find((cat: Category) => cat?.id === id)?.items;
-  if (existingItems && existingItems?.length <= limit) {
-    return;
-  }
+    .category?.categoriesList?.find(
+      (cat: Category) =>
+        cat?.id === id || cat?.subcategories?.some((sub: Category) => sub.id === id),
+    )?.[type];
+
+  // const existingItems = store
+  //   .getState()
+  //   .category?.categoriesList?.find((cat: Category) => cat?.id === id)?.[type];
+  if (existingItems && existingItems?.length >= page * limit) return;
+
   const data = await handleGetApiRequest<any>({
-    url: `${API_ROUTES.GET_CATEGORIES_ITEM}search=${search}&page=${page}&limit=${limit}`,
+    url: isTicketPurchase
+      ? `${API_ROUTES.GET_CATEGORIES_ITEM}?${query?.toString()}`
+      : `${API_ROUTES.GET_CATEGORIES_VENDOR}${id}?${query?.toString()}`,
   });
   if (data?.result) {
     store.dispatch(
       setCategoriesItemList({
         categoryId: id,
         items: data?.result ?? [],
+        type,
       }),
     );
   }
@@ -74,24 +120,40 @@ const getMainCategoriesHomeItems = async ({
 const getRatinglist = async ({
   id,
   page = 1,
-  limit = 10,
+  limit = 5,
 }: {
   id: number;
   page?: number;
   limit?: number;
 }) => {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
   const response = await handleGetApiRequest<any>({
-    url: `${API_ROUTES.GET_RATING_BY_ITEM_ID}${id}`,
-    // url: `${API_ROUTES.GET_RATING_BY_ITEM_ID}${id}&page=${page}&limit=${limit}`,
+    url: `${API_ROUTES.GET_RATING_BY_ITEM_ID}${id}?${query?.toString()}`,
   });
 
   return response;
-  // store.dispatch(
-  //   setCategoriesItemList({
-  //     categoryId: id,
-  //     items: data?.result ?? [],
-  //   }),
-  // );
+};
+const getGallerylist = async ({
+  id,
+  page = 1,
+  limit = 6,
+}: {
+  id: number;
+  page?: number;
+  limit?: number;
+}) => {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  const response = await handleGetApiRequest<any>({
+    url: `${API_ROUTES.GET_GALLERY_BY_ITEM_ID}${id}/gallery?${query?.toString()}`,
+  });
+  return response;
 };
 const giveRating = async ({ data }: { data: any }) => {
   const response = await handlePostApiRequest({
@@ -114,4 +176,5 @@ export {
   toggleFavourite,
   getRatinglist,
   giveRating,
+  getGallerylist,
 };

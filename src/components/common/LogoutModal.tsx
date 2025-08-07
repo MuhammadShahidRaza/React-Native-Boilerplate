@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ModalComponent } from './Modal';
 import { Icon } from './Icon';
@@ -78,11 +77,10 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   titleText: {
-    fontSize: FontSize.MediumLarge,
     fontWeight: FontWeight.SemiBold,
   },
   messageText: {
-    fontSize: FontSize.MediumLarge,
+    textAlign: 'center',
     fontWeight: FontWeight.SemiBold,
   },
   buttonRow: {

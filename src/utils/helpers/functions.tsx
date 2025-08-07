@@ -6,9 +6,33 @@ import { ChildrenType, voidFuntionType } from 'types/common';
 import { User } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-// import { getUniqueId } from 'react-native-device-info';
+import { getUniqueId, getVersion, getBrand } from 'react-native-device-info';
 import { IMAGES } from 'constants/assets';
 import parsePhoneNumber from 'libphonenumber-js';
+import { getFCMToken } from 'utils/notifications';
+
+export const normalizePhoneNumber = (
+  phone_number: string,
+  calling_code?: string | null,
+): string => {
+  const normalizedCode = (calling_code || '').replace(/\+/g, '').trim();
+
+  // Remove all non-digit characters from phone number
+  const digitsOnlyPhone = phone_number.replace(/\D/g, '');
+
+  if (!normalizedCode) {
+    // No valid calling code provided, return just the digits
+    return `+${digitsOnlyPhone}`;
+  }
+
+  // If phone already starts with the calling code, return with +
+  if (digitsOnlyPhone.startsWith(normalizedCode)) {
+    return `+${digitsOnlyPhone}`;
+  }
+
+  // Otherwise, prepend the calling code
+  return `+${normalizedCode}${digitsOnlyPhone}`;
+};
 
 export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined) {
   try {
@@ -107,6 +131,7 @@ export const formatEventDateTimeRange = ({
 };
 
 export const safeString = (val?: string | null): string => val ?? '';
+export const safeNumber = (val?: number | null): number => val ?? 0;
 
 export const screenHeight = (percent: number) => {
   const screenHeight = Dimensions.get('window').height;
@@ -162,7 +187,6 @@ export const isIOS = () => {
   return isIOS;
 };
 
-
 export const roundToNearestHalf = (num: number) => {
   return Math.round(num * 2) / 2;
 };
@@ -175,33 +199,31 @@ export const deviceType = () => {
   const deviceType = Platform.OS;
   return deviceType;
 };
-export const deviceUdid = () => {
-  // const deviceUdid = getUniqueId();
+export const deviceUdid = async () => {
+  const deviceUdid = await getUniqueId();
   return deviceUdid;
 };
 export const appVersion = () => {
-  // const deviceUdid = getUniqueId();
-  const appVersion = '1.0.0';
+  const appVersion = getVersion();
   return appVersion;
 };
 export const deviceOS = () => {
-  // const deviceUdid = getUniqueId();
   const deviceOS = Platform.OS;
   return deviceOS;
 };
 export const deviceBrand = () => {
-  // const deviceUdid = getUniqueId();
-  const deviceBrand = 'vivo';
+  const deviceBrand = getBrand();
   return deviceBrand;
 };
 
-export const deviceDetails = () => {
+export const deviceDetails = async () => {
   const data = {
-    udid: deviceUdid(),
+    udid: await getUniqueId(),
     device_type: deviceType(),
     device_brand: deviceBrand(),
     device_os: deviceOS(),
     app_version: appVersion(),
+    device_token: await getFCMToken(),
   };
 
   return data;

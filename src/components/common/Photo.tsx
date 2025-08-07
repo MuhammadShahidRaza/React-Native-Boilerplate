@@ -32,14 +32,11 @@ export const Photo: React.FC<PhotoProps> = ({
   imageStyle,
   ...otherProps
 }) => {
-  const imageSource =
-    typeof source === 'string'
+  const imageSource = source
+    ? typeof source === 'string'
       ? { uri: source }
-      : typeof source === 'object'
-      ? source
-      : typeof source === 'number'
-      ? source
-      : IMAGES.USER;
+      : source
+    : IMAGES.USER;
 
   const handlePress = () => {
     if (onPress) {

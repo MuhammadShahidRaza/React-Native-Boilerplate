@@ -6,7 +6,6 @@ import { FontSize } from 'types/fontTypes';
 import { Button, Typography, Input, AuthComponent, RowComponent } from 'components/index';
 import { navigate } from 'navigation/index';
 import { loginUser } from 'api/functions/auth';
-import { getFCMToken } from 'utils/notifications';
 
 interface LoginFormValues {
   email: string;
@@ -24,13 +23,12 @@ export const Login = () => {
   };
 
   const handleSubmit = async (values: LoginFormValues) => {
+    const deviceInfo = await deviceDetails();
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
-      device_token: await getFCMToken(),
-      ...deviceDetails(),
+      ...deviceInfo,
     };
-
     loginUser({ data, rememberMe: values?.rememberMe });
   };
 
@@ -120,7 +118,12 @@ export const Login = () => {
           </Typography>
         </RowComponent>
       </RowComponent>
-      <Button  loading={true} title={COMMON_TEXT.SIGN_IN} onPress={formik.handleSubmit} style={styles.row} />
+      <Button
+        loading={true}
+        title={COMMON_TEXT.SIGN_IN}
+        onPress={formik.handleSubmit}
+        style={styles.row}
+      />
     </AuthComponent>
   );
 };

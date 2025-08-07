@@ -1,15 +1,28 @@
 import { getRatinglist } from 'api/functions/app/home';
-import { FlatListComponent, Icon, MessageBox, RowComponent, Typography } from 'components/common';
+import {
+  FlatListComponent,
+  Icon,
+  MessageBox,
+  RowComponent,
+  SkeletonLoader,
+  Typography,
+} from 'components/common';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/Navigators';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import StarRating from 'react-native-star-rating-widget';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { User, Vendor } from 'types/responseTypes';
+import { CategoryItem, User, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
-import { formatDate, roundToNearestHalf, screenHeight, screenWidth } from 'utils/helpers';
+import {
+  formatDate,
+  roundToNearestHalf,
+  safeNumber,
+  screenHeight,
+  screenWidth,
+} from 'utils/helpers';
 export interface ReviewItem {
   id: number;
   object_id: number;
@@ -19,7 +32,11 @@ export interface ReviewItem {
   created_at: string;
   user: User;
 }
-
+export interface ReviewStats {
+  total_reviews: number;
+  average_rating: number;
+  rating_breakdown: Record<'1' | '2' | '3' | '4' | '5', number>;
+}
 export const renderRatingBar = (percentage: number) => {
   return (
     <View style={styles.ratingBarContainer}>
@@ -28,34 +45,31 @@ export const renderRatingBar = (percentage: number) => {
   );
 };
 
-export const Reviews = ({ data }: { data: Vendor }) => {
+export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
   const [_, setRatingListPage] = useState(1);
   const [ratingData, setRatingData] = useState<ReviewItem[]>([]);
-  const [averageRating, setAverageRating] = useState(0);
-  const [totalReviews, setTotalReviews] = useState(0);
+  const [ratingStats, setRatingStats] = useState<ReviewStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [didLoad, setDidLoad] = useState(false);
 
   useEffect(() => {
-    if (!didLoad && data?.id) {
+    if (!didLoad && data?.id && !didLoad && itemData?.id) {
       fetchReviews(1);
       setRatingListPage(1);
     }
-  }, [data?.id]);
+  }, [data?.id, itemData?.id]);
 
   const fetchReviews = async (page: number) => {
-    if (isLoading || !data?.id || !hasMore) return;
+    if (isLoading || !data?.id || !hasMore || !itemData?.id) return;
     try {
-      const response = await getRatinglist({ id: data.id, page });
+      const response = await getRatinglist({ id: itemData?.id ?? data.id, page });
       const newReviews = response?.reviews ?? [];
-      const meta = response?.meta;
+      const pagination = response?.pagination;
       const stats = response?.stats;
-
       setRatingData(prev => [...prev, ...newReviews]);
-      setAverageRating(stats?.average_rating ?? 0);
-      setTotalReviews(stats?.total_reviews ?? 0);
-      if (meta?.current_page >= meta?.last_page) {
+      setRatingStats(stats);
+      if (pagination?.current_page >= pagination?.last_page) {
         setHasMore(false);
       }
       if (page === 1) setDidLoad(true);
@@ -67,39 +81,41 @@ export const Reviews = ({ data }: { data: Vendor }) => {
   };
 
   const renderReviews = ({ item }: { item: ReviewItem }) => (
-    <TouchableOpacity
-      key={item?.id || item?.user?.full_name}
-      onPress={() => {
-        navigate(SCREENS.ADD_REVIEW, {
-          isNotEditable: true,
-          data: {
-            vendor: data,
-            item,
-          },
-        });
-      }}
-      style={styles.reviewItem}
-    >
-      <MessageBox
-        containerStyle={{ marginHorizontal: 0 }}
-        userImage={item?.user?.profile_image}
-        hideBorder
-        messageStyle={{ fontSize: FontSize.Small, color: COLORS.BORDER }}
-        userName={item?.user?.full_name}
-        message={formatDate(item?.created_at)}
-      />
-      <StarRating
-        emptyColor={COLORS.BORDER}
-        rating={roundToNearestHalf(item?.rating)}
-        starSize={25}
-        color={COLORS.SECONDARY}
-        starStyle={{
-          marginLeft: -2,
+    <SkeletonLoader key={item?.id}>
+      <TouchableOpacity
+        key={item?.id || item?.user?.full_name}
+        onPress={() => {
+          navigate(SCREENS.ADD_REVIEW, {
+            isNotEditable: true,
+            data: {
+              vendor: data,
+              item,
+            },
+          });
         }}
-        onChange={() => {}}
-      />
-      <Typography style={styles.reviewDescription}>{item?.review}</Typography>
-    </TouchableOpacity>
+        style={styles.reviewItem}
+      >
+        <MessageBox
+          containerStyle={{ marginHorizontal: 0 }}
+          userImage={item?.user?.profile_image}
+          hideBorder
+          messageStyle={{ fontSize: FontSize.Small, color: COLORS.BORDER }}
+          userName={item?.user?.full_name}
+          message={formatDate(item?.created_at)}
+        />
+        <StarRating
+          emptyColor={COLORS.BORDER}
+          rating={roundToNearestHalf(item?.rating)}
+          starSize={25}
+          color={COLORS.SECONDARY}
+          starStyle={{
+            marginLeft: -2,
+          }}
+          onChange={() => {}}
+        />
+        <Typography style={styles.reviewDescription}>{item?.review}</Typography>
+      </TouchableOpacity>
+    </SkeletonLoader>
   );
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -111,16 +127,20 @@ export const Reviews = ({ data }: { data: Vendor }) => {
           }}
         >
           <View style={styles.overallRatingContainer}>
-            <Typography style={styles.overallRating}>{averageRating?.toString()}</Typography>
+            <Typography style={styles.overallRating}>
+              {safeNumber(ratingStats?.average_rating)?.toString()}
+            </Typography>
             <StarRating
               emptyColor={COLORS.BORDER}
-              rating={roundToNearestHalf(averageRating)}
+              rating={roundToNearestHalf(safeNumber(ratingStats?.average_rating))}
               starSize={22}
               color={COLORS.PRIMARY}
               starStyle={{ marginLeft: -5 }}
               onChange={() => {}}
             />
-            <Typography style={styles.totalRatings}>{`(${totalReviews})`}</Typography>
+            <Typography style={styles.totalRatings}>{`( ${safeNumber(
+              ratingStats?.total_reviews,
+            )}) `}</Typography>
           </View>
           <View style={styles.ratingDistribution}>
             {[5, 4, 3, 2, 1].map(stars => (

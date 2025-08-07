@@ -8,7 +8,7 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import { CENTER, COLORS, isIOS, REGEX } from 'utils/index';
+import { CENTER, COLORS, isIOS, REGEX, safeString } from 'utils/index';
 import { Typography } from './Typography';
 import { FontSize, StyleType } from 'types/index';
 import { useFocus } from 'hooks/useFocus';
@@ -25,6 +25,7 @@ interface PhoneInputProp extends PhoneInputProps {
   placeholder: string;
   onChangeText: (text: string) => void;
   onChangeCountryCode: (text: string) => void;
+  onChangeCallingCode: (text: string) => void;
   style?: StyleProp<TextStyle>;
   returnKeyType?: TextInputProps['returnKeyType'];
   onSubmitEditing?: (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => void;
@@ -64,6 +65,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   name,
   startIcon,
   onChangeCountryCode,
+  onChangeCallingCode,
   endIcon,
   darkTheme,
   titleStyle,
@@ -144,12 +146,14 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 onBlur: () => setActiveInput(''),
                 onFocus: () => setActiveInput(name),
               }}
+              disabled={!editable}
               textInputStyle={[{ height }, styles.textInputStyle]}
               codeTextStyle={styles.codeTextStyle}
               textContainerStyle={[{ height }, styles.textContainerStyle]}
               onChangeCountry={country => {
-                setCountryCode(country.callingCode?.[0]);
-                onChangeCountryCode(country.cca2);
+                setCountryCode(country?.callingCode?.[0]);
+                onChangeCallingCode(safeString(country?.callingCode?.[0]));
+                onChangeCountryCode(country?.cca2);
               }}
               onChangeFormattedText={(text: string) => {
                 handleTextChange(text);

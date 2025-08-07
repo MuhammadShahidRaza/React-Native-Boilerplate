@@ -16,6 +16,7 @@ import {
   safeString,
   splitPhoneNumberWithCode,
   openCameraOrGallery,
+  normalizePhoneNumber,
 } from 'utils/index';
 import { updateUserDetails } from 'api/functions/app/user';
 import { EditProfileFormExtended } from './Profile';
@@ -31,6 +32,9 @@ export const EditProfile = () => {
     country: safeString(userDetails?.country),
     phone_number: safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number),
     country_code: safeString(userDetails?.country_code),
+    calling_code:
+      safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.countryCode) ??
+      safeString(userDetails?.calling_code),
   };
 
   const getCountry = async () => {
@@ -45,8 +49,11 @@ export const EditProfile = () => {
   };
 
   const handleSubmit = async (values: EditProfileFormExtended) => {
+    const phone_number = normalizePhoneNumber(values?.phone_number, values?.calling_code);
+
     updateUserDetails({
       ...values,
+      phone_number,
       ...(selectedMedia?.[0]?.uri && {
         profile_image: selectedMedia?.[0],
       }),
@@ -173,6 +180,7 @@ export const EditProfile = () => {
             allowSpacing={false}
             defaultCode={formik.values.country_code as any}
             onChangeCountryCode={formik.handleChange('country_code')}
+            onChangeCallingCode={formik.handleChange('calling_code')}
             startIcon={{
               componentName: VARIABLES.Feather,
               iconName: 'phone',

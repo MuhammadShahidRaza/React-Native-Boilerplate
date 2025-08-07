@@ -11,14 +11,20 @@ export const Splash = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setPaused(false);
-    }, 1000); 
+    }, 1000);
     return () => clearTimeout(timeout);
   }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: paused ? COLORS.SECONDARY : COLORS.WHITE }]}>
       <StatusBar backgroundColor={COLORS.SECONDARY} barStyle='light-content' />
-      <Video source={VIDEO.SPLASH} paused={paused} style={styles.video} resizeMode='cover' />
+      <Video
+        controls={false}
+        source={VIDEO.SPLASH}
+        paused={paused}
+        style={styles.video}
+        resizeMode='cover'
+      />
     </View>
   );
 };

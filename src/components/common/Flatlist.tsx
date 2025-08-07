@@ -111,7 +111,7 @@ export const FlatListComponent = <T,>({
         refreshControl={
           onRefresh && <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.8}
         {...otherProps}
       />
     </View>

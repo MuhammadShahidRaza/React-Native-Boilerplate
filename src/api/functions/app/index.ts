@@ -1,6 +1,6 @@
 import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
-import { get, post, put, putWithSingleFile } from 'utils/axios';
+import { get, post, put, putWithSingleFile, remove } from 'utils/axios';
 import { showToast } from 'utils/toast';
 
 // R type for Return
@@ -63,6 +63,38 @@ const handlePostApiRequest = async <R extends object, A extends object>({
   }
   return;
 };
+const handleDeleteApiRequest = async <R extends object, A extends object>({
+  url,
+  data,
+  showLoader,
+}: {
+  url: string;
+  data: A;
+  showLoader?: boolean;
+}): Promise<R | undefined> => {
+  try {
+    const response = await remove({
+      url,
+      data,
+      showLoader,
+    });
+    return (
+      response?.data ?? {
+        message: response?.messages?.[0],
+        code: response?.code,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+
+    const errorMessage =
+      (error instanceof Error && error.message) || i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);
+    showToast({
+      message: errorMessage,
+    });
+  }
+  return;
+};
 
 const handlePutApiRequest = async <R extends object, A extends object>({
   url,
@@ -94,9 +126,6 @@ const handlePutApiRequest = async <R extends object, A extends object>({
   return;
 };
 
-
-
-
 const handleFormDataPutRequest = async <R extends object, A extends object>({
   url,
   data,
@@ -127,4 +156,10 @@ const handleFormDataPutRequest = async <R extends object, A extends object>({
   return;
 };
 
-export { handleGetApiRequest, handlePostApiRequest, handlePutApiRequest, handleFormDataPutRequest };
+export {
+  handleGetApiRequest,
+  handlePostApiRequest,
+  handlePutApiRequest,
+  handleFormDataPutRequest,
+  handleDeleteApiRequest,
+};

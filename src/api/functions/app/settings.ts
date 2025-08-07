@@ -1,10 +1,11 @@
 import { API_ROUTES } from 'api/routes';
-import { handleGetApiRequest, handlePostApiRequest } from '.';
+import { handleDeleteApiRequest, handleGetApiRequest, handlePostApiRequest } from '.';
 import { ContactUsFormValues, Region } from 'screens/user';
 import { onBack } from 'navigation/index';
 import { showToast } from 'utils/index';
 import { StaticPage, StaticPageType } from 'screens/common';
 import { COMMON_TEXT } from 'constants/screens';
+import { MessageResponse } from 'types/responseTypes';
 
 const logout = async (data: { device_udid: string }) => {
   const response = await handlePostApiRequest({
@@ -17,17 +18,17 @@ const logout = async (data: { device_udid: string }) => {
   }
 };
 const deleteAccount = async (data: {}) => {
-  const response = await handlePostApiRequest({
+  const response = await handleDeleteApiRequest<MessageResponse, {}>({
     url: API_ROUTES.DELETE_ACCOUNT,
     data,
     showLoader: false,
   });
   if (response) {
-    console.log(response);
+    showToast({ message: response?.message, isError: false });
   }
 };
 const contactUs = async (data: ContactUsFormValues) => {
-  const response = await handlePostApiRequest<{ message: string }, ContactUsFormValues>({
+  const response = await handlePostApiRequest<MessageResponse, ContactUsFormValues>({
     url: API_ROUTES.CONTACT_US,
     data,
   });

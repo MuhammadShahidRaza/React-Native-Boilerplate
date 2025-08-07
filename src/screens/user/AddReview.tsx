@@ -80,6 +80,9 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
           placeholder={'Write a review'}
           multiline={true}
           numberOfLines={4}
+          inputContainerWithTitleStyle={{
+            width: '100%',
+          }}
           style={{
             height: 150,
             padding: 10,

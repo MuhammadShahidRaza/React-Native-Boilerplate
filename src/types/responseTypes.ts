@@ -16,6 +16,7 @@ export interface User {
   last_name?: string;
   full_name: string;
   country_code: string;
+  calling_code: string;
   username: string | null;
   email: string;
   about: string | null;
@@ -70,6 +71,66 @@ export interface User {
   whatsapp_number?: string | null;
 }
 
+// export type BusinessFlowSlug =
+//   | 'ticket_purchase'
+//   | 'room_booking'
+//   | 'service_inquiry'
+//   | 'reservation_booking'
+//   | 'grocery_order'
+//   | 'fashion_order'
+//   | 'health_order'
+//   | 'property_inquiry'
+//   | 'electronic_order'
+//   | 'interior_order';
+
+export const BUSINESS_FLOW_SLUGS = {
+  TICKET_PURCHASE: 'ticket_purchase',
+  ROOM_BOOKING: 'room_booking',
+  SERVICE_INQUIRY: 'service_inquiry',
+  RESERVATION_BOOKING: 'reservation_booking',
+  GROCERY_ORDER: 'grocery_order',
+  FASHION_ORDER: 'fashion_order',
+  HEALTH_ORDER: 'health_order',
+  PROPERTY_INQUIRY: 'property_inquiry',
+  ELECTRONIC_ORDER: 'electronic_order',
+  INTERIOR_ORDER: 'interior_order',
+} as const;
+
+export const FILTER_NAMES = {
+  UPCOMING: 'upcoming',
+  TRENDING: 'trending',
+  NEAR_BY: 'nearby',
+} as const;
+
+export type filterTypes = (typeof FILTER_NAMES)[keyof typeof FILTER_NAMES];
+
+export const CATEGORY_NAMES = {
+  EVENTS: 'Events',
+  FASHION: 'Fashion',
+  GROCERY: 'Grocery',
+  HEALTH: 'Health',
+  REAL_ESTATE: 'Real Estate',
+  ELECTRONICS: 'Electronics',
+  INTERIOR: 'Interior',
+  HOTELS: 'Hotels',
+  SHORTLET: 'Shortlet',
+} as const;
+
+// 👇 Type from the values of the object
+export type BusinessFlowSlug = (typeof BUSINESS_FLOW_SLUGS)[keyof typeof BUSINESS_FLOW_SLUGS];
+export type CategoryNameTypes = (typeof CATEGORY_NAMES)[keyof typeof CATEGORY_NAMES];
+
+export interface BusinessFlow {
+  id: number;
+  title: string;
+  slug: string;
+  descripetion: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
 export interface Subcategory {
   id: number;
   title: string;
@@ -77,19 +138,23 @@ export interface Subcategory {
   thumbnail: string;
   createdAt: string;
   updatedAt: string;
-  subcategories: Subcategory[]; // supports further nesting
+  subcategories: Category[];
 }
 
 export interface Category {
   id: number;
-  title: string;
+  title: CategoryNameTypes;
   icon: string;
   thumbnail: string;
   createdAt: string;
   updatedAt: string;
   is_subcategory: boolean;
-  subcategories: Subcategory[];
+  subcategories: Category[];
   items: CategoryItem[];
+  upcoming: CategoryItem[];
+  trending: CategoryItem[];
+  nearby: CategoryItem[];
+  business_flow: BusinessFlow | null;
 }
 
 // For the full list of categories

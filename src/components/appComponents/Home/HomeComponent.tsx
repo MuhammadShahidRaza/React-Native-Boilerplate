@@ -13,8 +13,10 @@ import { isIOS, screenHeight, screenWidth } from 'utils/index';
 import { styles } from './styles';
 import { FontWeight } from 'types/fontTypes';
 import { useAppSelector } from 'types/reduxTypes';
-import { Category, Subcategory } from 'types/responseTypes';
+import { BUSINESS_FLOW_SLUGS, Category, FILTER_NAMES } from 'types/responseTypes';
 import { getMainCategoriesHomeItems } from 'api/functions/app/home';
+import { SCREENS } from 'constants/routes';
+import { navigate } from 'navigation/index';
 
 export const HomeComponent = () => {
   const { categoriesList } = useAppSelector(state => state.category);
@@ -28,54 +30,69 @@ export const HomeComponent = () => {
   }, [selectedCategory, categoriesList]);
 
   useEffect(() => {
-    if (!activeCategory) return;
-    const mainCategory = categoriesList.find(cat => cat?.id == selectedCategory);
-    if (!mainCategory) return;
-    setItemHeading(mainCategory?.title);
-  }, [selectedCategory, activeCategory, categoriesList]);
+    if (activeCategory?.title) {
+      setItemHeading(activeCategory.title);
+    }
+  }, [activeCategory]);
 
   const handlePress = (item: Category) => {
-    if (item?.id == selectedCategory) return;
-    if (item?.is_subcategory) {
-      setSelectedCategory(item?.id);
-      return;
-    }
-    // getMainCategoriesHomeItems({ id: item?.id, page: 1, limit: 3 });
-    getMainCategoriesHomeItems({ id: 1, page: 1, limit: 3 });
+    if (item?.id === selectedCategory) return;
     setSelectedCategory(item?.id);
+    if (item?.is_subcategory) return;
+
+    const isTicketPurchase = item?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE;
+    const typesToFetch = isTicketPurchase
+      ? [FILTER_NAMES.UPCOMING, FILTER_NAMES.TRENDING]
+      : [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
+    typesToFetch.forEach(type => {
+      getMainCategoriesHomeItems({
+        id: item?.id,
+        page: 1,
+        type,
+        isTicketPurchase,
+      });
+    });
   };
 
-  // const handleSubCategoryPress = (item: {
-  //   key: string;
-  //   items: ItemType[];
-  //   categories?: { id: string; name: string; image: string }[];
-  // }) => {
-  //   if (item?.key === 'Order Your Food') {
-  //     navigate(SCREENS.SUB_CATEGORY_FOOD, {
-  //       data: {
-  //         heading: item?.key,
-  //         items: item?.items ?? [],
-  //         itemHeading: item?.key,
-  //         categories: item?.categories ?? [],
-  //       },
-  //     });
-  //   } else if (item?.key === 'Electronics' || item?.key === 'Interior') {
-  //     navigate(SCREENS.VIEW_ALL, {
-  //       data: {
-  //         headerTitle: item?.key,
-  //         items: item?.items ?? [],
-  //       },
-  //     });
-  //   } else {
-  //     navigate(SCREENS.SUB_CATEGORY_ITEMS, {
-  //       data: {
-  //         heading: item?.key,
-  //         items: item?.items ?? [],
-  //         itemHeading: item?.key,
-  //       },
-  //     });
-  //   }
-  // };
+  const handleSubCategoryPress = (item: Category) => {
+    // if (item?.key === 'Order Your Food') {
+    //   navigate(SCREENS.SUB_CATEGORY_FOOD, {
+    //     data: {
+    //       heading: itemHeading,
+    //       items: item?.items ?? [],
+    //       itemHeading: itemHeading,
+    //       categories: item?.categories,
+    //     },
+    //   });
+    // } else if (
+    //   itemHeading === CATEGORY_NAMES.ELECTRONICS ||
+    //   itemHeading === CATEGORY_NAMES.INTERIOR
+    // ) {
+    //   navigate(SCREENS.VIEW_ALL, {
+    //     data: {
+    //       headerTitle: itemHeading,
+    //       items: item?.items ?? [],
+    //     },
+    //   });
+    // } else {
+
+    const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
+    typesToFetch.forEach(type => {
+      getMainCategoriesHomeItems({
+        id: item?.id,
+        page: 1,
+        type,
+      });
+    });
+    navigate(SCREENS.SUB_CATEGORY_ITEMS, {
+      data: {
+        heading: item?.title,
+        item: item ?? [],
+        itemHeading: item?.title,
+      },
+    });
+    // }
+  };
 
   const renderCategoryItem = ({ item }: { item: Category }) => (
     <TouchableOpacity
@@ -112,11 +129,13 @@ export const HomeComponent = () => {
     </TouchableOpacity>
   );
 
-  const renderSubCategoryItem = ({ item }: { item: Subcategory }) => (
+  const renderSubCategoryItem = ({ item }: { item: Category }) => (
     <SkeletonLoader key={item?.id}>
       <TouchableOpacity
         style={styles.subCategoryItemContainer}
-        // onPress={() => handleSubCategoryPress(item)}
+        onPress={() => {
+          handleSubCategoryPress(item);
+        }}
       >
         <Photo disabled imageStyle={styles.subCategoryItemImage} source={item?.thumbnail} />
         <View style={styles.textOverlay}>
@@ -132,7 +151,10 @@ export const HomeComponent = () => {
     if (!activeCategory) return null;
 
     const hasSubCategories = (activeCategory?.subcategories?.length ?? 0) > 0;
-    const hasItems = (activeCategory?.items?.length ?? 0) > 0;
+    const hasItems =
+      (activeCategory?.upcoming?.length ?? 0) > 0 ||
+      (activeCategory?.trending?.length ?? 0) > 0 ||
+      (activeCategory?.nearby?.length ?? 0) > 0;
 
     return (
       <ScrollView
@@ -141,10 +163,8 @@ export const HomeComponent = () => {
       >
         {hasSubCategories && (
           <FlatListComponent
-            keyExtractor={item => item?.title}
+            keyExtractor={item => item?.id?.toString()}
             numColumns={2}
-            // refreshing={false}
-            // onRefresh={() => {}}
             columnWrapperStyle={styles.subCategoriesColumnWrapper}
             contentContainerStyle={styles.subCategoriesContentContainer}
             data={activeCategory?.subcategories}
@@ -154,16 +174,25 @@ export const HomeComponent = () => {
 
         {!hasSubCategories && hasItems && (
           <>
-            {renderHorizontalItemsWithRow({
-              data: activeCategory.items ?? [],
-              heading: itemHeading,
-              rowHeading: `Upcoming ${itemHeading}`,
-            })}
-            {renderHorizontalItemsWithRow({
-              data: activeCategory.items ?? [],
-              heading: itemHeading,
-              rowHeading: `Trending ${itemHeading}`,
-            })}
+            {activeCategory?.upcoming?.length > 0 &&
+              renderHorizontalItemsWithRow({
+                data: activeCategory.upcoming,
+                heading: itemHeading,
+                rowHeading: `Upcoming ${itemHeading}`,
+              })}
+            {activeCategory?.nearby?.length > 0 &&
+              renderHorizontalItemsWithRow({
+                data: activeCategory.nearby,
+                heading: itemHeading,
+                rowHeading: `Near By ${itemHeading}`,
+              })}
+
+            {activeCategory?.trending?.length > 0 &&
+              renderHorizontalItemsWithRow({
+                data: activeCategory.trending,
+                heading: itemHeading,
+                rowHeading: `Trending ${itemHeading}`,
+              })}
           </>
         )}
         <View style={{ height: screenHeight(5) }} />
@@ -184,6 +213,15 @@ export const HomeComponent = () => {
         style={styles.categoriesFlatList}
         contentContainerStyle={styles.categoriesContentContainer}
         data={categoriesList}
+        noItemProps={{
+          message: 'No Category Found',
+          messageStyle: {
+            color: COLORS.WHITE,
+            alignSelf: 'center',
+            width: screenWidth(90),
+          },
+          containerHeight: screenHeight(12),
+        }}
         renderItem={renderCategoryItem}
       />
       {selectedCategory && renderCategoryContent()}

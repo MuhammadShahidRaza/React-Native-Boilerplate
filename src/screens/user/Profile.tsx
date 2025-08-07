@@ -13,7 +13,7 @@ import { safeString, screenHeight, screenWidth, splitPhoneNumberWithCode } from 
 
 export type EditProfileFormExtended = EditProfileFormTypes & {
   country_code?: string;
-  // calling_code?: string;
+  calling_code?: string;
 };
 
 export const Profile = () => {
@@ -22,6 +22,7 @@ export const Profile = () => {
   const handleSubmit = async () => {
     navigate(SCREENS.EDIT_PROFILE);
   };
+
   return (
     <Wrapper useScrollView={true} useSafeArea={false}>
       <View style={STYLES.CONTAINER}>
@@ -89,6 +90,7 @@ export const Profile = () => {
             }}
           />
           <PhoneInputComponent
+            key={userDetails?.phone_number}
             name={COMMON_TEXT.PHONE_NUMBER}
             title={COMMON_TEXT.PHONE_NUMBER}
             editable={false}
@@ -96,6 +98,7 @@ export const Profile = () => {
             value={safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number)}
             allowSpacing={false}
             onChangeCountryCode={() => {}}
+            onChangeCallingCode={() => {}}
             defaultCode={safeString(userDetails?.country_code) as any}
             startIcon={{
               componentName: VARIABLES.Feather,

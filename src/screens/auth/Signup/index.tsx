@@ -3,9 +3,9 @@ import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
 import {
   COLORS,
   deviceDetails,
+  normalizePhoneNumber,
   screenWidth,
   signUpValidationSchema,
-  getFCMToken,
 } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
@@ -22,6 +22,7 @@ interface SignUpFormValues {
   country: string;
   confirmPassword: string;
   country_code: string;
+  calling_code: string;
   showPassword: boolean;
   showConfirmPassword: boolean;
 }
@@ -35,12 +36,15 @@ export const SignUp = () => {
     country: __DEV__ ? 'Pakistan' : '',
     phone_number: __DEV__ ? '3242445623' : '',
     country_code: __DEV__ ? 'PK' : 'NG',
+    calling_code: __DEV__ ? '+92' : '+234',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
     showConfirmPassword: false,
   };
 
   const handleSubmit = async (values: SignUpFormValues) => {
+    const deviceInfo = await deviceDetails();
+    const phone_number = normalizePhoneNumber(values.phone_number, values.calling_code);
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
@@ -48,10 +52,9 @@ export const SignUp = () => {
       user_name: values?.user_name,
       country: values?.country,
       country_code: values.country_code,
-      phone_number: values?.phone_number,
-      device_token: await getFCMToken(),
-      // referal_id:""
-      ...deviceDetails(),
+      calling_code: values.calling_code,
+      phone_number,
+      ...deviceInfo,
     };
     signUpUser({ data });
   };
@@ -151,6 +154,7 @@ export const SignUp = () => {
           onChangeText={formik.handleChange('phone_number')}
           value={formik.values.phone_number}
           onChangeCountryCode={formik.handleChange('country_code')}
+          onChangeCallingCode={formik.handleChange('calling_code')}
           allowSpacing={false}
           defaultCode={__DEV__ ? 'PK' : 'NG'}
           startIcon={{

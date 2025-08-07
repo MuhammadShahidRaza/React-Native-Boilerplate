@@ -20,7 +20,7 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
     categoryName === 'Interior' ||
     categoryName === 'Electronics';
   return (
-    <SkeletonLoader key={item?.title} height={screenHeight(25)}>
+    <SkeletonLoader key={item?.id} height={screenHeight(25)}>
       <TouchableOpacity
         style={styles.itemContainer}
         onPress={() => {
