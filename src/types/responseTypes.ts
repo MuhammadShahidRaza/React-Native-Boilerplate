@@ -108,12 +108,16 @@ export const CATEGORY_NAMES = {
   EVENTS: 'Events',
   FASHION: 'Fashion',
   GROCERY: 'Grocery',
+  SPA: 'SPA',
+  SALOONS: 'Salons', //TODO: SET BACKEND TYPo
   HEALTH: 'Health',
   REAL_ESTATE: 'Real Estate',
   ELECTRONICS: 'Electronics',
   INTERIOR: 'Interior',
   HOTELS: 'Hotels',
   SHORTLET: 'Shortlet',
+  ORDER_YOUR_FOOD: 'Order Your Food',
+  RESTAURANT_RESERVATION: 'Restaurant Reservation',
 } as const;
 
 // 👇 Type from the values of the object

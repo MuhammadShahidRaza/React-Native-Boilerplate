@@ -1,136 +1,161 @@
+import { getVendorItemslist } from 'api/functions/app/home';
+import { ServiceCard } from 'components/appComponents';
+import { FlatListComponent } from 'components/common';
 import { useEffect, useState } from 'react';
-import { COLORS, STYLES } from 'utils/index';
-import { BusinessCard, Button, FlatListComponent, Wrapper } from 'components/index';
-import { AppScreenProps, CATEGORY_NAMES } from 'types/index';
-import { SCREENS } from 'constants/index';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { Reviews } from './Reviews';
+import { CATEGORY_NAMES, CategoryItem, CategoryNameTypes, Vendor } from 'types/responseTypes';
+import { COLORS } from 'utils/colors';
+import { STYLES } from 'utils/commonStyles';
 import { screenHeight, screenWidth } from 'utils/helpers';
-import { Gallery } from './Gallery';
-import { AboutSection } from './AboutSection';
-import { Rooms } from './Rooms';
-import { Services } from './Services';
 
-export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
-  const params = route?.params;
+export interface ServiceSpecifications {
+  duration: string;
+  includes: string[];
+  therapist_gender: string;
+}
 
-  const itemData = params?.data;
-  const vendor = params?.data?.vendor ?? itemData;
+export interface ServiceInquiryDetails {
+  id: number;
+  item_id: number;
+  duration: number;
+  gender_specific: string;
+  about: string;
+}
+
+export interface ServiceItem {
+  id: number;
+  vendor_id: number;
+  item_category_id: number | null;
+  category_id: number;
+  title: string;
+  description: string;
+  specifications: ServiceSpecifications;
+  item_type: string;
+  price: string;
+  currency: string;
+  stock_quantity: number | null;
+  is_available: boolean;
+  booking_required: boolean;
+  call_only: boolean;
+  featured: boolean;
+  distance: number | null;
+  rating_count: number;
+  rating_avg: number | null;
+  is_rated: boolean;
+  is_liked: boolean;
+  rating: any[];
+  notification_count: number;
+  createdAt: string;
+  updatedAt: string;
+  vendor: Vendor;
+  media: any[];
+  serviceInquiryDetails: ServiceInquiryDetails;
+}
+
+export const Services = ({
+  data,
+  itemData,
+  heading,
+}: {
+  data: Vendor;
+  itemData: CategoryItem;
+  heading: CategoryNameTypes;
+}) => {
+  const [_, setRoomListPage] = useState(1);
+  const [serviceData, setServiceData] = useState<ServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [didLoad, setDidLoad] = useState(false);
+
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: params?.heading,
-    });
-  }, []);
+    if (!didLoad && data?.id && !didLoad && itemData?.id) {
+      fetchHotelRooms(1);
+      setRoomListPage(1);
+    }
+  }, [data?.id, itemData?.id]);
 
-  const getTabs = () => {
-    if (params?.heading === CATEGORY_NAMES.SPA || params?.heading === CATEGORY_NAMES.SALOONS) {
-      return [
-        { id: 2, name: 'About' },
-        { id: 1, name: 'Services' },
-        { id: 3, name: 'Gallery' },
-        { id: 5, name: 'Reviews' },
-      ];
-    } else if (
-      params?.heading === CATEGORY_NAMES.HOTELS ||
-      params?.heading === CATEGORY_NAMES.SHORTLET
-    ) {
-      return [
-        { id: 1, name: 'About' },
-        { id: 2, name: 'Gallery' },
-        { id: 3, name: 'Rooms' },
-        { id: 4, name: 'Reviews' },
-      ];
-    } else if (params?.heading === CATEGORY_NAMES.EVENTS) {
-      return [
-        { id: 1, name: 'About' },
-        { id: 2, name: 'Gallery' },
-        { id: 3, name: 'Reviews' },
-      ];
-    } else {
-      return [
-        { id: 2, name: 'About' },
-        { id: 3, name: 'Gallery' },
-        { id: 5, name: 'Reviews' },
-      ];
+  console.log('data?.id');
+  console.log(data?.id);
+  console.log('data?.id');
+
+  const fetchHotelRooms = async (page: number) => {
+    if (isLoading || !data?.id || !hasMore) return;
+    try {
+      const response = await getVendorItemslist({ vendor_Id: data?.id, page });
+      const newItems = response?.result ?? [];
+
+      const pagination = response?.pagination;
+      setServiceData(prev => [...prev, ...newItems]);
+      if (pagination?.current_page >= pagination?.last_page) {
+        setHasMore(false);
+      }
+      if (page === 1) setDidLoad(true);
+    } catch (error) {
+      console.error('Failed to load items:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const [selectedTab, setSelectedTab] = useState(getTabs()[0]?.name);
-  const [showCartButton, setShowCartButton] = useState<any>(null);
-
-  const renderTabItem = ({ item }: { item: { name: string } }) => {
-    const isSelected = item.name === selectedTab;
+  const renderServices = ({
+    item,
+    onPressItem,
+  }: {
+    item: ServiceItem;
+    onPressItem?: (item: any) => void;
+  }) => {
     return (
-      <Button
-        title={item?.name}
-        style={[
-          styles.tabButton,
-          {
-            backgroundColor: isSelected ? COLORS.PRIMARY : COLORS.WHITE,
-          },
-        ]}
-        textStyle={[
-          styles.tabButtonText,
-          {
-            color: isSelected ? COLORS.WHITE : COLORS.BORDER,
-          },
-        ]}
-        onPress={() => setSelectedTab(item.name)}
+      <ServiceCard
+        item={{
+          name: item?.title,
+          image: item?.media?.[0]?.media_url,
+          price: item?.price,
+        }}
+        onPressItem={onPressItem}
+        priceContainerStyle={{
+          justifyContent: 'flex-start',
+        }}
+        priceTitle={heading !== CATEGORY_NAMES.HOTELS ? 'Price - ' : ''}
+        priceStyle={{
+          color: heading !== CATEGORY_NAMES.HOTELS ? COLORS.SECONDARY : COLORS.DARK_GREY,
+        }}
       />
     );
   };
 
-  const renderTabContent = () => {
-    switch (selectedTab) {
-      case 'About':
-        return <AboutSection data={vendor} itemData={itemData} heading={params?.heading} />;
-      case 'Reviews':
-        return <Reviews data={vendor} itemData={itemData} />;
-      case 'Gallery':
-        return <Gallery data={vendor} itemData={itemData} />;
-      case 'Rooms':
-        return (
-          <Rooms
-            data={vendor}
-            itemData={itemData}
-            heading={params?.heading}
-            setShowCartButton={setShowCartButton}
-            showCartButton={showCartButton}
-          />
-        );
-      case 'Services':
-        return (
-          <Services
-            data={vendor}
-            itemData={itemData}
-            heading={params?.heading}
-            setShowCartButton={setShowCartButton}
-            showCartButton={showCartButton}
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Wrapper useSafeArea={false}>
-      <BusinessCard data={itemData} />
+    <View style={styles.tabContent}>
       <FlatListComponent
-        horizontal
-        data={getTabs()}
-        renderItem={renderTabItem}
-        style={styles.tabBar}
-        contentContainerStyle={styles.tabBarContent}
+        data={serviceData}
+        numColumns={2}
+        scrollEnabled={true}
+        renderItem={renderServices}
+        contentContainerStyle={styles.photosGrid}
       />
-      {renderTabContent()}
-    </Wrapper>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // reviewItem: {
+  //   marginBottom: 10,
+  //   paddingBottom: 15,
+  //   borderBottomWidth: 1,
+  //   borderColor: COLORS.BORDER,
+  // },
+  reviewItem: {
+    paddingVertical: 15,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.BORDER,
+  },
+
+  reviewDescription: {
+    fontSize: FontSize.MediumSmall,
+    color: COLORS.PRIMARY,
+    marginTop: 5,
+  },
   tabBar: {
     marginBottom: 10,
     marginHorizontal: 20,
@@ -277,12 +302,7 @@ const styles = StyleSheet.create({
     color: COLORS.PRIMARY,
     marginBottom: 5,
   },
-  reviewItem: {
-    paddingVertical: 15,
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.BORDER,
-  },
+
   reviewerAvatar: {
     width: 40,
     height: 40,

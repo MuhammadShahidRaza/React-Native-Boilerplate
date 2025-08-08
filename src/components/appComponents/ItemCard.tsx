@@ -5,20 +5,23 @@ import { Icon, Photo, RowComponent, SkeletonLoader, Typography } from 'component
 import { styles } from './Home/styles';
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
-import { CategoryItem } from 'types/responseTypes';
+import { CATEGORY_NAMES, CategoryItem } from 'types/responseTypes';
 import { useState } from 'react';
 import { toggleFavourite } from 'api/functions/app/home';
 
 export const ItemCard = ({ item }: { item: CategoryItem }) => {
   const [isLiked, setIsLiked] = useState<boolean>(item?.is_liked);
-  const categoryName = item?.itemCategory?.category?.title;
+
+  console.log(item);
+
+  const categoryName = item?.category?.title ?? item?.itemCategory?.category?.title;
   const isEcommerce =
-    categoryName === 'Order Your Food' ||
-    categoryName === 'Grocery' ||
-    categoryName === 'Fashion' ||
-    categoryName === 'Health' ||
-    categoryName === 'Interior' ||
-    categoryName === 'Electronics';
+    categoryName === CATEGORY_NAMES.ORDER_YOUR_FOOD ||
+    categoryName === CATEGORY_NAMES.GROCERY ||
+    categoryName === CATEGORY_NAMES.FASHION ||
+    categoryName === CATEGORY_NAMES.HEALTH ||
+    categoryName === CATEGORY_NAMES.INTERIOR ||
+    categoryName === CATEGORY_NAMES.ELECTRONICS;
   return (
     <SkeletonLoader key={item?.id} height={screenHeight(25)}>
       <TouchableOpacity
@@ -66,26 +69,30 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
               iconStyle={styles.heartIcon}
             />
           </RowComponent>
-          <Photo disabled imageStyle={styles.itemImage} source={item?.media?.[0]?.media_url} />
+          <Photo
+            disabled
+            imageStyle={styles.itemImage}
+            source={item?.business_logo ?? item?.media?.[0]?.media_url}
+          />
         </View>
         <View
           style={{ paddingHorizontal: 10, paddingTop: 5, gap: isIOS() ? 4 : 2, overflow: 'hidden' }}
         >
           <Typography numberOfLines={1} style={styles.itemText}>
-            {item?.title}
+            {item?.business_name ?? item?.title}
           </Typography>
           <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 5 }}>
             <Typography
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.eventDetail?.city + ' - '}
+              {item?.city + ' - ' ?? item?.eventDetail?.city + ' - '}
             </Typography>
             <Typography
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.eventDetail?.country}
+              {item?.country ?? item?.eventDetail?.country}
             </Typography>
           </RowComponent>
           {item?.eventDetail?.start_time && (

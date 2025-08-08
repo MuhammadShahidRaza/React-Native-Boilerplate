@@ -13,13 +13,14 @@ import { useState } from 'react';
 
 export const BusinessCard = ({ data }: { data: CategoryItem }) => {
   const [isLiked, setIsLiked] = useState<boolean>(data?.is_liked);
-  const vendorDetails = data?.vendor;
+  const vendorDetails = data?.vendor ?? data;
   return (
     <View style={styles.container}>
       <RowComponent style={styles.contentContainer}>
         <Photo
           source={vendorDetails?.business_logo ?? vendorDetails?.profile_image}
           imageStyle={styles.image}
+          resizeMode='contain'
         />
         <View style={styles.infoContainer}>
           <RowComponent style={styles.headerRow}>
@@ -160,6 +161,8 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 60,
+    borderWidth: 0.5,
+    borderColor: COLORS.LIGHT_GREY,
     ...STYLES.SHADOW,
   },
   infoContainer: {

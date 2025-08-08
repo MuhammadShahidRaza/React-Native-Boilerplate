@@ -117,6 +117,27 @@ const getMainCategoriesHomeItems = async ({
     );
   }
 };
+const getVendorItemslist = async ({
+  vendor_Id,
+  page = 1,
+  limit = 6,
+}: {
+  vendor_Id: number;
+  page?: number;
+  limit?: number;
+}) => {
+  const query = new URLSearchParams({
+    vendor_Id: String(vendor_Id),
+    page: String(page),
+    limit: String(limit),
+  });
+
+  const response = await handleGetApiRequest<any>({
+    url: `${API_ROUTES.GET_VENDOR_ITEMS__BY_ID}?${query?.toString()}`,
+  });
+
+  return response;
+};
 const getRatinglist = async ({
   id,
   page = 1,
@@ -177,4 +198,5 @@ export {
   getRatinglist,
   giveRating,
   getGallerylist,
+  getVendorItemslist,
 };

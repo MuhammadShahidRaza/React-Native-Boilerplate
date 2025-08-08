@@ -51,6 +51,15 @@ export const SubCategoryItems = ({
     CATEGORY_NAMES.REAL_ESTATE,
   ] as readonly CategoryNameTypes[];
 
+  const showHeading = (heading: string) => {
+    switch (heading) {
+      case CATEGORY_NAMES.SPA:
+        return 'Stores';
+      default:
+        return heading;
+    }
+  };
+
   return (
     <Wrapper useSafeArea={false} useScrollView={true}>
       {data?.heading === CATEGORY_NAMES.HOTELS && (
@@ -94,14 +103,14 @@ export const SubCategoryItems = ({
             renderHorizontalItemsWithRow({
               data: activeCategory.nearby,
               heading: data.heading,
-              rowHeading: `Near By ${data.heading}`,
+              rowHeading: `Near By ${showHeading(data.heading)}`,
             })}
 
           {activeCategory?.trending?.length > 0 &&
             renderHorizontalItemsWithRow({
               data: activeCategory.trending,
               heading: data?.heading,
-              rowHeading: `Trending ${data?.heading}`,
+              rowHeading: `Trending ${showHeading(data?.heading)}`,
             })}
         </>
       )}

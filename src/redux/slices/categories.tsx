@@ -33,13 +33,6 @@ const categoriesSlice = createSlice({
         state.categoriesList
           .flatMap(cat => cat.subcategories || [])
           .find(sub => sub.id === categoryId);
-
-          console.log("category");
-          console.log(category);
-          console.log(type);
-          console.log(items);
-          console.log('category');
-          
       if (category) {
         if (!category[type]) category[type] = []; // Make sure the type exists (trending/upcoming)
         category[type] = [...(category[type] ?? []), ...items];

@@ -99,6 +99,7 @@ export const API_ROUTES = {
   GET_CATEGORIES_ITEM: 'items/events/tickets/?',
   GET_CATEGORIES_VENDOR: 'vendor/',
   GET_RATING_BY_ITEM_ID: 'reviews/item/',
+  GET_VENDOR_ITEMS__BY_ID: 'items/',
   GET_GALLERY_BY_ITEM_ID: 'gallery/item/',
   POST_RATING: 'reviews',
   GET_SUB_CATEGORIES: '',
