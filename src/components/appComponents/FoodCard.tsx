@@ -1,14 +1,13 @@
 import { TouchableOpacity, View } from 'react-native';
 import { FontSize } from 'types/fontTypes';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
-import { Icon, Photo, Typography } from 'components/index';
+import { Icon, ItemCardData, Photo, Typography } from 'components/index';
 import { styles } from './Home/styles';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/index';
-import { CategoryItem } from 'types/responseTypes';
 
-export const FoodCard = ({ item }: { item: CategoryItem }) => {
-  const categoryName = item?.itemCategory?.category?.title;
+export const FoodCard = ({ item, isItemFlow }: { item: ItemCardData; isItemFlow: boolean }) => {
+  const categoryName = item?.categoryName;
   const isFood = categoryName === 'Order Your Food';
   return (
     <TouchableOpacity

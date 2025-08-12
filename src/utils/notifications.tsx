@@ -1,9 +1,9 @@
-import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
-import {COLORS, isIOS} from './index';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { COLORS, isIOS } from './index';
 import store from 'store/store';
-import {PermissionsAndroid} from 'react-native';
-import {setIsNotificationAllowed} from 'store/slices/notification';
-import {VARIABLES} from 'constants/common';
+import { PermissionsAndroid } from 'react-native';
+import { setIsNotificationAllowed } from 'store/slices/notification';
+import { VARIABLES } from 'constants/common';
 import messaging from '@react-native-firebase/messaging';
 async function displayNotification({
   notificationData,
@@ -84,12 +84,11 @@ const handleNotificationOpenedApp = (detail, isWait = 0) => {
 };
 
 const messageHandler = async remoteMessage => {
-  displayNotification({notificationData: remoteMessage});
+  displayNotification({ notificationData: remoteMessage });
 };
 
 const onForegroundEvent = () => {
-  return notifee.onForegroundEvent(({type, detail}) => {
-    console.log(type === EventType.PRESS);
+  return notifee.onForegroundEvent(({ type, detail }) => {
     if (type === EventType.PRESS) {
       handleNotificationOpenedApp(detail?.notification?.data);
     }

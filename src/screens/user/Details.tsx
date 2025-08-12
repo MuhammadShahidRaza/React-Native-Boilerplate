@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { COLORS, STYLES } from 'utils/index';
 import { BusinessCard, Button, FlatListComponent, Wrapper } from 'components/index';
 import { AppScreenProps, CATEGORY_NAMES } from 'types/index';
 import { SCREENS } from 'constants/index';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { Reviews } from './Reviews';
 import { screenHeight, screenWidth } from 'utils/helpers';
@@ -14,17 +14,18 @@ import { Services } from './Services';
 
 export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
+  const data = params?.data;
+  const itemData = data?.itemData ?? data?.vendor;
+  const vendor = data?.vendor ?? data?.itemData?.vendor;
 
-  const itemData = params?.data;
-  const vendor = params?.data?.vendor ?? itemData;
   useEffect(() => {
     navigation.setOptions({
       headerTitle: params?.heading,
     });
   }, []);
 
-  const getTabs = () => {
-    if (params?.heading === CATEGORY_NAMES.SPA || params?.heading === CATEGORY_NAMES.SALOONS) {
+  const tabs = useMemo(() => {
+    if (params?.heading === CATEGORY_NAMES.SALOONS) {
       return [
         { id: 2, name: 'About' },
         { id: 1, name: 'Services' },
@@ -47,6 +48,13 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
         { id: 2, name: 'Gallery' },
         { id: 3, name: 'Reviews' },
       ];
+    } else if (params?.heading === CATEGORY_NAMES.SPA) {
+      return [
+        { id: 1, name: 'Services' },
+        { id: 2, name: 'Gallery' },
+        { id: 3, name: 'Reviews' },
+        { id: 4, name: 'About' },
+      ];
     } else {
       return [
         { id: 2, name: 'About' },
@@ -54,9 +62,10 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
         { id: 5, name: 'Reviews' },
       ];
     }
-  };
+  }, [params?.heading]);
 
-  const [selectedTab, setSelectedTab] = useState(getTabs()[0]?.name);
+  // const [selectedTab, setSelectedTab] = useState(getTabs()[0]?.name);
+  const [selectedTab, setSelectedTab] = useState(tabs[0]?.name);
   const [showCartButton, setShowCartButton] = useState<any>(null);
 
   const renderTabItem = ({ item }: { item: { name: string } }) => {
@@ -120,7 +129,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
       <BusinessCard data={itemData} />
       <FlatListComponent
         horizontal
-        data={getTabs()}
+        data={tabs}
         renderItem={renderTabItem}
         style={styles.tabBar}
         contentContainerStyle={styles.tabBarContent}

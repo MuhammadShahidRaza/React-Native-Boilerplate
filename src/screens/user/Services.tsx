@@ -75,10 +75,6 @@ export const Services = ({
     }
   }, [data?.id, itemData?.id]);
 
-  console.log('data?.id');
-  console.log(data?.id);
-  console.log('data?.id');
-
   const fetchHotelRooms = async (page: number) => {
     if (isLoading || !data?.id || !hasMore) return;
     try {

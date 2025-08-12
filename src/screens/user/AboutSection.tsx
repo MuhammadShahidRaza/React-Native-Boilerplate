@@ -1,3 +1,4 @@
+import { BusinessHours } from 'components/appComponents/BusinessHours';
 import { Icon, IconComponentMapping, RowComponent, Typography } from 'components/common';
 import { VARIABLES } from 'constants/index';
 import { Clipboard, ScrollView, StyleSheet, View } from 'react-native';
@@ -65,16 +66,16 @@ export const AboutSection = ({
       <View style={styles.tabContent}>
         <Typography style={styles.sectionTitle}>{`About ${heading}`}</Typography>
         <Typography style={styles.description}>
-          {itemData?.description || 'No description available.'}
+          {itemData?.description ?? data?.about ?? 'No description available.'}
         </Typography>
         <View style={styles.divider} />
-        {/* {itemData?.businessHours && (
+        {data?.schedules?.length > 0 && (
           <>
             <Typography style={styles.sectionTitle}>Business Hours</Typography>
-            <BusinessHours data={itemData?.businessHours} />
+            <BusinessHours data={data?.schedules} />
             <View style={styles.divider} />
           </>
-        )} */}
+        )}
         {heading === 'Events' && (
           <>
             <Typography style={styles.sectionTitle}>Event Start Date</Typography>

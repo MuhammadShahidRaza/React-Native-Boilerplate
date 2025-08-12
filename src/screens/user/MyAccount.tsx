@@ -2,10 +2,13 @@ import { View, StyleSheet, Share } from 'react-native';
 import { Button, Header, Icon, RowComponent, Wrapper } from 'components/common';
 import { COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { STYLES, COLORS } from 'utils/index';
+import { STYLES, COLORS, safeNumber } from 'utils/index';
 import { navigate } from 'navigation/Navigators';
+import { useAppSelector } from 'types/reduxTypes';
 
 export const MyAccount = () => {
+  const { userDetails } = useAppSelector(state => state?.user);
+
   const tabs = [
     {
       title: 'My Profile',
@@ -59,7 +62,9 @@ export const MyAccount = () => {
               iconStyle={styles.iconStyle}
               color={COLORS.PRIMARY}
             />
-            <View style={styles.notificationDot} />
+            {safeNumber(userDetails?.notification_count) > 0 && (
+              <View style={styles.notificationDot} />
+            )}
           </View>
         }
       />

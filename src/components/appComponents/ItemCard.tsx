@@ -1,20 +1,25 @@
 import { TouchableOpacity, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, isIOS, screenHeight } from 'utils/index';
-import { Icon, Photo, RowComponent, SkeletonLoader, Typography } from 'components/index';
+import {
+  Icon,
+  ItemCardData,
+  Photo,
+  RowComponent,
+  SkeletonLoader,
+  Typography,
+} from 'components/index';
 import { styles } from './Home/styles';
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
-import { CATEGORY_NAMES, CategoryItem } from 'types/responseTypes';
+import { CATEGORY_NAMES } from 'types/responseTypes';
 import { useState } from 'react';
 import { toggleFavourite } from 'api/functions/app/home';
+import { safeString } from '../../utils/helpers/functions';
 
-export const ItemCard = ({ item }: { item: CategoryItem }) => {
-  const [isLiked, setIsLiked] = useState<boolean>(item?.is_liked);
-
-  console.log(item);
-
-  const categoryName = item?.category?.title ?? item?.itemCategory?.category?.title;
+export const ItemCard = ({ item, isItemFlow }: { item: ItemCardData; isItemFlow: boolean }) => {
+  const [isLiked, setIsLiked] = useState<boolean>(item?.isLiked);
+  const categoryName = item?.categoryName;
   const isEcommerce =
     categoryName === CATEGORY_NAMES.ORDER_YOUR_FOOD ||
     categoryName === CATEGORY_NAMES.GROCERY ||
@@ -36,7 +41,7 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
       >
         <View>
           <RowComponent style={{ zIndex: 100 }}>
-            {item?.rating_avg && (
+            {item?.ratingAvg && (
               <RowComponent style={styles.ratingContainer}>
                 <Icon
                   onPress={() => {}}
@@ -48,7 +53,7 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
                 />
 
                 <Typography style={{ color: COLORS.WHITE, fontSize: FontSize.ExtraSmall }}>
-                  {String(item?.rating_avg ?? '0.0')}
+                  {item?.ratingAvg}
                 </Typography>
               </RowComponent>
             )}
@@ -59,7 +64,7 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
                 toggleFavourite({
                   object_id: item?.id,
                   object_type: 'item',
-                  category_id: item?.category_id,
+                  category_id: item?.categoryId,
                 });
               }}
               componentName={VARIABLES.AntDesign}
@@ -69,33 +74,29 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
               iconStyle={styles.heartIcon}
             />
           </RowComponent>
-          <Photo
-            disabled
-            imageStyle={styles.itemImage}
-            source={item?.business_logo ?? item?.media?.[0]?.media_url}
-          />
+          <Photo disabled imageStyle={styles.itemImage} source={item?.imageUrl} />
         </View>
         <View
           style={{ paddingHorizontal: 10, paddingTop: 5, gap: isIOS() ? 4 : 2, overflow: 'hidden' }}
         >
           <Typography numberOfLines={1} style={styles.itemText}>
-            {item?.business_name ?? item?.title}
+            {item?.title}
           </Typography>
           <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 5 }}>
             <Typography
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.city + ' - ' ?? item?.eventDetail?.city + ' - '}
+              {item?.city + ' - '}
             </Typography>
             <Typography
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.country ?? item?.eventDetail?.country}
+              {item?.country}
             </Typography>
           </RowComponent>
-          {item?.eventDetail?.start_time && (
+          {item?.startTime && (
             <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 10 }}>
               {/* <Typography
                 numberOfLines={1}
@@ -111,13 +112,13 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
                 numberOfLines={1}
                 style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
               >
-                {item?.eventDetail?.start_time + ' - '}
+                {item?.startTime + ' - '}
               </Typography>
               <Typography
                 numberOfLines={1}
                 style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
               >
-                {item?.eventDetail?.end_time}
+                {item?.endTime}
               </Typography>
             </RowComponent>
           )}
@@ -141,7 +142,7 @@ export const ItemCard = ({ item }: { item: CategoryItem }) => {
                 numberOfLines={1}
                 style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
               >
-                {item?.distance}
+                {safeString(String(item?.distance))}
               </Typography>
             </RowComponent>
           )}

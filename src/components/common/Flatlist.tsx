@@ -52,7 +52,7 @@ export const FlatListComponent = <T,>({
   HeaderComponent,
   nestedScrollEnabled = true,
   FooterComponent,
-  bounces = false,
+  bounces = true,
   EmptyComponent,
   style,
   getItemLayout,

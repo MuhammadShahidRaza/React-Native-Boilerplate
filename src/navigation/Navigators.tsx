@@ -4,7 +4,7 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Icon, OrderItem } from 'components/index';
+import { Icon, ItemCardData, OrderItem } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
@@ -54,16 +54,19 @@ export type RootStackParamList = {
       item?: ReviewItem;
     };
   };
-  [SCREENS.VIEW_ALL]: { data: { items: CategoryItem[]; headerTitle: string } };
+  [SCREENS.VIEW_ALL]: {
+    data: { items: CategoryItem[] | Vendor[]; headerTitle: CategoryNameTypes };
+  };
   [SCREENS.VIEW_DETAILS]: { data: CategoryItem };
-  [SCREENS.DETAILS]: { data: CategoryItem; heading: CategoryNameTypes };
+  [SCREENS.DETAILS]: { data: ItemCardData; heading: CategoryNameTypes };
   [SCREENS.ECOMMERCE_DETAILS]: { data: any; heading: string };
   [SCREENS.ORDER_DETAIL]: { data: OrderItem };
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: CategoryNameTypes;
-      item: Category;
+      item: ItemCardData;
       itemHeading: CategoryNameTypes;
+      isItemFlow: boolean;
     };
   };
   [SCREENS.VIEW_ALL_ECOMMERCE]: {

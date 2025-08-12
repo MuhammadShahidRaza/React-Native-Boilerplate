@@ -1,9 +1,16 @@
 import { TouchableOpacity, View } from 'react-native';
-import { Icon, Photo, RowComponent, SkeletonLoader, Typography } from 'components/index';
+import {
+  Icon,
+  ItemCardData,
+  Photo,
+  RowComponent,
+  SkeletonLoader,
+  Typography,
+} from 'components/index';
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
 import { StyleSheet } from 'react-native';
-import { CategoryItem, FontSize, FontWeight } from 'types/index';
+import { FontSize, FontWeight } from 'types/index';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
 import { useState } from 'react';
 import { toggleFavourite } from 'api/functions/app/home';
@@ -12,11 +19,11 @@ export const ItemLargeCard = ({
   item,
   showCategory = false,
 }: {
-  item: CategoryItem;
+  item: ItemCardData;
   showCategory?: boolean;
 }) => {
-  const [isLiked, setIsLiked] = useState<boolean>(item?.is_liked);
-  const categoryName = item?.itemCategory?.category?.title;
+  const [isLiked, setIsLiked] = useState<boolean>(item?.isLiked);
+  const categoryName = item?.categoryName;
   const isEcommerce =
     categoryName === 'Order Your Food' ||
     categoryName === 'Grocery' ||
@@ -33,7 +40,7 @@ export const ItemLargeCard = ({
             navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: categoryName });
             return;
           }
-          navigate(SCREENS.DETAILS, { data: item, heading: categoryName });
+          navigate(SCREENS.DETAILS, { data: item, heading: categoryName, });
         }}
         style={styles.itemContainer}
       >
@@ -68,7 +75,7 @@ export const ItemLargeCard = ({
                 toggleFavourite({
                   object_id: item?.id,
                   object_type: 'item',
-                  category_id: item?.category_id,
+                  category_id: item?.categoryId,
                 });
               }}
               componentName={VARIABLES.AntDesign}
@@ -78,14 +85,14 @@ export const ItemLargeCard = ({
               iconStyle={styles.heartIcon}
             />
           </RowComponent>
-          <Photo disabled imageStyle={styles.itemImage} source={item?.media?.[0]?.media_url} />
+          <Photo disabled imageStyle={styles.itemImage} source={item?.imageUrl} />
         </View>
         <View style={{ paddingHorizontal: 10, paddingVertical: 12, gap: isIOS() ? 3 : 3 }}>
           <RowComponent>
             <Typography numberOfLines={1} style={styles.itemText}>
               {item?.title}
             </Typography>
-            {item?.eventDetail?.start_time && (
+            {item?.startTime && (
               <RowComponent style={{ alignItems: 'center', justifyContent: 'flex-start', gap: 5 }}>
                 {/* <Typography
                   numberOfLines={1}
@@ -97,23 +104,25 @@ export const ItemLargeCard = ({
                 >
                   {item?.isOpen ? 'OPEN' : 'CLOSED'}
                 </Typography> */}
+                {item?.date && (
+                  <Typography
+                    numberOfLines={1}
+                    style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
+                  >
+                    {new Date(item?.date)?.toLocaleDateString()}
+                  </Typography>
+                )}
                 <Typography
                   numberOfLines={1}
                   style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
                 >
-                  {new Date(item?.eventDetail?.date)?.toLocaleDateString()}
+                  {item?.startTime + '  -'}
                 </Typography>
                 <Typography
                   numberOfLines={1}
                   style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
                 >
-                  {item?.eventDetail?.start_time + '  -'}
-                </Typography>
-                <Typography
-                  numberOfLines={1}
-                  style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
-                >
-                  {item?.eventDetail?.end_time}
+                  {item?.endTime}
                 </Typography>
               </RowComponent>
             )}
@@ -130,13 +139,13 @@ export const ItemLargeCard = ({
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.eventDetail?.city + ' - '}
+              {item?.city + ' - '}
             </Typography>
             <Typography
               numberOfLines={1}
               style={{ color: COLORS.DARK_GREY, fontSize: FontSize.Small }}
             >
-              {item?.eventDetail?.country}
+              {item?.country}
             </Typography>
           </RowComponent>
           {/* <Typography
@@ -171,7 +180,7 @@ export const ItemLargeCard = ({
               </RowComponent>
             )}
 
-            {!item?.rating_avg && (
+            {!item?.ratingAvg && (
               <RowComponent style={styles.ratingContainer}>
                 <Icon
                   onPress={() => {}}
@@ -183,7 +192,7 @@ export const ItemLargeCard = ({
                 />
 
                 <Typography style={{ color: COLORS.WHITE, fontSize: FontSize.ExtraSmall }}>
-                  {String(item?.rating_avg ?? '0.0') + ' Rating'}
+                  {item?.ratingAvg + ' Rating'}
                 </Typography>
               </RowComponent>
             )}

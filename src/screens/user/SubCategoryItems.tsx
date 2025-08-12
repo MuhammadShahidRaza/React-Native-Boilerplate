@@ -1,17 +1,7 @@
-import { useEffect, useState } from 'react';
-import { COLORS, STYLES } from 'utils/index';
-import { renderHorizontalItemsWithRow, SearchBar, Wrapper } from 'components/index';
-import {
-  AppScreenProps,
-  CATEGORY_NAMES,
-  CategoryNameTypes,
-  FontSize,
-  useAppSelector,
-} from 'types/index';
-import { SCREENS, VARIABLES } from 'constants/index';
-import { Autocomplete } from 'components/common/Autocomplete';
-import { AddressDetails } from 'utils/location';
-import { navigate } from 'navigation/index';
+import { useEffect } from 'react';
+import { renderHorizontalItemsWithRow, Wrapper } from 'components/index';
+import { AppScreenProps, CATEGORY_NAMES, CategoryNameTypes, useAppSelector } from 'types/index';
+import { SCREENS } from 'constants/index';
 // import { getMainCategoriesHomeItems } from 'api/functions/app/home';
 
 export const SubCategoryItems = ({
@@ -21,17 +11,21 @@ export const SubCategoryItems = ({
   const data = route?.params?.data;
   const selectedCategory = data?.item;
   const { categoriesList } = useAppSelector(state => state.category);
-  const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState<AddressDetails | null>(null);
-  const [search, setSearch] = useState('');
+  // const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState<AddressDetails | null>(null);
   const activeCategory =
     categoriesList
       ?.find(cat => cat.subcategories?.some(sub => sub.id === selectedCategory?.id))
       ?.subcategories?.find(sub => sub.id === selectedCategory?.id) || null;
 
+  // const [isItemFlow, setIsItemFlow] = useState(
+  //   activeCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE,
+  // );
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: data?.heading,
     });
+
     // const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
     // typesToFetch.forEach(type => {
     //   getMainCategoriesHomeItems({
@@ -62,7 +56,7 @@ export const SubCategoryItems = ({
 
   return (
     <Wrapper useSafeArea={false} useScrollView={true}>
-      {data?.heading === CATEGORY_NAMES.HOTELS && (
+      {/* {data?.heading === CATEGORY_NAMES.HOTELS && (
         <Autocomplete
           containerStyle={STYLES.CONTAINER}
           setReverseGeocodedAddress={setReverseGeocodedAddress}
@@ -95,7 +89,7 @@ export const SubCategoryItems = ({
             size: FontSize.ExtraLarge,
           },
         })}
-      />
+      /> */}
 
       {hasItems && activeCategory && (
         <>
@@ -103,6 +97,7 @@ export const SubCategoryItems = ({
             renderHorizontalItemsWithRow({
               data: activeCategory.nearby,
               heading: data.heading,
+              isItemFlow: false,
               rowHeading: `Near By ${showHeading(data.heading)}`,
             })}
 
@@ -110,6 +105,7 @@ export const SubCategoryItems = ({
             renderHorizontalItemsWithRow({
               data: activeCategory.trending,
               heading: data?.heading,
+              isItemFlow: false,
               rowHeading: `Trending ${showHeading(data?.heading)}`,
             })}
         </>

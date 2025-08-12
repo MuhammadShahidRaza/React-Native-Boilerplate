@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { HomeComponent, Icon, MessageBox, RowComponent, Wrapper } from 'components/index';
-import { screenHeight, screenWidth, STYLES, COLORS, greetings } from 'utils/index';
+import { screenHeight, screenWidth, STYLES, COLORS, greetings, safeNumber } from 'utils/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { FontSize, useAppSelector } from 'types/index';
 import { navigate } from 'navigation/index';
@@ -46,7 +46,9 @@ export const Home = () => {
                 iconStyle={styles.iconStyle}
                 color={COLORS.PRIMARY}
               />
-              {userDetails?.is_notify && <View style={styles.notificationDot} />}
+              {safeNumber(userDetails?.notification_count) > 0 && (
+                <View style={styles.notificationDot} />
+              )}
             </View>
           </RowComponent>
         </RowComponent>
@@ -69,7 +71,7 @@ const styles = StyleSheet.create({
   },
   userNameStyle: {
     color: COLORS.WHITE,
-    textTransform:"capitalize"
+    textTransform: 'capitalize',
   },
   iconStyle: {
     backgroundColor: COLORS.WHITE,

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { COLORS, STYLES } from 'utils/index';
-import { ItemType, renderHorizontalFoodItemsWithRow, SearchBar, Wrapper } from 'components/index';
+import { renderHorizontalFoodItemsWithRow, SearchBar, Wrapper } from 'components/index';
 import { AppScreenProps, FontSize } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { Autocomplete } from 'components/common/Autocomplete';
 import { AddressDetails } from 'utils/location';
-import { navigate } from 'navigation/Navigators';
 
 export const SubCategoryFood = ({
   navigation,
@@ -56,7 +55,7 @@ export const SubCategoryFood = ({
       })}
       <View style={{ height: 10 }} />
       {renderHorizontalFoodItemsWithRow({
-        data: (data?.categories as ItemType[]) ?? [],
+        data: data?.categories ?? [],
         heading: data.itemHeading,
         onPressViewAll: () => {},
         rowHeading: `Categories`,

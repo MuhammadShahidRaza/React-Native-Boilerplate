@@ -22,6 +22,7 @@ export const HomeComponent = () => {
   const { categoriesList } = useAppSelector(state => state.category);
   const [searchText, setSearchText] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
+  const [isItemFlow, setIsItemFlow] = useState(true);
   const [itemHeading, setItemHeading] = useState<string>('');
   const activeCategory = useMemo(() => {
     const mainCategory = categoriesList.find(cat => cat.id === selectedCategory);
@@ -41,6 +42,7 @@ export const HomeComponent = () => {
     if (item?.is_subcategory) return;
 
     const isTicketPurchase = item?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE;
+    setIsItemFlow(isTicketPurchase);
     const typesToFetch = isTicketPurchase
       ? [FILTER_NAMES.UPCOMING, FILTER_NAMES.TRENDING]
       : [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
@@ -89,6 +91,7 @@ export const HomeComponent = () => {
         heading: item?.title,
         item: item ?? [],
         itemHeading: item?.title,
+        isItemFlow,
       },
     });
     // }
@@ -163,7 +166,7 @@ export const HomeComponent = () => {
       >
         {hasSubCategories && (
           <FlatListComponent
-            keyExtractor={item => item?.id?.toString()}
+            keyExtractor={item => String(item?.id)}
             numColumns={2}
             columnWrapperStyle={styles.subCategoriesColumnWrapper}
             contentContainerStyle={styles.subCategoriesContentContainer}
@@ -179,12 +182,14 @@ export const HomeComponent = () => {
                 data: activeCategory.upcoming,
                 heading: itemHeading,
                 rowHeading: `Upcoming ${itemHeading}`,
+                isItemFlow,
               })}
             {activeCategory?.nearby?.length > 0 &&
               renderHorizontalItemsWithRow({
                 data: activeCategory.nearby,
                 heading: itemHeading,
                 rowHeading: `Near By ${itemHeading}`,
+                isItemFlow,
               })}
 
             {activeCategory?.trending?.length > 0 &&
@@ -192,6 +197,7 @@ export const HomeComponent = () => {
                 data: activeCategory.trending,
                 heading: itemHeading,
                 rowHeading: `Trending ${itemHeading}`,
+                isItemFlow,
               })}
           </>
         )}

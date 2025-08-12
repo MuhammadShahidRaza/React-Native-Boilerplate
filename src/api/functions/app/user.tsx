@@ -31,6 +31,7 @@ const updateUserDetails = async <R extends { user: User }>(data: EditProfileForm
     url: API_ROUTES.UPDATE_PROFILE,
     data,
   });
+
   if (user) {
     store.dispatch(setUserDetails(user.user));
     onBack();

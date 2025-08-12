@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { FlatListComponent, Wrapper, ItemLargeCard, SearchBar } from 'components/index';
+import {
+  FlatListComponent,
+  Wrapper,
+  ItemLargeCard,
+  SearchBar,
+  mapToItemCardData,
+} from 'components/index';
 import { COLORS, STYLES } from 'utils/index';
-import { AppNavigationProp, AppRouteProp, CategoryItem, FontSize } from 'types/index';
+import {
+  AppNavigationProp,
+  AppRouteProp,
+  CATEGORY_NAMES,
+  CategoryItem,
+  FontSize,
+  Vendor,
+} from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Autocomplete } from 'components/common/Autocomplete';
@@ -21,11 +34,11 @@ export const ViewAll = () => {
   }, []);
 
   useEffect(() => {
-    setFilteredData(
-      data?.items?.filter((item: CategoryItem) =>
-        item?.title?.toLowerCase().includes(search.toLowerCase()),
-      ),
-    );
+    // setFilteredData(
+    //   data?.items?.filter((item: CategoryItem) =>
+    //     item?.title?.toLowerCase().includes(search.toLowerCase()),
+    //   ),
+    // );
   }, [search]);
 
   return (
@@ -70,9 +83,15 @@ export const ViewAll = () => {
         data={filteredData}
         onRefresh={() => {}}
         refreshing={false}
-        contentContainerStyle={{ paddingBottom: 100, ...STYLES.CONTAINER }}
-        renderItem={({ item }: { item: CategoryItem }) => (
-          <ItemLargeCard item={item} key={item?.id} />
+        contentContainerStyle={{ paddingBottom: 150, ...STYLES.CONTAINER }}
+        renderItem={({ item }: { item: CategoryItem | Vendor }) => (
+          <ItemLargeCard
+            item={mapToItemCardData({
+              data: item,
+              isItemFlow: data?.headerTitle == CATEGORY_NAMES.EVENTS ? true : false,
+            })}
+            key={item?.id}
+          />
         )}
       />
     </Wrapper>

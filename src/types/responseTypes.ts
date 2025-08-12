@@ -19,6 +19,7 @@ export interface User {
   calling_code: string;
   username: string | null;
   email: string;
+  notification_count: number;
   about: string | null;
   verification_code: string;
   expired_at: string;
@@ -200,12 +201,6 @@ export interface CategoryItem {
   category_id: number;
   title: string;
   description: string;
-  specifications: {
-    venue: string;
-    category: string;
-    duration: string;
-    age_limit: string;
-  };
   item_type: string;
   price: string;
   currency: string;
@@ -232,9 +227,6 @@ export interface Vendor {
   full_name: string;
   user_name: string;
   email: string;
-  password: string;
-  provider_id: string | null;
-  provider: string;
   phone_number: string;
   whatsapp_number: string;
   website_url: string;
@@ -244,26 +236,19 @@ export interface Vendor {
   about: string;
   profile_image: string | null;
   background_image: string | null;
-  category_id: number;
-  referal_id: number | null;
-  region_id: number | null;
-  language_id: number | null;
   address: string;
-  country_code: string | null;
   country: string;
+  country_code: string | null;
   state: string;
   city: string;
   latitude: number;
   longitude: number;
-  verification_token: string | null;
   invitation_code: string | null;
   balance: number;
   user_type: string;
   user_role: string;
   is_email_verified: boolean;
   is_phone_verified: boolean;
-  is_active: boolean;
-  is_notify: boolean;
   business_name: string | null;
   business_logo: string | null;
   cover_image: string | null;
@@ -272,6 +257,28 @@ export interface Vendor {
   business_license: string | null;
   verification_status: string;
   notes: string | null;
+  distance: string | null;
+  rating_count: number;
+  rating_avg: number | null;
+  is_rated: boolean;
+  is_liked: boolean;
+  rating: any[];
+  notification_count: number;
+  is_active: boolean;
+  is_notify: boolean;
+  createdAt: string;
+  updatedAt: string;
+  schedules: [];
+  category: {
+    id: number;
+    category_id: number;
+    title: CategoryNameTypes;
+    business_flow_id: number;
+    sort_order: number;
+    is_active: boolean;
+    icon: string;
+    thumbnail: string;
+  };
 }
 
 export interface ItemCategory {
@@ -284,21 +291,20 @@ export interface ItemCategory {
   icon: string | null;
   is_active: boolean;
   sort_order: number;
+  createdAt: string;
+  updatedAt: string;
   category: {
     id: number;
-    category_id: number | null;
-    title: string;
-    category_type: string | null;
+    title: CategoryNameTypes;
+    business_flow_id: number;
     sort_order: number;
-    is_active: boolean;
     icon: string;
     thumbnail: string;
+    is_subcategory: boolean;
     createdAt: string;
     updatedAt: string;
-    deletedAt: string | null;
   };
 }
-
 export interface Media {
   id: number;
   item_id: number;
