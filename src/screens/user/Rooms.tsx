@@ -10,7 +10,7 @@ import {
 } from 'components/common';
 import { IMAGES, SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/Navigators';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import {
@@ -81,12 +81,21 @@ export const Rooms = ({
   showCartButton: any; //TODO: ADD TYPE
   setShowCartButton: any; //TODO: ADD TYPE
 }) => {
-  const [_, setRoomListPage] = useState(1);
+  const isLoadingRef = useRef(false);
+  const [roomListPage, setRoomListPage] = useState(1);
   const [roomData, setRoomData] = useState<RoomItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [didLoad, setDidLoad] = useState(false);
   const [showDatePickerModal, setShowDatePickerModal] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    setRoomData([]);
+    setHasMore(true);
+    setRoomListPage(1);
+    await fetchHotelRooms(1);
+  };
 
   const [selectedDate, setSelectedDate] = useState<{
     start_date?: string;
@@ -120,32 +129,36 @@ export const Rooms = ({
   };
 
   useEffect(() => {
-    if (!didLoad && data?.id && !didLoad && itemData?.id) {
+    if (data?.id && !didLoad && itemData?.id) {
       fetchHotelRooms(1);
       setRoomListPage(1);
     }
   }, [data?.id, itemData?.id]);
 
   const fetchHotelRooms = async (page: number) => {
-    if (isLoading || !data?.id || !hasMore) return;
+    if (isLoadingRef.current || !data?.id || !hasMore) return;
     try {
+      isLoadingRef.current = true;
       const response = await getVendorItemslist({
         vendor_Id: data?.id,
         page,
         start_date: selectedDate?.start_date,
-        end_date: selectedDate?.end_date,
+        end_date: selectedDate?.end_date ?? selectedDate?.start_date,
       });
+      console.log(response);
       const newItems = response?.result ?? [];
       const pagination = response?.pagination;
-      setRoomData(prev => [...prev, ...newItems]);
+      setRoomData(prev => (page === 1 ? newItems : [...prev, ...newItems]));
       if (pagination?.current_page >= pagination?.last_page) {
         setHasMore(false);
       }
+      setRoomListPage(page);
       if (page === 1) setDidLoad(true);
     } catch (error) {
       console.error('Failed to load items:', error);
     } finally {
-      setIsLoading(false);
+      isLoadingRef.current = false; 
+      setIsRefreshing(false);
     }
   };
 
@@ -156,8 +169,6 @@ export const Rooms = ({
     item: RoomItem;
     onPressItem?: (item: any) => void;
   }) => {
-    console.log(item);
-
     return (
       <ServiceCard
         item={{
@@ -222,7 +233,9 @@ export const Rooms = ({
           />
           <View>
             <Typography style={{ fontWeight: FontWeight.Bold }}>End Date</Typography>
-            <Typography>{formatDateFriendly(selectedDate?.end_date)}</Typography>
+            <Typography>
+              {formatDateFriendly(selectedDate?.end_date ?? selectedDate?.start_date)}
+            </Typography>
           </View>
         </RowComponent>
       </RowComponent>
@@ -230,6 +243,11 @@ export const Rooms = ({
         data={roomData}
         numColumns={2}
         scrollEnabled={true}
+        refreshing={isRefreshing}
+        keyExtractor={item => item?.id?.toString()}
+        onRefresh={onRefresh}
+        // showLoadingMore={isLoadingRef.current && hasMore}
+        onEndReachedThreshold={0.2}
         renderItem={({ item }) =>
           renderServices({
             item,
@@ -238,6 +256,11 @@ export const Rooms = ({
             },
           })
         }
+        onEndReached={() => {
+          if (!isLoadingRef.current && hasMore) {
+            fetchHotelRooms(roomListPage + 1);
+          }
+        }}
         contentContainerStyle={{ paddingBottom: 160 }}
       />
       {showCartButton && (
@@ -359,8 +382,14 @@ export const Rooms = ({
 
         <Button
           title={'Done'}
+          disabled={!selectedDate.start_date}
           onPress={() => {
             setShowDatePickerModal(false);
+            // Reset and fetch data based on selected date range
+            setRoomData([]); // clear old data
+            setHasMore(true); // reset pagination
+            setRoomListPage(1);
+            fetchHotelRooms(1);
           }}
         />
       </ModalComponent>

@@ -10,12 +10,14 @@ import {
 } from 'react-native';
 import { StyleType, voidFuntionType } from 'types/common';
 import NoItemFound from './NoItemFound';
+import { FlatListProps } from 'react-native';
 
-interface FlatListComponentProps<T> {
+interface FlatListComponentProps<T> extends FlatListProps<T> {
   data: T[];
-  renderItem?: ListRenderItem<T>;
+  renderItem: ListRenderItem<T>;
   containerStyle?: ViewStyle;
   numColumns?: number;
+  onEndReachedThreshold?: number;
   reference?: LegacyRef<FlatList<T>>;
   horizontal?: boolean;
   scrollEnabled?: boolean;
@@ -37,9 +39,8 @@ interface FlatListComponentProps<T> {
   nestedScrollEnabled?: boolean;
   stickyHeaderIndices?: number[];
   noItemProps?: any;
-  pagination?: boolean;
-  onLoadMore?: voidFuntionType;
-  isLoadingMore?: boolean;
+  onEndReached?: voidFuntionType;
+  showLoadingMore?: boolean;
 }
 
 export const FlatListComponent = <T,>({
@@ -61,18 +62,17 @@ export const FlatListComponent = <T,>({
   keyExtractor,
   refreshing = false,
   scrollEnabled = horizontal ?? false,
-  pagination = false,
-  onLoadMore,
-  isLoadingMore = false,
+  onEndReached,
+  onEndReachedThreshold = 0.5,
+  showLoadingMore = false,
   noItemProps,
   ...otherProps
 }: FlatListComponentProps<T>) => {
   const renderHeader = HeaderComponent ? <HeaderComponent /> : null;
-  // const renderFooter = FooterComponent ? <FooterComponent /> : null;
 
   const renderFooter = () => {
     if (FooterComponent) return <FooterComponent />;
-    if (pagination && isLoadingMore) {
+    if (showLoadingMore) {
       return (
         <View style={{ paddingVertical: 12, alignItems: 'center' }}>
           <ActivityIndicator size='small' />
@@ -107,11 +107,11 @@ export const FlatListComponent = <T,>({
         onScrollToIndexFailed={() => {}}
         nestedScrollEnabled={nestedScrollEnabled}
         scrollEnabled={scrollEnabled}
-        onEndReached={pagination ? onLoadMore : undefined}
+        onEndReached={onEndReached}
         refreshControl={
           onRefresh && <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onEndReachedThreshold={0.8}
+        onEndReachedThreshold={onEndReachedThreshold}
         {...otherProps}
       />
     </View>
