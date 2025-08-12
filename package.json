@@ -57,6 +57,7 @@
     "react": "19.0.0",
     "react-i18next": "^15.5.2",
     "react-native": "0.79.2",
+    "react-native-calendars": "^1.1313.0",
     "react-native-device-info": "^14.0.4",
     "react-native-dotenv": "^3.4.11",
     "react-native-get-random-values": "^1.11.0",

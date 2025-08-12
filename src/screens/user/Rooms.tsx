@@ -1,10 +1,17 @@
 import { getVendorItemslist } from 'api/functions/app/home';
 import { ServiceCard } from 'components/appComponents';
-import { FlatListComponent, Icon, RowComponent, Typography } from 'components/common';
+import {
+  Button,
+  FlatListComponent,
+  Icon,
+  ModalComponent,
+  RowComponent,
+  Typography,
+} from 'components/common';
 import { IMAGES, SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/Navigators';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import {
   CATEGORY_NAMES,
@@ -16,6 +23,7 @@ import {
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
 import { screenHeight, screenWidth } from 'utils/helpers';
+import { Calendar } from 'react-native-calendars';
 
 export interface HotelDetails {
   id: number;
@@ -78,6 +86,38 @@ export const Rooms = ({
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [didLoad, setDidLoad] = useState(false);
+  const [showDatePickerModal, setShowDatePickerModal] = useState<boolean>(false);
+
+  const [selectedDate, setSelectedDate] = useState<{
+    start_date?: string;
+    end_date?: string;
+  }>({});
+
+  const formatDateFriendly = (dateString?: string) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short', // "Thu"
+      month: 'short', // "Apr"
+      day: 'numeric', // 18
+    }).format(date);
+  };
+
+  const handleDayPress = (day: { dateString: string }) => {
+    const selected = day.dateString;
+
+    if (!selectedDate.start_date || (selectedDate.start_date && selectedDate.end_date)) {
+      // If no start_date set OR both start and end are set, reset with new start_date
+      setSelectedDate({ start_date: selected });
+    } else {
+      // If start_date is set and no end_date yet, check if selected is after or equal to start_date
+      if (selected >= selectedDate.start_date) {
+        setSelectedDate(prev => ({ ...prev, end_date: selected }));
+      } else {
+        // If selected date is before start_date, ignore or alert user
+        Alert.alert('End date cannot be before start date');
+      }
+    }
+  };
 
   useEffect(() => {
     if (!didLoad && data?.id && !didLoad && itemData?.id) {
@@ -89,7 +129,12 @@ export const Rooms = ({
   const fetchHotelRooms = async (page: number) => {
     if (isLoading || !data?.id || !hasMore) return;
     try {
-      const response = await getVendorItemslist({ vendor_Id: data?.id, page });
+      const response = await getVendorItemslist({
+        vendor_Id: data?.id,
+        page,
+        start_date: selectedDate?.start_date,
+        end_date: selectedDate?.end_date,
+      });
       const newItems = response?.result ?? [];
       const pagination = response?.pagination;
       setRoomData(prev => [...prev, ...newItems]);
@@ -137,6 +182,9 @@ export const Rooms = ({
     <View style={styles.tabContent}>
       <RowComponent>
         <RowComponent
+          onPress={() => {
+            setShowDatePickerModal(true);
+          }}
           style={{
             justifyContent: 'flex-start',
             gap: 15,
@@ -152,10 +200,13 @@ export const Rooms = ({
           />
           <View>
             <Typography style={{ fontWeight: FontWeight.Bold }}>Start Date</Typography>
-            <Typography>Thurs, Apr 18</Typography>
+            <Typography>{formatDateFriendly(selectedDate?.start_date)}</Typography>
           </View>
         </RowComponent>
         <RowComponent
+          onPress={() => {
+            setShowDatePickerModal(true);
+          }}
           style={{
             justifyContent: 'flex-start',
             gap: 15,
@@ -171,7 +222,7 @@ export const Rooms = ({
           />
           <View>
             <Typography style={{ fontWeight: FontWeight.Bold }}>End Date</Typography>
-            <Typography>Fri, Apr 19</Typography>
+            <Typography>{formatDateFriendly(selectedDate?.end_date)}</Typography>
           </View>
         </RowComponent>
       </RowComponent>
@@ -265,6 +316,54 @@ export const Rooms = ({
           </RowComponent>
         </View>
       )}
+
+      <ModalComponent
+        position='center'
+        modalVisible={showDatePickerModal}
+        setModalVisible={setShowDatePickerModal}
+        modalSecondaryContainerStyle={{
+          gap: 20,
+        }}
+      >
+        <Typography
+          style={{
+            textAlign: 'center',
+            color: COLORS.PRIMARY,
+            fontWeight: FontWeight.Bold,
+            fontSize: FontSize.MediumLarge,
+          }}
+        >{`Select Start & End Dates`}</Typography>
+        <Calendar
+          onDayPress={handleDayPress}
+          style={{ ...STYLES.SHADOW, borderRadius: 20, padding: 10 }}
+          markedDates={{
+            ...(selectedDate.start_date && {
+              [selectedDate.start_date]: {
+                selected: true,
+                startingDay: true,
+                color: COLORS.PRIMARY,
+                textColor: COLORS.WHITE,
+              },
+            }),
+            ...(selectedDate.end_date && {
+              [selectedDate.end_date]: {
+                selected: true,
+                endingDay: true,
+                color: COLORS.PRIMARY,
+                textColor: COLORS.WHITE,
+              },
+            }),
+          }}
+          markingType={'period'}
+        />
+
+        <Button
+          title={'Done'}
+          onPress={() => {
+            setShowDatePickerModal(false);
+          }}
+        />
+      </ModalComponent>
     </View>
   );
 };

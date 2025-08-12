@@ -24,7 +24,7 @@ const getMainCategories = async () => {
   const categories = data?.categories ?? [];
   store.dispatch(setCategoriesList(categories));
   const firstCategory = categories?.[0];
-  // Safe check: ensure business_flow exists and slug matches
+  // Safe check: ensure business_flow of Event exists and slug matches with Ticket Purchase.
   if (firstCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE) {
     const { id } = firstCategory;
     getMainCategoriesHomeItems({
@@ -121,19 +121,25 @@ const getVendorItemslist = async ({
   vendor_Id,
   page = 1,
   limit = 6,
+  start_date,
+  end_date,
 }: {
   vendor_Id: number;
   page?: number;
   limit?: number;
+  start_date?: string;
+  end_date?: string;
 }) => {
   const query = new URLSearchParams({
     vendor_Id: String(vendor_Id),
     page: String(page),
     limit: String(limit),
+    ...(start_date ? { start_date: String(start_date) } : {}),
+    ...(end_date ? { end_date: String(end_date) } : {}),
   });
 
   const response = await handleGetApiRequest<any>({
-    url: `${API_ROUTES.GET_VENDOR_ITEMS__BY_ID}?${query?.toString()}`,
+    url: `${API_ROUTES.GET_VENDOR_ITEMS_BY_ID}?${query?.toString()}`,
   });
 
   return response;

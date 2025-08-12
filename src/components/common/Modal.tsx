@@ -19,6 +19,7 @@ interface ModalComponentProps {
   transparent?: boolean;
   statusBarTranslucent?: boolean;
   modalContainerStyle?: StyleType;
+  modalSecondaryContainerStyle?: StyleType;
   wantToCloseOnBack?: boolean;
   wantToCloseOnTop?: boolean;
   onRequestClose?: () => void;
@@ -32,6 +33,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
   scroll = false,
   transparent = true,
   modalContainerStyle,
+  modalSecondaryContainerStyle,
   statusBarTranslucent = true,
   wantToCloseOnBack = false,
   wantToCloseOnTop = false,
@@ -81,6 +83,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
               styles.modalInnerWrapper,
               position === 'center' ? styles.centeredModal : styles.bottomModal,
               position === 'center' && styles.centeredModalLayout,
+              modalSecondaryContainerStyle,
             ]}
           >
             {scroll ? (
