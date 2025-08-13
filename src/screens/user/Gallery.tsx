@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getGallerylist } from 'api/functions/app/home';
 import { FlatListComponent, Photo } from 'components/common';
 import { StyleSheet, View } from 'react-native';
@@ -17,12 +17,19 @@ export interface GalleryItem {
 }
 
 export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
-  const [_, setGalleryListPage] = useState(1);
+  const isLoadingRef = useRef(false);
+  const [galleryListPage, setGalleryListPage] = useState(1);
   const [galleryData, setGalleryData] = useState<GalleryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [didLoad, setDidLoad] = useState(false);
-
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setHasMore(true);
+    setIsRefreshing(true);
+    setGalleryData([]);
+    setGalleryListPage(1);
+    await fetchGallery(1);
+  };
   useEffect(() => {
     if ((!didLoad && data?.id) || (!didLoad && itemData?.id)) {
       fetchGallery(1);
@@ -31,21 +38,24 @@ export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
   }, [data?.id, itemData?.id]);
 
   const fetchGallery = async (page: number) => {
-    if (isLoading || !data?.id || !hasMore || !itemData?.id) return;
+    if (isLoadingRef.current || !data?.id || !hasMore || !itemData?.id) return;
     try {
+      isLoadingRef.current = true;
       const response = await getGallerylist({ id: itemData?.id ?? data?.id, page });
-      const gallery = response?.galleries ?? [];
+      console.log(response);
+      const gallery = response?.result ?? [];
       const pagination = response?.pagination;
-
       setGalleryData(prev => [...prev, ...gallery]);
       if (pagination?.current_page >= pagination?.last_page) {
         setHasMore(false);
       }
+      setGalleryListPage(page);
       if (page === 1) setDidLoad(true);
     } catch (error) {
       console.error('Failed to load gallery:', error);
     } finally {
-      setIsLoading(false);
+      isLoadingRef.current = false;
+      setIsRefreshing(false);
     }
   };
 
@@ -55,6 +65,14 @@ export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
         data={galleryData}
         numColumns={2}
         scrollEnabled={true}
+        keyExtractor={item => item?.id?.toString()}
+        refreshing={isRefreshing}
+        onRefresh={onRefresh}
+        onEndReached={() => {
+          if (!isLoadingRef.current && hasMore) {
+            fetchGallery(galleryListPage + 1);
+          }
+        }}
         renderItem={({ item }) => (
           <Photo
             key={item?.id}

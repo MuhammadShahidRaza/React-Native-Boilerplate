@@ -9,7 +9,7 @@ import {
 } from 'components/common';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/Navigators';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import StarRating from 'react-native-star-rating-widget';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -46,13 +46,23 @@ export const renderRatingBar = (percentage: number) => {
 };
 
 export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
-  const [_, setRatingListPage] = useState(1);
+  const isLoadingRef = useRef(false);
+
+  const [ratingListPage, setRatingListPage] = useState(1);
   const [ratingData, setRatingData] = useState<ReviewItem[]>([]);
   const [ratingStats, setRatingStats] = useState<ReviewStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [didLoad, setDidLoad] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const onRefresh = async () => {
+    setHasMore(true);
+    setIsRefreshing(true);
+    setRatingData([]);
+    setRatingListPage(1);
+    await fetchReviews(1);
+  };
   useEffect(() => {
     if (!didLoad && data?.id && !didLoad && itemData?.id) {
       fetchReviews(1);
@@ -63,6 +73,7 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
   const fetchReviews = async (page: number) => {
     if (isLoading || !data?.id || !hasMore || !itemData?.id) return;
     try {
+      setIsLoading(true);
       const response = await getRatinglist({ id: itemData?.id ?? data.id, page });
       const newReviews = response?.reviews ?? [];
       const pagination = response?.pagination;
@@ -72,11 +83,13 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
       if (pagination?.current_page >= pagination?.last_page) {
         setHasMore(false);
       }
+      setRatingListPage(page);
       if (page === 1) setDidLoad(true);
     } catch (error) {
       console.error('Failed to load reviews:', error);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -143,6 +156,20 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
             )}) `}</Typography>
           </View>
           <View style={styles.ratingDistribution}>
+            {/* {[5, 4, 3, 2, 1].map(stars => {
+              let count = ratingStats?.rating_breakdown?.[stars] ?? 0;
+              if (stars === 3) {
+                count += ratingStats?.rating_breakdown?.[2] ?? 0; // move 2.5 into 3
+              }
+              const total = ratingStats?.total_reviews ?? 0;
+
+              const percentage = total > 0 ? (count / total) * 100 : 0;
+              return (
+                <RowComponent key={stars} style={styles.ratingRow}>
+                  {renderRatingBar(percentage)}
+                </RowComponent>
+              );
+            })} */}
             {[5, 4, 3, 2, 1].map(stars => (
               <RowComponent key={stars} style={styles.ratingRow}>
                 {renderRatingBar((100 / 5) * stars)}
@@ -176,23 +203,14 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
         <FlatListComponent
           data={ratingData}
           renderItem={renderReviews}
-          onRefresh={() => {
-            setIsLoading(true);
-            setRatingListPage(1);
-            setRatingData([]);
-            setHasMore(true);
-            fetchReviews(1);
+          refreshing={isRefreshing}
+          keyExtractor={item => item?.id?.toString()}
+          onRefresh={onRefresh}
+          onEndReached={() => {
+            if (!isLoading && hasMore) {
+              fetchReviews(ratingListPage + 1);
+            }
           }}
-          refreshing={isLoading}
-          // pagination={true}
-          // onLoadMore={() => {
-          //   if (!isLoading && hasMore) {
-          //     const nextPage = ratingListPage + 1;
-          //     setRatingListPage(nextPage);
-          //     fetchReviews(nextPage);
-          //   }
-          // }}
-          // isLoadingMore={isLoading && ratingListPage > 1}
         />
       </View>
     </ScrollView>

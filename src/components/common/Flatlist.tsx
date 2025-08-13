@@ -63,7 +63,7 @@ export const FlatListComponent = <T,>({
   refreshing = false,
   scrollEnabled = horizontal ?? false,
   onEndReached,
-  onEndReachedThreshold = 0.5,
+  onEndReachedThreshold = 0.2,
   showLoadingMore = false,
   noItemProps,
   ...otherProps

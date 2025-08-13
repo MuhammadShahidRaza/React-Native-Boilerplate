@@ -90,9 +90,9 @@ export const Rooms = ({
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const onRefresh = async () => {
+    setHasMore(true);
     setIsRefreshing(true);
     setRoomData([]);
-    setHasMore(true);
     setRoomListPage(1);
     await fetchHotelRooms(1);
   };
@@ -157,7 +157,7 @@ export const Rooms = ({
     } catch (error) {
       console.error('Failed to load items:', error);
     } finally {
-      isLoadingRef.current = false; 
+      isLoadingRef.current = false;
       setIsRefreshing(false);
     }
   };
@@ -243,11 +243,10 @@ export const Rooms = ({
         data={roomData}
         numColumns={2}
         scrollEnabled={true}
-        refreshing={isRefreshing}
         keyExtractor={item => item?.id?.toString()}
+        refreshing={isRefreshing}
         onRefresh={onRefresh}
         // showLoadingMore={isLoadingRef.current && hasMore}
-        onEndReachedThreshold={0.2}
         renderItem={({ item }) =>
           renderServices({
             item,
