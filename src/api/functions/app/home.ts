@@ -25,7 +25,7 @@ const getMainCategories = async () => {
   store.dispatch(setCategoriesList(categories));
   const firstCategory = categories?.[0];
   // Safe check: ensure business_flow of Event exists and slug matches with Ticket Purchase.
-  if (firstCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE) {
+  if (firstCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.EVENTS) {
     const { id } = firstCategory;
     getMainCategoriesHomeItems({
       id,
@@ -97,25 +97,67 @@ const getMainCategoriesHomeItems = async ({
         cat?.id === id || cat?.subcategories?.some((sub: Category) => sub.id === id),
     )?.[type];
 
-  // const existingItems = store
-  //   .getState()
-  //   .category?.categoriesList?.find((cat: Category) => cat?.id === id)?.[type];
-  if (existingItems && existingItems?.length >= page * limit) return;
+  if (existingItems && existingItems?.length >= page * limit && !search) return;
 
   const data = await handleGetApiRequest<any>({
     url: isTicketPurchase
       ? `${API_ROUTES.GET_CATEGORIES_ITEM}?${query?.toString()}`
       : `${API_ROUTES.GET_CATEGORIES_VENDOR}${id}?${query?.toString()}`,
   });
-  if (data?.result) {
-    store.dispatch(
-      setCategoriesItemList({
-        categoryId: id,
-        items: data?.result ?? [],
-        type,
-      }),
-    );
-  }
+  // if (data?.result) {
+  store.dispatch(
+    setCategoriesItemList({
+      categoryId: id,
+      items: data?.result ?? [],
+      type,
+      isSearched: Boolean(search),
+    }),
+  );
+  // }
+};
+const getItemCategories = async ({
+  id,
+  page = 1,
+  limit = 5,
+  search = '',
+}: {
+  id: number;
+  page: number;
+  limit?: number;
+  search?: string;
+}) => {
+  const query = new URLSearchParams({
+    search,
+    page: String(page),
+    limit: String(limit),
+  });
+
+  const existingItems = store
+    .getState()
+    .category?.categoriesList?.find(
+      (cat: Category) =>
+        cat?.id === id || cat?.subcategories?.some((sub: Category) => sub.id === id),
+    )?.[FILTER_NAMES.CATEGORIES];
+
+  // const existingItems = store
+  //   .getState()
+  //   .category?.categoriesList?.find((cat: Category) => cat?.id === id)?.[type];
+  if (existingItems && existingItems?.length >= page * limit && !search) return;
+  const data = await handleGetApiRequest<any>({
+    url: `${API_ROUTES.GET_ITEM_CATEGORIES}${id}?${query?.toString()}`,
+  });
+
+  console.log(data?.result);
+  // if (data?.result) {
+  store.dispatch(
+    setCategoriesItemList({
+      categoryId: id,
+      items: data?.result ?? [],
+      type: FILTER_NAMES.CATEGORIES,
+      isSearched: Boolean(search),
+    }),
+  );
+  // }
 };
 const getVendorItemslist = async ({
   vendor_Id,
@@ -205,4 +247,5 @@ export {
   giveRating,
   getGallerylist,
   getVendorItemslist,
+  getItemCategories,
 };

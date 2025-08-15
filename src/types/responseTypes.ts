@@ -85,22 +85,23 @@ export interface User {
 //   | 'interior_order';
 
 export const BUSINESS_FLOW_SLUGS = {
-  TICKET_PURCHASE: 'ticket_purchase',
+  EVENTS: 'ticket_purchase',
   ROOM_BOOKING: 'room_booking',
   SERVICE_INQUIRY: 'service_inquiry',
-  RESERVATION_BOOKING: 'reservation_booking',
+  ORDER_YOUR_FOOD: 'food_order',
   GROCERY_ORDER: 'grocery_order',
   FASHION_ORDER: 'fashion_order',
   HEALTH_ORDER: 'health_order',
   PROPERTY_INQUIRY: 'property_inquiry',
-  ELECTRONIC_ORDER: 'electronic_order',
-  INTERIOR_ORDER: 'interior_order',
+  ELECTRONICS: 'electronic_order',
+  INTERIOR: 'interior_order',
 } as const;
 
 export const FILTER_NAMES = {
   UPCOMING: 'upcoming',
   TRENDING: 'trending',
   NEAR_BY: 'nearby',
+  CATEGORIES: 'item_categories',
 } as const;
 
 export type filterTypes = (typeof FILTER_NAMES)[keyof typeof FILTER_NAMES];
@@ -158,6 +159,7 @@ export interface Category {
   items: CategoryItem[];
   upcoming: CategoryItem[];
   trending: CategoryItem[];
+  item_categories: CategoryItem[];
   nearby: CategoryItem[];
   business_flow: BusinessFlow | null;
 }
@@ -219,6 +221,8 @@ export interface CategoryItem {
   vendor: Vendor;
   itemCategory: ItemCategory;
   media: Media[];
+  name?: string; //if it will be item category
+  icon?: string | null; //if it will be item category
   eventDetail: EventDetail; // ✅ Newly added
 }
 

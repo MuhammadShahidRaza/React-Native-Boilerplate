@@ -87,7 +87,7 @@ export const BusinessCard = ({ data }: { data: CategoryItem }) => {
           <RowComponent style={styles.ratingContainer}>
             <StarRating
               emptyColor={COLORS.BORDER}
-              rating={roundToNearestHalf(data?.rating_avg)}
+              rating={roundToNearestHalf(data?.rating_avg ?? 0)}
               starSize={13}
               color={COLORS.PRIMARY}
               starStyle={{

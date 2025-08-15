@@ -98,6 +98,7 @@ export const API_ROUTES = {
   TOGGLE_FAVOURITE: 'favourites/toggle',
   GET_CATEGORIES_ITEM: 'items/events/tickets/?',
   GET_CATEGORIES_VENDOR: 'vendor/',
+  GET_ITEM_CATEGORIES: 'item_categories/',
   GET_RATING_BY_ITEM_ID: 'reviews/item/',
   GET_VENDOR_ITEMS_BY_ID: 'items/',
   GET_GALLERY_BY_ITEM_ID: 'gallery/item/',

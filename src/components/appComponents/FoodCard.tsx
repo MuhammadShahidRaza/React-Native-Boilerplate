@@ -6,27 +6,31 @@ import { styles } from './Home/styles';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { navigate } from 'navigation/index';
 
-export const FoodCard = ({ item, isItemFlow }: { item: ItemCardData; isItemFlow: boolean }) => {
+export const FoodCard = ({ item, isCategory }: { item: ItemCardData; isCategory: boolean }) => {
   const categoryName = item?.categoryName;
-  const isFood = categoryName === 'Order Your Food';
   return (
     <TouchableOpacity
-      activeOpacity={isFood ? 0.5 : 1}
+      activeOpacity={!isCategory ? 0.5 : 1}
       onPress={() => {
-        if (isFood) {
+        if (!isCategory) {
           navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: categoryName });
         }
       }}
     >
-      <View style={[styles.itemContainer, { padding: 0, width: screenWidth(38) }]}>
+      <View
+        style={[
+          styles.itemContainer,
+          { padding: 0, width: screenWidth(38), height: screenHeight(18) },
+        ]}
+      >
         {/* <SkeletonLoader key={item?.name} height={screenHeight(25)}> */}
         <View>
           {categoryName && (
             <Icon
               onPress={() => {}}
               componentName={VARIABLES.AntDesign}
-              iconName={item?.is_liked ? 'heart' : 'hearto'}
-              color={item?.is_liked ? COLORS.SECONDARY : COLORS.SECONDARY}
+              iconName={item?.isLiked ? 'heart' : 'hearto'}
+              color={item?.isLiked ? COLORS.SECONDARY : COLORS.SECONDARY}
               size={FontSize.MediumLarge}
               iconStyle={styles.heartIcon}
             />
@@ -40,7 +44,7 @@ export const FoodCard = ({ item, isItemFlow }: { item: ItemCardData; isItemFlow:
                 height: screenHeight(18),
               },
             ]}
-            source={item?.image}
+            source={item?.imageUrl}
           />
         </View>
       </View>
@@ -48,7 +52,7 @@ export const FoodCard = ({ item, isItemFlow }: { item: ItemCardData; isItemFlow:
         numberOfLines={1}
         style={[styles.itemText, { textAlign: 'center', marginTop: 10 }]}
       >
-        {item?.name}
+        {item?.title}
       </Typography>
       {/* // </SkeletonLoader> */}
     </TouchableOpacity>

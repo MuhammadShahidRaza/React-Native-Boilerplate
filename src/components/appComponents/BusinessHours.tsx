@@ -26,11 +26,13 @@ export const BusinessHours = ({
             <Typography style={[styles.text, highlightDay(item?.day)]}>{item?.day}</Typography>
           </RowComponent>
           <RowComponent style={styles.subContainer}>
-            <Typography style={[styles.text, highlightDay(item?.day)]}>
+            <Typography translate={false} style={[styles.text, highlightDay(item?.day)]}>
               {item?.start_time}
             </Typography>
             <Typography style={[styles.text, highlightDay(item?.day)]}>-</Typography>
-            <Typography style={[styles.text, highlightDay(item?.day)]}>{item?.end_time}</Typography>
+            <Typography translate={false} style={[styles.text, highlightDay(item?.day)]}>
+              {item?.end_time}
+            </Typography>
           </RowComponent>
         </RowComponent>
       )}

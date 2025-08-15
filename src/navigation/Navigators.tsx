@@ -55,7 +55,11 @@ export type RootStackParamList = {
     };
   };
   [SCREENS.VIEW_ALL]: {
-    data: { items: CategoryItem[] | Vendor[]; headerTitle: CategoryNameTypes };
+    data: {
+      items: CategoryItem[] | Vendor[] | [];
+      headerTitle: CategoryNameTypes;
+      category?: Category;
+    };
   };
   [SCREENS.VIEW_DETAILS]: { data: CategoryItem };
   [SCREENS.DETAILS]: { data: ItemCardData; heading: CategoryNameTypes };
@@ -64,7 +68,7 @@ export type RootStackParamList = {
   [SCREENS.SUB_CATEGORY_ITEMS]: {
     data: {
       heading: CategoryNameTypes;
-      item: ItemCardData;
+      item: Category;
       itemHeading: CategoryNameTypes;
       isItemFlow: boolean;
     };
@@ -87,10 +91,9 @@ export type RootStackParamList = {
   };
   [SCREENS.SUB_CATEGORY_FOOD]: {
     data: {
-      heading: string;
-      items: CategoryItem[];
-      itemHeading: string;
-      categories?: Category;
+      heading: CategoryNameTypes;
+      item: Category;
+      // categories?: Category;
     };
   };
   // Auth Screens

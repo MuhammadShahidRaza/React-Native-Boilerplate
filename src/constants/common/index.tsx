@@ -84,6 +84,7 @@ export const WEEKDAYS_ABBR = {
 };
 
 export const VARIABLES = {
+  CATEGORIES: 'Categories',
   //Common
   GRANTED: 'granted',
   CUSTOM: 'Custom',

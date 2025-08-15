@@ -3,12 +3,10 @@ import { Category, CategoryItem, filterTypes } from 'types/responseTypes';
 
 export interface CategoriesState {
   categoriesList: Category[];
-  categoriesItemList: CategoryItem[];
 }
 
 const initialState: CategoriesState = {
   categoriesList: [],
-  categoriesItemList: [],
 };
 
 const categoriesSlice = createSlice({
@@ -25,9 +23,10 @@ const categoriesSlice = createSlice({
         categoryId: number;
         items: CategoryItem[];
         type: filterTypes;
+        isSearched: boolean;
       }>,
     ) {
-      const { categoryId, items, type } = action.payload;
+      const { categoryId, items, type, isSearched = false } = action.payload;
       const category =
         state.categoriesList.find(cat => cat.id === categoryId) ||
         state.categoriesList
@@ -35,7 +34,7 @@ const categoriesSlice = createSlice({
           .find(sub => sub.id === categoryId);
       if (category) {
         if (!category[type]) category[type] = []; // Make sure the type exists (trending/upcoming)
-        category[type] = [...(category[type] ?? []), ...items];
+        category[type] = isSearched ? items : [...(category[type] ?? []), ...items];
       }
     },
 

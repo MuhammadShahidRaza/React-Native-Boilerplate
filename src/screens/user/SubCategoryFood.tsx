@@ -1,66 +1,99 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { COLORS, STYLES } from 'utils/index';
+import { STYLES } from 'utils/index';
 import { renderHorizontalFoodItemsWithRow, SearchBar, Wrapper } from 'components/index';
-import { AppScreenProps, FontSize } from 'types/index';
+import { AppScreenProps, FILTER_NAMES, useAppSelector } from 'types/index';
 import { SCREENS, VARIABLES } from 'constants/index';
-import { Autocomplete } from 'components/common/Autocomplete';
-import { AddressDetails } from 'utils/location';
+import { getItemCategories, getMainCategoriesHomeItems } from 'api/functions/app/home';
 
 export const SubCategoryFood = ({
   navigation,
   route,
 }: AppScreenProps<typeof SCREENS.SUB_CATEGORY_FOOD>) => {
-  const data = route?.params?.data;
-  const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState<AddressDetails | null>(null);
   const [search, setSearch] = useState('');
+  const data = route?.params?.data;
+  const selectedCategory = data?.item;
+  const { categoriesList } = useAppSelector(state => state.category);
+  // const activeCategory =
+  //   categoriesList
+  //     ?.find(cat => cat.subcategories?.some(sub => sub.id === selectedCategory?.id))
+  //     ?.subcategories?.find(sub => sub.id === selectedCategory?.id) || null;
+
+  const activeCategory = useMemo(() => {
+    return (
+      categoriesList
+        ?.find(cat => cat.subcategories?.some(sub => sub.id === selectedCategory?.id))
+        ?.subcategories?.find(sub => sub.id === selectedCategory?.id) || null
+    );
+  }, [categoriesList]);
+
+  const fetchItems = async () => {
+    const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
+    typesToFetch.forEach(type => {
+      getMainCategoriesHomeItems({
+        id: selectedCategory?.id,
+        page: 1,
+        type,
+        search,
+      });
+    });
+    getItemCategories({
+      id: selectedCategory?.id,
+      page: 1,
+      search,
+    });
+  };
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: data?.heading,
     });
+
+    fetchItems();
   }, []);
+
+  const hasItems =
+    (activeCategory?.trending?.length ?? 0) > 0 ||
+    (activeCategory?.nearby?.length ?? 0) > 0 ||
+    (activeCategory?.item_categories?.length ?? 0) > 0;
 
   return (
     <Wrapper useSafeArea={false} useScrollView={true}>
-      {data?.heading === 'Hotels' && (
-        <Autocomplete
-          containerStyle={STYLES.CONTAINER}
-          setReverseGeocodedAddress={setReverseGeocodedAddress}
-          placeholder={'Enter Your Destination'}
-          startIcon={{
-            componentName: VARIABLES.MaterialCommunityIcons,
-            iconName: 'map-marker-distance',
-            color: COLORS.SECONDARY,
-            size: FontSize.ExtraLarge,
-          }}
-        />
-      )}
       <SearchBar
         value={search}
         onChangeText={setSearch}
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
+        onSubmitEditing={() => {
+          fetchItems();
+        }}
       />
 
-      {renderHorizontalFoodItemsWithRow({
-        data: data.items ?? [],
-        heading: data.itemHeading,
-        rowHeading: `Near By`,
-      })}
-      <View style={{ height: 10 }} />
-      {renderHorizontalFoodItemsWithRow({
-        data: data.items ?? [],
-        heading: data.itemHeading,
-        rowHeading: `Top Brands`,
-      })}
-      <View style={{ height: 10 }} />
-      {renderHorizontalFoodItemsWithRow({
-        data: data?.categories ?? [],
-        heading: data.itemHeading,
-        onPressViewAll: () => {},
-        rowHeading: `Categories`,
-      })}
-      <View style={{ height: 30 }} />
+      {hasItems && activeCategory && (
+        <>
+          {activeCategory?.nearby?.length > 0 &&
+            renderHorizontalFoodItemsWithRow({
+              data: activeCategory.nearby,
+              heading: data.heading,
+              rowHeading: `Near By`,
+            })}
+
+          {activeCategory?.trending?.length > 0 &&
+            renderHorizontalFoodItemsWithRow({
+              data: activeCategory.trending,
+              heading: data?.heading,
+              rowHeading: 'Top Brands',
+            })}
+          <View style={{ height: 10 }} />
+          {activeCategory?.item_categories?.length > 0 &&
+            renderHorizontalFoodItemsWithRow({
+              data: activeCategory.item_categories,
+              heading: data?.heading,
+              rowHeading: VARIABLES.CATEGORIES,
+            })}
+          <View style={{ height: 30 }} />
+        </>
+      )}
     </Wrapper>
   );
 };

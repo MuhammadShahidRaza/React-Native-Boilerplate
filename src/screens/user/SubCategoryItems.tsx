@@ -1,7 +1,14 @@
 import { useEffect } from 'react';
 import { renderHorizontalItemsWithRow, Wrapper } from 'components/index';
-import { AppScreenProps, CATEGORY_NAMES, CategoryNameTypes, useAppSelector } from 'types/index';
+import {
+  AppScreenProps,
+  CATEGORY_NAMES,
+  CategoryNameTypes,
+  FILTER_NAMES,
+  useAppSelector,
+} from 'types/index';
 import { SCREENS } from 'constants/index';
+import { getMainCategoriesHomeItems } from 'api/functions/app/home';
 // import { getMainCategoriesHomeItems } from 'api/functions/app/home';
 
 export const SubCategoryItems = ({
@@ -18,12 +25,21 @@ export const SubCategoryItems = ({
       ?.subcategories?.find(sub => sub.id === selectedCategory?.id) || null;
 
   // const [isItemFlow, setIsItemFlow] = useState(
-  //   activeCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE,
+  //   activeCategory?.business_flow?.slug === BUSINESS_FLOW_SLUGS.EVENTS,
   // );
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: data?.heading,
+    });
+
+    const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
+    typesToFetch.forEach(type => {
+      getMainCategoriesHomeItems({
+        id: selectedCategory?.id,
+        page: 1,
+        type,
+      });
     });
 
     // const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];

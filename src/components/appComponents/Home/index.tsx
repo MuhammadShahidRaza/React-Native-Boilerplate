@@ -1,6 +1,6 @@
 import { ItemCard, Typography } from 'components/index';
 import { FlatListComponent, RowComponent } from 'components/common';
-import { COMMON_TEXT, IMAGES, SCREENS } from 'constants/index';
+import { COMMON_TEXT, IMAGES, SCREENS, VARIABLES } from 'constants/index';
 import { COLORS, safeString, STYLES } from 'utils/index';
 import { CategoryItem, CategoryNameTypes, FontSize, FontWeight, Vendor } from 'types/index';
 import { navigate } from 'navigation/index';
@@ -12882,7 +12882,7 @@ export const renderSeeAll = ({
 }: {
   heading: string;
   items: Vendor[] | CategoryItem[];
-  itemHeading: string;
+  itemHeading: CategoryNameTypes;
   showSeeAll?: boolean;
   onPressViewAll?: () => void;
 }) => {
@@ -12920,6 +12920,7 @@ export type ItemCardData = {
   ratingAvg?: string | null;
   isLiked: boolean;
   city?: string;
+  description?: string;
   country?: string;
   distance?: string | null;
   date?: string | undefined;
@@ -12970,19 +12971,21 @@ export const mapToItemCardData = ({
   if (isItemFlow) {
     const itemData = data as CategoryItem;
     return {
-      id: itemData.id,
-      title: itemData.title,
-      categoryName: itemData.itemCategory?.category?.title as CategoryNameTypes,
-      ratingAvg: safeString(String(itemData.rating_avg ?? '0.0')),
-      isLiked: itemData.is_liked,
-      city: itemData.eventDetail?.city,
-      country: itemData.eventDetail?.country,
-      distance: itemData.distance ?? null,
-      date: itemData.eventDetail?.date,
-      startTime: itemData.eventDetail?.start_time,
-      endTime: itemData.eventDetail?.end_time,
-      imageUrl: itemData.media?.[0]?.media_url ?? itemData?.vendor?.business_logo,
-      categoryId: itemData.category_id,
+      id: itemData?.id,
+      title: itemData?.title ?? itemData?.name,
+      description: itemData?.description,
+      categoryName: itemData?.itemCategory?.category?.title as CategoryNameTypes,
+      ratingAvg: safeString(String(itemData?.rating_avg ?? '0.0')),
+      isLiked: itemData?.is_liked,
+      city: itemData?.eventDetail?.city,
+      country: itemData?.eventDetail?.country,
+      distance: itemData?.distance ?? null,
+      date: itemData?.eventDetail?.date,
+      startTime: itemData?.eventDetail?.start_time,
+      endTime: itemData?.eventDetail?.end_time,
+      imageUrl:
+        itemData?.media?.[0]?.media_url ?? itemData?.vendor?.business_logo ?? itemData?.icon,
+      categoryId: itemData?.category_id,
       itemData,
     };
   } else {
@@ -13014,7 +13017,7 @@ export const renderHorizontalItemsWithRow = ({
   isItemFlow,
 }: {
   data: Vendor[] | CategoryItem[];
-  heading: string;
+  heading: CategoryNameTypes;
   rowHeading: string;
   isItemFlow: boolean;
   onPressViewAll?: () => void;
@@ -13032,7 +13035,7 @@ export const renderHorizontalItemsWithRow = ({
         keyExtractor={item => String(item?.id)}
         contentContainerStyle={styles.subCategoriesContentContainer}
         data={data?.slice(0, 3) ?? []}
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: Vendor | CategoryItem }) => (
           <ItemCard
             item={mapToItemCardData({
               data: item,
@@ -13051,12 +13054,10 @@ export const renderHorizontalFoodItemsWithRow = ({
   rowHeading,
   onPressViewAll,
   showSeeAll = true,
-  isItemFlow,
 }: {
   data: Vendor[] | CategoryItem[];
-  heading: string;
+  heading: CategoryNameTypes;
   rowHeading: string;
-  isItemFlow: boolean;
   onPressViewAll?: () => void;
   showSeeAll?: boolean;
 }) => {
@@ -13074,8 +13075,11 @@ export const renderHorizontalFoodItemsWithRow = ({
         keyExtractor={item => String(item?.id)}
         contentContainerStyle={styles.subCategoriesContentContainer}
         data={data?.slice(0, 5) ?? []}
-        renderItem={({ item }: { item: ItemCardData }) => (
-          <FoodCard item={item} isItemFlow={isItemFlow} />
+        renderItem={({ item }: { item: Vendor | CategoryItem }) => (
+          <FoodCard
+            item={mapToItemCardData({ data: item, isItemFlow: VARIABLES.CATEGORIES == rowHeading })}
+            isCategory={VARIABLES.CATEGORIES == rowHeading}
+          />
         )}
       />
     </>

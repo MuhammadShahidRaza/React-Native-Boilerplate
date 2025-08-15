@@ -58,6 +58,7 @@ export const styles = StyleSheet.create({
   itemText: {
     color: COLORS.PRIMARY,
     fontSize: FontSize.Small,
+    textTransform: 'capitalize',
     fontWeight: FontWeight.Black,
   },
   categoryItemText: {

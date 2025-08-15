@@ -13,7 +13,13 @@ import { isIOS, screenHeight, screenWidth } from 'utils/index';
 import { styles } from './styles';
 import { FontWeight } from 'types/fontTypes';
 import { useAppSelector } from 'types/reduxTypes';
-import { BUSINESS_FLOW_SLUGS, Category, FILTER_NAMES } from 'types/responseTypes';
+import {
+  BUSINESS_FLOW_SLUGS,
+  Category,
+  CATEGORY_NAMES,
+  CategoryNameTypes,
+  FILTER_NAMES,
+} from 'types/responseTypes';
 import { getMainCategoriesHomeItems } from 'api/functions/app/home';
 import { SCREENS } from 'constants/routes';
 import { navigate } from 'navigation/index';
@@ -23,7 +29,7 @@ export const HomeComponent = () => {
   const [searchText, setSearchText] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const [isItemFlow, setIsItemFlow] = useState(true);
-  const [itemHeading, setItemHeading] = useState<string>('');
+  const [itemHeading, setItemHeading] = useState<CategoryNameTypes>(CATEGORY_NAMES.EVENTS);
   const activeCategory = useMemo(() => {
     const mainCategory = categoriesList.find(cat => cat.id === selectedCategory);
     if (!mainCategory) return null;
@@ -41,7 +47,7 @@ export const HomeComponent = () => {
     setSelectedCategory(item?.id);
     if (item?.is_subcategory) return;
 
-    const isTicketPurchase = item?.business_flow?.slug === BUSINESS_FLOW_SLUGS.TICKET_PURCHASE;
+    const isTicketPurchase = item?.business_flow?.slug === BUSINESS_FLOW_SLUGS.EVENTS;
     setIsItemFlow(isTicketPurchase);
     const typesToFetch = isTicketPurchase
       ? [FILTER_NAMES.UPCOMING, FILTER_NAMES.TRENDING]
@@ -57,44 +63,42 @@ export const HomeComponent = () => {
   };
 
   const handleSubCategoryPress = (item: Category) => {
-    // if (item?.key === 'Order Your Food') {
-    //   navigate(SCREENS.SUB_CATEGORY_FOOD, {
-    //     data: {
-    //       heading: itemHeading,
-    //       items: item?.items ?? [],
-    //       itemHeading: itemHeading,
-    //       categories: item?.categories,
-    //     },
+    const slug = item?.business_flow?.slug;
+    // const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
+    // typesToFetch.forEach(type => {
+    //   getMainCategoriesHomeItems({
+    //     id: item?.id,
+    //     page: 1,
+    //     type,
     //   });
-    // } else if (
-    //   itemHeading === CATEGORY_NAMES.ELECTRONICS ||
-    //   itemHeading === CATEGORY_NAMES.INTERIOR
-    // ) {
-    //   navigate(SCREENS.VIEW_ALL, {
-    //     data: {
-    //       headerTitle: itemHeading,
-    //       items: item?.items ?? [],
-    //     },
-    //   });
-    // } else {
+    // });
 
-    const typesToFetch = [FILTER_NAMES.NEAR_BY, FILTER_NAMES.TRENDING];
-    typesToFetch.forEach(type => {
-      getMainCategoriesHomeItems({
-        id: item?.id,
-        page: 1,
-        type,
+
+    if (slug == BUSINESS_FLOW_SLUGS.ORDER_YOUR_FOOD) {
+      navigate(SCREENS.SUB_CATEGORY_FOOD, {
+        data: {
+          heading: item?.title,
+          item: item,
+        },
       });
-    });
-    navigate(SCREENS.SUB_CATEGORY_ITEMS, {
-      data: {
-        heading: item?.title,
-        item: item ?? [],
-        itemHeading: item?.title,
-        isItemFlow,
-      },
-    });
-    // }
+    } else if (slug == BUSINESS_FLOW_SLUGS.ELECTRONICS || slug == BUSINESS_FLOW_SLUGS.INTERIOR) {
+      navigate(SCREENS.VIEW_ALL, {
+        data: {
+          headerTitle: itemHeading,
+          items: [],
+          category: item,
+        },
+      });
+    } else {
+      navigate(SCREENS.SUB_CATEGORY_ITEMS, {
+        data: {
+          heading: item?.title,
+          item: item,
+          itemHeading: item?.title,
+          isItemFlow,
+        },
+      });
+    }
   };
 
   const renderCategoryItem = ({ item }: { item: Category }) => (
