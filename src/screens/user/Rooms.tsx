@@ -22,7 +22,7 @@ import {
 } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { screenHeight, screenWidth } from 'utils/helpers';
+import { safeString, screenHeight, screenWidth } from 'utils/helpers';
 import { Calendar } from 'react-native-calendars';
 
 export interface HotelDetails {
@@ -307,7 +307,7 @@ export const Rooms = ({
                 01
               </Typography>
             </View>
-            <View style={{ width: screenWidth(50), ...FLEX_CENTER }}>
+            <View style={{ width: screenWidth(40), ...FLEX_CENTER }}>
               <Typography
                 style={{
                   fontSize: FontSize.MediumSmall,
@@ -325,7 +325,7 @@ export const Rooms = ({
                   color: COLORS.WHITE,
                 }}
               >
-                {showCartButton?.name}
+                {showCartButton?.title}
               </Typography>
             </View>
             <Typography
@@ -333,7 +333,7 @@ export const Rooms = ({
                 color: COLORS.WHITE,
               }}
             >
-              {`$${Number(showCartButton?.price)?.toFixed(2)}`}
+              {`${safeString(showCartButton?.price)} ${safeString(showCartButton?.currency)}`}
             </Typography>
           </RowComponent>
         </View>
@@ -347,6 +347,21 @@ export const Rooms = ({
           gap: 20,
         }}
       >
+        <Icon
+          iconName={'close-circle'}
+          onPress={() => {
+            setShowDatePickerModal(false);
+          }}
+          componentName={VARIABLES.Ionicons}
+          size={FontSize.XXL}
+          color={COLORS.PRIMARY}
+          iconStyle={{
+            position: 'absolute',
+            right: 0,
+            zIndex: 10,
+            top: 0,
+          }}
+        />
         <Typography
           style={{
             textAlign: 'center',

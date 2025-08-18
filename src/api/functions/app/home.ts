@@ -164,12 +164,14 @@ const getVendorItemslist = async ({
   page = 1,
   limit = 6,
   start_date,
+  search,
   end_date,
 }: {
   vendor_Id: number;
   page?: number;
   limit?: number;
   start_date?: string;
+  search?: string;
   end_date?: string;
 }) => {
   const query = new URLSearchParams({
@@ -178,6 +180,7 @@ const getVendorItemslist = async ({
     limit: String(limit),
     ...(start_date ? { start_date: String(start_date) } : {}),
     ...(end_date ? { end_date: String(end_date) } : {}),
+    ...(search ? { search: String(search) } : {}),
   });
 
   const response = await handleGetApiRequest<any>({

@@ -89,6 +89,7 @@ export const SubCategoryFood = ({
             renderHorizontalFoodItemsWithRow({
               data: activeCategory.item_categories,
               heading: data?.heading,
+              showSeeAll: false,
               rowHeading: VARIABLES.CATEGORIES,
             })}
           <View style={{ height: 30 }} />

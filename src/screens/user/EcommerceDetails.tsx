@@ -11,8 +11,8 @@ import {
   Typography,
   Icon,
 } from 'components/index';
-import { AppScreenProps } from 'types/index';
-import { SCREENS, VARIABLES } from 'constants/index';
+import { AppScreenProps, CATEGORY_NAMES } from 'types/index';
+import { IMAGES, SCREENS, VARIABLES } from 'constants/index';
 import {
   StyleSheet,
   StyleProp,
@@ -23,24 +23,43 @@ import {
   View,
 } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { isIOS, screenHeight, screenWidth } from 'utils/helpers';
+import { isIOS, safeString, screenHeight, screenWidth } from 'utils/helpers';
 import { navigate } from 'navigation/index';
+import { getVendorItemslist } from 'api/functions/app/home';
 
 export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SCREENS.DETAILS>) => {
   const params = route?.params;
+  const data = route?.params?.data;
   const [search, setSearch] = useState('');
+  const [itemsList, setItemsList] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [showAllData, setShowAllData] = useState(false);
+  const fetchDetails = async () => {
+    try {
+      const response = await getVendorItemslist({ vendor_Id: data?.id, search });
+      const categories = response?.item_categories?.result ?? [];
+      const itemsAgainstCategories = response?.result ?? [];
+      setCategories(categories);
+      setItemsList(itemsAgainstCategories);
+    } catch (error) {
+      console.error('Failed to load items:', error);
+    } finally {
+    }
+  };
+
   useEffect(() => {
     navigation.setOptions({
       headerTitle: params?.heading,
     });
+    fetchDetails();
   }, []);
 
   const getPriceTitle = (data: any) => {
     if (data?.weight) return data.weight;
     if (data?.size) return data.size;
     if (data?.quantity) return data.quantity;
-    if (data?.available === true) return 'In Stock';
-    if (data?.available === false) return 'Out of Stock';
+    if (data?.is_available === true) return 'In Stock';
+    if (data?.is_available === false) return 'Out of Stock';
     return '';
   };
   const [showCartButton, setShowCartButton] = useState<any>(null);
@@ -52,14 +71,11 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
     imageStyle,
   }: {
     data: {
-      image: string;
+      icon: string;
       name: string;
       price: string;
-      description?: string;
-      icon?: boolean;
-      weight?: string;
-      available?: boolean;
-      size?: string;
+      currency: string;
+      is_available?: boolean;
     };
     onPressItem?: (item: any) => void;
     nameStyle?: StyleProp<TextStyle>;
@@ -68,17 +84,23 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
   }) => {
     return (
       <ServiceCard
-        item={data}
+        item={{
+          name: data?.name ?? data?.title,
+          image: data?.icon ?? data?.media?.[0]?.media_url,
+          price: data?.price,
+          currency: data?.currency,
+        }}
         onPressItem={onPressItem}
         nameStyle={nameStyle}
         containerStyle={containerStyle}
         imageStyle={imageStyle}
         priceTitle={getPriceTitle(data)}
         priceTitleStyle={{
+          fontSize: FontSize.Small,
           color:
-            data?.available === true
+            data?.is_available === true
               ? COLORS.GREEN_STATUS
-              : data?.available === false
+              : data?.is_available === false
               ? COLORS.RED
               : COLORS.PRIMARY,
         }}
@@ -90,8 +112,11 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
     data,
     heading,
     rowHeading,
-    showSeeAll = true,
+    showSeeAll = false, //TODO: remove this oand open bottomn one 
+    // showSeeAll = data?.length > 3 ? true : false,
+    showAllData,
     nameStyle,
+    numColumn,
     imageStyle,
     onPressItem,
     containerStyle,
@@ -100,6 +125,9 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
     heading: string;
     rowHeading: string;
     showSeeAll?: boolean;
+    showAllData?: boolean;
+
+    numColumn?: number;
     onPressItem?: (item: any) => void;
     nameStyle?: StyleProp<TextStyle>;
     containerStyle?: ViewStyle;
@@ -110,18 +138,19 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
         {renderSeeAll({
           heading: rowHeading,
           items: data ?? [],
-          itemHeading: heading,
+          itemHeading: heading as any,
           showSeeAll,
           onPressViewAll: () => {
             navigate(SCREENS.VIEW_ALL_ECOMMERCE, {
-              data: { items: params?.data?.categories ?? [], headerTitle: params?.heading },
+              data: { items: data ?? [], headerTitle: params?.heading },
             });
           },
         })}
         <FlatListComponent
-          horizontal={true}
+          horizontal={numColumn ? false : true}
+          numColumns={numColumn}
           contentContainerStyle={styles.contentContainer}
-          data={data?.slice(0, 5) ?? []}
+          data={showAllData ? data : data?.slice(0, 3) ?? []}
           renderItem={({ item }) =>
             renderServices({
               data: item as any,
@@ -138,53 +167,69 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
 
   return (
     <Wrapper useSafeArea={false}>
-      <BusinessCard data={params?.data} />
+      <BusinessCard data={data} />
       <SearchBar
         value={search}
+        returnKeyType='search'
+        onSubmitEditing={() => {
+          fetchDetails();
+        }}
         onChangeText={setSearch}
         secondContainerStyle={{ ...STYLES.SHADOW, ...STYLES.CONTAINER }}
         showBorder={false}
       />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
         {renderHorizontalItemsWithRow({
-          data: params?.data?.categories ?? [],
-          heading: 'Categories',
-          rowHeading: 'Categories',
+          data: categories,
+          heading: VARIABLES.CATEGORIES,
+          rowHeading: VARIABLES.CATEGORIES,
           showSeeAll: false,
+          showAllData,
+          numColumn: 3,
           nameStyle: {
             textAlign: 'center',
           },
           containerStyle: {
             borderRadius: 8,
-            shadowColor: params?.heading == 'Fashion' ? COLORS.TRANSPARENT : COLORS.BLACK,
+            shadowColor:
+              params?.heading == CATEGORY_NAMES.FASHION ? COLORS.TRANSPARENT : COLORS.BLACK,
           },
           imageStyle: {
-            width: screenWidth(params?.heading == 'Fashion' && isIOS() ? 36 : 35),
-            height: screenHeight(params?.heading == 'Fashion' ? 16 : 10),
+            width: screenWidth(params?.heading == CATEGORY_NAMES.FASHION && isIOS() ? 36 : 26),
+            height: screenHeight(params?.heading == CATEGORY_NAMES.FASHION ? 16 : 8),
           },
         })}
-        <RowComponent
-          style={{ justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 15 }}
-        >
-          <Icon iconName='chevron-down' size={25} componentName={VARIABLES.Entypo} />
-          <Typography
-            style={{
-              fontSize: FontSize.MediumSmall,
-              color: COLORS.PRIMARY,
-              fontWeight: FontWeight.Bold,
+        {categories?.length > 3 && (
+          <RowComponent
+            onPress={() => {
+              setShowAllData(!showAllData);
             }}
+            style={{ justifyContent: 'center', alignItems: 'center', gap: 10, marginBottom: 15 }}
           >
-            View All Categories
-          </Typography>
-        </RowComponent>
+            <Icon
+              iconName={showAllData ? 'chevron-up' : 'chevron-down'}
+              size={25}
+              componentName={VARIABLES.Entypo}
+            />
+            <Typography
+              style={{
+                fontSize: FontSize.MediumSmall,
+                color: COLORS.PRIMARY,
+                fontWeight: FontWeight.Bold,
+              }}
+            >
+              {showAllData ? 'View Less Categories' : 'View All Categories'}
+            </Typography>
+          </RowComponent>
+        )}
 
         <FlatListComponent
-          data={params?.data?.categories ?? []}
+          data={itemsList}
           renderItem={({ item }) => {
             return (
               <>
                 {renderHorizontalItemsWithRow({
-                  data: item?.products ?? [],
+                  data: item?.items,
                   heading: item?.name,
                   rowHeading: item?.name,
                   onPressItem: (item: any) => {
@@ -194,7 +239,6 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
               </>
             );
           }}
-          keyExtractor={item => item?.name}
         />
       </ScrollView>
       {showCartButton && (
@@ -242,7 +286,7 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
                 01
               </Typography>
             </View>
-            <View style={{ width: screenWidth(50), ...FLEX_CENTER }}>
+            <View style={{ width: screenWidth(40), ...FLEX_CENTER }}>
               <Typography
                 style={{
                   fontSize: FontSize.MediumSmall,
@@ -266,9 +310,10 @@ export const EcommerceDetails = ({ navigation, route }: AppScreenProps<typeof SC
             <Typography
               style={{
                 color: COLORS.WHITE,
+                fontSize: FontSize.MediumSmall,
               }}
             >
-              {`$${Number(showCartButton?.price)?.toFixed(2)}`}
+              {`${safeString(showCartButton?.price)} ${safeString(showCartButton?.currency)}`}
             </Typography>
           </RowComponent>
         </View>

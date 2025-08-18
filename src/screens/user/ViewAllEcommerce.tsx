@@ -7,7 +7,7 @@ import {
   Typography,
   RowComponent,
 } from 'components/index';
-import { COLORS, FLEX_CENTER, isIOS, screenWidth, STYLES } from 'utils/index';
+import { COLORS, FLEX_CENTER, safeString, screenWidth, STYLES } from 'utils/index';
 import { AppNavigationProp, AppRouteProp, FontSize, FontWeight } from 'types/index';
 import { SCREENS } from 'constants/index';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -141,7 +141,7 @@ export const ViewAllEcommerce = () => {
                 01
               </Typography>
             </View>
-            <View style={{ width: screenWidth(50), ...FLEX_CENTER }}>
+            <View style={{ width: screenWidth(40), ...FLEX_CENTER }}>
               <Typography
                 style={{
                   fontSize: FontSize.MediumSmall,
@@ -167,7 +167,7 @@ export const ViewAllEcommerce = () => {
                 color: COLORS.WHITE,
               }}
             >
-              {`$${Number(showCartButton?.price)?.toFixed(2)}`}
+              {`${safeString(showCartButton?.price)} ${safeString(showCartButton?.currency)}`}
             </Typography>
           </RowComponent>
         </View>

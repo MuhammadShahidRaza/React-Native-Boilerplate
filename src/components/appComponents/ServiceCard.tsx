@@ -1,5 +1,13 @@
-import { View, StyleSheet, StyleProp, TextStyle, ImageStyle, ViewStyle } from 'react-native';
-import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
+import {
+  View,
+  StyleSheet,
+  StyleProp,
+  TextStyle,
+  ImageStyle,
+  ViewStyle,
+  TouchableOpacity,
+} from 'react-native';
+import { COLORS, isIOS, safeString, screenHeight, screenWidth, STYLES } from 'utils/index';
 import { Icon, Photo, RowComponent, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { VARIABLES } from 'constants/common';
@@ -22,6 +30,7 @@ export const ServiceCard = ({
   containerStyle?: ViewStyle;
   priceContainerStyle?: ViewStyle;
   priceTitle?: string;
+  currency?: string;
   priceStyle?: TextStyle;
   priceTitleStyle?: StyleProp<TextStyle>;
 }) => {
@@ -39,12 +48,9 @@ export const ServiceCard = ({
       <View style={styles.serviceImageContainer}>
         <Photo source={item?.image} imageStyle={[styles.photoGrid, imageStyle]} />
         {onPressItem && (
-          <Icon
+          <TouchableOpacity
             onPress={() => onPressItem(item)}
-            iconName='add'
-            componentName={VARIABLES.Ionicons}
-            size={30}
-            iconStyle={{
+            style={{
               position: 'absolute',
               bottom: 10,
               right: 10,
@@ -53,10 +59,17 @@ export const ServiceCard = ({
               borderColor: COLORS.PRIMARY,
               padding: 2,
               backgroundColor: COLORS.WHITE_OPACITY,
-              borderRadius: 30,
+              borderRadius: 50,
             }}
-            color={COLORS.PRIMARY}
-          />
+          >
+            <Icon
+              iconName='add'
+              componentName={VARIABLES.Ionicons}
+              size={30}
+              // iconStyle={}
+              color={COLORS.PRIMARY}
+            />
+          </TouchableOpacity>
         )}
       </View>
       <View style={styles.serviceInfoContainer}>
@@ -86,9 +99,9 @@ export const ServiceCard = ({
             }}
           >
             {priceTitle && <Typography style={priceTitleStyle}>{priceTitle}</Typography>}
-            <Typography
-              style={{ ...styles.servicePrice, ...priceStyle }}
-            >{`$${item?.price}`}</Typography>
+            <Typography style={{ ...styles.servicePrice, ...priceStyle }}>{`${safeString(
+              item?.price,
+            )} ${safeString(item?.currency)}`}</Typography>
           </RowComponent>
         )}
       </View>

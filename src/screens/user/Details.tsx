@@ -89,7 +89,7 @@ export const Details = ({ navigation, route }: AppScreenProps<typeof SCREENS.DET
       />
     );
   };
-
+  
   const renderTabContent = () => {
     switch (selectedTab) {
       case 'About':

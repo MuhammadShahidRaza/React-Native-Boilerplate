@@ -20,7 +20,6 @@ export const BusinessCard = ({ data }: { data: CategoryItem }) => {
         <Photo
           source={vendorDetails?.business_logo ?? vendorDetails?.profile_image}
           imageStyle={styles.image}
-          resizeMode='contain'
         />
         <View style={styles.infoContainer}>
           <RowComponent style={styles.headerRow}>
@@ -97,7 +96,7 @@ export const BusinessCard = ({ data }: { data: CategoryItem }) => {
             />
 
             <Typography style={styles.ratingText}>
-              {`${data?.rating_avg ?? '0.0'}  (${data?.rating_count} Ratings)`}
+              {`${data?.rating_avg ?? '0.0'} (${data?.rating_count ?? 0} Ratings)`}
             </Typography>
           </RowComponent>
         </View>
@@ -175,6 +174,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: FontSize.MediumLarge,
+    textTransform: 'capitalize',
     fontWeight: FontWeight.Bold,
     color: COLORS.PRIMARY,
     flex: 1,

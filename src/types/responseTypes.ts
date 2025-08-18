@@ -111,7 +111,7 @@ export const CATEGORY_NAMES = {
   FASHION: 'Fashion',
   GROCERY: 'Grocery',
   SPA: 'SPA',
-  SALOONS: 'Salons', //TODO: SET BACKEND TYPo
+  SALOONS: 'Saloons',
   HEALTH: 'Health',
   REAL_ESTATE: 'Real Estate',
   ELECTRONICS: 'Electronics',

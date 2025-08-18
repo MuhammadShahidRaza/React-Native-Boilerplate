@@ -10,7 +10,7 @@ import {
 import { VARIABLES, SCREENS } from 'constants/index';
 import { navigate } from 'navigation/index';
 import { StyleSheet } from 'react-native';
-import { FontSize, FontWeight } from 'types/index';
+import { CATEGORY_NAMES, FontSize, FontWeight } from 'types/index';
 import { COLORS, isIOS, screenHeight, screenWidth, STYLES } from 'utils/index';
 import { useState } from 'react';
 import { toggleFavourite } from 'api/functions/app/home';
@@ -25,12 +25,12 @@ export const ItemLargeCard = ({
   const [isLiked, setIsLiked] = useState<boolean>(item?.isLiked);
   const categoryName = item?.categoryName;
   const isEcommerce =
-    categoryName === 'Order Your Food' ||
-    categoryName === 'Grocery' ||
-    categoryName === 'Fashion' ||
-    categoryName === 'Health' ||
-    categoryName === 'Interior' ||
-    categoryName === 'Electronics';
+    categoryName === CATEGORY_NAMES.ORDER_YOUR_FOOD ||
+    categoryName === CATEGORY_NAMES.GROCERY ||
+    categoryName === CATEGORY_NAMES.FASHION ||
+    categoryName === CATEGORY_NAMES.HEALTH ||
+    categoryName === CATEGORY_NAMES.INTERIOR ||
+    categoryName === CATEGORY_NAMES.ELECTRONICS;
 
   return (
     <SkeletonLoader key={item?.title} height={screenHeight(25)}>
@@ -40,7 +40,7 @@ export const ItemLargeCard = ({
             navigate(SCREENS.ECOMMERCE_DETAILS, { data: item, heading: categoryName });
             return;
           }
-          navigate(SCREENS.DETAILS, { data: item, heading: categoryName, });
+          navigate(SCREENS.DETAILS, { data: item, heading: categoryName });
         }}
         style={styles.itemContainer}
       >
