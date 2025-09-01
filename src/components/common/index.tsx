@@ -15,6 +15,7 @@ export * from './Photo';
 export * from './RadioButton';
 // export * from './Map';
 export * from './Modal';
+export * from './OfflineBanner';
 export * from './MessageBox';
 export * from './RadioButton';
 // export * from './RangeSlider';

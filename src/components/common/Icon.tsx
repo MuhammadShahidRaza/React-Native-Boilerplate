@@ -1,4 +1,4 @@
-import {GestureResponderEvent, StyleProp, TextStyle} from 'react-native';
+import { GestureResponderEvent, StyleProp, TextStyle } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
@@ -8,7 +8,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {FontSize} from 'types/fontTypes';
+import { FontSize } from 'types/fontTypes';
 // import {useTranslation} from 'hooks/useTranslation';
 
 // Define Props type

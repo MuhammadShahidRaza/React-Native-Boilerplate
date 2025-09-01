@@ -1,10 +1,10 @@
-import {View, StyleSheet} from 'react-native';
-import {FontSize} from 'types/fontTypes';
-import {Typography} from './Typography';
-import {RowComponent} from './Row';
-import {StyleType} from 'types/common';
-import {COLORS} from 'utils/colors';
-import {FLEX_CENTER} from '../../utils/commonStyles/index';
+import { View, StyleSheet } from 'react-native';
+import { FontSize } from 'types/fontTypes';
+import { Typography } from './Typography';
+import { RowComponent } from './Row';
+import { StyleType } from 'types/common';
+import { COLORS } from 'utils/colors';
+import { FLEX_CENTER } from '../../utils/commonStyles/index';
 
 interface RadioButtonProps {
   options: string[];
@@ -31,12 +31,11 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
           key={option}
           style={[styles.optionContainer, optionsContainerStyle]}
           onPress={() => onSelectOption(option)}
-          activeOpacity={0.8}>
-          <View style={{...styles.radioButton, borderColor: color}}>
+          activeOpacity={0.8}
+        >
+          <View style={{ ...styles.radioButton, borderColor: color }}>
             {selectedOption === option && (
-              <View
-                style={{...styles.radioButtonInner, backgroundColor: color}}
-              />
+              <View style={{ ...styles.radioButtonInner, backgroundColor: color }} />
             )}
           </View>
           <Typography style={styles.optionText}>{option}</Typography>

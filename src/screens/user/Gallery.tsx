@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { getGallerylist } from 'api/functions/app/home';
 import { FlatListComponent, Photo } from 'components/common';
 import { StyleSheet, View } from 'react-native';
-import { CategoryItem, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import { screenHeight, screenWidth } from 'utils/helpers';
@@ -16,7 +14,7 @@ export interface GalleryItem {
   updatedAt: string;
 }
 
-export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
+export const Gallery = ({ data, itemData }: { data: any; itemData: any }) => {
   const isLoadingRef = useRef(false);
   const [galleryListPage, setGalleryListPage] = useState(1);
   const [galleryData, setGalleryData] = useState<GalleryItem[]>([]);
@@ -41,8 +39,7 @@ export const Gallery = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
     if (isLoadingRef.current || !data?.id || !hasMore || !itemData?.id) return;
     try {
       isLoadingRef.current = true;
-      const response = await getGallerylist({ id: itemData?.id ?? data?.id, page });
-      console.log(response);
+      const response: any = null;
       const gallery = response?.result ?? [];
       const pagination = response?.pagination;
       setGalleryData(prev => [...prev, ...gallery]);

@@ -1,7 +1,7 @@
-import {StyleSheet, TouchableOpacity} from 'react-native';
-import {CommonProps} from 'types/index';
-import {FLEX_BETWEEN} from 'utils/index';
-import {useTranslation} from 'hooks/index';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { CommonProps } from 'types/index';
+import { FLEX_BETWEEN } from 'utils/index';
+import { useTranslation } from 'hooks/index';
 
 interface Props extends CommonProps {
   onPress?: () => void;
@@ -17,7 +17,7 @@ export const RowComponent = ({
   isRightLeftJustify = false,
   ...restProps
 }: Props) => {
-  const {isLangRTL} = useTranslation();
+  const { isLangRTL } = useTranslation();
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -25,14 +25,15 @@ export const RowComponent = ({
       activeOpacity={onPress ? 0.5 : 1}
       style={[
         styles.row,
-        {flexDirection: isLangRTL ? 'row-reverse' : 'row'},
+        { flexDirection: isLangRTL ? 'row-reverse' : 'row' },
         isRightLeftJustify && {
           justifyContent: isLangRTL ? 'flex-start' : 'flex-end',
         },
         style,
       ]}
       hitSlop={hitSlop}
-      {...restProps}>
+      {...restProps}
+    >
       {children}
     </TouchableOpacity>
   );

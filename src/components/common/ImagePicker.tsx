@@ -1,13 +1,6 @@
-import {useState, useEffect} from 'react';
-import {
-  View,
-  Button,
-  Image,
-  StyleSheet,
-  Platform,
-  PermissionsAndroid,
-} from 'react-native';
-import ImagePicker, {Image as ImageType} from 'react-native-image-crop-picker';
+import { useState, useEffect } from 'react';
+import { View, Button, Image, StyleSheet, Platform, PermissionsAndroid } from 'react-native';
+import ImagePicker, { Image as ImageType } from 'react-native-image-crop-picker';
 
 export const ImagePickerComponent: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
@@ -25,8 +18,7 @@ export const ImagePickerComponent: React.FC = () => {
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         ]);
         if (
-          granted['android.permission.CAMERA'] ===
-            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.CAMERA'] === PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.READ_EXTERNAL_STORAGE'] ===
             PermissionsAndroid.RESULTS.GRANTED &&
           granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
@@ -78,17 +70,11 @@ export const ImagePickerComponent: React.FC = () => {
   return (
     <View style={styles.container}>
       {selectedImages.map((image, index) => (
-        <Image key={index} source={{uri: image}} style={styles.image} />
+        <Image key={index} source={{ uri: image }} style={styles.image} />
       ))}
-      <Button title="Select from Camera" onPress={selectFromCamera} />
-      <Button
-        title="Select from Gallery (Single)"
-        onPress={selectFromGallerySingle}
-      />
-      <Button
-        title="Select from Gallery (Multiple)"
-        onPress={selectFromGalleryMultiple}
-      />
+      <Button title='Select from Camera' onPress={selectFromCamera} />
+      <Button title='Select from Gallery (Single)' onPress={selectFromGallerySingle} />
+      <Button title='Select from Gallery (Multiple)' onPress={selectFromGalleryMultiple} />
     </View>
   );
 };

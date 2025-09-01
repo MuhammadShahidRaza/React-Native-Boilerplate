@@ -4,13 +4,11 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Icon, ItemCardData, OrderItem } from 'components/index';
+import { Icon } from 'components/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
-import { ReviewItem } from 'screens/user';
 import { FontSize } from 'types/fontTypes';
-import { Category, CategoryItem, CategoryNameTypes, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
@@ -29,6 +27,7 @@ export type RootStackParamList = {
   [SCREENS.ABOUT]: undefined;
   [SCREENS.CONTACT_US]: undefined;
   [SCREENS.REVIEWS]: undefined;
+  [SCREENS.CHAT]: undefined;
   [SCREENS.FAQ]: undefined;
   [SCREENS.TASKS]: undefined;
   [SCREENS.SHOP]: undefined;
@@ -36,7 +35,6 @@ export type RootStackParamList = {
   [SCREENS.FAVORITES]: undefined;
   [SCREENS.CHECKOUT]: undefined;
   [SCREENS.EDIT_PROFILE]: undefined;
-  [SCREENS.SELECT_REGION]: undefined;
   [SCREENS.LANGUAGE]: undefined;
   [SCREENS.ORDERS]: undefined;
   [SCREENS.FILTER]: {
@@ -49,53 +47,8 @@ export type RootStackParamList = {
   [SCREENS.INVOICES]: undefined;
   [SCREENS.ADD_REVIEW]: {
     isNotEditable: boolean;
-    data?: {
-      vendor: Vendor;
-      item?: ReviewItem;
-    };
   };
-  [SCREENS.VIEW_ALL]: {
-    data: {
-      items: CategoryItem[] | Vendor[] | [];
-      headerTitle: CategoryNameTypes;
-      category?: Category;
-    };
-  };
-  [SCREENS.VIEW_DETAILS]: { data: CategoryItem };
-  [SCREENS.DETAILS]: { data: ItemCardData; heading: CategoryNameTypes };
-  [SCREENS.ECOMMERCE_DETAILS]: { data: any; heading: string };
-  [SCREENS.ORDER_DETAIL]: { data: OrderItem };
-  [SCREENS.SUB_CATEGORY_ITEMS]: {
-    data: {
-      heading: CategoryNameTypes;
-      item: Category;
-      itemHeading: CategoryNameTypes;
-      isItemFlow: boolean;
-    };
-  };
-  [SCREENS.VIEW_ALL_ECOMMERCE]: {
-    data: {
-      items: {
-        id: string;
-        name: string;
-        image: string;
-        products?: {
-          id: string;
-          name: string;
-          image: string;
-          price: string;
-        }[];
-      };
-      headerTitle: string;
-    };
-  };
-  [SCREENS.SUB_CATEGORY_FOOD]: {
-    data: {
-      heading: CategoryNameTypes;
-      item: Category;
-      // categories?: Category;
-    };
-  };
+
   // Auth Screens
   [SCREENS.LOGIN]: undefined;
   [SCREENS.SIGN_UP]: undefined;

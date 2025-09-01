@@ -1,6 +1,6 @@
-import {  Text, View } from 'react-native'
-import React from 'react'
-import { Wrapper } from 'components/common/Wrapper'
+import { Text, View } from 'react-native';
+import React from 'react';
+import { Wrapper } from 'components/common/Wrapper';
 
 export const ProductDetail = () => {
   return (
@@ -9,5 +9,5 @@ export const ProductDetail = () => {
         <Text>ProductDetail</Text>
       </View>
     </Wrapper>
-  )
-}
+  );
+};

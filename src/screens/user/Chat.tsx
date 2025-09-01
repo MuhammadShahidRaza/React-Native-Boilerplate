@@ -1,14 +1,9 @@
-import {memo, useCallback} from 'react';
-import {
-  FlatListComponent,
-  Header,
-  MessageBox,
-  Wrapper,
-} from 'components/common';
-import {COMMON_TEXT, TEMPORARY_TEXT} from 'constants/screens';
-import {IMAGES} from 'constants/assets';
-import {navigate} from 'navigation/Navigators';
-import {SCREENS} from 'constants/routes';
+import { memo, useCallback } from 'react';
+import { FlatListComponent, Header, MessageBox, Wrapper } from 'components/common';
+import { COMMON_TEXT, TEMPORARY_TEXT } from 'constants/screens';
+import { IMAGES } from 'constants/assets';
+import { navigate } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
 interface ChatItem {
   id: number;
 }
@@ -16,18 +11,18 @@ interface ChatItem {
 const MemoizedMessageBox = memo(MessageBox);
 
 export const Chat = () => {
-  const chatList: ChatItem[] = [{id: 1}, {id: 2}, {id: 2}, {id: 3}, {id: 3}];
+  const chatList: ChatItem[] = [{ id: 1 }, { id: 2 }, { id: 2 }, { id: 3 }, { id: 3 }];
 
   const renderChats = useCallback(
-    ({item}: {item: ChatItem}) => (
+    ({ item }: { item: ChatItem }) => (
       <MemoizedMessageBox
         key={item?.id}
-        onPress={() => navigate(SCREENS.MESSAGES)}
+        onPress={() => navigate(SCREENS.CHAT)}
         userImage={IMAGES.USER}
-        userNameDescription={TEMPORARY_TEXT.DRY_CUPPING_EXPERT_BRACKET}
-        userName={TEMPORARY_TEXT.DR_KIM}
+        userNameDescription={TEMPORARY_TEXT.DAYS_3}
+        userName={TEMPORARY_TEXT.JOHN_DOE}
         message={TEMPORARY_TEXT.LORUM_IPSUM}
-        time="12:45 PM"
+        time='12:45 PM'
       />
     ),
     [],

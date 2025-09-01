@@ -1,18 +1,11 @@
-import {
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import {FontSize} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
-import {Typography} from './Typography';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {FLEX_CENTER, STYLES} from 'utils/commonStyles';
-import {RowComponent} from './Row';
+import { TouchableOpacity, View, StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { FontSize } from 'types/fontTypes';
+import { COLORS } from 'utils/colors';
+import { Typography } from './Typography';
+import { Icon } from './Icon';
+import { VARIABLES } from 'constants/common';
+import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
+import { RowComponent } from './Row';
 
 interface CheckboxProps {
   label: string;
@@ -48,16 +41,11 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     <TouchableOpacity
       activeOpacity={1}
       onPress={handlePress}
-      accessibilityLabel={accessibilityLabel}>
+      accessibilityLabel={accessibilityLabel}
+    >
       <RowComponent style={[styles.container, style]}>
-        <View style={[{...styles.checkbox, borderColor: color}, checkboxStyle]}>
-          {checked && (
-            <Icon
-              componentName={VARIABLES.AntDesign}
-              iconName={'check'}
-              color={color}
-            />
-          )}
+        <View style={[{ ...styles.checkbox, borderColor: color }, checkboxStyle]}>
+          {checked && <Icon componentName={VARIABLES.AntDesign} iconName={'check'} color={color} />}
         </View>
         <Typography style={[styles.label, labelStyle]}>{label}</Typography>
       </RowComponent>

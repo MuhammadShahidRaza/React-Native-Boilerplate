@@ -1,5 +1,5 @@
 import { Button, Input, Photo, RowComponent, Typography, Wrapper } from 'components/common';
-import { COMMON_TEXT, SCREENS } from 'constants/index';
+import { COMMON_TEXT, IMAGES, SCREENS, TEMPORARY_TEXT } from 'constants/index';
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { FontSize, FontWeight, useAppSelector } from 'types/index';
@@ -13,23 +13,18 @@ import {
 } from 'utils/index';
 import { AppScreenProps } from 'types/navigation';
 import StarRating from 'react-native-star-rating-widget';
-import { giveRating } from 'api/functions/app/home';
 
 export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) => {
   const { userDetails } = useAppSelector(state => state?.user);
   const isNotEditable = route?.params?.isNotEditable;
-  const vendorDetails = route?.params?.data?.vendor;
-  const ratingDetails = route?.params?.data?.item;
-  const [remarks, setRemarks] = useState<string>(
-    isNotEditable ? safeString(ratingDetails?.review) : '',
-  );
-  const [rating, setRating] = useState(isNotEditable ? ratingDetails?.rating ?? 0 : 0);
+  const [remarks, setRemarks] = useState<string>(isNotEditable ? safeString('') : '');
+  const [rating, setRating] = useState(isNotEditable ? 0 : 0);
 
   return (
     <Wrapper useScrollView>
       <View style={styles.container}>
         <Photo
-          source={isNotEditable ? ratingDetails?.user?.profile_image : userDetails?.profile_image}
+          source={isNotEditable ? IMAGES.USER : userDetails?.profile_image}
           resizeMode='contain'
           imageStyle={styles.userImage}
         />
@@ -39,7 +34,7 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
             fontWeight: FontWeight.Bold,
           }}
         >
-          {isNotEditable ? ratingDetails?.user?.full_name : userDetails?.full_name}
+          {isNotEditable ? TEMPORARY_TEXT.JOHN_DOE : userDetails?.full_name}
         </Typography>
 
         {!isNotEditable && (
@@ -54,7 +49,7 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
                 }}
                 numberOfLines={1}
               >
-                {vendorDetails?.business_name ?? vendorDetails?.full_name}
+                {TEMPORARY_TEXT.JOHN_DOE}
               </Typography>
             </RowComponent>
             <Typography style={{ textAlign: 'center' }}>
@@ -98,12 +93,12 @@ export const AddReview = ({ route }: AppScreenProps<typeof SCREENS.ADD_REVIEW>) 
         disabled={isNotEditable || rating == 0 || remarks.length < 3}
         onPress={() => {
           const data = {
-            object_id: vendorDetails?.id,
+            object_id: 0,
             object_type: 'item',
             rating: rating,
             review: remarks,
           };
-          giveRating({ data });
+          console.log(data);
         }}
         style={{ marginVertical: 25, marginHorizontal: 20 }}
       />

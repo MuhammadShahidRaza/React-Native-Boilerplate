@@ -1,5 +1,5 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {User} from 'types/responseTypes';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { User } from 'types/responseTypes';
 
 export interface UserState {
   userDetails: User | null;
@@ -29,5 +29,5 @@ const userSlice = createSlice({
   },
 });
 
-export const {setGuestModal, setUserDetails, setUserVideos} = userSlice.actions;
+export const { setGuestModal, setUserDetails, setUserVideos } = userSlice.actions;
 export default userSlice.reducer;

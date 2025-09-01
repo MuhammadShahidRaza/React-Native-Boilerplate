@@ -1,6 +1,6 @@
-import Toast, {ToastPosition, ToastType} from 'react-native-toast-message';
-import {COLORS} from './index';
-import {FontSize, FontWeight} from 'types/fontTypes';
+import Toast, { ToastPosition, ToastType } from 'react-native-toast-message';
+import { COLORS } from './index';
+import { FontSize, FontWeight } from 'types/fontTypes';
 
 interface ToastConfig {
   type: ToastType;
@@ -23,7 +23,7 @@ interface ShowToastParams {
   isError?: boolean;
 }
 
-export const showToast = ({message, isError = true}: ShowToastParams): void => {
+export const showToast = ({ message, isError = true }: ShowToastParams): void => {
   const toastConfig: ToastConfig = {
     type: isError ? 'error' : 'success',
     position: 'top',

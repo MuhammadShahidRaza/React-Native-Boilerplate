@@ -1,4 +1,4 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface NotificationState {
   status: string;
@@ -23,6 +23,5 @@ const notificationSlice = createSlice({
   },
 });
 
-export const {setNotificationStatus, setIsNotificationAllowed} =
-  notificationSlice.actions;
+export const { setNotificationStatus, setIsNotificationAllowed } = notificationSlice.actions;
 export default notificationSlice.reducer;

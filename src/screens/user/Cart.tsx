@@ -36,7 +36,7 @@ export const renderSubPriceItem = ({
 export const Cart = () => {
   const [cartItems, setCartItems] = useState<any[]>([
     {
-      image: IMAGES.HOTELS,
+      image: IMAGES.USER,
       name: 'Product 1',
       type: 'Type 1',
       price: 50,
@@ -44,7 +44,7 @@ export const Cart = () => {
       id: 1,
     },
     {
-      image: IMAGES.HOTELS,
+      image: IMAGES.USER,
       name: 'Product 2',
       type: 'Type 1',
       price: 25,

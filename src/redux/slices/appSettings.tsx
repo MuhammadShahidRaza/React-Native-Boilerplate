@@ -1,4 +1,4 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface AppSettingsState {
   isUserLoggedIn: boolean;
@@ -33,10 +33,6 @@ const appSlice = createSlice({
   },
 });
 
-export const {
-  setIsUserLoggedIn,
-  setIsUserVisitedApp,
-  setIsAppLoading,
-  setAppLanguage,
-} = appSlice.actions;
+export const { setIsUserLoggedIn, setIsUserVisitedApp, setIsAppLoading, setAppLanguage } =
+  appSlice.actions;
 export default appSlice.reducer;

@@ -15,7 +15,7 @@ const previousSearchList = [
 
 export const Search = () => {
   const [searchText, setSearchText] = useState<string>('');
-  const handlePress = (searchName: string) => {
+  const handlePress = (_: string) => {
     // setSearchText(searchName);
   };
 

@@ -80,6 +80,5 @@ export const RESPONSE_MESSAGES = {
   REMINDER_DELETED_SUCCESSFULLY: 'Reminder Deleted Successfully',
   REQUEST_CANCELLED_SUCCESSFULLY: 'Request Cancelled Successfully',
   ALERT_DISMISSED_SUCCESSFULLY: 'Alert Dismissed Successfully',
-  NOTIFICATION_ACKNOWLEDGED_SUCCESSFULLY:
-    'Notification Acknowledged Successfully',
+  NOTIFICATION_ACKNOWLEDGED_SUCCESSFULLY: 'Notification Acknowledged Successfully',
 };

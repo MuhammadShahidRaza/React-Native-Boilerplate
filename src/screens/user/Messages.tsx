@@ -7,16 +7,16 @@ import {
   Typography,
   Wrapper,
 } from 'components/common';
-import {VARIABLES} from 'constants/common';
-import {COMMON_TEXT, TEMPORARY_TEXT} from 'constants/screens';
-import {useState} from 'react';
-import {View, SectionList, StyleSheet, TouchableOpacity} from 'react-native';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
-import {screenWidth} from 'utils/helpers';
-import {FLEX_CENTER} from '../../utils/commonStyles/index';
-import {IMAGES} from 'constants/assets';
-import {useTranslation} from 'hooks/useTranslation';
+import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT, TEMPORARY_TEXT } from 'constants/screens';
+import { useState } from 'react';
+import { View, SectionList, StyleSheet, TouchableOpacity } from 'react-native';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { COLORS } from 'utils/colors';
+import { screenWidth } from 'utils/helpers';
+import { FLEX_CENTER } from '../../utils/commonStyles/index';
+import { IMAGES } from 'constants/assets';
+import { useTranslation } from 'hooks/useTranslation';
 
 interface Message {
   id: string;
@@ -48,7 +48,7 @@ const groupMessagesByDate = (messages: Message[]) => {
 };
 
 export const Messages = () => {
-  const {isLangRTL} = useTranslation();
+  const { isLangRTL } = useTranslation();
   const tempList: Message[] = [
     {
       id: '1',
@@ -88,7 +88,7 @@ export const Messages = () => {
 
   const groupedMessages = groupMessagesByDate(messages);
 
-  const renderMessage = ({item}: {item: Message}) => {
+  const renderMessage = ({ item }: { item: Message }) => {
     const timeString = item.createdAt.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -100,7 +100,8 @@ export const Messages = () => {
           {
             justifyContent: item.sender === 'user' ? 'flex-end' : 'flex-start',
           },
-        ]}>
+        ]}
+      >
         {/* {item.sender === 'other' && item.profilePic && (
         <Photo source={IMAGES.USER} imageStyle={styles.profilePic} />
       )} */}
@@ -108,14 +109,12 @@ export const Messages = () => {
           style={[
             styles.messageContainer,
             item.sender === 'user' ? styles.userMessage : styles.otherMessage,
-          ]}>
+          ]}
+        >
           <View style={styles.messageContent}>
             <Typography
-              style={
-                item.sender === 'user'
-                  ? styles.userMessageText
-                  : styles.otherMessageText
-              }>
+              style={item.sender === 'user' ? styles.userMessageText : styles.otherMessageText}
+            >
               {item.text}
             </Typography>
             <Typography style={styles.timestamp}>{timeString}</Typography>
@@ -126,20 +125,18 @@ export const Messages = () => {
   };
 
   const previousSearchList = [
-    {id: '1', searchName: 'Yes'},
-    {id: '2', searchName: 'Yeah Ok'},
-    {id: '3', searchName: 'Sure!'},
-    {id: '4', searchName: 'Ok'},
-    {id: '5', searchName: '👍'},
+    { id: '1', searchName: 'Yes' },
+    { id: '2', searchName: 'Yeah Ok' },
+    { id: '3', searchName: 'Sure!' },
+    { id: '4', searchName: 'Ok' },
+    { id: '5', searchName: '👍' },
   ];
   const handlePress = (searchName: string) => {
     setInputText(prev => prev + ` ${searchName}`);
   };
 
-  const renderItem = ({item}: {item: {id: string; searchName: string}}) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => handlePress(item.searchName)}>
+  const renderItem = ({ item }: { item: { id: string; searchName: string } }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => handlePress(item.searchName)}>
       <Typography numberOfLines={1} style={styles.itemText}>
         {item.searchName}
       </Typography>
@@ -149,11 +146,11 @@ export const Messages = () => {
   return (
     <>
       <Wrapper>
-        <Header title={TEMPORARY_TEXT.DR_KIM} centerImage={IMAGES.USER} />
+        <Header title={TEMPORARY_TEXT.JOHN_DOE} centerImage={IMAGES.USER} />
         <SectionList
           sections={groupedMessages}
           renderItem={renderMessage}
-          renderSectionHeader={({section}) => {
+          renderSectionHeader={({ section }) => {
             const dateObj = new Date(section.title);
             const formattedDate =
               `${dateObj.getDate()} ` +
@@ -163,9 +160,7 @@ export const Messages = () => {
               `,  ${dateObj.getFullYear()}`;
             return (
               <View style={styles.sectionHeaderContainer}>
-                <Typography style={styles.sectionHeader}>
-                  {formattedDate}
-                </Typography>
+                <Typography style={styles.sectionHeader}>{formattedDate}</Typography>
               </View>
             );
           }}
@@ -174,7 +169,7 @@ export const Messages = () => {
 
         <FlatListComponent
           horizontal
-          style={{marginLeft: 15}}
+          style={{ marginLeft: 15 }}
           data={previousSearchList}
           renderItem={renderItem}
         />
@@ -182,14 +177,14 @@ export const Messages = () => {
           <Input
             name={COMMON_TEXT.EMAIL}
             onChangeText={setInputText}
-            containerStyle={{width: screenWidth(78)}}
+            containerStyle={{ width: screenWidth(78) }}
             value={inputText}
             placeholder={COMMON_TEXT.WRITE_MESSAGE}
             endIcon={{
               componentName: VARIABLES.FontAwesome5,
               iconName: 'plus-circle',
               color: COLORS.ICONS,
-              iconStyle: {paddingRight: 0},
+              iconStyle: { paddingRight: 0 },
               size: FontSize.ExtraLarge,
               onPress: () => {},
             }}
@@ -206,7 +201,7 @@ export const Messages = () => {
               fontSize: FontSize.ExtraLarge,
               overflow: 'hidden',
               borderRadius: 10,
-              transform: [{scaleX: isLangRTL ? -1 : 1}],
+              transform: [{ scaleX: isLangRTL ? -1 : 1 }],
             }}
           />
         </RowComponent>

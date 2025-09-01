@@ -1,14 +1,13 @@
-import {StyleSheet, View} from 'react-native';
-import {Button, Map, Typography, Wrapper} from 'components/common';
-import {COMMON_TEXT, SETTINGS_TEXT} from 'constants/screens';
-import {INITIAL_REGION} from 'constants/common';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {getLocationPermission} from 'utils/location';
-import {COLORS} from 'utils/colors';
-import {STYLES} from 'utils/commonStyles';
-import {screenHeight, screenWidth} from 'utils/helpers';
-import {replace} from 'navigation/Navigators';
-import {SCREENS} from 'constants/routes';
+import { StyleSheet, View } from 'react-native';
+import { Button, Typography, Wrapper } from 'components/common';
+import { COMMON_TEXT, SETTINGS_TEXT } from 'constants/screens';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { getLocationPermission } from 'utils/location';
+import { COLORS } from 'utils/colors';
+import { STYLES } from 'utils/commonStyles';
+import { screenHeight } from 'utils/helpers';
+import { replace } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
 
 export const Location = () => {
   return (
@@ -25,7 +24,8 @@ export const Location = () => {
               textAlign: 'center',
               fontSize: FontSize.ExtraLarge,
               fontWeight: FontWeight.Bold,
-            }}>
+            }}
+          >
             {SETTINGS_TEXT.LOCATION_ACCESS}
           </Typography>
           <Typography
@@ -33,7 +33,8 @@ export const Location = () => {
               // fontSize: FontSize.MediumSmall,
               textAlign: 'center',
               fontWeight: FontWeight.Bold,
-            }}>
+            }}
+          >
             {SETTINGS_TEXT.ALLOW_LOCATION_DESCRIPTION}
           </Typography>
           <Button

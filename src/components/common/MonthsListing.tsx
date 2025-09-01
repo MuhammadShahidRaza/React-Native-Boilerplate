@@ -1,12 +1,12 @@
-import {View, StyleSheet} from 'react-native';
-import {MONTHS, VARIABLES} from 'constants/index';
-import {screenWidth} from 'utils/helpers';
-import {Dropdown} from './Dropdown';
-import {Icon} from './Icon';
-import {RowComponent} from './Row';
-import {Typography} from './Typography';
-import {FontWeight, SetStateType, StyleType} from 'types/index';
-import {useTranslation} from 'hooks/useTranslation';
+import { View, StyleSheet } from 'react-native';
+import { MONTHS, VARIABLES } from 'constants/index';
+import { screenWidth } from 'utils/helpers';
+import { Dropdown } from './Dropdown';
+import { Icon } from './Icon';
+import { RowComponent } from './Row';
+import { Typography } from './Typography';
+import { FontWeight, SetStateType, StyleType } from 'types/index';
+import { useTranslation } from 'hooks/useTranslation';
 
 type Props = {
   selectedMonth: string;
@@ -15,12 +15,8 @@ type Props = {
 };
 const monthsArray = Object.values(MONTHS);
 
-export const MonthsListing = ({
-  selectedMonth,
-  setSelectedMonth,
-  dropDownStyle,
-}: Props) => {
-  const {isLangRTL} = useTranslation();
+export const MonthsListing = ({ selectedMonth, setSelectedMonth, dropDownStyle }: Props) => {
+  const { isLangRTL } = useTranslation();
   const getPreviousMonth = (currentMonth: string) => {
     const index = monthsArray.indexOf(currentMonth);
     return monthsArray[(index - 1 + monthsArray.length) % monthsArray.length];
@@ -47,7 +43,7 @@ export const MonthsListing = ({
       <RowComponent hitSlop={8} onPress={handlePrevMonth}>
         <RowComponent>
           <Icon
-            iconStyle={{transform: [{scaleX: isLangRTL ? -1 : 1}]}}
+            iconStyle={{ transform: [{ scaleX: isLangRTL ? -1 : 1 }] }}
             componentName={VARIABLES.MaterialIcons}
             iconName={'keyboard-arrow-left'}
           />
@@ -59,7 +55,7 @@ export const MonthsListing = ({
           <Typography style={styles.sideText}>{nextMonth}</Typography>
           <Icon
             componentName={VARIABLES.MaterialIcons}
-            iconStyle={{transform: [{scaleX: isLangRTL ? -1 : 1}]}}
+            iconStyle={{ transform: [{ scaleX: isLangRTL ? -1 : 1 }] }}
             iconName={'keyboard-arrow-right'}
           />
         </RowComponent>
@@ -74,10 +70,11 @@ export const MonthsListing = ({
             zIndex: 10,
           },
           dropDownStyle,
-        ]}>
+        ]}
+      >
         <Dropdown
           width={screenWidth(28)}
-          containerStyle={{borderWidth: 0}}
+          containerStyle={{ borderWidth: 0 }}
           textStyle={styles.title}
           options={monthsArray.map(monthKey => ({
             name: monthKey,

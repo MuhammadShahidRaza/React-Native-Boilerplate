@@ -1,10 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
 import { forgotPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm } from 'hooks/index';
 import { Button, Input, AuthComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
-import { navigate } from 'navigation/Navigators';
 import { forgotPassword } from 'api/functions/auth';
 
 interface ForgotPasswordFormValues {
@@ -20,11 +19,7 @@ export const ForgotPassword = () => {
     const data = {
       email: values?.email,
     };
-
     forgotPassword({ data });
-    // navigate(SCREENS.VERIFICATION, {
-    //   isFromForgot: true,
-    // });
   };
 
   const formik = useFormikForm<ForgotPasswordFormValues>({

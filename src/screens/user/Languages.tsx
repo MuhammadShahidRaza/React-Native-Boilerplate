@@ -8,6 +8,9 @@ import { onBack } from 'navigation/Navigators';
 import { SearchBar } from 'components/appComponents';
 import { IMAGES } from 'constants/assets';
 import { FontSize } from 'types/fontTypes';
+import { setAppLanguage } from 'store/slices/appSettings';
+import { VARIABLES } from 'constants/common';
+import { setItem } from 'utils/storage';
 
 export const Language = () => {
   const dispatch = useAppDispatch();
@@ -17,9 +20,10 @@ export const Language = () => {
   const [searchValue, setSearchValue] = useState('');
 
   const handleSubmit = () => {
-    // changeLanguage(selectedLanguage);
-    // dispatch(setAppLanguage(selectedLanguage));
-    // setItem(VARIABLES.LANGUAGE, selectedLanguage);
+    setSelectedLanguage(selectedLanguage);
+    changeLanguage(selectedLanguage);
+    dispatch(setAppLanguage(selectedLanguage));
+    setItem(VARIABLES.LANGUAGE, selectedLanguage);
     onBack();
   };
 
@@ -40,7 +44,7 @@ export const Language = () => {
       <RowComponent
         style={styles.rowComponent}
         onPress={() => {
-          onBack();
+          handleSubmit();
         }}
       >
         <Photo source={item?.image} style={STYLES.USER_IMAGE} resizeMode='contain' />

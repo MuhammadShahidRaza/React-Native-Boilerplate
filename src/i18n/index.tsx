@@ -1,6 +1,6 @@
 import i18n from 'i18next';
-import {initReactI18next} from 'react-i18next';
-import {arabic, dutch, english, german, portuguese, spanish} from './languages';
+import { initReactI18next } from 'react-i18next';
+import { arabic, dutch, english, german, portuguese, spanish } from './languages';
 
 const resources = {
   english: {

@@ -1,4 +1,4 @@
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Button,
   DatesListing,
@@ -7,12 +7,12 @@ import {
   MonthsListing,
   Wrapper,
 } from 'components/index';
-import {isIOS, screenHeight, screenWidth} from 'utils/helpers';
-import {FontSize, FontWeight} from 'types/fontTypes';
-import {COLORS} from 'utils/colors';
-import {COMMON_TEXT} from 'constants/screens';
-import {ChildrenType, SetStateType} from 'types/common';
-import {useTranslation} from 'hooks/useTranslation';
+import { isIOS, screenHeight, screenWidth } from 'utils/helpers';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import { COLORS } from 'utils/colors';
+import { COMMON_TEXT } from 'constants/screens';
+import { ChildrenType, SetStateType } from 'types/common';
+import { useTranslation } from 'hooks/useTranslation';
 
 interface Props {
   headerTitle: string;
@@ -37,12 +37,8 @@ export const CutomTabsBooking: React.FC<Props> = ({
   isCustomTab,
   setSelectedMonth,
 }) => {
-  const tabs = [
-    COMMON_TEXT.UPCOMING,
-    COMMON_TEXT.COMPLETED,
-    COMMON_TEXT.CUSTOM,
-  ];
-  const {isLangRTL} = useTranslation();
+  const tabs = [COMMON_TEXT.UPCOMING, COMMON_TEXT.COMPLETED, COMMON_TEXT.CUSTOM];
+  const { isLangRTL } = useTranslation();
   return (
     <Wrapper>
       <Header title={headerTitle} />
@@ -50,7 +46,7 @@ export const CutomTabsBooking: React.FC<Props> = ({
         <FlatListComponent
           data={tabs}
           horizontal
-          renderItem={({item}) => (
+          renderItem={({ item }) => (
             <Button
               key={item}
               style={[
@@ -59,10 +55,8 @@ export const CutomTabsBooking: React.FC<Props> = ({
                   padding: isIOS() ? (isLangRTL ? 3 : 10) : 8,
                   height: screenHeight(isIOS() ? (isLangRTL ? 5 : 4.5) : 5.2),
 
-                  backgroundColor:
-                    item === selectedTab ? COLORS.PRIMARY : COLORS.WHITE,
-                  borderColor:
-                    item === selectedTab ? COLORS.SECONDARY : COLORS.BORDER,
+                  backgroundColor: item === selectedTab ? COLORS.PRIMARY : COLORS.WHITE,
+                  borderColor: item === selectedTab ? COLORS.SECONDARY : COLORS.BORDER,
                 },
               ]}
               textStyle={[
@@ -79,10 +73,7 @@ export const CutomTabsBooking: React.FC<Props> = ({
         />
         {isCustomTab && (
           <>
-            <MonthsListing
-              selectedMonth={selectedMonth}
-              setSelectedMonth={setSelectedMonth}
-            />
+            <MonthsListing selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
             <DatesListing
               selectedDate={selectedDate}
               selectedMonth={selectedMonth}

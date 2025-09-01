@@ -1,10 +1,10 @@
-import {TouchableOpacity, StyleSheet, FlatList} from 'react-native';
-import {FlatListComponent} from './Flatlist';
-import {COLORS} from 'utils/colors';
-import {FLEX_CENTER} from 'utils/commonStyles';
-import {FontWeight} from 'types/fontTypes';
-import {SetStateType} from 'types/common';
-import {Typography} from './Typography';
+import { TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { FlatListComponent } from './Flatlist';
+import { COLORS } from 'utils/colors';
+import { FLEX_CENTER } from 'utils/commonStyles';
+import { FontWeight } from 'types/fontTypes';
+import { SetStateType } from 'types/common';
+import { Typography } from './Typography';
 import {
   getCurrentDate,
   getCurrentMonth,
@@ -12,8 +12,8 @@ import {
   screenHeight,
   screenWidth,
 } from 'utils/helpers';
-import {MONTHS} from 'constants/common';
-import {useEffect, useRef} from 'react';
+import { MONTHS } from 'constants/common';
+import { useEffect, useRef } from 'react';
 
 type Props = {
   selectedMonth: string;
@@ -44,19 +44,15 @@ export const DatesListing = ({
   setSelectedDate,
 }: Props) => {
   const datesWithWeekdays = generateDatesWithWeekdays(selectedMonth);
-  const flatListRef = useRef<FlatList<{date: number; weekday: string}> | null>(
-    null,
-  );
+  const flatListRef = useRef<FlatList<{ date: number; weekday: string }> | null>(null);
 
   useEffect(() => {
     const scollToCurrrentDate = () => {
       setTimeout(() => {
         if (flatListRef.current && selectedDate) {
-          const index = datesWithWeekdays.findIndex(
-            d => d.date === selectedDate,
-          );
+          const index = datesWithWeekdays.findIndex(d => d.date === selectedDate);
           if (index >= 0) {
-            flatListRef.current.scrollToIndex({index, animated: true});
+            flatListRef.current.scrollToIndex({ index, animated: true });
           }
         }
       }, 2000);
@@ -70,7 +66,7 @@ export const DatesListing = ({
       reference={flatListRef}
       data={datesWithWeekdays}
       horizontal
-      renderItem={({item, index}) => (
+      renderItem={({ item, index }) => (
         <TouchableOpacity
           key={index}
           onPress={() => {
@@ -79,21 +75,23 @@ export const DatesListing = ({
           style={[
             styles.dateButton,
             {
-              backgroundColor:
-                selectedDate === item.date ? COLORS.SECONDARY : COLORS.WHITE,
+              backgroundColor: selectedDate === item.date ? COLORS.SECONDARY : COLORS.WHITE,
             },
-          ]}>
+          ]}
+        >
           <Typography
             style={{
               fontWeight: FontWeight.Bold,
               color: selectedDate === item.date ? COLORS.WHITE : COLORS.GRAY,
-            }}>
+            }}
+          >
             {item?.date.toString()}
           </Typography>
           <Typography
             style={{
               color: selectedDate === item.date ? COLORS.WHITE : COLORS.GRAY,
-            }}>
+            }}
+          >
             {item.weekday}
           </Typography>
         </TouchableOpacity>

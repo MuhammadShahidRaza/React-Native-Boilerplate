@@ -1,10 +1,8 @@
-import { getVendorItemslist } from 'api/functions/app/home';
 import { ServiceCard } from 'components/appComponents';
 import { FlatListComponent } from 'components/common';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { CATEGORY_NAMES, CategoryItem, CategoryNameTypes, Vendor } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import { screenHeight, screenWidth } from 'utils/helpers';
@@ -48,20 +46,11 @@ export interface ServiceItem {
   notification_count: number;
   createdAt: string;
   updatedAt: string;
-  vendor: Vendor;
   media: any[];
   serviceInquiryDetails: ServiceInquiryDetails;
 }
 
-export const Services = ({
-  data,
-  itemData,
-  heading,
-}: {
-  data: Vendor;
-  itemData: CategoryItem;
-  heading: CategoryNameTypes;
-}) => {
+export const Services = ({ data, itemData }: { data: any; itemData: any; heading: any }) => {
   const [_, setRoomListPage] = useState(1);
   const [serviceData, setServiceData] = useState<ServiceItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +67,7 @@ export const Services = ({
   const fetchHotelRooms = async (page: number) => {
     if (isLoading || !data?.id || !hasMore) return;
     try {
-      const response = await getVendorItemslist({ vendor_Id: data?.id, page });
+      const response: any = null;
       const newItems = response?.result ?? [];
 
       const pagination = response?.pagination;
@@ -112,9 +101,9 @@ export const Services = ({
         priceContainerStyle={{
           justifyContent: 'flex-start',
         }}
-        priceTitle={heading !== CATEGORY_NAMES.HOTELS ? 'Price - ' : ''}
+        priceTitle={'Price - '}
         priceStyle={{
-          color: heading !== CATEGORY_NAMES.HOTELS ? COLORS.SECONDARY : COLORS.DARK_GREY,
+          color: COLORS.SECONDARY,
         }}
       />
     );

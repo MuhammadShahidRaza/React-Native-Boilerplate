@@ -1,4 +1,3 @@
-import { getRatinglist } from 'api/functions/app/home';
 import {
   FlatListComponent,
   Icon,
@@ -13,7 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import StarRating from 'react-native-star-rating-widget';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { CategoryItem, User, Vendor } from 'types/responseTypes';
+import { User } from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
 import {
@@ -45,7 +44,7 @@ export const renderRatingBar = (percentage: number) => {
   );
 };
 
-export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryItem }) => {
+export const Reviews = ({ data, itemData }: { data: any; itemData: any }) => {
   const isLoadingRef = useRef(false);
 
   const [ratingListPage, setRatingListPage] = useState(1);
@@ -74,7 +73,7 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
     if (isLoading || !data?.id || !hasMore || !itemData?.id) return;
     try {
       setIsLoading(true);
-      const response = await getRatinglist({ id: itemData?.id ?? data.id, page });
+      const response: any = null;
       const newReviews = response?.reviews ?? [];
       const pagination = response?.pagination;
       const stats = response?.stats;
@@ -100,10 +99,6 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
         onPress={() => {
           navigate(SCREENS.ADD_REVIEW, {
             isNotEditable: true,
-            data: {
-              vendor: data,
-              item,
-            },
           });
         }}
         style={styles.reviewItem}
@@ -184,9 +179,6 @@ export const Reviews = ({ data, itemData }: { data: Vendor; itemData: CategoryIt
             onPress={() => {
               navigate(SCREENS.ADD_REVIEW, {
                 isNotEditable: false,
-                data: {
-                  vendor: data,
-                },
               });
             }}
             style={{ gap: 5 }}

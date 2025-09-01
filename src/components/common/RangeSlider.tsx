@@ -1,10 +1,10 @@
-import {useCallback} from 'react';
-import {StyleSheet, View, TextStyle} from 'react-native';
+import { useCallback } from 'react';
+import { StyleSheet, View, TextStyle } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import {COLORS} from 'utils/colors';
-import {isIOS, screenWidth} from 'utils/helpers';
-import {Typography} from './Typography';
-import {SetStateType} from 'types/common';
+import { COLORS } from 'utils/colors';
+import { isIOS, screenWidth } from 'utils/helpers';
+import { Typography } from './Typography';
+import { SetStateType } from 'types/common';
 
 interface RangeSliderProps {
   title?: string;
@@ -25,9 +25,7 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
 
   return (
     <>
-      {title && (
-        <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-      )}
+      {title && <Typography style={[styles.title, titleStyle]}>{title}</Typography>}
       <MultiSlider
         values={values}
         selectedStyle={styles.selectedStyle}
@@ -43,17 +41,13 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
         customMarkerLeft={() => (
           <View style={styles.markerContainer}>
             <View style={styles.marker} />
-            <Typography style={styles.markerText}>
-              {`$ ${values?.[0]}`}
-            </Typography>
+            <Typography style={styles.markerText}>{`$ ${values?.[0]}`}</Typography>
           </View>
         )}
         customMarkerRight={() => (
           <View style={styles.markerContainer}>
             <View style={styles.marker} />
-            <Typography style={styles.markerText}>
-              {`$ ${values?.[1]}`}
-            </Typography>
+            <Typography style={styles.markerText}>{`$ ${values?.[1]}`}</Typography>
           </View>
         )}
       />

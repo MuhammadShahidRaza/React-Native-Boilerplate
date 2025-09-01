@@ -5,7 +5,7 @@ import { FontSize } from 'types/fontTypes';
 export const NotificationListing = () => {
   const renderListing = ({ item }: { item: number }) => (
     <MessageBox
-      userImage={IMAGES.HOTELS}
+      userImage={IMAGES.USER}
       userName={`Restaurant ${item}`}
       message={'Has approved your reservation request.'}
       messageNumLine={2}

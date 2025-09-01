@@ -1,22 +1,12 @@
 // // https://github.com/react-native-maps/react-native-maps/issues/4861
-import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
-import {StyleSheet, TouchableOpacity, ViewStyle} from 'react-native';
-import MapView, {
-  Callout,
-  Marker,
-  PROVIDER_GOOGLE,
-  Region,
-} from 'react-native-maps';
-import {
-  COLORS,
-  getCurrentLocation,
-  screenHeight,
-  screenWidth,
-} from 'utils/index';
-import {Icon} from './Icon';
-import {VARIABLES} from 'constants/common';
-import {Wrapper} from './Wrapper';
-import {ChildrenType, voidFuntionType} from 'types/common';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import { COLORS, getCurrentLocation, screenHeight, screenWidth } from 'utils/index';
+import { Icon } from './Icon';
+import { VARIABLES } from 'constants/common';
+import { Wrapper } from './Wrapper';
+import { ChildrenType, voidFuntionType } from 'types/common';
 
 interface Location {
   latitude: number;
@@ -89,9 +79,9 @@ export const Map: FC<MapProps> = ({
   }, []);
 
   const handleMarkerDragEnd = useCallback(
-    (e: {nativeEvent: {coordinate: Location}}) => {
-      const {latitude, longitude} = e.nativeEvent.coordinate;
-      onMarkerDragEnd?.({latitude, longitude});
+    (e: { nativeEvent: { coordinate: Location } }) => {
+      const { latitude, longitude } = e.nativeEvent.coordinate;
+      onMarkerDragEnd?.({ latitude, longitude });
     },
     [onMarkerDragEnd],
   );
@@ -123,16 +113,12 @@ export const Map: FC<MapProps> = ({
         {showMarkers &&
           markersCoordinate.map((coord, index) => (
             <Marker key={index} pinColor={COLORS.SECONDARY} coordinate={coord}>
-              {customPopup && (
-                <Callout onPress={customPopupPress}>{customPopup}</Callout>
-              )}
+              {customPopup && <Callout onPress={customPopupPress}>{customPopup}</Callout>}
             </Marker>
           ))}
       </MapView>
       {showCurrentLocationButton && (
-        <TouchableOpacity
-          style={styles.currentLocationButton}
-          onPress={fetchCurrentLocation}>
+        <TouchableOpacity style={styles.currentLocationButton} onPress={fetchCurrentLocation}>
           <Icon
             componentName={VARIABLES.MaterialIcons}
             iconName={'my-location'}

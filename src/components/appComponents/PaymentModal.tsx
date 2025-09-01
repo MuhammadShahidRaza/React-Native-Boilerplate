@@ -5,15 +5,13 @@ import { COMMON_TEXT } from '../../constants/screens/index';
 import { screenWidth } from '../../utils/helpers/functions';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { SocialButton } from './AuthComponent';
-import { IMAGES, SVG } from 'constants/assets';
-import { Button, Input, Photo, RowComponent } from 'components/common';
+import { SVG } from 'constants/assets';
+import { Button, Input, RowComponent } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { COLORS } from 'utils/colors';
 import { useFormikForm } from 'hooks/useFormik';
 import { cardValidationSchema, formatCardNumber, formatExpiryDate } from 'utils/validations';
 import { FocusProvider } from 'hooks/useFocus';
-import { replace } from 'navigation/Navigators';
-import { SCREENS } from 'constants/routes';
 
 interface PaymentModalProps {
   showPaymentModal: boolean;
@@ -40,7 +38,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     expiryDate: '',
   };
 
-  const handleSubmit = async (values: PaymentFormValues) => {
+  const handleSubmit = async (_: PaymentFormValues) => {
     setShowPaymentModal(false);
     if (isFromBooking) {
       // replace(SCREENS.BOOKING_DETAILS);
@@ -71,7 +69,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       wantToCloseOnBack
       scroll
       wantToCloseOnTop
-      modalContainer={{ flex: 2 }}
+      modalContainerStyle={{ flex: 2 }}
       modalVisible={showPaymentModal}
       setModalVisible={setShowPaymentModal}
     >

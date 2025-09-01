@@ -17,18 +17,10 @@ import {
   Help,
   Location,
   Home,
-  SubCategoryItems,
   ChangePassword,
-  Details,
   AddCard,
   Wallet,
-  SelectRegion,
-  ViewAll,
   ProductDetail,
-  SubCategoryFood,
-  EcommerceDetails,
-  ViewAllEcommerce,
-  OrderDetail,
   Checkout,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
@@ -63,10 +55,6 @@ export const AppNavigator = () => {
       component: Location,
       options: { headerShown: false },
     },
-    [SCREENS.ORDER_DETAIL]: {
-      component: OrderDetail,
-      options: { headerShown: false },
-    },
     [SCREENS.CHAT]: {
       component: Chat,
       options: { headerShown: false },
@@ -78,10 +66,6 @@ export const AppNavigator = () => {
     [SCREENS.WALLET]: {
       component: Wallet,
       options: { headerShown: true, headerTitle: 'My Wallet' },
-    },
-    [SCREENS.SUB_CATEGORY_FOOD]: {
-      component: SubCategoryFood,
-      options: { headerShown: true },
     },
     [SCREENS.PRODUCT_DETAIL]: {
       component: ProductDetail,
@@ -107,10 +91,6 @@ export const AppNavigator = () => {
       component: ChangePassword,
       options: { headerShown: true, headerTitle: t(COMMON_TEXT.CHANGE_PASSWORD) },
     },
-    [SCREENS.SUB_CATEGORY_ITEMS]: {
-      component: SubCategoryItems,
-      options: { headerShown: true },
-    },
     [SCREENS.SEARCH]: {
       component: Search,
       options: { headerShown: false },
@@ -122,14 +102,6 @@ export const AppNavigator = () => {
     [SCREENS.FILTER]: {
       component: Filter,
       options: { headerShown: true, headerTitle: t(COMMON_TEXT.FILTERS) },
-    },
-    [SCREENS.VIEW_ALL]: {
-      component: ViewAll,
-      options: { headerShown: true, headerTitle: t(COMMON_TEXT.VIEW_ALL) },
-    },
-    [SCREENS.VIEW_ALL_ECOMMERCE]: {
-      component: ViewAllEcommerce,
-      options: { headerShown: true, headerTitle: t(COMMON_TEXT.VIEW_ALL) },
     },
     [SCREENS.MESSAGES]: {
       component: Messages,
@@ -143,10 +115,6 @@ export const AppNavigator = () => {
       component: Language,
       options: { headerShown: true, headerTitle: t(COMMON_TEXT.LANGUAGE) },
     },
-    [SCREENS.SELECT_REGION]: {
-      component: SelectRegion,
-      options: { headerShown: true, headerTitle: 'Select Region' },
-    },
     [SCREENS.HELP]: {
       component: Help,
       options: { headerShown: false },
@@ -158,14 +126,6 @@ export const AppNavigator = () => {
     [SCREENS.REVIEWS]: {
       component: Reviews,
       options: { headerShown: false },
-    },
-    [SCREENS.DETAILS]: {
-      component: Details,
-      options: { headerShown: true },
-    },
-    [SCREENS.ECOMMERCE_DETAILS]: {
-      component: EcommerceDetails,
-      options: { headerShown: true },
     },
     [SCREENS.CART]: {
       component: Cart,

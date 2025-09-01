@@ -231,11 +231,11 @@ const verificationCodeSchema = createStringValidationSchema({
   maxLength: 6,
 });
 
-const linkSchema = createStringValidationSchema({
-  regex: REGEX.URL,
-  regexMessage: VALIDATION_MESSAGES.INVALID_URL_FORMAT,
-  nullable: true,
-});
+// const linkSchema = createStringValidationSchema({
+//   regex: REGEX.URL,
+//   regexMessage: VALIDATION_MESSAGES.INVALID_URL_FORMAT,
+//   nullable: true,
+// });
 
 // Validation schemas
 export const loginValidationSchema = createObjectShape({

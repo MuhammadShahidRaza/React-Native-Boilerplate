@@ -15,7 +15,7 @@ import { FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/colors';
 
 export const Wallet = () => {
-  const [balance, setBalance] = useState<string>('50');
+  const [balance, _] = useState<string>('50');
   const users = [
     {
       name: 'John Doe',

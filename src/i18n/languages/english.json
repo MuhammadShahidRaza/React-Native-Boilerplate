@@ -12,6 +12,7 @@
     "ENTER": "Enter",
     "FULL_NAME": "Full Name",
     "ENTER_FULL_NAME": "Enter Full Name",
+    "NO_INTERNET_CONNECTION": "⚠️  No Internet Connection",
     "COUNTRY": "Country",
     "ENTER_COUNTRY": "Enter Country",
     "ENTER_CURRENT_PASSWORD": "Enter Your Current Password",

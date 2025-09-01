@@ -10,10 +10,7 @@ export const Checkout = () => {
   return (
     <Wrapper useScrollView useSafeArea={false}>
       <View style={styles.container}>
-        <View style={styles.subItemContainer}>
-
-
-        </View>
+        <View style={styles.subItemContainer}></View>
         <View style={styles.subItemContainer}>
           {renderSubPriceItem({
             title: 'Sub Total',

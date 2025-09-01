@@ -1,4 +1,4 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface AddressState {
   addressList: string[]; // Assuming addressList is an array of strings
@@ -18,5 +18,5 @@ const addressSlice = createSlice({
   },
 });
 
-export const {setUserAddressList} = addressSlice.actions;
+export const { setUserAddressList } = addressSlice.actions;
 export default addressSlice.reducer;

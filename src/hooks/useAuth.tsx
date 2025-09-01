@@ -7,7 +7,6 @@ import { useTranslation } from './useTranslation';
 import crashlytics from '@react-native-firebase/crashlytics';
 import { requestNotificationPermission } from 'utils/notifications';
 import { getUserDetails } from 'api/functions/app/user';
-import { getMainCategories } from 'api/functions/app/home';
 
 interface UserLoginStatus {
   isUserLoggedIn: boolean;
@@ -39,7 +38,6 @@ export const useUserLoginStatus = (): UserLoginStatus => {
         }
         const isUserLoggedInApp = await getItem(VARIABLES.IS_USER_LOGGED_IN);
         if (isUserLoggedInApp) {
-          await getMainCategories();
           await getUserDetails();
           dispatch(setIsUserLoggedIn(true));
           await requestNotificationPermission();
@@ -47,9 +45,12 @@ export const useUserLoginStatus = (): UserLoginStatus => {
       } catch (error) {
         console.error('Error checking user login status:', error);
       } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        },isUserLoggedIn ? 1000 : 4000);
+        setTimeout(
+          () => {
+            setIsLoading(false);
+          },
+          isUserLoggedIn ? 1000 : 4000,
+        );
       }
     };
     checkUserIsLogin();

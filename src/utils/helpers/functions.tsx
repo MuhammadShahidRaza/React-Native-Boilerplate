@@ -10,6 +10,18 @@ import { getUniqueId, getVersion, getBrand } from 'react-native-device-info';
 import { IMAGES } from 'constants/assets';
 import parsePhoneNumber from 'libphonenumber-js';
 import { getFCMToken } from 'utils/notifications';
+import NetInfo from '@react-native-community/netinfo';
+import { showToast } from 'utils/toast';
+
+export const initNetworkListener = () => {
+  NetInfo.addEventListener(state => {
+    if (!state.isConnected) {
+      showToast({ message: '📴 No Internet Connection' });
+    } else {
+      showToast({ message: '✅ Back Online', isError: false });
+    }
+  });
+};
 
 export const normalizePhoneNumber = (
   phone_number: string,

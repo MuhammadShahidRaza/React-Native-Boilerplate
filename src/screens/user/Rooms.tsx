@@ -1,4 +1,3 @@
-import { getVendorItemslist } from 'api/functions/app/home';
 import { ServiceCard } from 'components/appComponents';
 import {
   Button,
@@ -8,21 +7,13 @@ import {
   RowComponent,
   Typography,
 } from 'components/common';
-import { IMAGES, SCREENS, VARIABLES } from 'constants/index';
-import { navigate } from 'navigation/Navigators';
+import { IMAGES, VARIABLES } from 'constants/index';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import {
-  CATEGORY_NAMES,
-  CategoryItem,
-  CategoryNameTypes,
-  Media,
-  Vendor,
-} from 'types/responseTypes';
 import { COLORS } from 'utils/colors';
-import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { safeString, screenHeight, screenWidth } from 'utils/helpers';
+import { STYLES } from 'utils/commonStyles';
+import { screenHeight, screenWidth } from 'utils/helpers';
 import { Calendar } from 'react-native-calendars';
 
 export interface HotelDetails {
@@ -63,24 +54,10 @@ export interface RoomItem {
   notification_count: number;
   createdAt: string;
   updatedAt: string;
-  vendor: Vendor;
-  media: Media[];
   hotelDetails: HotelDetails;
 }
 
-export const Rooms = ({
-  data,
-  itemData,
-  heading,
-  setShowCartButton,
-  showCartButton,
-}: {
-  data: Vendor;
-  itemData: CategoryItem;
-  heading: CategoryNameTypes;
-  showCartButton: any; //TODO: ADD TYPE
-  setShowCartButton: any; //TODO: ADD TYPE
-}) => {
+export const Rooms = ({ data, itemData }: { data: any; itemData: any; heading: any }) => {
   const isLoadingRef = useRef(false);
   const [roomListPage, setRoomListPage] = useState(1);
   const [roomData, setRoomData] = useState<RoomItem[]>([]);
@@ -139,12 +116,7 @@ export const Rooms = ({
     if (isLoadingRef.current || !data?.id || !hasMore) return;
     try {
       isLoadingRef.current = true;
-      const response = await getVendorItemslist({
-        vendor_Id: data?.id,
-        page,
-        start_date: selectedDate?.start_date,
-        end_date: selectedDate?.end_date ?? selectedDate?.start_date,
-      });
+      const response: any = null;
       console.log(response);
       const newItems = response?.result ?? [];
       const pagination = response?.pagination;
@@ -175,16 +147,16 @@ export const Rooms = ({
           description: item?.hotelDetails?.bed_type,
           icon: true,
           name: item?.title,
-          image: item?.media?.[0]?.media_url ?? IMAGES.HOTEL_1,
+          image: IMAGES.USER_IMAGE,
           price: item?.price,
         }}
         onPressItem={onPressItem}
         priceContainerStyle={{
           justifyContent: 'flex-start',
         }}
-        priceTitle={heading !== CATEGORY_NAMES.HOTELS ? 'Price - ' : ''}
+        priceTitle={'Price - '}
         priceStyle={{
-          color: heading !== CATEGORY_NAMES.HOTELS ? COLORS.SECONDARY : COLORS.DARK_GREY,
+          color: COLORS.SECONDARY,
         }}
       />
     );
@@ -250,9 +222,7 @@ export const Rooms = ({
         renderItem={({ item }) =>
           renderServices({
             item,
-            onPressItem: () => {
-              setShowCartButton(item);
-            },
+            onPressItem: () => {},
           })
         }
         onEndReached={() => {
@@ -262,83 +232,6 @@ export const Rooms = ({
         }}
         contentContainerStyle={{ paddingBottom: 160 }}
       />
-      {showCartButton && (
-        <View
-          style={{
-            paddingVertical: 15,
-            position: 'absolute',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            bottom: 0,
-            left: 0,
-            right: 0,
-            ...STYLES.SHADOW,
-          }}
-        >
-          <RowComponent
-            onPress={() => {
-              navigate(SCREENS.CART);
-            }}
-            style={{
-              backgroundColor: COLORS.PRIMARY,
-              marginHorizontal: 30,
-              borderRadius: 10,
-              padding: 10,
-            }}
-          >
-            <View
-              style={{
-                padding: 10,
-                backgroundColor: COLORS.WHITE,
-                width: screenWidth(10),
-                marginRight: 10,
-                height: 40,
-                borderRadius: 40,
-                ...FLEX_CENTER,
-              }}
-            >
-              <Typography
-                style={{
-                  color: COLORS.PRIMARY,
-
-                  fontSize: FontSize.MediumSmall,
-                }}
-              >
-                01
-              </Typography>
-            </View>
-            <View style={{ width: screenWidth(40), ...FLEX_CENTER }}>
-              <Typography
-                style={{
-                  fontSize: FontSize.MediumSmall,
-                  textAlign: 'center',
-                  color: COLORS.WHITE,
-                }}
-              >
-                View your cart
-              </Typography>
-              <Typography
-                numberOfLines={1}
-                style={{
-                  textAlign: 'center',
-                  fontSize: FontSize.MediumSmall,
-                  color: COLORS.WHITE,
-                }}
-              >
-                {showCartButton?.title}
-              </Typography>
-            </View>
-            <Typography
-              style={{
-                color: COLORS.WHITE,
-              }}
-            >
-              {`${safeString(showCartButton?.price)} ${safeString(showCartButton?.currency)}`}
-            </Typography>
-          </RowComponent>
-        </View>
-      )}
-
       <ModalComponent
         position='center'
         modalVisible={showDatePickerModal}

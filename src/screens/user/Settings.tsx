@@ -35,10 +35,6 @@ export const Settings = () => {
 
   const tabs = [
     {
-      title: 'Select Region',
-      onPress: () => navigate(SCREENS.SELECT_REGION),
-    },
-    {
       title: COMMON_TEXT.LANGUAGE,
       onPress: () => navigate(SCREENS.LANGUAGE),
     },

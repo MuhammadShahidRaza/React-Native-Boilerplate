@@ -101,7 +101,7 @@ export const ServiceCard = ({
             {priceTitle && <Typography style={priceTitleStyle}>{priceTitle}</Typography>}
             <Typography style={{ ...styles.servicePrice, ...priceStyle }}>{`${safeString(
               item?.price,
-            )} ${safeString(item?.currency)}`}</Typography>
+            )} USD`}</Typography>
           </RowComponent>
         )}
       </View>

@@ -47,7 +47,7 @@ export const AddCard = () => {
     expiryDate: '',
   };
 
-  const handleSubmit = async (values: PaymentFormValues) => {};
+  const handleSubmit = async (_: PaymentFormValues) => {};
 
   const formik = useFormikForm<PaymentFormValues>({
     initialValues,

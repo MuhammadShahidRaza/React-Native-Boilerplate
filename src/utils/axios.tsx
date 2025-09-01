@@ -3,7 +3,7 @@ import { getItem, removeMultipleItem } from './index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import store from 'store/store';
 import { setIsAppLoading, setIsUserLoggedIn } from 'store/slices/appSettings';
-
+import NetInfo from '@react-native-community/netinfo';
 interface RequestOptions {
   url: string;
   data?: object;
@@ -27,6 +27,15 @@ export interface ErrorMessage {
     messages: string;
   };
 }
+
+let pendingRequests: (() => void)[] = [];
+
+NetInfo.addEventListener(state => {
+  if (state.isConnected) {
+    pendingRequests.forEach(cb => cb());
+    pendingRequests = [];
+  }
+});
 
 const axiosInstance = axios.create({
   baseURL: ENV_CONSTANTS.BASE_URL,
@@ -79,7 +88,7 @@ const checkUnAuth = async (error?: string) => {
   }
 };
 
-const handleRequestError = (error: AxiosError<ErrorResponse>) => {
+const handleRequestError = async (error: AxiosError<ErrorResponse>) => {
   store.dispatch(setIsAppLoading(false));
 
   if (axios.isAxiosError(error)) {
@@ -88,7 +97,11 @@ const handleRequestError = (error: AxiosError<ErrorResponse>) => {
       if (error.code === 'ECONNABORTED') {
         throw new SocketError('Socket timeout: The request took too long to complete.');
       }
-      throw new NetworkError('No Internet Connection');
+      const netState = await NetInfo.fetch();
+      if (!netState.isConnected) {
+        throw new NetworkError('No Internet Connection. Please check your network.');
+      }
+      throw new NetworkError('Server unreachable. Please try again later.');
     }
 
     const status = error.response.status;
@@ -150,6 +163,12 @@ const makeHttpRequest = async (
         error?.response?.data?.error?.message,
         error?.response?.data?.error?.code,
       );
+    } else if (error instanceof NetworkError) {
+      return new Promise((resolve, reject) => {
+        pendingRequests.push(() => {
+          makeHttpRequest(config, includeToken).then(resolve).catch(reject);
+        });
+      });
     } else {
       handleRequestError(error as AxiosError<ErrorResponse>);
     }

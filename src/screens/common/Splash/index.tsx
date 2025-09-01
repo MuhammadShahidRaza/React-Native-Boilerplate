@@ -1,30 +1,10 @@
 import { StatusBar, StyleSheet, View } from 'react-native';
-import { VIDEO } from 'constants/assets';
-import Video from 'react-native-video';
-import { screenHeight, screenWidth } from 'utils/helpers';
-import { COLORS } from 'utils/colors';
-import { useEffect, useState } from 'react';
+import { screenHeight, screenWidth, COLORS } from 'utils/index';
 
 export const Splash = () => {
-  const [paused, setPaused] = useState(true);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setPaused(false);
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, []);
-
   return (
-    <View style={[styles.container, { backgroundColor: paused ? COLORS.SECONDARY : COLORS.WHITE }]}>
+    <View style={[styles.container, { backgroundColor: COLORS.SECONDARY }]}>
       <StatusBar backgroundColor={COLORS.SECONDARY} barStyle='light-content' />
-      <Video
-        controls={false}
-        source={VIDEO.SPLASH}
-        paused={paused}
-        style={styles.video}
-        resizeMode='cover'
-      />
     </View>
   );
 };

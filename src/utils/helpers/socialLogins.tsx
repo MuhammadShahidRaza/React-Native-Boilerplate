@@ -1,15 +1,10 @@
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
-import appleAuth, {
-  appleAuthAndroid,
-} from '@invertase/react-native-apple-authentication';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import appleAuth, { appleAuthAndroid } from '@invertase/react-native-apple-authentication';
 // import * as Zendesk from 'react-native-zendesk-messaging';
-import {decode as atob} from 'base-64';
-import {ENV_CONSTANTS} from 'constants/common';
-import {isIOS} from './functions';
-import {showToast} from 'utils/toast';
+import { decode as atob } from 'base-64';
+import { ENV_CONSTANTS } from 'constants/common';
+import { isIOS } from './functions';
+import { showToast } from 'utils/toast';
 const userData = {
   social_id: '',
   name: '',
@@ -38,9 +33,7 @@ export const GoogleSignIn = async () => {
         last_name: user?.familyName,
         email: user?.email,
         username:
-          user?.givenName != null
-            ? user?.givenName + new Date().getUTCMilliseconds()
-            : user?.id,
+          user?.givenName != null ? user?.givenName + new Date().getUTCMilliseconds() : user?.id,
         picture: user?.photo,
       });
       return userData;
@@ -54,7 +47,7 @@ export const GoogleSignIn = async () => {
     } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
       // play services not available or outdated
     } else {
-      showToast({message: error?.message});
+      showToast({ message: error?.message });
     }
     return userData;
   } finally {

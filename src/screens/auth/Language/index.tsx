@@ -7,7 +7,6 @@ import {
   Icon,
   Photo,
   RowComponent,
-  SvgComponent,
   Typography,
   AuthComponent,
 } from 'components/index';
@@ -17,7 +16,6 @@ import { LANGUAGES, VARIABLES } from 'constants/common';
 import { COMMON_TEXT } from 'constants/screens';
 import { useTranslation } from 'hooks/useTranslation';
 import { IMAGES } from 'constants/assets/images';
-import { SVG } from 'constants/assets';
 import { setAppLanguage } from 'store/slices/appSettings';
 import { useAppDispatch } from 'types/reduxTypes';
 import { setItem } from 'utils/storage';
