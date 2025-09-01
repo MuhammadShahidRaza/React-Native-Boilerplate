@@ -1,14 +1,17 @@
-// import useFirebaseMessaging from 'hooks/useMessaging';
+import useFirebaseMessaging from 'hooks/useMessaging';
 import MainNavigation from 'navigation/MainNavigation';
-import {Provider} from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 import store from 'store/store';
 
 const App = () => {
-  // useFirebaseMessaging();
+  useFirebaseMessaging();
   return (
-    <Provider store={store}>
-      <MainNavigation />
-    </Provider>
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <MainNavigation />
+      </Provider>
+    </SafeAreaProvider>
   );
 };
 
