@@ -1,6 +1,6 @@
 import { API_ROUTES } from 'api/routes';
 import { handleDeleteApiRequest, handleGetApiRequest, handlePostApiRequest } from '.';
-import { ContactUsFormValues, Region } from 'screens/user';
+import { ContactUsFormValues } from 'screens/user';
 import { onBack } from 'navigation/index';
 import { showToast } from 'utils/index';
 import { StaticPage, StaticPageType } from 'screens/common';
@@ -45,13 +45,6 @@ const contactUs = async (data: ContactUsFormValues) => {
 // }
 // };
 
-const getRegionList = async (): Promise<Region[] | undefined> => {
-  const response = await handleGetApiRequest<{ regions: Region[] }>({
-    url: API_ROUTES.GET_REGIONS_LIST,
-  });
-  return response?.regions ?? [];
-};
-
 const getStaticPage = async (pageType: StaticPageType): Promise<StaticPage | undefined> => {
   let url: string;
   switch (pageType) {
@@ -71,4 +64,4 @@ const getStaticPage = async (pageType: StaticPageType): Promise<StaticPage | und
   return response;
 };
 
-export { getStaticPage, contactUs, getRegionList, logout, deleteAccount };
+export { getStaticPage, contactUs, logout, deleteAccount };
