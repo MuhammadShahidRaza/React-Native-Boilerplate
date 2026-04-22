@@ -1,0 +1,41 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/GorditaBlack.otf",
+      "sha1": "21035af0f261c32846702297160e3de813498e0d"
+    },
+    {
+      "path": "src/assets/fonts/GorditaBold.otf",
+      "sha1": "af8c77fe8c8b11fdaa96932fcbf6d9a1327b505d"
+    },
+    {
+      "path": "src/assets/fonts/GorditaLight.otf",
+      "sha1": "925365d3e65f14f74712706aa29286ef0a9e8274"
+    },
+    {
+      "path": "src/assets/fonts/GorditaMedium.otf",
+      "sha1": "08ddd7a722c14476412a693c8e76254102db8fcd"
+    },
+    {
+      "path": "src/assets/fonts/GorditaRegular.otf",
+      "sha1": "4180ceaaf5b38e3c554a33c3fee07a7b421e1b8c"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsBold.ttf",
+      "sha1": "b9b65c039a1f10a5cb5e0726c6e7e18e98a8e517"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsMedium.ttf",
+      "sha1": "af7058373acbcf383dd114b8f9bbfb9faafd79eb"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsRegular.ttf",
+      "sha1": "01d319c533f62ea29f03b5df8adfd4d93d2d2a38"
+    },
+    {
+      "path": "src/assets/fonts/PoppinsSemiBold.ttf",
+      "sha1": "20b39c8b480c946b084d6aa09f12bf10b2ec5aa6"
+    }
+  ]
+}

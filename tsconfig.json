@@ -1,0 +1,37 @@
+{
+  "extends": "@react-native/typescript-config",
+  "include": ["**/*.ts", "**/*.tsx", "index.js"],
+  "exclude": ["**/node_modules", "**/Pods"],
+  "compilerOptions": {
+    "module": "esnext",
+    "types": ["jest"],
+    "target": "es2020",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "resolveJsonModule": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "paths": {
+      "types/*": ["./src/types/*"],
+      "assets/*": ["./src/assets/*"],
+      "components/*": ["./src/components/*"],
+      "screens/*": ["./src/screens/*"],
+      "utils/*": ["./src/utils/*"],
+      "navigation/*": ["./src/navigation/*"],
+      "constants/*": ["./src/constants/*"],
+      "config/*": ["./src/config/*"],
+      "store/*": ["./src/redux/*"],
+      "context/*": ["./src/context/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "theme/*": ["./src/theme/*"],
+      "i18n/*": ["./src/i18n/*"],
+      "api/*": ["./src/api/*"]
+      // Add more aliases as needed
+    }
+  }
+}

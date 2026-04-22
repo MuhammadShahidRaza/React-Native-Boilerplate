@@ -1,0 +1,130 @@
+// Base colors that never change
+const BASE_COLORS = {
+  // APP SPECIFIC (these stay the same)
+  PRIMARY_LIGHT: '#051229',
+  PRIMARY_DARK: '#0AC8FF',
+  SECONDARY: '#262626',
+  ERROR: '#FB344F',
+  GREEN_STATUS: '#00B406',
+  NOTIFICATION_ICON_BACKGROUND: '#FFDED4',
+
+  LIGHT_ORANGE: '#FFA082',
+  // COMMON (static colors)
+  WHITE: '#FFFFFF',
+  LIGHT_WHITE: '#FAFBFF',
+  BLACK: '#000000',
+  BLUE: '#0000FF',
+  DARK_BLUE: '#173C47',
+  LIGHT_GREY: '#D9D9D9',
+  DARK_GREY: '#858585',
+  MEDIUM_GREY: '#343434',
+  PURPLE: '#800080',
+  RED: '#FF0000',
+  GREEN: '#008000',
+  YELLOW: '#FFFF00',
+  ORANGE: '#FFA500',
+  PINK: '#FFC0CB',
+  CYAN: '#00FFFF',
+  MAGENTA: '#FF00FF',
+  LIME: '#00FF00',
+  TEAL: '#008080',
+  INDIGO: '#4B0082',
+  BROWN: '#A52A2A',
+  SILVER: '#C0C0C0',
+  GOLD: '#FFD700',
+  MAROON: '#800000',
+  NAVY: '#000080',
+  OLIVE: '#808000',
+  GRAY: '#808080',
+  SKY_BLUE: '#87CEEB',
+  CORAL: '#FF7F50',
+  LAVENDER: '#E6E6FA',
+  TURQUOISE: '#40E0D0',
+  SALMON: '#FA8072',
+  CRIMSON: '#DC143C',
+  DARK_GREEN: '#006400',
+  DARK_ORANGE: '#FF8C00',
+  DARK_RED: '#8B0000',
+  DARK_VIOLET: '#9400D3',
+  FIRE_BRICK: '#B22222',
+  FOREST_GREEN: '#228B22',
+  DARK_SLATE_GRAY: '#2F4F4F',
+  LIGHT_CORAL: '#F08080',
+  LIGHT_SEA_GREEN: '#20B2AA',
+  MEDIUM_BLUE: '#0000CD',
+  MEDIUM_VIOLETRED: '#C71585',
+  MID_NIGHT_BLUE: '#191970',
+  PERU: '#CD853F',
+  ROSY_BROWN: '#BC8F8F',
+  SIENNA: '#A0522D',
+  SLATE_BLUE: '#6A5ACD',
+  TOMATO: '#FF6347',
+  STEEL_BLUE: '#4682B4',
+  TRANSPARENT: 'transparent',
+  DARK_BLACK_OPACITY: 'rgba(2,2,2,0.8)',
+  MEDIUM_BLACK_OPACITY: 'rgba(2,2,2,0.6)',
+  WHITE_OPACITY: 'rgba(255, 255, 255, 0.4)',
+  INHERIT: 'inherit',
+};
+
+// Light theme colors
+const LIGHT_COLORS = {
+  PRIMARY: '#E05024',
+  BACKGROUND: '#FFFFFF',
+  SURFACE: '#FFFFFF',
+  CARD: '#FFFFFF',
+  TEXT: '#000000',
+  TEXT_SECONDARY: '#4D4D4D',
+  TEXT_INVERSE: '#FFFFFF',
+  BORDER: '#CACACA',
+  INPUT_BACKGROUND: '#F9F9F9',
+  HEADER: '#ECECEC',
+  ICONS: '#676767',
+  SEARCH_BAR: '#F4F5F6',
+  DIVIDER: '#ECECEC',
+  PLACEHOLDER: '#858585',
+  APP_ICON: '#3b3b3b',
+  BOTTOM_NAVIGATION_BAR: '#262626',
+  SKELETON_BACKGROUND: '#E8E8E8',
+  SKELETON_HIGHLIGHT: '#FFE8E0',
+};
+
+// Dark theme colors
+const DARK_COLORS = {
+  PRIMARY: '#E05024',
+  BACKGROUND: '#121212',
+  SURFACE: '#1E1E1E',
+  CARD: '#1E1E1E',
+  TEXT: '#FFFFFF',
+  TEXT_SECONDARY: '#B3B3B3',
+  TEXT_INVERSE: '#000000',
+  BORDER: '#333333',
+  INPUT_BACKGROUND: '#1E1E1E',
+  HEADER: '#1E1E1E',
+  ICONS: '#B3B3B3',
+  SEARCH_BAR: '#2A2A2A',
+  DIVIDER: '#2A2A2A',
+  PLACEHOLDER: '#666666',
+  APP_ICON: '#FFFFFF',
+  BOTTOM_NAVIGATION_BAR: '#E05024',
+  SKELETON_BACKGROUND: '#1E1E1E',
+  SKELETON_HIGHLIGHT: '#3A2A25',
+};
+
+// Mutable COLORS object - gets updated by ThemeProvider
+export const COLORS = {
+  ...BASE_COLORS,
+  ...LIGHT_COLORS,
+};
+
+// Function to update COLORS (called by ThemeProvider)
+export const updateColors = (isDark: boolean) => {
+  const themeColors = isDark ? DARK_COLORS : LIGHT_COLORS;
+  Object.assign(COLORS, themeColors);
+};
+
+// For backwards compatibility
+export const getThemeColors = (isDark: boolean) => ({
+  ...BASE_COLORS,
+  ...(isDark ? DARK_COLORS : LIGHT_COLORS),
+});

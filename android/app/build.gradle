@@ -1,0 +1,208 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services' 
+apply plugin: 'com.google.firebase.crashlytics'
+
+
+/**
+ * This is the configuration block to customize your React Native Android app.
+ * By default you don't need to apply any configuration, just uncomment the lines you need.
+ */
+react {
+    /* Folders */
+    //   The root of your project, i.e. where "package.json" lives. Default is '../..'
+    // root = file("../../")
+    //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
+    // reactNativeDir = file("../../node_modules/react-native")
+    //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
+    // codegenDir = file("../../node_modules/@react-native/codegen")
+    //   The cli.js file which is the React Native CLI entrypoint. Default is ../../node_modules/react-native/cli.js
+    // cliFile = file("../../node_modules/react-native/cli.js")
+
+    /* Variants */
+    //   The list of variants to that are debuggable. For those we're going to
+    //   skip the bundling of the JS bundle and the assets. Default is "debug", "debugOptimized". 
+    //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
+    // debuggableVariants = ["liteDebug", "liteDebugOptimized", "prodDebug", "prodDebugOptimized"]
+
+    /* Bundling */
+    //   A list containing the node command and its flags. Default is just 'node'.
+    // nodeExecutableAndArgs = ["node"]
+    //
+    //   The command to run when bundling. By default is 'bundle'
+    // bundleCommand = "ram-bundle"
+    //
+    //   The path to the CLI configuration file. Default is empty.
+    // bundleConfig = file(../rn-cli.config.js)
+    //
+    //   The name of the generated asset file containing your JS bundle
+    // bundleAssetName = "MyApplication.android.bundle"
+    //
+    //   The entry file for bundle generation. Default is 'index.android.js' or 'index.js'
+    // entryFile = file("../js/MyApplication.android.js")
+    //
+    //   A list of extra flags to pass to the 'bundle' commands.
+    //   See https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
+    // extraPackagerArgs = []
+
+    /* Hermes Commands */
+    //   The hermes compiler command to run. By default it is 'hermesc'
+    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    //
+    //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
+    // hermesFlags = ["-O", "-output-source-map"]
+
+    /* Autolinking */
+    autolinkLibrariesWithApp()
+}
+
+// =============================================================================
+// APP CONFIG (read at build time – no manual script needed)
+// =============================================================================
+// App name      → app.json (displayName)
+// Version name  → package.json (version)
+// Version code  → package.json (versionCode), incremented on release AAB/APK build
+// Maps API key  → .env file (MAP_API_KEY=...)
+// =============================================================================
+
+def enableProguardInReleaseBuilds = true
+def rootDir = file("../../")
+def packageJsonFile = file("${rootDir}/package.json")
+
+// 1) App name from app.json (e.g. "yourappname")
+def appJson = new groovy.json.JsonSlurper().parseText(file("${rootDir}/app.json").text)
+def appName = "yourappname" // appJson.displayName ?: appJson.name ?: "YourAppName" TODO:OPEN THIS AND REMOVE yourappname
+
+// 2) Version and version code from package.json
+def pkgJson = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
+def appVersionName = pkgJson.version ?: "1.0.0"
+def appVersionCode = pkgJson.versionCode != null ? Integer.parseInt(pkgJson.versionCode.toString()) : 1
+
+// After a release build, bump versionCode in package.json
+tasks.whenTaskAdded { task ->
+    if (task.name == "assembleRelease" || task.name == "bundleRelease") {
+        task.doLast {
+            def pkg = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
+            pkg.versionCode = appVersionCode + 1
+            packageJsonFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(pkg))
+            println "Next release version code will be: ${appVersionCode + 1}"
+        }
+    }
+}
+
+// // 4) Google Maps API key from .env (MAP_API_KEY=...) – same key as JS uses
+// def getMapApiKeyFromEnv() {
+//     def envFile = rootDir.path + "/.env"
+//     if (!new File(envFile).exists()) envFile = rootDir.path + "/.env.production"
+//     if (!new File(envFile).exists()) envFile = rootDir.path + "/.env.development"
+//     def f = new File(envFile)
+//     if (!f.exists()) return ""
+//     def line = f.readLines().find { it.trim().startsWith("MAP_API_KEY=") }
+//     if (line == null) return ""
+//     return line.replaceFirst("MAP_API_KEY=", "").trim().replaceAll("^['\"]|['\"]\$", "")
+// }
+// def googleMapsApiKey = getMapApiKeyFromEnv()
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = io.github.react-native-community:jsc-android-intl:2026004.+`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
+
+    namespace "com.cmolds.yourappname"
+    // Skip lint during release assemble for faster builds (run lint separately when needed)
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+    defaultConfig {
+        applicationId "com.cmolds.yourappname"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode appVersionCode
+        versionName appVersionName
+        // manifestPlaceholders += [googleMapsApiKey: googleMapsApiKey]
+    }
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+            firebaseCrashlytics {
+                nativeSymbolUploadEnabled true
+                unstrippedNativeLibsDir 'build/intermediates/merged_native_libs/release/out/lib'
+            }
+            minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            variant.outputs.all { output ->
+                output.outputFileName = "${appName}-${appVersionName}-${appVersionCode}.apk"
+            }
+        }
+    }
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = true
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+}
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
