@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.BORDER,
   },
   mapLoadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.6)',

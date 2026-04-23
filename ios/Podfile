@@ -23,6 +23,19 @@ ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# RN 0.85 + New Arch + use_frameworks :static: RNFB as frameworks breaks Clang explicit modules
+# (e.g. RCTPromiseRejectBlock / RCT_EXPORT_MODULE in RNFBMessaging). Build RNFB pods as static libraries.
+# See https://github.com/invertase/react-native-firebase/issues/8883
+pre_install do |installer|
+  installer.pod_targets.each do |pod|
+    if pod.name.start_with?('RNFB')
+      def pod.build_type
+        Pod::BuildType.static_library
+      end
+    end
+  end
+end
+
 setup_permissions([
     # 'AppTrackingTransparency',
     # 'Bluetooth',
@@ -70,6 +83,17 @@ pod 'react-native-maps/Google', :path => rn_maps_path
   )
 
   post_install do |installer|
+    # Xcode 26+: StripeSwiftInterop.h used NSUInteger for STPPaymentStatus; Swift exports NSInteger — hard error in 0.58.x.
+    # Fixed upstream in @stripe/stripe-react-native >= 0.61.0; patch locally until you can bump the npm package + pods.
+    stripe_swift_interop = File.expand_path('../node_modules/@stripe/stripe-react-native/ios/StripeSwiftInterop.h', __dir__)
+    if File.exist?(stripe_swift_interop)
+      contents = File.read(stripe_swift_interop)
+      patched = contents.gsub('typedef NS_ENUM(NSUInteger, STPPaymentStatus);', 'typedef NS_ENUM(NSInteger, STPPaymentStatus);')
+      if contents != patched
+        File.write(stripe_swift_interop, patched)
+        Pod::UI.puts '[Stripe] Patched StripeSwiftInterop.h for Xcode 26+ (STPPaymentStatus)'.green
+      end
+    end
 
     react_native_post_install(
       installer,
@@ -84,6 +108,8 @@ pod 'react-native-maps/Google', :path => rn_maps_path
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |cfg|
         cfg.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        # Apple Silicon hosts: skip Intel simulator; avoids flaky Swift explicit modules / mixed slices with some pods.
+        cfg.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'x86_64'
         if target.name == 'fmt'
           cfg.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
         end

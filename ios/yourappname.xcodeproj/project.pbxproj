@@ -483,6 +483,8 @@
 					"${PODS_ROOT}/React-NativeModulesApple",
 					"${PODS_ROOT}/React-graphics",
 					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
+					"${PODS_ROOT}/React-featureflags",
+					"${PODS_ROOT}/React-renderercss",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -496,7 +498,10 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -504,6 +509,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -581,6 +587,8 @@
 					"${PODS_ROOT}/React-NativeModulesApple",
 					"${PODS_ROOT}/React-graphics",
 					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
+					"${PODS_ROOT}/React-featureflags",
+					"${PODS_ROOT}/React-renderercss",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -593,7 +601,10 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -601,6 +612,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
