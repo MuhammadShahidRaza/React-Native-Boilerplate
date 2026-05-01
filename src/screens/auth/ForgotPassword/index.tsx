@@ -49,6 +49,8 @@ export const ForgotPassword = () => {
           onBlur={formik.handleBlur('email')}
           value={formik.values.email}
           allowSpacing={false}
+          autoCapitalize='none'
+          autoCorrect={false}
           returnKeyType='go'
           keyboardType={'email-address'}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}

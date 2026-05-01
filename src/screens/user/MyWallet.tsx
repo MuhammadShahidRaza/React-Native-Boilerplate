@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, use, useLayoutEffect } from 'react';
+import { useState, useCallback, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -27,7 +27,7 @@ import { navigate } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
 import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { COMMON_TEXT } from 'constants/screens';
-import { RootState, useAppDispatch, useAppSelector, User } from 'types/index';
+import { RootState, useAppSelector, User } from 'types/index';
 import { requestWithdrawAmount, getStripeConnectLink, getWallet } from 'api/functions/app/home';
 import type { WalletTransaction } from 'api/functions/app/home';
 import { getUserDetails } from 'api/functions/app/user';
@@ -37,7 +37,6 @@ const hasStripeAccount = (user: User | null) =>
   user?.is_stripe_onboarded && user?.stripe_connect_id;
 
 export const MyWallet = () => {
-  const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
   const { userDetails } = useAppSelector((state: RootState) => state.user);
   const [amount, setAmount] = useState<string>('');

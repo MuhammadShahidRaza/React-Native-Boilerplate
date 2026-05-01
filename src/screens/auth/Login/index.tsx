@@ -100,6 +100,8 @@ export const Login = () => {
           value={formik.values.email}
           allowSpacing={false}
           keyboardType={'email-address'}
+          autoCapitalize='none'
+          autoCorrect={false}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
           error={formik.errors.email}
           touched={Boolean(formik.touched.email && formik.submitCount)}

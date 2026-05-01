@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { Wrapper } from 'components/common';
 import { Typography, RowComponent, FlatListComponent, SkeletonWrapper } from 'components/common';

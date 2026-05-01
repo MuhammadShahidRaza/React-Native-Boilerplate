@@ -156,6 +156,8 @@ export const SignUp = () => {
           onBlur={formik.handleBlur('email')}
           value={formik.values.email}
           allowSpacing={false}
+          autoCapitalize='none'
+          autoCorrect={false}
           // startIcon={{
           //   componentName: VARIABLES.MaterialCommunityIcons,
           //   iconName: 'email-outline',

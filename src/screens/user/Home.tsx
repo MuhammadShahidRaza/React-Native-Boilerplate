@@ -16,7 +16,7 @@ import { JobActivityBanner } from 'components/appComponents/JobActivityBanner';
 import { FontSize } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import { useAppSelector } from 'types/reduxTypes';
 import { JobInfoBox } from 'components/appComponents/JobInfoBox';
 import { ActivityStatus } from './Activities';
 import { JobStatus } from './MyJobs';
@@ -24,7 +24,6 @@ import { useBookings } from 'hooks/useBookings';
 import { Booking } from 'types/responseTypes';
 import { APP_CONFIG } from 'config/app';
 import { IMAGES } from 'constants/assets';
-import { resetNewInquiriesUnreadCount } from 'store/slices/notification';
 
 /** User: all active jobs. Dentor: jobs after bid placed (excludes pending/new inquiries). */
 const ACTIVE_STATUSES_USER = ['pending', 'bidding', 'upcoming', 'in_progress', 'completed'];
