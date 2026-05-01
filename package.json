@@ -39,7 +39,8 @@
     "ios:clean": "cd ios && rm -rf ~/Library/Caches/CocoaPods && rm -rf Pods && rm -rf ~/Library/Developer/Xcode/DerivedData/* && yarn pod",
     "ios:debug": "pod && yarn ios",
     "ios:bundle:assets": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "rename-app": "node scripts/rename-app.js"
   },
   "lint-staged": {
     "./src/**/*.{js,jsx,ts,tsx}": [
