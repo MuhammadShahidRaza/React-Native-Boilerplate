@@ -75,3 +75,11 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Firebase / Google secrets — never commit these
+google-services.json
+GoogleService-Info.plist
+*GoogleService-Info*.plist
+.env.production
+.env.staging
+firebaseConfig.ts
