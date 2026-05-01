@@ -40,7 +40,8 @@
     "ios:debug": "pod && yarn ios",
     "ios:bundle:assets": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
     "postinstall": "patch-package",
-    "rename-app": "node scripts/rename-app.js"
+    "rename-app": "node scripts/rename-app.js",
+    "replace-icons": "node scripts/replace-app-icons.js"
   },
   "lint-staged": {
     "./src/**/*.{js,jsx,ts,tsx}": [
@@ -143,6 +144,7 @@
     "prettier": "3.7.4",
     "react-native-svg-transformer": "^1.5.2",
     "react-test-renderer": "19.2.3",
+    "sharp": "^0.34.5",
     "typescript": "^5.9.3"
   },
   "engines": {

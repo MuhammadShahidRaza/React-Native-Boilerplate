@@ -24,12 +24,14 @@ const NoItemFound = ({
   return (
     <View style={[styles.container, { height: containerHeight, width: containerWidth }]}>
       {/* {showImage && ( */}
-      <Image
-        source={logoSource}
-        style={styles.logo}
-        resizeMode='contain'
-        accessibilityLabel='No data'
-      />
+      {showImage && (
+        <Image
+          source={logoSource}
+          style={styles.logo}
+          resizeMode='contain'
+          accessibilityLabel='No data'
+        />
+      )}
       {/* )} */}
       {message && <Typography style={[styles.message, messageStyle]}>{message}</Typography>}
     </View>

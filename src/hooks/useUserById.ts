@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getUserById } from 'api/functions/app/user';
 import type { User } from 'types/responseTypes';
-import { fetchDentorBookingsPage, fetchUserBookingsPage } from 'api/functions/app/home';
-import { APP_CONFIG } from 'config/app';
-import { useAppSelector } from 'types/index';
 
 export function useUserById(userId: number | string | null | undefined) {
   const [user, setUser] = useState<User | null>(null);

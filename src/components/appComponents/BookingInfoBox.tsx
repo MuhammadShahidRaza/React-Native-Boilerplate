@@ -5,7 +5,6 @@ import { COLORS, STYLES } from 'utils/index';
 import { Booking, FontSize, FontWeight, useAppSelector } from 'types/index';
 import { IMAGES } from 'constants/assets';
 import {
-  screenHeight,
   screenWidth,
   safeString,
   getBookingPrice,
