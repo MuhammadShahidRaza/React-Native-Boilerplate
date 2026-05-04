@@ -1,0 +1,12 @@
+diff --git a/node_modules/@stripe/stripe-react-native/ios/StripeSwiftInterop.h b/node_modules/@stripe/stripe-react-native/ios/StripeSwiftInterop.h
+index 0000000..1111111 100644
+--- a/node_modules/@stripe/stripe-react-native/ios/StripeSwiftInterop.h
++++ b/node_modules/@stripe/stripe-react-native/ios/StripeSwiftInterop.h
+@@ -12,6 +12,6 @@
+ @protocol STPPaymentCardTextFieldDelegate;
+ @protocol STPCardFormViewDelegate;
+ 
+-typedef NS_ENUM(NSUInteger, STPPaymentStatus);
++typedef NS_ENUM(NSInteger, STPPaymentStatus);
+ 
+ // stripe_react_native-Swift.h also depends on these headers.

@@ -4,13 +4,15 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  StyleProp,
+  TextStyle,
   View,
 } from 'react-native';
 import { COLORS } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
 import { Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { isIOS } from 'utils/index';
 import { Header } from './Header';
 import { onBack } from 'navigation/index';
@@ -31,7 +33,7 @@ import { useTheme } from 'hooks/useTheme';
  */
 
 interface WrapperProps {
-  children: React.ReactNode;
+  children: ReactNode;
   useSafeArea?: boolean;
   useScrollView?: boolean;
   backgroundColor?: string;
@@ -43,6 +45,10 @@ interface WrapperProps {
   headerTitle?: string;
   showBackButton?: boolean;
   onPressBack?: () => void;
+  /** Passed to `Header` → `CustomBackIcon` (e.g. consumer flows). */
+  backIconStyle?: StyleProp<TextStyle>;
+  /** Right side of header row (e.g. cancel action). */
+  headerEndIcon?: ReactNode | (() => ReactNode);
 }
 
 export const Wrapper: React.FC<WrapperProps> = ({
@@ -58,6 +64,8 @@ export const Wrapper: React.FC<WrapperProps> = ({
   headerTitle,
   showBackButton = true,
   onPressBack = () => onBack(),
+  backIconStyle,
+  headerEndIcon,
 }) => {
   const isAppLoading = useAppSelector((state: RootState) => state.app.isAppLoading);
   const insets = useSafeAreaInsets();
@@ -116,6 +124,8 @@ export const Wrapper: React.FC<WrapperProps> = ({
             title={headerTitle || ''}
             showBackButton={showBackButton || false}
             onPressBack={onPressBack}
+            backIconStyle={backIconStyle}
+            endIcon={headerEndIcon}
           />
         </View>
       )}

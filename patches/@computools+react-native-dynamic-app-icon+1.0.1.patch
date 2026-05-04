@@ -1,0 +1,66 @@
+diff --git a/node_modules/@computools/react-native-dynamic-app-icon/android/src/main/java/com/computools/reactnativedynamicappicon/ReactNativeDynamicAppIconModule.kt b/node_modules/@computools/react-native-dynamic-app-icon/android/src/main/java/com/computools/reactnativedynamicappicon/ReactNativeDynamicAppIconModule.kt
+index ae007e7..4d86395 100644
+--- a/node_modules/@computools/react-native-dynamic-app-icon/android/src/main/java/com/computools/reactnativedynamicappicon/ReactNativeDynamicAppIconModule.kt
++++ b/node_modules/@computools/react-native-dynamic-app-icon/android/src/main/java/com/computools/reactnativedynamicappicon/ReactNativeDynamicAppIconModule.kt
+@@ -27,13 +27,13 @@ class ReactNativeDynamicAppIconModule(private val reactContext: ReactApplication
+ 
+     @ReactMethod
+     fun getIcon(promise: Promise) {
+-        val activity = currentActivity
++        val activity = reactContext.currentActivity
+         if (activity == null) {
+             promise.reject("ACTIVITY_NOT_FOUND", "Activity was not found")
+             return
+         }
+ 
+-        val activityName = activity.componentName.className
++        val activityName = activity.getComponentName().className
+ 
+         if (activityName.endsWith(MAIN_ACTIVITY_BASE_NAME)) {
+             promise.resolve("Default")
+@@ -51,7 +51,7 @@ class ReactNativeDynamicAppIconModule(private val reactContext: ReactApplication
+ 
+     @ReactMethod
+     fun changeIcon(iconName: String, promise: Promise) {
+-        val activity = currentActivity
++        val activity = reactContext.currentActivity
+ 
+         if (activity == null) {
+             promise.reject("ACTIVITY_NOT_FOUND", "The activity is null. Check if the app is running properly.")
+@@ -62,7 +62,7 @@ class ReactNativeDynamicAppIconModule(private val reactContext: ReactApplication
+             return
+         }
+         if (componentClass.isEmpty()) {
+-            componentClass = activity.componentName.className
++            componentClass = activity.getComponentName().className
+         }
+ 
+         val newIconName = iconName.takeUnless { it.isEmpty() } ?: "Default"
+@@ -75,7 +75,7 @@ class ReactNativeDynamicAppIconModule(private val reactContext: ReactApplication
+         }
+ 
+         try {
+-            activity.packageManager.setComponentEnabledSetting(
++            activity.getPackageManager().setComponentEnabledSetting(
+                 ComponentName(packageName, activeClass),
+                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                 PackageManager.DONT_KILL_APP
+@@ -88,15 +88,15 @@ class ReactNativeDynamicAppIconModule(private val reactContext: ReactApplication
+ 
+         classesToKill.add(componentClass)
+         componentClass = activeClass
+-        activity.application.registerActivityLifecycleCallbacks(this)
++        activity.getApplication().registerActivityLifecycleCallbacks(this)
+         completeIconChange()
+     }
+ 
+     private fun completeIconChange() {
+-        val activity = currentActivity ?: return
++        val activity = reactContext.currentActivity ?: return
+ 
+         classesToKill.forEach { cls ->
+-            activity.packageManager.setComponentEnabledSetting(
++            activity.getPackageManager().setComponentEnabledSetting(
+                 ComponentName(reactContext.packageName, cls),
+                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                 PackageManager.DONT_KILL_APP
