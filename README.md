@@ -154,17 +154,26 @@ Full list: see **`package.json` → `scripts`**.
 
 ## Appendix: copy-paste setup for new / merged projects
 
-Use this when you want **concrete blocks** to drop into a fresh or existing React Native app. Always reconcile with the files in **this repository** (`package.json`, `ios/Podfile`) for the latest behavior.
+Use this when you want **concrete blocks** to drop into a fresh or existing React Native app. The snippets below mirror **`package.json`**, **`ios/Podfile`**, and **`ios/yourappname/Info.plist`** in **this** repository; if anything drifts, those files are the source of truth.
 
 ### `package.json` — scripts and `lint-staged`
 
-Merge into your `package.json` (avoid duplicate keys). If you use Bundler for CocoaPods, keep **`bundle exec pod install`** in `pod` / `debugIos` as below.
+Merge into your `package.json` (avoid duplicate keys). CocoaPods here expects **`bundle exec pod install`** in `pod` / `debugIos`. **`postinstall`** runs **`patch-package`** (see **`patches/`**).
 
 ```json
 "scripts": {
-  "build": "cd android && ./gradlew clean && ./gradlew assembleRelease",
-  "aab": "cd android && ./gradlew clean && ./gradlew bundleRelease",
-  "debugAndroid": "cd android && ./gradlew clean && cd .. && yarn android",
+  "build": "yarn version:bump:patch && cd android && ./gradlew assembleRelease && cd .. && yarn open-apk",
+  "build:fast": "cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a && cd .. && yarn open-apk",
+  "build:clean": "cd android && ./gradlew clean && ./gradlew assembleRelease && cd .. && yarn open-apk",
+  "version:bump:patch": "node scripts/bump-version.js patch",
+  "version:bump:minor": "node scripts/bump-version.js minor",
+  "version:bump:major": "node scripts/bump-version.js major",
+  "release:android": "yarn version:bump:patch && yarn build",
+  "release:android:aab": "yarn version:bump:patch && yarn aab",
+  "release:ios": "yarn version:bump:patch",
+  "aab": "yarn version:bump:patch && cd android && ./gradlew bundleRelease && cd .. && yarn open-bundle",
+  "aab:clean": "cd android && ./gradlew clean && ./gradlew bundleRelease && cd ..",
+  "debugAndroid": "yarn android",
   "debugIos": "cd ios && bundle exec pod install && cd .. && yarn ios",
   "prepare": "husky",
   "format": "prettier --write ./src",
@@ -181,14 +190,16 @@ Merge into your `package.json` (avoid duplicate keys). If you use Bundler for Co
   "open-apk": "open ./android/app/build/outputs/apk/",
   "signing": "cd android && ./gradlew signingReport && cd ..",
   "open-bundle": "open ./android/app/build/outputs/bundle",
-  "build:prod": "yarn android:clean && cd android && ./gradlew assembleRelease && yarn open-apk",
-  "bundle": "cd android && ./gradlew bundleRelease && yarn open-bundle",
+  "bundle": "yarn version:bump:patch && cd android && ./gradlew bundleRelease && cd .. && yarn open-bundle",
   "ios": "react-native run-ios",
   "pod": "cd ios && bundle exec pod install && cd ..",
   "pod:reset": "cd ios && pod deintegrate && pod setup && bundle exec pod install && cd ..",
   "ios:clean": "cd ios && rm -rf ~/Library/Caches/CocoaPods && rm -rf Pods && rm -rf ~/Library/Developer/Xcode/DerivedData/* && yarn pod",
   "ios:debug": "yarn pod && yarn ios",
-  "ios:bundle:assets": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios"
+  "ios:bundle:assets": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
+  "postinstall": "patch-package",
+  "rename-app": "node scripts/rename-app.js",
+  "replace-icons": "node scripts/replace-app-icons.js"
 },
 "lint-staged": {
   "./src/**/*.{js,jsx,ts,tsx}": [
@@ -198,18 +209,9 @@ Merge into your `package.json` (avoid duplicate keys). If you use Bundler for Co
 }
 ```
 
-**Note:** The boilerplate in this repo also ships **extra** scripts (version bumps, `build:fast`, `aab`, `rename-app`, `replace-icons`, `patch-package` postinstall, etc.). For a **1:1** match, merge from this repo’s **`package.json`** instead of only the block above.
-
 ### iOS — update the `Podfile`
 
-- **Before** this line:
-
-  ```ruby
-  (platform :ios, min_ios_version_supported)
-  prepare_react_native_project!
-  ```
-
-  Add the following so Ruby can resolve React Native and **react-native-permissions** scripts:
+- **Before** `platform :ios, min_ios_version_supported` and `prepare_react_native_project!`, add **`node_require`** and load React Native plus **react-native-permissions** (same as **`ios/Podfile`** here):
 
   ```ruby
   def node_require(script)
@@ -225,49 +227,54 @@ Merge into your `package.json` (avoid duplicate keys). If you use Bundler for Co
   node_require('react-native-permissions/scripts/setup.rb')
   ```
 
-- **After** this line:
+- This repo sets **`ENV['RCT_NEW_ARCH_ENABLED'] = '1'`** before the platform line (New Architecture on).
 
-  ```ruby
-  (platform :ios, min_ios_version_supported)
-  prepare_react_native_project!
-  ```
-
-  Declare the permissions your app needs (remove entries you do not use):
+- **After** `prepare_react_native_project!`, declare permissions. **This repository** currently enables the subset below; uncomment or add handlers from [react-native-permissions](https://github.com/zoontek/react-native-permissions) as needed:
 
   ```ruby
   setup_permissions([
-    'AppTrackingTransparency',
-    'Bluetooth',
-    'Calendars',
-    'CalendarsWriteOnly',
-    'Camera',
-    'Contacts',
-    'FaceID',
-    'LocationAccuracy',
-    'LocationAlways',
-    'LocationWhenInUse',
-    'MediaLibrary',
-    'Microphone',
-    'Motion',
-    'Notifications',
-    'PhotoLibrary',
-    'PhotoLibraryAddOnly',
-    'Reminders',
-    'Siri',
-    'SpeechRecognition',
-    'StoreKit',
+      # 'AppTrackingTransparency',
+      # 'Bluetooth',
+      # 'Calendars',
+      # 'CalendarsWriteOnly',
+      'Camera',
+      # 'Contacts',
+      # 'FaceID',
+      # 'LocationAccuracy',
+      'LocationAlways',
+      'LocationWhenInUse',
+      'MediaLibrary',
+      # 'Microphone',
+      # 'Motion',
+      'Notifications',
+      'PhotoLibrary',
+      # 'PhotoLibraryAddOnly',
+      # 'Reminders',
+      # 'Siri',
+      # 'SpeechRecognition',
+      # 'StoreKit',
   ])
   ```
 
-Then open **`ios/Podfile`** in this repository and align **Maps**, **Firebase**, **`pre_install`**, **`use_frameworks!`**, and **`ENV['RCT_NEW_ARCH_ENABLED']`** if you use the same stack.
+- **Also aligned in this repo’s `Podfile`:** `pre_install` forces **RNFB** pods to **static libraries** (Firebase + New Arch / `use_frameworks`), **`pod 'react-native-maps/Google'`**, **`use_frameworks! :linkage => :static`** when `USE_FRAMEWORKS` is unset, **`$RNFirebaseAsStaticFramework = true`**, and **`post_install`** patches Stripe’s **`StripeSwiftInterop.h`** for newer Xcode, sets **`CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES`**, **`EXCLUDED_ARCHS[sdk=iphonesimulator*]=x86_64`**, and **`fmt`** to **C++17**. Copy those blocks only if your stack matches.
 
 ### iOS — `Info.plist`
 
-Add or adjust keys in **`ios/<YourApp>/Info.plist`**. Customize the location string for your product:
+Add or adjust keys in **`ios/yourappname/Info.plist`** (rename the folder when you rename the app). Strings below match **this** project; tailor copy for your product.
 
 ```xml
+<key>NSAppleMusicUsageDescription</key>
+<string>$(PRODUCT_NAME) requires access to your music library to enhance your experience with music features.</string>
+<key>NSCameraUsageDescription</key>
+<string>$(PRODUCT_NAME) needs access to your camera to allow you to capture and upload photo.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>$(PRODUCT_NAME) requires access to your location to provide location-based services even when the app is in the background.</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>$(PRODUCT_NAME) needs your location to show nearby practitioners.</string>
+<string>$(PRODUCT_NAME) needs your location to show nearby restaurants, hotels.</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>$(PRODUCT_NAME) requires access to your photo library to allow you to select and upload photo.</string>
+<key>RCTNewArchEnabled</key>
+<true/>
 <key>UIAppFonts</key>
 <array>
     <string>AntDesign.ttf</string>
@@ -294,8 +301,14 @@ Add or adjust keys in **`ios/<YourApp>/Info.plist`**. Customize the location str
     <string>GorditaLight.otf</string>
     <string>GorditaMedium.otf</string>
     <string>GorditaRegular.otf</string>
+    <string>PoppinsBold.ttf</string>
+    <string>PoppinsMedium.ttf</string>
+    <string>PoppinsRegular.ttf</string>
+    <string>PoppinsSemiBold.ttf</string>
 </array>
 ```
+
+The checked-in plist also includes **alternate app icons** (`CFBundleIcons` / `UIApplicationSupportsAlternateIcons`), **Google URL schemes**, **Firebase Crashlytics** collection flag, **ATS**, and **background modes** (`fetch`, `remote-notification`); open **`ios/yourappname/Info.plist`** for the full file.
 
 ### Optional — Gradle helper
 
@@ -354,27 +367,16 @@ Copy into the **root** of the target app:
 
 - `src` folder  
 - `scripts` folder  
+- `patches` folder (so **`patch-package`** applies; e.g. **`@computools/react-native-dynamic-app-icon`**)  
 - `babel.config.js`, `commitlint.config.js`, `declarations.d.ts`, `eslint.config.js`, `metro.config.js`, `.prettierrc.js`  
 - `App.tsx`  
 - `.env` files (and add `.env.production` / `.env.staging` locally as needed)  
 - `.husky` folder  
 - **Font** folder (unzip; add fonts in Xcode / Android as required)
 
-### Optional: one-line dependency installs (reference only)
+### Dependencies
 
-Prefer merging this repo’s **`package.json`** and running **`yarn`**. If you need the old one-liners for comparison:
-
-**Main (example — versions will drift):**
-
-```bash
-yarn add react-native-reanimated react-native-safe-area-context react-native-screens react-native-skeleton-placeholder formik @reduxjs/toolkit i18next react-native-dotenv react-i18next react-native-svg react-native-toast-message react-native-vector-icons react-redux yup react-native-permissions react-native-phone-number-input react-native-image-crop-picker axios @react-navigation/native-stack @react-navigation/native @react-native-async-storage/async-storage @react-native-community/geolocation react-native-linear-gradient @notifee/react-native
-```
-
-**Dev (example):**
-
-```bash
-yarn add -D @commitlint/cli @commitlint/config-conventional @types/react-native-vector-icons @typescript-eslint/eslint-plugin @typescript-eslint/parser babel-plugin-module-resolver eslint-config-prettier eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-react-native globals husky lint-staged metro-react-native-babel-preset react-native-codegen react-native-svg-transformer typescript-eslint
-```
+Do **not** rely on stale one-line `yarn add` lists. Merge this repository’s **`dependencies`** and **`devDependencies`** from **`package.json`**, keep **`engines.node`** (currently **≥ 22.11**), then run **`yarn`** so versions and native modules stay consistent.
 
 ### Update project files (classic steps)
 
@@ -391,11 +393,11 @@ yarn add -D @commitlint/cli @commitlint/config-conventional @types/react-native-
 
 4. **`tsconfig.json`** — align with this repo’s TypeScript config.
 
-5. **`package.json` scripts** — use the **Appendix** block in this README, or copy the full **`scripts`** section from this repo’s `package.json`.
+5. **`package.json` scripts** — use the **Appendix** block in this README, or copy the full **`scripts`** / **`lint-staged`** / **`postinstall`** sections from this repo’s **`package.json`**.
 
 ### iOS: Podfile & `Info.plist`
 
-Full **Ruby `node_require`**, **`setup_permissions`**, and **`UIAppFonts` / location usage** snippets are in the [Appendix](#appendix-copy-paste-setup-for-new--merged-projects). Match **`ios/Podfile`** in this repo for Firebase, Maps, New Architecture, and `pre_install` when applicable.
+Full **`node_require`**, **`setup_permissions`**, **New Architecture**, **Maps / Firebase / Stripe `post_install`**, and **`Info.plist`** snippets are in the [Appendix](#appendix-copy-paste-setup-for-new--merged-projects). Compare your **`ios/<App>/Info.plist`** with **`ios/yourappname/Info.plist`** here (URL schemes, background modes, alternate icons, etc.).
 
 ### Final native steps
 
