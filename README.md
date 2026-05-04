@@ -21,6 +21,31 @@ Official environment help: [React Native – Set Up Your Environment](https://re
 
 ---
 
+## Before you run: avoid these mistakes
+
+Most broken builds and “Firebase works on my machine” issues come from **skipping or mixing up native config**. Read this block once before `yarn android` / `yarn ios`.
+
+### Firebase — use **your** app’s files (not the template’s)
+
+1. In the [Firebase Console](https://console.firebase.google.com/), open **your** project and register apps that match **your** Android `applicationId` and **iOS bundle identifier**.
+2. Download and place **your own** config files (do **not** reuse another team’s JSON/plist or assume the repo’s placeholders are valid for production):
+
+   | Platform | File | Typical path in this repo |
+   |----------|------|---------------------------|
+   | Android | `google-services.json` | `android/app/google-services.json` |
+   | iOS | `GoogleService-Info.plist` | `ios/<YourTargetFolder>/GoogleService-Info.plist` (e.g. `ios/yourappname/` until you rename) |
+
+3. If you **do not** use the same Firebase project as whoever maintained the boilerplate, **replace** any bundled or example plist/JSON — wrong `GOOGLE_APP_ID` / bundle ID pairs cause cryptic native errors.
+4. After **`yarn rename-app`** or any change to package name / bundle ID, download **fresh** `google-services.json` and `GoogleService-Info.plist` from Firebase again.
+5. **Never commit** real Firebase keys or keystores. The repo’s **`.gitignore`** documents which paths stay local; keep secrets in your password manager / CI secrets.
+
+### Env and URLs
+
+- Fill **`.env.development`** (and `.env.production` / `.env.staging` locally if you use them) with **your** API URLs, map keys, Stripe publishable keys, OAuth client IDs, etc. Template values are not your backend.
+- **`Info.plist`** may contain **example** URL schemes or IDs for Google Sign-In — replace with **your** OAuth client configuration when you wire auth.
+
+---
+
 ## Choose your setup
 
 ### Option A — Use this repo as your app (recommended)
@@ -45,6 +70,7 @@ Best when you want a **new app** or are happy to start from this folder structur
    - Copy `.env.development` and adjust values for your API, maps, Stripe, OAuth, etc.
    - Add **`.env.production`** and **`.env.staging`** locally if you use those modes (they are gitignored).  
    - Env is loaded via `react-native-dotenv` and **`APP_ENV`** (see `babel.config.js`). Do **not** commit real secrets.
+   - **Firebase:** add **your** `google-services.json` and `GoogleService-Info.plist` — see [Before you run: avoid these mistakes](#before-you-run-avoid-these-mistakes) (users often skip this and hit native errors).
 
 4. **iOS — CocoaPods**
 
@@ -128,7 +154,7 @@ Variables are read through **`@env`** (see `babel.config.js`). Typical keys (pla
 | Feature flags | `IS_ALPHA_PHASE`, `OFFLINE_ACCESS` |
 | Other | Zendesk channels, etc. |
 
-Keep **`google-services.json`**, **`GoogleService-Info.plist`**, keystores, and API secrets **out of git**; use your team’s secure storage.
+Keep **`google-services.json`**, **`GoogleService-Info.plist`**, keystores, and API secrets **out of git**; use your team’s secure storage. For paths and the usual copy-paste errors, see **[Before you run: avoid these mistakes](#before-you-run-avoid-these-mistakes)** above.
 
 ---
 
@@ -332,6 +358,7 @@ node scripts/updateBuildGradle.js
 
 | Issue | What to try |
 |-------|-------------|
+| Firebase / wrong bundle ID / “Default FirebaseApp is not configured” | Use **your** `google-services.json` + `GoogleService-Info.plist`; match package name / bundle ID to Firebase; see [Before you run: avoid these mistakes](#before-you-run-avoid-these-mistakes) |
 | Metro cache | `yarn start --reset-cache` |
 | Android can’t reach Metro | `yarn reverse` (or `adb reverse tcp:8081 tcp:8081`) |
 | iOS pod errors | `yarn pod:reset` or clean DerivedData + `yarn pod` |

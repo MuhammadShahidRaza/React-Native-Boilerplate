@@ -76,10 +76,17 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-# Firebase / Google secrets — never commit these
+# Firebase / Google — DO NOT commit real secrets.
+#
+# IMPORTANT (read this): Add YOUR own app’s Firebase files from the Firebase
+# Console. If you are not using the same Firebase project as this boilerplate,
+# replace any template / temp placeholders with your own JSON + plist:
+#   • Android → android/app/google-services.json
+#   • iOS     → ios/<YourApp>/GoogleService-Info.plist
+# The patterns below keep those files (and local env secrets) out of git.
 google-services.json
 GoogleService-Info.plist
 *GoogleService-Info*.plist
 .env.production
-.env.staging
+.env.development
 firebaseConfig.ts
