@@ -3,23 +3,34 @@
  * Change these values when creating a new app from this boilerplate.
  */
 export const APP_CONFIG = {
-  /** App display name (e.g. "yourappname", "MyApp") */
-  APP_NAME: 'yourappname',
+  /** App display name (shown in auth UI; align with native display name separately) */
+  APP_NAME: 'SN LIFT',
 
-  /** Provider role value sent to API (must match backend) */
-  PROVIDER_ROLE: 'dentor' as const,
-
-  /** User role value */
+  /** Customer role (maps, bookings, consumer hub) */
   USER_ROLE: 'user' as const,
 
-  /** Display label for provider role in UI (e.g. "Dentor", "Provider", "Professional") */
-  PROVIDER_ROLE_LABEL: 'Dentor',
+  /** Delivery / parcel worker */
+  COURIER_ROLE: 'courier' as const,
 
-  /** Display label for user role in UI */
-  USER_ROLE_LABEL: 'User',
+  /** Ride / vehicle worker */
+  DRIVER_ROLE: 'driver' as const,
+
+  USER_ROLE_LABEL: 'Customer',
+  COURIER_ROLE_LABEL: 'Courier',
+  DRIVER_ROLE_LABEL: 'Driver',
 
   APP_VERSION: '1.0.0',
 } as const;
 
-export type ProviderRole = typeof APP_CONFIG.PROVIDER_ROLE;
-export type UserRole = typeof APP_CONFIG.USER_ROLE;
+export type AppUserRole = typeof APP_CONFIG.USER_ROLE;
+export type AppCourierRole = typeof APP_CONFIG.COURIER_ROLE;
+export type AppDriverRole = typeof APP_CONFIG.DRIVER_ROLE;
+
+/** Courier or driver (or legacy API `dentor`) — same tab stack as the old single “provider” role */
+export function isWorkerRole(role: string | undefined | null): boolean {
+  if (role == null || role === '') return false;
+  return (
+    role === APP_CONFIG.COURIER_ROLE ||
+    role === APP_CONFIG.DRIVER_ROLE
+  );
+}

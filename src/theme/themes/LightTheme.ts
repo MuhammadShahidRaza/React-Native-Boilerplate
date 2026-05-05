@@ -1,54 +1,46 @@
 import { DefaultTheme } from '@react-navigation/native';
 import { AppTheme, ThemeColors } from 'types/themeTypes';
+import { BRAND_PRIMARY, BRAND_SECONDARY } from 'utils/colors';
 
 const lightColors: ThemeColors = {
-  // Primary colors
-  primary: '#051229',
-  secondary: '#0AC8FF',
-  background: '#FFFFFF',
+  primary: BRAND_PRIMARY,
+  secondary: BRAND_SECONDARY,
+  background: '#F7FAFC',
   surface: '#FFFFFF',
   error: '#FB344F',
 
-  // Text colors
-  text: '#000000',
-  textSecondary: '#4D4D4D',
-  textDisabled: '#858585',
+  text: '#0F172A',
+  textSecondary: '#475569',
+  textDisabled: '#94A3B8',
   textInverse: '#FFFFFF',
 
-  // UI colors
-  border: '#CACACA',
-  divider: '#ECECEC',
-  icon: '#676767',
-  iconSecondary: '#858585',
-  placeholder: '#858585',
+  border: '#E2E8F0',
+  divider: '#E2E8F0',
+  icon: '#475569',
+  iconSecondary: '#64748B',
+  placeholder: '#94A3B8',
 
-  // Input colors
-  inputBackground: '#F9F9F9',
-  inputBorder: '#CACACA',
-  inputText: '#000000',
+  inputBackground: '#F1F5F9',
+  inputBorder: '#CBD5E1',
+  inputText: '#0F172A',
 
-  // Card colors
   card: '#FFFFFF',
-  cardBorder: '#ECECEC',
+  cardBorder: '#E2E8F0',
 
-  // Status colors
-  success: '#00B406',
+  success: BRAND_PRIMARY,
   warning: '#FFA500',
-  info: '#0AC8FF',
+  info: BRAND_SECONDARY,
 
-  // Overlay colors
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  shadow: '#000000',
+  overlay: 'rgba(15, 23, 42, 0.45)',
+  shadow: '#0F172A',
 
-  // Header
-  header: '#ECECEC',
-  headerText: '#000000',
+  header: '#FFFFFF',
+  headerText: '#0F172A',
 
-  // Navigation specific
   notification: '#FB344F',
-  tabBar: '#FFFFFF',
-  tabBarActive: '#051229',
-  tabBarInactive: '#858585',
+  tabBar: BRAND_SECONDARY,
+  tabBarActive: '#FFFFFF',
+  tabBarInactive: 'rgba(255,255,255,0.55)',
 };
 
 export const LightTheme: AppTheme = {

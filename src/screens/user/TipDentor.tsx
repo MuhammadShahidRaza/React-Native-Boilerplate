@@ -60,7 +60,7 @@ export const TipDentor = ({ route }: AppScreenProps<typeof SCREENS.TIP_DENTOR>) 
       }
       const { error: setupInitError } = await initPaymentSheet({
         setupIntentClientSecret: setupRes.setup_intent,
-        merchantDisplayName: 'yourappname',
+        merchantDisplayName: 'Sn Lift',
         customerId: setupRes.customer,
         customerEphemeralKeySecret: setupRes.ephemeralKey,
       });

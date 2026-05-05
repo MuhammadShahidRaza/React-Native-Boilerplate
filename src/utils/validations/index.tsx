@@ -4,7 +4,7 @@ import { REGEX } from '../regex';
 import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
 import { LANGUAGES } from 'constants/common';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 
 type StringValidationOptions = {
   regex?: RegExp;
@@ -552,8 +552,8 @@ export const formatSSN = (value: string): string => {
   return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5, 9)}`;
 };
 
-export const signUpValidationSchemaWithProfileImage = ({ role }: { role: 'user' | 'dentor' }) => {
-  if (role === APP_CONFIG.PROVIDER_ROLE) {
+export const signUpValidationSchemaWithProfileImage = ({ role }: { role: import('types/auth').USER_TYPE }) => {
+  if (isWorkerRole(role)) {
     return signUpValidationSchema.shape({
       profile_image: requiredImageSchema,
     });

@@ -21,9 +21,9 @@ import {
 } from 'components/index';
 // import { getCurrentLocation, reverseGeocode } from 'utils/location';
 import { signUpUser } from 'api/functions/auth';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { navigate } from 'navigation/index';
-import { Login_SignUp } from 'types/auth';
+import { Login_SignUp, type USER_TYPE } from 'types/auth';
 import { RootState } from 'types/reduxTypes';
 import { useSelector } from 'react-redux';
 import { SelectedMedia } from 'hooks/useMediaPicker';
@@ -38,7 +38,7 @@ interface SignUpFormValues {
   confirmPassword: string;
   country_code?: string;
   calling_code?: string;
-  user_type: 'user' | 'dentor';
+  user_type: USER_TYPE;
   profile_image?: SelectedMedia | null;
   showPassword: boolean;
   agreeToTerms: boolean;
@@ -108,7 +108,7 @@ export const SignUp = () => {
       bottomButtonText={COMMON_TEXT.LOGIN}
     >
       <FocusProvider>
-        {role === APP_CONFIG.PROVIDER_ROLE && (
+        {isWorkerRole(role) && (
           <ProfilePictureUpload
             source={formik.values.profile_image?.uri || null}
             onImageSelected={handleProfileImageSelected}

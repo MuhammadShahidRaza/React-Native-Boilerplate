@@ -7,6 +7,7 @@ import { isIOS } from './functions';
 import { deviceDetails } from './functions';
 import { showToast } from 'utils/toast';
 import { logger } from 'utils/logger';
+import type { USER_TYPE } from 'types/auth';
 
 /** Extract display name from email when full_name is empty (e.g. john.doe@x.com -> John Doe) */
 const extractNameFromEmail = (email: string): string => {
@@ -34,7 +35,7 @@ const decodeJwtPayload = (token: string): Record<string, unknown> => {
 export type SocialLoginPayload = {
   provider_id: string;
   provider: 'google' | 'apple';
-  user_type: 'user' | 'dentor';
+  user_type: USER_TYPE;
   email?: string;
   full_name?: string;
   picture?: string | null;
@@ -46,9 +47,7 @@ export type SocialLoginPayload = {
   device_token?: string;
 };
 
-export const GoogleSignIn = async (
-  user_type: 'user' | 'dentor',
-): Promise<SocialLoginPayload | null> => {
+export const GoogleSignIn = async (user_type: USER_TYPE): Promise<SocialLoginPayload | null> => {
   try {
     GoogleSignin.configure({
       webClientId: ENV_CONSTANTS.GOOGLE_ANDROID_CLIENT_ID,
@@ -92,9 +91,7 @@ export const GoogleSignIn = async (
   }
 };
 
-export const AppleSignIn = async (
-  user_type: 'user' | 'dentor',
-): Promise<SocialLoginPayload | null> => {
+export const AppleSignIn = async (user_type: USER_TYPE): Promise<SocialLoginPayload | null> => {
   try {
     const device = await deviceDetails();
 

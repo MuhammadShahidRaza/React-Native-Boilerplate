@@ -32,7 +32,7 @@ export const changeAppIcon = async (mode: ThemeMode): Promise<void> => {
     // - iOS expects the alternate icon key name from Info.plist (e.g. DarkAppIcon/LightAppIcon),
     //   or "DefaultIcon" to reset to primary.
     // - Android implementation in this library expects only the suffix after MainActivity
-    //   (e.g. "Dark" -> enables com.cmolds.yourappname.MainActivityDark).
+    //   (e.g. "Dark" -> enables com.cmolds.snlift.MainActivityDark).
     const targetIcon = isIOS()
       ? mode === 'default'
         ? 'DefaultIcon'

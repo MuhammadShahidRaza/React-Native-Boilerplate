@@ -20,7 +20,7 @@ import {
 } from 'components/index';
 import { navigate } from 'navigation/index';
 import { loginUser, loginUserThroughSocial } from 'api/functions/auth';
-import { Login_SignUp, USER_TYPE } from 'types/auth';
+import { Login_SignUp, type USER_TYPE } from 'types/auth';
 import { RootState } from 'types/reduxTypes';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
@@ -31,7 +31,7 @@ interface LoginFormValues {
   password: string;
   rememberMe: boolean;
   showPassword: boolean;
-  user_type: 'user' | 'dentor';
+  user_type: USER_TYPE;
 }
 
 export const Login = () => {

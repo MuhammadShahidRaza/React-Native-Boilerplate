@@ -1,54 +1,46 @@
 import { DarkTheme as NavigationDarkTheme } from '@react-navigation/native';
 import { AppTheme, ThemeColors } from 'types/themeTypes';
+import { BRAND_PRIMARY, BRAND_SECONDARY } from 'utils/colors';
 
 const darkColors: ThemeColors = {
-  // Primary colors
-  primary: '#0AC8FF',
-  secondary: '#051229',
-  background: '#121212',
-  surface: '#1E1E1E',
+  primary: BRAND_PRIMARY,
+  secondary: BRAND_SECONDARY,
+  background: '#0B1220',
+  surface: '#141C2E',
   error: '#FB344F',
 
-  // Text colors
-  text: '#FFFFFF',
-  textSecondary: '#B3B3B3',
-  textDisabled: '#666666',
-  textInverse: '#000000',
+  text: '#F1F5F9',
+  textSecondary: '#94A3B8',
+  textDisabled: '#64748B',
+  textInverse: '#0F172A',
 
-  // UI colors
-  border: '#333333',
-  divider: '#2A2A2A',
-  icon: '#B3B3B3',
-  iconSecondary: '#808080',
-  placeholder: '#666666',
+  border: '#2D3A52',
+  divider: '#2D3A52',
+  icon: '#94A3B8',
+  iconSecondary: '#64748B',
+  placeholder: '#64748B',
 
-  // Input colors
-  inputBackground: '#1E1E1E',
-  inputBorder: '#333333',
-  inputText: '#FFFFFF',
+  inputBackground: '#1A2438',
+  inputBorder: '#334155',
+  inputText: '#F1F5F9',
 
-  // Card colors
-  card: '#1E1E1E',
-  cardBorder: '#333333',
+  card: '#1A2438',
+  cardBorder: '#2D3A52',
 
-  // Status colors
-  success: '#4CAF50',
+  success: '#33C88E',
   warning: '#FF9800',
-  info: '#0AC8FF',
+  info: '#5B8DEF',
 
-  // Overlay colors
-  overlay: 'rgba(0, 0, 0, 0.7)',
+  overlay: 'rgba(0, 0, 0, 0.65)',
   shadow: '#000000',
 
-  // Header
-  header: '#1E1E1E',
-  headerText: '#FFFFFF',
+  header: '#141C2E',
+  headerText: '#F1F5F9',
 
-  // Navigation specific
   notification: '#FB344F',
-  tabBar: '#1E1E1E',
-  tabBarActive: '#0AC8FF',
-  tabBarInactive: '#808080',
+  tabBar: '#003380',
+  tabBarActive: '#FFFFFF',
+  tabBarInactive: 'rgba(255,255,255,0.5)',
 };
 
 export const DarkTheme: AppTheme = {

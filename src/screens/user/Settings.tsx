@@ -22,6 +22,7 @@ import { useTranslation } from 'hooks/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { updateUserDetails } from 'api/functions/app/user';
 import { deviceUdid } from 'utils/index';
+import { APP_CONFIG } from 'config/app';
 
 export const handleAccountLogout = async ({ isDelete }: { isDelete: boolean }) => {
   store.dispatch(resetAppState());
@@ -73,7 +74,7 @@ export const Settings = () => {
       iconComponent: VARIABLES.MaterialCommunityIcons,
       onPress: () => navigate(SCREENS.CHANGE_PASSWORD),
     },
-    ...(role === 'user'
+    ...(role === APP_CONFIG.USER_ROLE
       ? [
           {
             title: 'Address',

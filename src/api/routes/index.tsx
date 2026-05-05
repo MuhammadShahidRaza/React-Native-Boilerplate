@@ -97,7 +97,7 @@ export const API_ROUTES = {
   SEND_FEEDBACK: 'feedback/send',
   GET_FAQ: 'faq',
 
-  //yourappname
+  //snlift
   GET_SERVICES_LIST: 'service',
   GET_CATEGORIES: 'static/categories',
   TOGGLE_FAVOURITE: 'favourites/toggle',

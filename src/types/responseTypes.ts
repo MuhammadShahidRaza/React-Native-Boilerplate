@@ -56,8 +56,8 @@ export interface User {
   phone?: string | null;
   provider_id?: string | null;
   provider?: string | null;
-  user_type?: 'user' | 'dentor';
-  user_role?: 'user' | 'dentor';
+  user_type?: 'user' | 'courier' | 'driver';
+  user_role?: 'user' | 'courier' | 'driver';
   bio?: string | null;
   profile_image?: string | null | undefined;
   gender?: string | null;

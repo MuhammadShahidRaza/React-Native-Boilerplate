@@ -11,7 +11,8 @@ import { VARIABLES } from 'constants/common';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { JobStatus } from 'screens/user/MyJobs';
-import { APP_CONFIG } from 'config/app';
+import { APP_CONFIG, isWorkerRole } from 'config/app';
+import type { USER_TYPE } from 'types/auth';
 import { ActivityStatus } from 'screens/user/Activities';
 import {
   AuthorizationStatus,
@@ -88,14 +89,14 @@ const getJobId = (data: any) => {
   return id != null ? Number(id) : undefined;
 };
 
-const getRole = (): 'user' | 'dentor' => {
+const getRole = (): USER_TYPE => {
   return store.getState()?.user?.role ?? APP_CONFIG.USER_ROLE;
 };
 
-/** Navigate to MyJobs (dentor only - nested in BottomStack) or fallback for user */
+/** Navigate to MyJobs (courier / driver - nested in BottomStack) or fallback for customer */
 const navigateToJobsFallback = (params?: { selectedTab?: JobStatus }) => {
   const role = getRole();
-  if (role === APP_CONFIG.PROVIDER_ROLE) {
+  if (isWorkerRole(role)) {
     navigate(SCREENS.BOTTOM_STACK, {
       screen: SCREENS.MY_JOBS,
       params,
@@ -125,7 +126,7 @@ export const handleNotificationNavigation = (notificationData: any) => {
       break;
 
     case 'new-booking-available':
-      if (role !== 'dentor') return;
+      if (!isWorkerRole(role)) return;
       if (jobId) {
         navigate(SCREENS.JOB_DETAIL, {
           jobId,
@@ -137,7 +138,7 @@ export const handleNotificationNavigation = (notificationData: any) => {
       break;
 
     case 'new-quotation-accepted':
-      if (role !== 'dentor') return;
+      if (!isWorkerRole(role)) return;
       if (jobId) {
         navigate(SCREENS.JOB_DETAIL, {
           jobId,
