@@ -13,7 +13,7 @@ import {
 import { VARIABLES } from 'constants/common';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 
 // Activity Status Enum
 enum ActivityStatus {
@@ -33,7 +33,7 @@ export interface BookingInfoBoxProps {
 export const BookingInfoBox = memo<BookingInfoBoxProps>(({ item, style, showBiddingSection }) => {
   const status = item?.status as ActivityStatus;
   const role = useAppSelector(state => state?.user?.role);
-  const other = role === APP_CONFIG.PROVIDER_ROLE ? item?.user : item?.dentor;
+  const other = isWorkerRole(role) ? item?.user : item?.dentor;
   const price = getBookingPrice(item);
   // Render bottom buttons based on status
   const renderBottomButtons = () => {

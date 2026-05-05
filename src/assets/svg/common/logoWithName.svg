@@ -1,30 +1,16 @@
-<svg width="600" height="200" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="gradA" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#00C6FF"/>
-      <stop offset="100%" stop-color="#0072FF"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Logo Icon -->
-  <g transform="translate(20,40)">
-    <path d="M40 0 L80 80 L60 80 L30 20 L10 80 L-10 80 Z" />
-    <path d="M90 80 L120 0 L150 80 Z" fill="url(#gradA)"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="219.578" height="69.794" viewBox="0 0 219.578 69.794">
+  <g id="Group_2" data-name="Group 2" transform="translate(831 -455)">
+    <path id="Path_1" data-name="Path 1" d="M436.77,487.3H421.38c-5.8,0-10.012-1.142-12.6-3.393-2.592-2.284-3.888-5.97-3.888-11.093V435.226H415v37.585c0,2.055.454,3.458,1.393,4.241.907.783,2.592,1.174,5.022,1.174H436.8Z" transform="translate(-1147.379 20.172)"/>
+    <path id="Path_2" data-name="Path 2" d="M690.222,444.3H671.98c-2.138,0-3.629.424-4.471,1.24s-1.264,2.284-1.264,4.307v7.243H685.2l-.713,9.07H666.245V487.3H656.136V445.83c0-3.85.843-6.591,2.5-8.189,1.685-1.6,4.536-2.414,8.619-2.414h22.94v9.07Z" transform="translate(-1344.058 20.172)"/>
+    <path id="Path_3" data-name="Path 3" d="M813.3,444.3H799.429v43H789.32v-43h-13.8v-9.07H813.3Z" transform="translate(-1424.719 20.172)"/>
+    <g id="Group_1" data-name="Group 1" transform="translate(-756.945 467.69)">
+      <path id="Path_4" data-name="Path 4" d="M390.941,473.318a.384.384,0,0,0-.43-.184l-29.8,4.375a.571.571,0,0,0-.359.294.41.41,0,0,0,.108.441l6.311,6.029a.375.375,0,0,0,.43.074l8.821-3.272-7.387,4.191a.455.455,0,0,0-.215.294l-1.65,7.684a.427.427,0,0,0,.179.441c.036.037.072.037.108.074a.416.416,0,0,0,.358-.037l5.307-3.456,4.16,3.9a.567.567,0,0,0,.323.11.365.365,0,0,0,.287-.184l13.411-20.221C391.013,473.649,391.049,473.465,390.941,473.318Z" transform="translate(-360.326 -473.125)"/>
+    </g>
+    <path id="Path_5" data-name="Path 5" d="M422.119,626.35a5.481,5.481,0,1,0-5.443-5.481A5.463,5.463,0,0,0,422.119,626.35Z" transform="translate(-1155.344 -101.557)" fill="#00b76c"/>
+    <path id="Path_6" data-name="Path 6" d="M479.262,626.35a5.481,5.481,0,1,0-5.443-5.481A5.463,5.463,0,0,0,479.262,626.35Z" transform="translate(-1193.953 -101.557)"/>
+    <path id="Path_7" data-name="Path 7" d="M365.041,481.984,373,479.233l19.548-9.209a.548.548,0,0,0-.417-.16l-34.636,4.7a.656.656,0,0,0-.417.319.508.508,0,0,0,.125.478l7.336,6.538A.458.458,0,0,0,365.041,481.984Z" transform="translate(-1115.067 -3.232)" fill="#00b76c"/>
+    <path id="Path_8" data-name="Path 8" d="M135.279,446.418c.57-7.321,7.128-9.905,14.043-9.905,5.7,0,11.9,2.512,14.4,7.106l2.495-1.077C163.365,436.8,156.165,434,149.322,434c-8.269,0-16.538,4.02-16.752,12.346v.646a10.735,10.735,0,0,0,1.283,5.383c2.78,4.953,8.911,7.034,14.827,8.326,5.916,1.364,11.476,2.584,14.114,7.034a9.322,9.322,0,0,1,1,4.45v.933c-.927,7.465-7.627,10.408-14.4,10.408-5.988,0-12.4-2.512-14.9-7.321L132,477.354c3.065,5.958,10.55,8.829,17.251,8.829,8.483,0,16.965-4.45,17.322-12.992v-.933a11.72,11.72,0,0,0-1.212-5.527c-3.065-5.311-9.338-7.178-15.9-8.469-5.988-1.148-11.191-3.3-13.33-7.178a7.884,7.884,0,0,1-.855-3.8Z" transform="translate(-963 21)" fill="#00b76c"/>
+    <path id="Path_9" data-name="Path 9" d="M301.662,485.526l-29.226-47.3h-3.493v50.819h2.78V442.532l28.656,46.512h4.063V438.225h-2.78Z" transform="translate(-1055.527 18.145)" fill="#00b76c"/>
+    <rect id="Rectangle_2" data-name="Rectangle 2" width="11" height="52" transform="translate(-704.711 455.303)"/>
   </g>
-
-  <!-- App Name -->
-  <text x="200" y="90" font-family="Arial, Helvetica, sans-serif" font-size="32"  letter-spacing="3">
-    YOUR
-  </text>
-  <text x="340" y="90" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="url(#gradA)" letter-spacing="3">
-    APP LOGO
-  </text>
-
-  <!-- Divider Line -->
-  <rect x="200" y="105" width="220" height="3" fill="url(#gradA)" rx="2"/>
-
-  <!-- Creator -->
-  <text x="200" y="140" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#A0AEC0" letter-spacing="2">
-    CREATED BY MUHAMMAD SHAHID RAZA
-  </text>
 </svg>

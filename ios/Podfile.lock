@@ -2829,6 +2829,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-blur (4.4.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-geolocation (3.4.0):
     - hermes-engine
     - RCTRequired
@@ -4257,6 +4279,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-blob-util (from `../node_modules/react-native-blob-util`)
+  - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - react-native-keyboard-controller (from `../node_modules/react-native-keyboard-controller`)
@@ -4449,6 +4472,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-blob-util:
     :path: "../node_modules/react-native-blob-util"
+  react-native-blur:
+    :path: "../node_modules/@react-native-community/blur"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-get-random-values:
@@ -4648,6 +4673,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: ba6cecdd4b529b68476e515ce97e496127ca265a
   React-microtasksnativemodule: a74a5f3f6f8d2ecdb32df2725b009b5ae06dd2b7
   react-native-blob-util: 50e8b0d00267d0aa904bcda18fd3d8135c39cfaa
+  react-native-blur: dd21695992f88cc3816925e521cfbde18518976d
   react-native-geolocation: 33894c821abbf67380755e5c888cb3cf38c5b11f
   react-native-get-random-values: 3058bfb015cdb2f4d591c2c8555ca2ba3ce1532b
   react-native-keyboard-controller: 4b22b18601bd494114766a13946f8759f7d96d15

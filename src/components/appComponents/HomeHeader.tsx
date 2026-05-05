@@ -18,7 +18,7 @@ import { VARIABLES } from 'constants/common';
 import { FontSize } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 
 export const HomeHeader = () => {
   const { userDetails } = useAppSelector(state => state?.user);
@@ -44,14 +44,13 @@ export const HomeHeader = () => {
   };
 
   const displayImage =
-    role === APP_CONFIG.PROVIDER_ROLE ? IMAGES.LOCATION_ICON : userDetails?.profile_image;
+    isWorkerRole(role) ? IMAGES.LOCATION_ICON : userDetails?.profile_image;
   const displayName =
-    role === APP_CONFIG.PROVIDER_ROLE ? 'Location' : (userDetails?.full_name ?? 'Guest');
+    isWorkerRole(role) ? 'Location' : (userDetails?.full_name ?? 'Guest');
   const userAddr = getUserAddressString(userDetails?.address);
-  const displayMessage =
-    role === APP_CONFIG.PROVIDER_ROLE
-      ? getLocationString()
-      : userAddr || currentAddress?.fullAddress || '';
+  const displayMessage = isWorkerRole(role)
+    ? getLocationString()
+    : userAddr || currentAddress?.fullAddress || '';
 
   return (
     <ImageBackground
@@ -62,7 +61,7 @@ export const HomeHeader = () => {
       <RowComponent style={STYLES.CONTAINER}>
         <MessageBox
           onPress={() => {
-            if (role === APP_CONFIG.PROVIDER_ROLE) {
+            if (isWorkerRole(role)) {
               navigate(SCREENS.PROFESSIONAL_DETAILS);
             } else {
               navigate(SCREENS.LOCATION);

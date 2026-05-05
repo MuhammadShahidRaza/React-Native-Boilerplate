@@ -7,13 +7,13 @@ import { navigate, reset } from 'navigation/Navigators';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
 import { setUserDetails } from 'store/slices/user';
 import store from 'store/store';
-import { Login_SignUp, SocialLogin, VerifyOtp } from 'types/auth';
+import { Login_SignUp, SocialLogin, VerifyOtp, type USER_TYPE } from 'types/auth';
 import { MessageResponse, User } from 'types/responseTypes';
 import { post, postWithSingleFile } from 'utils/axios';
 import { saveUserDetailsForRole, setKeychainItem } from 'utils/storage';
 import { showToast } from 'utils/toast';
 import { DUMMY_USER } from './app/user';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 
 // R type for Return
 // A type for Accept
@@ -110,7 +110,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
     await setKeychainItem(VARIABLES.USER_TOKEN, user?.token ?? '');
     store.dispatch(setUserDetails(user));
     if (
-      user?.user_type === APP_CONFIG.PROVIDER_ROLE &&
+      isWorkerRole(user?.user_type) &&
       (!user?.is_onboarded || !user?.is_admin_verified)
     ) {
       navigate(SCREENS.COMPLETE_PROFILE);
@@ -169,7 +169,7 @@ const forgotPassword = async <R extends MessageResponse, A extends { email: stri
 };
 const verifyEmailCode = async <
   R extends User,
-  A extends { email: string; otp: string; user_type: 'user' | 'dentor' },
+  A extends { email: string; otp: string; user_type: USER_TYPE | 'dentor' },
 >({
   data,
 }: {
@@ -188,7 +188,7 @@ const verifyEmailCode = async <
   if (user) {
     await setKeychainItem(VARIABLES.USER_TOKEN, user?.token ?? '');
     store.dispatch(setUserDetails(user));
-    if (user?.user_type === APP_CONFIG.PROVIDER_ROLE) {
+    if (isWorkerRole(user?.user_type)) {
       navigate(SCREENS.COMPLETE_PROFILE);
     } else {
       store.dispatch(setIsUserLoggedIn(true));
@@ -274,7 +274,7 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
     store.dispatch(setUserDetails(user));
 
     if (
-      user?.user_type === APP_CONFIG.PROVIDER_ROLE &&
+      isWorkerRole(user?.user_type) &&
       (!user?.is_onboarded || !user?.is_admin_verified)
     ) {
       navigate(SCREENS.COMPLETE_PROFILE);

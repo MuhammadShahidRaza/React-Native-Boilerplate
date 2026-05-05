@@ -238,12 +238,12 @@
     "SATURDAY": "Saturday"
   },
   "ONBOARDING": {
-    "HEADING_1": "Fix Car Dents Instantly",
-    "HEADING_2": "Compare Trusted Local Technicians",
-    "HEADING_3": "Book, Pay & Track Easily",
-    "DESCRIPTION_1": "Upload a photo of your car dent and get repair quotes from nearby experts within minutes.",
-    "DESCRIPTION_2": "Review multiple offers, ratings, and experience to choose the best technician for your repair needs.",
-    "DESCRIPTION_3": "Confirm your repair, chat with the technician, and track job progress — all securely inside the app."
+    "HEADING_1": "Book rides & deliveries",
+    "HEADING_2": "Track every trip",
+    "HEADING_3": "One app for customers & partners",
+    "DESCRIPTION_1": "Request rides, send parcels, and order food — all from one home hub built for speed and clarity.",
+    "DESCRIPTION_2": "Follow your courier or driver in real time with clear status updates from pickup to drop-off.",
+    "DESCRIPTION_3": "Whether you are a customer, courier, or driver, sign in with your role after onboarding to see the right tools."
   },
   "AUTH": {
     "LOGIN_HEADING": "Welcome Back! 👋",
@@ -251,7 +251,10 @@
     "DONT_WORRY_FORGOT": "Don't worry we are here to help!",
     "RESET_YOUR_PASSWORD": "Reset your password with email to use your account.",
     "SIGN_UP_HEADING": "Join Us Today! 🎉",
-    "SIGN_UP_DESCRIPTION": "Create your account to get started."
+    "SIGN_UP_DESCRIPTION": "Create your account to get started.",
+    "GET_STARTED_HEADING": "Choose your role",
+    "GET_STARTED_DESCRIPTION": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
+    "GET_STARTED_CONTINUE": "Continue"
   },
   "CHAT": {
     "HEADING_1": "Take care of your body",

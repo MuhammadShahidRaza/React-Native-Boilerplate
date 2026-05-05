@@ -18,7 +18,7 @@ import {
 } from 'api/functions/app/home';
 import { getDentorFromBooking } from 'utils/helpers/functions';
 import { markConversationCompleted } from '../../services/chat/firestoreChat';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { BidModal } from './BidModal';
 import { ReviewsModal } from './ReviewsModal';
 import { VerificationPictureModal } from './VerificationPictureModal';
@@ -35,7 +35,7 @@ export interface JobInfoBoxProps {
 export const JobInfoBox = memo<JobInfoBoxProps>(({ item, style, onBidSuccess, onProofSuccess }) => {
   const role = useAppSelector(s => s.user.role);
   const status = item?.status ?? JobStatus.NewInquiries;
-  const otherUser = role === APP_CONFIG.PROVIDER_ROLE ? item.user : item.dentor;
+  const otherUser = isWorkerRole(role) ? item.user : item.dentor;
   const price = getBookingPrice(item);
 
   // Modal states

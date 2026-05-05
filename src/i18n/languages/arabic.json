@@ -201,7 +201,10 @@
     "WELCOME_BACK_LOGIN": "مرحبًا، أهلاً بعودتك! 👋",
     "HELLO_AGAIN_LOGIN": "مرحبًا مرة أخرى، لقد كنا نشتاق إليك!",
     "DONT_WORRY_FORGOT": "لا داعي للقلق نحن هنا للمساعدة!",
-    "CONNECT_WITH_SIGNUP": "اتصل بالخبراء اليوم!"
+    "CONNECT_WITH_SIGNUP": "اتصل بالخبراء اليوم!",
+    "GET_STARTED_HEADING": "Choose your role",
+    "GET_STARTED_DESCRIPTION": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
+    "GET_STARTED_CONTINUE": "متابعة"
   },
   "CHAT": {
     "HEADING_1": "اعتنِ بجسمك",
