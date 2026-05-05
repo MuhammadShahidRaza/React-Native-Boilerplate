@@ -1,43 +1,26 @@
 {
   "project_info": {
-    "project_number": "613797050409",
-    "project_id": "yourappname-3t9bf",
-    "storage_bucket": "yourappname-3t9bf.firebasestorage.app"
+    "project_number": "1061285627466",
+    "project_id": "snlift-c01dc",
+    "storage_bucket": "snlift-c01dc.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:613797050409:android:d75f0c8746badd89f8c058",
+        "mobilesdk_app_id": "1:1061285627466:android:bdb41010bfeb871142c8b3",
         "android_client_info": {
-          "package_name": "com.cmolds.yourappname"
+          "package_name": "com.cmolds.snlift"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "613797050409-poeu1cshtnc4maj73jhia1ukc6tlc7m8.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "REDACTED_GOOGLE_API_KEY"
+          "current_key": "AIzaSyCCckxbCMnuMQ5aGoVgwAC7hBB-B6i3a3I"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "613797050409-poeu1cshtnc4maj73jhia1ukc6tlc7m8.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "613797050409-2h840d920oulm57fahr144i3ob8fh1mv.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.cmolds.yourappname-"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

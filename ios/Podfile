@@ -59,7 +59,7 @@ setup_permissions([
     # 'StoreKit',
 ])
 
-target 'yourappname' do
+target 'snlift' do
 
 # React Native Maps dependencies
 

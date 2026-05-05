@@ -33,7 +33,7 @@ Most broken builds and “Firebase works on my machine” issues come from **ski
    | Platform | File | Typical path in this repo |
    |----------|------|---------------------------|
    | Android | `google-services.json` | `android/app/google-services.json` |
-   | iOS | `GoogleService-Info.plist` | `ios/<YourTargetFolder>/GoogleService-Info.plist` (e.g. `ios/yourappname/` until you rename) |
+   | iOS | `GoogleService-Info.plist` | `ios/<YourTargetFolder>/GoogleService-Info.plist` (e.g. `ios/snlift/` until you rename) |
 
 3. If you **do not** use the same Firebase project as whoever maintained the boilerplate, **replace** any bundled or example plist/JSON — wrong `GOOGLE_APP_ID` / bundle ID pairs cause cryptic native errors.
 4. After **`yarn rename-app`** or any change to package name / bundle ID, download **fresh** `google-services.json` and `GoogleService-Info.plist` from Firebase again.
@@ -180,7 +180,7 @@ Full list: see **`package.json` → `scripts`**.
 
 ## Appendix: copy-paste setup for new / merged projects
 
-Use this when you want **concrete blocks** to drop into a fresh or existing React Native app. The snippets below mirror **`package.json`**, **`ios/Podfile`**, and **`ios/yourappname/Info.plist`** in **this** repository; if anything drifts, those files are the source of truth.
+Use this when you want **concrete blocks** to drop into a fresh or existing React Native app. The snippets below mirror **`package.json`**, **`ios/Podfile`**, and **`ios/snlift/Info.plist`** in **this** repository; if anything drifts, those files are the source of truth.
 
 ### `package.json` — scripts and `lint-staged`
 
@@ -286,7 +286,7 @@ Merge into your `package.json` (avoid duplicate keys). CocoaPods here expects **
 
 ### iOS — `Info.plist`
 
-Add or adjust keys in **`ios/yourappname/Info.plist`** (rename the folder when you rename the app). Strings below match **this** project; tailor copy for your product.
+Add or adjust keys in **`ios/snlift/Info.plist`** (rename the folder when you rename the app). Strings below match **this** project; tailor copy for your product.
 
 ```xml
 <key>NSAppleMusicUsageDescription</key>
@@ -334,7 +334,7 @@ Add or adjust keys in **`ios/yourappname/Info.plist`** (rename the folder when y
 </array>
 ```
 
-The checked-in plist also includes **alternate app icons** (`CFBundleIcons` / `UIApplicationSupportsAlternateIcons`), **Google URL schemes**, **Firebase Crashlytics** collection flag, **ATS**, and **background modes** (`fetch`, `remote-notification`); open **`ios/yourappname/Info.plist`** for the full file.
+The checked-in plist also includes **alternate app icons** (`CFBundleIcons` / `UIApplicationSupportsAlternateIcons`), **Google URL schemes**, **Firebase Crashlytics** collection flag, **ATS**, and **background modes** (`fetch`, `remote-notification`); open **`ios/snlift/Info.plist`** for the full file.
 
 ### Optional — Gradle helper
 
@@ -424,7 +424,7 @@ Do **not** rely on stale one-line `yarn add` lists. Merge this repository’s **
 
 ### iOS: Podfile & `Info.plist`
 
-Full **`node_require`**, **`setup_permissions`**, **New Architecture**, **Maps / Firebase / Stripe `post_install`**, and **`Info.plist`** snippets are in the [Appendix](#appendix-copy-paste-setup-for-new--merged-projects). Compare your **`ios/<App>/Info.plist`** with **`ios/yourappname/Info.plist`** here (URL schemes, background modes, alternate icons, etc.).
+Full **`node_require`**, **`setup_permissions`**, **New Architecture**, **Maps / Firebase / Stripe `post_install`**, and **`Info.plist`** snippets are in the [Appendix](#appendix-copy-paste-setup-for-new--merged-projects). Compare your **`ios/<App>/Info.plist`** with **`ios/snlift/Info.plist`** here (URL schemes, background modes, alternate icons, etc.).
 
 ### Final native steps
 

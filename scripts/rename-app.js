@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Replaces template "yourappname", updates bundle ID (iOS + Android), renames iOS tree,
+ * Replaces template "snlift", updates bundle ID (iOS + Android), renames iOS tree,
  * and moves Android Kotlin sources to match the new package path.
  *
  * Accepts any friendly casing: "MyAppName", "my app name", "MY-APP", etc.
@@ -20,12 +20,12 @@ const path = require('path');
 const readline = require('readline');
 
 const ROOT = path.resolve(__dirname, '..');
-const OLD = 'yourappname';
-const OLD_PASCAL = 'YourAppName';
-const OLD_UPPER = 'YOURAPPNAME';
-const OLD_BUNDLE_PREFIX = 'com.cmolds.yourappname';
+const OLD = 'snlift';
+const OLD_PASCAL = 'SnLift';
+const OLD_UPPER = 'SNLIFT';
+const OLD_BUNDLE_PREFIX = 'com.cmolds.snlift';
 /** Temporary marker — must not appear in repo before run */
-const PLACE = '__BOILERPLATE_APP_NAME_TOKEN__';
+const PLACE = 'snlift';
 
 const SKIP_DIR_NAMES = new Set([
   'node_modules',

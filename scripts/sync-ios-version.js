@@ -8,7 +8,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const pkgPath = path.join(root, 'package.json');
-const pbxPath = path.join(root, 'ios/yourappname.xcodeproj/project.pbxproj');
+const pbxPath = path.join(root, 'ios/snlift.xcodeproj/project.pbxproj');
 
 const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
 const version = pkg.version || '1.0.0';

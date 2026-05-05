@@ -70,9 +70,9 @@ def enableProguardInReleaseBuilds = true
 def rootDir = file("../../")
 def packageJsonFile = file("${rootDir}/package.json")
 
-// 1) App name from app.json (e.g. "yourappname")
+// 1) App name from app.json (e.g. "snlift")
 def appJson = new groovy.json.JsonSlurper().parseText(file("${rootDir}/app.json").text)
-def appName = "yourappname" // appJson.displayName ?: appJson.name ?: "YourAppName" TODO:OPEN THIS AND REMOVE yourappname
+def appName =  appJson.displayName ?: appJson.name ?: "SnLift"
 
 // 2) Version and version code from package.json
 def pkgJson = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
@@ -128,14 +128,14 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.cmolds.yourappname"
+    namespace "com.cmolds.snlift"
     // Skip lint during release assemble for faster builds (run lint separately when needed)
     lint {
         checkReleaseBuilds false
         abortOnError false
     }
     defaultConfig {
-        applicationId "com.cmolds.yourappname"
+        applicationId "com.cmolds.snlift"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode

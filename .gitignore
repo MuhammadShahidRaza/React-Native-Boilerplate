@@ -34,7 +34,7 @@ local.properties
 !debug.keystore
 # Release signing — do not commit
 android/keystore.properties
-android/app/yourappname-release.keystore
+android/app/snlift-release.keystore
 .kotlin/
 
 # node.js

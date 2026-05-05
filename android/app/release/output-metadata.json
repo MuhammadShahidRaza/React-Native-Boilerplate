@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.cmolds.yourappname",
+  "applicationId": "com.cmolds.snlift",
   "variantName": "release",
   "elements": [
     {
@@ -13,7 +13,7 @@
       "attributes": [],
       "versionCode": 13,
       "versionName": "1.0.16",
-      "outputFile": "yourappname-1.0.16-13.apk"
+      "outputFile": "snlift-1.0.16-13.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/yourappname-1.0.16-13.dm"
+        "baselineProfiles/1/snlift-1.0.16-13.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/yourappname-1.0.16-13.dm"
+        "baselineProfiles/0/snlift-1.0.16-13.dm"
       ]
     }
   ],
