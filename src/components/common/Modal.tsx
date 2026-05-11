@@ -106,7 +106,7 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
                 setModalVisible(false);
               }
             }}
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, styles.scrimTap]}
           />
 
           <View
@@ -117,27 +117,29 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
               modalSecondaryContainerStyle,
             ]}
           >
-            {closeIcon && (
-              <Icon
-                onPress={() => setModalVisible(false)}
-                componentName={VARIABLES.Entypo}
-                iconName='cross'
-                size={FontSize.ExtraLarge}
-                color={COLORS.WHITE}
-                iconStyle={[styles.closeIcon, closeIconStyle]}
-              />
-            )}
-            {scroll ? (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-                keyboardShouldPersistTaps='handled'
-              >
-                {children}
-              </ScrollView>
-            ) : (
-              children
-            )}
+            <View style={styles.modalInnerForeground}>
+              {closeIcon && (
+                <Icon
+                  onPress={() => setModalVisible(false)}
+                  componentName={VARIABLES.Entypo}
+                  iconName='cross'
+                  size={FontSize.ExtraLarge}
+                  color={COLORS.WHITE}
+                  iconStyle={[styles.closeIcon, closeIconStyle]}
+                />
+              )}
+              {scroll ? (
+                <ScrollView
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                  keyboardShouldPersistTaps='handled'
+                >
+                  {children}
+                </ScrollView>
+              ) : (
+                children
+              )}
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -148,7 +150,10 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: COLORS.MEDIUM_BLACK_OPACITY,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  scrimTap: {
+    zIndex: 1,
   },
   bottomContainer: {
     justifyContent: 'flex-end',
@@ -176,10 +181,16 @@ const styles = StyleSheet.create({
   modalInnerWrapper: {
     marginHorizontal: 20,
     borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
+    overflow: 'hidden',
+    position: 'relative',
+    zIndex: 2,
     ...STYLES.SHADOW,
     backgroundColor: COLORS.SURFACE,
+  },
+  modalInnerForeground: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    zIndex: 2,
   },
   closeIcon: {
     alignSelf: 'flex-end',

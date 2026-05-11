@@ -17,6 +17,7 @@ import {
   RowComponent,
   Checkbox,
   SocialButton,
+  PhoneInputComponent,
 } from 'components/index';
 import { navigate } from 'navigation/index';
 import { loginUser, loginUserThroughSocial } from 'api/functions/auth';
@@ -32,6 +33,9 @@ interface LoginFormValues {
   rememberMe: boolean;
   showPassword: boolean;
   user_type: USER_TYPE;
+  phone_number: string;
+  country_code: string;
+  calling_code: string;
 }
 
 export const Login = () => {
@@ -41,6 +45,9 @@ export const Login = () => {
     // password: __DEV__ ? 'Passward123!' : '',
     email: '',
     password: '',
+    phone_number: '',
+    country_code: '',
+    calling_code: '',
     showPassword: false,
     rememberMe: false,
     user_type: role,
@@ -52,6 +59,9 @@ export const Login = () => {
       email: values?.email,
       password: values?.password,
       user_type: values?.user_type,
+      phone_number: values?.phone_number,
+      country_code: values?.country_code,
+      calling_code: values?.calling_code,
       ...deviceInfo,
     };
 
@@ -92,7 +102,7 @@ export const Login = () => {
       }}
     >
       <FocusProvider>
-        <Input
+        {/* <Input
           name={COMMON_TEXT.EMAIL}
           title={COMMON_TEXT.EMAIL_ADDRESS}
           onChangeText={formik.handleChange('email')}
@@ -102,9 +112,32 @@ export const Login = () => {
           keyboardType={'email-address'}
           autoCapitalize='none'
           autoCorrect={false}
+            startIcon={{
+              componentName: VARIABLES.MaterialCommunityIcons,
+              iconName: 'email-outline',
+            }}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
           error={formik.errors.email}
           touched={Boolean(formik.touched.email && formik.submitCount)}
+        /> */}
+        <PhoneInputComponent
+          name={COMMON_TEXT.PHONE_NUMBER}
+          title={COMMON_TEXT.PHONE_NUMBER}
+          editable={true}
+          onChangeText={formik.handleChange('phone_number')}
+          value={formik.values.phone_number}
+          // onBlur={formik.handleBlur('phone_number')}
+          allowSpacing={false}
+          onChangeCountryCode={formik.handleChange('country_code')}
+          onChangeCallingCode={formik.handleChange('calling_code')}
+          defaultCode={(formik.values.country_code || 'NG') as any}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'phone',
+          }}
+          placeholder={COMMON_TEXT.PHONE_NUMBER}
+          error={formik.errors.phone_number}
+          touched={Boolean(formik.touched.phone_number && formik.submitCount)}
         />
         <Input
           name={COMMON_TEXT.PASSWORD}
@@ -118,11 +151,15 @@ export const Login = () => {
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showPassword ? 'eye' : 'eye-off',
-            color: COLORS.ICONS,
+            color: COLORS.PLACEHOLDER,
             size: FontSize.MediumLarge,
             onPress: () => {
               formik.setFieldValue('showPassword', !formik.values.showPassword);
             },
+          }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock',
           }}
           secureTextEntry={!formik.values.showPassword}
           error={formik.errors.password}
@@ -130,12 +167,13 @@ export const Login = () => {
         />
       </FocusProvider>
       <RowComponent style={styles.row}>
-        <Checkbox
+        {/* <Checkbox
           style={styles.checkbox}
           label={COMMON_TEXT.REMEMBER_ME}
           checked={formik.values.rememberMe}
           onChange={checked => formik.setFieldValue('rememberMe', checked)}
-        />
+        /> */}
+        <View />
         <RowComponent>
           <Typography
             onPress={() => {
@@ -162,7 +200,7 @@ export const Login = () => {
         style={[styles.row, styles.button]}
       />
 
-      <RowComponent style={{ gap: 10, alignItems: 'center', marginBottom: 30 }}>
+      {/* <RowComponent style={{ gap: 10, alignItems: 'center', marginBottom: 30 }}>
         <View style={styles.line} />
         <Typography style={styles.orLoginWith}>{COMMON_TEXT.OR_LOGIN_WITH}</Typography>
         <View style={styles.line} />
@@ -182,7 +220,7 @@ export const Login = () => {
           const payload = await AppleSignIn(role);
           if (payload) await loginUserThroughSocial({ data: payload });
         }}
-      />
+      /> */}
     </AuthComponent>
   );
 };

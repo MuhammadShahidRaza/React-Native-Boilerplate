@@ -1,0 +1,57 @@
+diff --git a/node_modules/react-native-country-picker-modal/lib/CloseButton.js b/node_modules/react-native-country-picker-modal/lib/CloseButton.js
+index 1111111..2222222 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CloseButton.js
++++ b/node_modules/react-native-country-picker-modal/lib/CloseButton.js
+@@ -1,5 +1,5 @@
+ import React from 'react';
+-import { Image, TouchableNativeFeedback, View, Platform, TouchableOpacity, StyleSheet } from 'react-native';
++import { TouchableNativeFeedback, View, Platform, TouchableOpacity, StyleSheet, Text } from 'react-native';
+ import PropTypes from 'prop-types';
+ import { useTheme } from './CountryTheme';
+ const styles = StyleSheet.create({
+@@ -12,14 +12,14 @@ const styles = StyleSheet.create({
+     imageStyle: {
+         height: 25,
+         width: 25,
+         resizeMode: 'contain'
++    },
++    closeText: {
++        fontSize: 26,
++        lineHeight: 26,
++        fontWeight: '600'
+     }
+ });
+ const CloseButtonAndroid = (props) => {
+-    let closeImage = require('./assets/images/close.android.png');
+-    if (props.image) {
+-        closeImage = props.image;
+-    }
+     const { onBackgroundTextColor } = useTheme();
+     return (React.createElement(View, { style: [styles.container, props.style] },
+         React.createElement(TouchableNativeFeedback, { background: Platform.Version < 21
+@@ -27,12 +27,7 @@ const CloseButtonAndroid = (props) => {
+                 ? TouchableNativeFeedback.SelectableBackground()
+                 : TouchableNativeFeedback.SelectableBackgroundBorderless(), onPress: props.onPress },
+             React.createElement(View, null,
+-                React.createElement(Image, { source: closeImage, style: [
+-                        styles.imageStyle,
+-                        props.imageStyle,
+-                        { tintColor: onBackgroundTextColor }
+-                    ] }))));
++                React.createElement(Text, { style: [styles.closeText, { color: onBackgroundTextColor }] }, "\u00D7")))));
+ };
+ const CloseButtonIOS = (props) => {
+-    let closeImage = require('./assets/images/close.ios.png');
+-    if (props.image) {
+-        closeImage = props.image;
+-    }
+     const { onBackgroundTextColor } = useTheme();
+     return (React.createElement(View, { style: [styles.container, props.style] },
+         React.createElement(TouchableOpacity, { onPress: props.onPress },
+-            React.createElement(Image, { source: closeImage, style: [
+-                    styles.imageStyle,
+-                    props.imageStyle,
+-                    { tintColor: onBackgroundTextColor }
+-                ] }))));
++            React.createElement(Text, { style: [styles.closeText, { color: onBackgroundTextColor }] }, "\u00D7"))));
+ };

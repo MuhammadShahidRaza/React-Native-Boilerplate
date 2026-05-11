@@ -1,4 +1,5 @@
 import { FontSize } from 'types/fontTypes';
+import { COLORS } from './colors';
 
 /**
  * Single source of truth for all form controls: Input, Dropdown, Autocomplete, PhoneInput.
@@ -23,8 +24,11 @@ export const INPUT_THEME = {
   },
   input: {
     height: 50,
-    borderRadius: 10,
+    borderRadius: 50,
     borderRadiusInline: 15,
+  },
+  inputBackground: {
+    backgroundColor: COLORS.SURFACE,
   },
   autocomplete: {
     height: 45,

@@ -1,23 +1,29 @@
 import { StyleSheet } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
 import { forgotPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
-import { Button, Input, AuthComponent } from 'components/index';
+import { Button, AuthComponent, PhoneInputComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
 import { forgotPassword } from 'api/functions/auth';
 
 interface ForgotPasswordFormValues {
-  email: string;
+  phone_number: string;
+  country_code: string;
+  calling_code: string;
 }
 
 export const ForgotPassword = () => {
   const initialValues: ForgotPasswordFormValues = {
-    email: __DEV__ ? 'shahid@mailinator.com' : '',
+    phone_number: '',
+    country_code: 'NG',
+    calling_code: '',
   };
 
   const handleSubmit = async (values: ForgotPasswordFormValues) => {
     const data = {
-      email: values?.email,
+      phone_number: values?.phone_number,
+      country_code: values?.country_code,
+      calling_code: values?.calling_code,
     };
     await forgotPassword({ data });
   };
@@ -33,33 +39,32 @@ export const ForgotPassword = () => {
 
   return (
     <AuthComponent
-      showLogo={false}
       heading1={COMMON_TEXT.FORGOT_PASSWORD}
       description={AUTH_TEXT.RESET_YOUR_PASSWORD}
       descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
-      containerStyle={{ marginTop: 50 }}
+    containerStyle={{ marginTop: 30 }}
       bottomButtonText=''
       bottomText=''
     >
       <FocusProvider>
-        <Input
-          name={COMMON_TEXT.EMAIL}
-          title={COMMON_TEXT.EMAIL_ADDRESS}
-          onChangeText={formik.handleChange('email')}
-          onBlur={formik.handleBlur('email')}
-          value={formik.values.email}
+        <PhoneInputComponent
+          name={COMMON_TEXT.PHONE_NUMBER}
+          title={COMMON_TEXT.PHONE_NUMBER}
+          onChangeText={formik.handleChange('phone_number')}
+          value={formik.values.phone_number}
+          // onBlur={formik.handleBlur('phone_number')}
+          onChangeCountryCode={formik.handleChange('country_code')}
+          onChangeCallingCode={formik.handleChange('calling_code')}
+          defaultCode={(formik.values.country_code || 'NG') as any}
           allowSpacing={false}
-          autoCapitalize='none'
-          autoCorrect={false}
           returnKeyType='go'
-          keyboardType={'email-address'}
-          placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
-          error={formik.errors.email}
-          touched={Boolean(formik.touched.email && formik.submitCount)}
-          // startIcon={{
-          //   componentName: VARIABLES.AntDesign,
-          //   iconName: 'lock1',
-          // }}
+          placeholder={COMMON_TEXT.PHONE_NUMBER}
+          error={formik.errors.phone_number}
+          touched={Boolean(formik.touched.phone_number && formik.submitCount)}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'phone',
+          }}
         />
       </FocusProvider>
       <Button

@@ -203,7 +203,7 @@
     "NEED_A_HELP": "Need a help?",
     "RE_SEND_CODE": "Resend code",
     "VERIFY": "VERIFY",
-    "ENTER_VERIFICATION_CODE_YOU": "Enter verification code you received on your email address",
+    "ENTER_VERIFICATION_CODE_YOU": "Enter the verification code you received on your phone number",
     "RESET_YOUR_PASSWORD_WITH": "Reset your password to get back into your account safely.",
     "DID_NOT_YOU_RECIEVE": "Didn’t receive a code?"
   },
@@ -249,7 +249,7 @@
     "LOGIN_HEADING": "Welcome Back! 👋",
     "LOGIN_DESCRIPTION": "Hello again, you've been missed!",
     "DONT_WORRY_FORGOT": "Don't worry we are here to help!",
-    "RESET_YOUR_PASSWORD": "Reset your password with email to use your account.",
+    "RESET_YOUR_PASSWORD": "Reset your password with phone number to use your account.",
     "SIGN_UP_HEADING": "Join Us Today! 🎉",
     "SIGN_UP_DESCRIPTION": "Create your account to get started.",
     "GET_STARTED_HEADING": "Choose your role",

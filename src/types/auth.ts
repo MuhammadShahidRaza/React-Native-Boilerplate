@@ -1,4 +1,4 @@
-export type USER_TYPE = 'user' | 'dentor';
+export type USER_TYPE = 'user' | 'courier' | 'driver';
 export type SOCIAL_LOGIN_PROVIDER = 'google' | 'facebook' | 'apple';
 
 export interface Login_SignUp {
@@ -8,7 +8,7 @@ export interface Login_SignUp {
   full_name?: string;
   country_code?: string;
   calling_code?: string;
-  email: string;
+  email?: string;
   user_type: USER_TYPE;
   phone_number?: string;
   profile_image?: object | null;
@@ -40,7 +40,10 @@ export interface SocialLogin {
 }
 
 export interface VerifyOtp {
-  email: string;
+  // email?: string;
+  phone_number?: string;
+  country_code?: string;
+  calling_code?: string;
   otp_code: string;
 }
 

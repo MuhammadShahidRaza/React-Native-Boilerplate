@@ -22,7 +22,7 @@ import { ActivityStatus } from './Activities';
 import { JobStatus } from './MyJobs';
 import { useBookings } from 'hooks/useBookings';
 import { Booking } from 'types/responseTypes';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { IMAGES } from 'constants/assets';
 
 /** User: all active jobs. Dentor: jobs after bid placed (excludes pending/new inquiries). */
@@ -34,7 +34,7 @@ export const Home = () => {
   const newInquiriesUnreadCount = useAppSelector(
     state => state?.notification?.newInquiriesUnreadCount ?? 0,
   );
-  const isDentor = role === APP_CONFIG.PROVIDER_ROLE;
+  const isDentor = isWorkerRole(role);
   const { items, loading, loadingMore, loadMore, hasMore, refetch } = useBookings({
     isDentor,
     status: 'upcoming',

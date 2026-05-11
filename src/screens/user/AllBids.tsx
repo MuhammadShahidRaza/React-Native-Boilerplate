@@ -114,7 +114,7 @@ export const AllBids = ({ route }: AppScreenProps<typeof SCREENS.ALL_BIDS>) => {
       }
       const { error: setupInitError } = await initPaymentSheet({
         setupIntentClientSecret: setupRes.setup_intent,
-        merchantDisplayName: 'yourappname',
+        merchantDisplayName: 'Sn Lift',
         customerId: setupRes.customer,
         customerEphemeralKeySecret: setupRes.ephemeralKey,
       });

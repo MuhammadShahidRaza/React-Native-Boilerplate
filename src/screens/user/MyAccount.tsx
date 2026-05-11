@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { handleAccountLogout } from './Settings';
 import CustomSwitch from 'components/common/SwitchButton';
 import { updateUserDetails } from 'api/functions/app/user';
-import { APP_CONFIG } from 'config/app';
+import { APP_CONFIG, isWorkerRole } from 'config/app';
 
 export const MyAccount = () => {
   const { userDetails } = useAppSelector(state => state?.user);
@@ -29,7 +29,7 @@ export const MyAccount = () => {
   };
 
   const tabs = [
-    ...(role === APP_CONFIG.PROVIDER_ROLE
+    ...(isWorkerRole(role)
       ? [
           {
             title: 'My Account',
@@ -39,7 +39,7 @@ export const MyAccount = () => {
           },
         ]
       : []),
-    ...(role === 'user'
+    ...(role === APP_CONFIG.USER_ROLE
       ? [
           {
             title: COMMON_TEXT.EDIT_PROFILE,
@@ -62,7 +62,7 @@ export const MyAccount = () => {
       iconComponent: VARIABLES.MaterialIcons,
       onPress: () => navigate(SCREENS.CONTACT_US),
     },
-    ...(role === APP_CONFIG.PROVIDER_ROLE
+    ...(isWorkerRole(role)
       ? [
           {
             title: 'My Wallet',
@@ -86,7 +86,7 @@ export const MyAccount = () => {
         setisLogoutModalVisible(true);
       },
       style: {
-        marginTop: role === APP_CONFIG.PROVIDER_ROLE ? 75 : 200,
+        marginTop: isWorkerRole(role) ? 75 : 200,
         borderBottomWidth: 0,
       },
     },
@@ -114,7 +114,7 @@ export const MyAccount = () => {
       <View style={styles.tabsContainer}>
         <Typography style={styles.titleText}>{'My Account'}</Typography>
         {/* Pause Profile Toggle for Dentors */}
-        {role === APP_CONFIG.PROVIDER_ROLE && (
+        {isWorkerRole(role) && (
           <RowComponent
             style={[
               styles.rowContainer,

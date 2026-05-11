@@ -37,3 +37,15 @@ export * from './AllBids';
 export { ThemeSelectorScreen as ThemeSelector } from './ThemeSelector';
 export * from './TransactionHistory';
 export * from './MyWallet';
+export {
+  ConsumerHomeHub,
+  ConsumerMultiServiceActivity,
+  BookRideScreen,
+  SendParcelScreen,
+  SendParcelFindingScreen,
+  CourierMatchedScreen,
+  TrackParcelScreen,
+  OrderFoodScreen,
+  RestaurantMenuScreen,
+  FoodDeliveryCartScreen,
+} from '../consumer';

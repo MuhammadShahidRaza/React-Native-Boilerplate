@@ -105,4 +105,14 @@ export const SCREENS = {
   TRANSACTION_HISTORY: 'TransactionHistory',
   MY_WALLET: 'MyWallet',
   MY_JOBS: 'MyJobs',
+
+  /** Multi-service consumer UI (rides, parcel, food) */
+  BOOK_RIDE: 'BookRide',
+  SEND_PARCEL: 'SendParcel',
+  SEND_PARCEL_FINDING: 'SendParcelFinding',
+  COURIER_MATCHED: 'CourierMatched',
+  TRACK_PARCEL: 'TrackParcel',
+  ORDER_FOOD: 'OrderFood',
+  RESTAURANT_MENU: 'RestaurantMenu',
+  FOOD_DELIVERY_CART: 'FoodDeliveryCart',
 } as const;

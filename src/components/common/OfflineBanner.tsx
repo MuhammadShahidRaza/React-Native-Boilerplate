@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Animated, StyleSheet } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { Typography } from './Typography';
 import { COLORS } from 'utils/colors';
@@ -40,21 +40,31 @@ export const OfflineBanner = () => {
     <Animated.View
       style={[styles.banner, { transform: [{ translateY: slideAnim }], bottom: insetBottom }]}
     >
-      <Typography style={styles.text}>{COMMON_TEXT.NO_INTERNET_CONNECTION}</Typography>
+      <View style={styles.bannerInner}>
+        <Typography style={styles.text}>{COMMON_TEXT.NO_INTERNET_CONNECTION}</Typography>
+      </View>
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   banner: {
-    // position: 'absolute',
-    bottom: 12,
+    position: 'absolute',
     left: 0,
     right: 0,
-    backgroundColor: COLORS.DARK_RED,
-    padding: 5,
+    bottom: 12,
+    marginHorizontal: 12,
+    borderRadius: 14,
+    overflow: 'hidden',
+    minHeight: 36,
     zIndex: 9999,
+    backgroundColor: 'rgba(180, 32, 32, 0.9)',
+  },
+  bannerInner: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: 'center',
+    zIndex: 2,
   },
   text: {
     color: COLORS.WHITE,

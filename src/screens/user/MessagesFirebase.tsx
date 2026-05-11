@@ -22,7 +22,7 @@ import {
   markConversationRead,
 } from '../../services/chat/firestoreChat';
 import { fetchDentorBookingsPage, fetchUserBookingsPage } from 'api/functions/app/home';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { useFocusEffect } from '@react-navigation/native';
 
 interface Message {
@@ -102,7 +102,7 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
 
   // Fetch active booking ID
   const role = useAppSelector(state => state?.user?.role);
-  const isDentor = role === APP_CONFIG.PROVIDER_ROLE;
+  const isDentor = isWorkerRole(role);
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {

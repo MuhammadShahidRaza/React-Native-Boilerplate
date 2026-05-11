@@ -21,6 +21,9 @@ export const Verification = ({
 }: AppScreenProps<typeof SCREENS.VERIFICATION>) => {
   const isFromForgot = route.params?.isFromForgot;
   const email = route.params?.email;
+  const phone_number = route.params?.phone_number;
+  const country_code = route.params?.country_code;
+  const calling_code = route.params?.calling_code;
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(TIMER_SECONDS);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
@@ -53,7 +56,15 @@ export const Verification = ({
 
   const handleVerify = buttons.wrap('verify', async () => {
     if (isFromForgot) {
-      await verifyOtpCode({ data: { email, otp_code: code } });
+      await verifyOtpCode({
+        data: {
+          email,
+          phone_number,
+          country_code,
+          calling_code,
+          otp_code: code,
+        },
+      });
     } else {
       await verifyEmailCode({
         data: {
@@ -71,7 +82,9 @@ export const Verification = ({
       setIsResendEnabled(false);
       setCode('');
       inputRef.current?.focus();
-      await resendEmailCode({ data: { email } });
+      if (email) {
+        await resendEmailCode({ data: { email } });
+      }
     }
   });
 
@@ -82,11 +95,10 @@ export const Verification = ({
 
   return (
     <AuthComponent
-      showLogo={false}
       heading1={COMMON_TEXT.VERIFICATION_CODE}
       description={COMMON_TEXT.ENTER_VERIFICATION_CODE_YOU}
-      descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
-      containerStyle={{ marginTop: 50 }}
+      descriptionStyle={{ marginBottom: 20, textAlign: 'left' }}
+      containerStyle={{ marginTop: 30 }}
       bottomButtonText=''
       bottomText=''
     >
@@ -191,9 +203,9 @@ const styles = StyleSheet.create({
   codeInput: {
     width: 56,
     height: 56,
-    borderWidth: 1,
+    borderBottomWidth: 4,
+    // borderRadius: 10,
     borderColor: COLORS.BORDER,
-    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.SURFACE,
@@ -203,7 +215,8 @@ const styles = StyleSheet.create({
   },
   codeInputActive: {
     borderColor: COLORS.PRIMARY,
-    borderWidth: 2,
+       borderBottomWidth: 4,
+    // borderRadius: 10,
   },
   codeText: {
     fontSize: FontSize.Large,

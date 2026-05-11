@@ -190,7 +190,7 @@ const verificationCodeSchema = createStringValidationSchema({
 
 // Validation schemas
 export const loginValidationSchema = createObjectShape({
-  email: emailSchema,
+  phone_number: phoneNumberSchema,
   password: passwordSchema,
 });
 
@@ -247,7 +247,7 @@ export const verificationValidationSchema = createObjectShape({
   code: verificationCodeSchema,
 });
 export const forgotPasswordValidationSchema = createObjectShape({
-  email: emailSchema,
+  phone_number: phoneNumberSchema,
 });
 
 export const resetPasswordValidationSchema = createObjectShape({

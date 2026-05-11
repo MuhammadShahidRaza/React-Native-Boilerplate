@@ -9,11 +9,17 @@ import { Icon, Typography } from 'components/common';
 import type { IconComponentProps } from 'components/common/Icon';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { screenHeight } from 'utils/index';
-import { Home, MyAccount, Activities, ChatFirebase } from 'screens/user';
+import {
+  Home,
+  MyAccount,
+  ChatFirebase,
+  ConsumerHomeHub,
+  ConsumerMultiServiceActivity,
+} from 'screens/user';
 import { useTranslation } from 'hooks/useTranslation';
 import { MyJobs } from 'screens/user/MyJobs';
 import { useAppSelector } from 'types/reduxTypes';
-import { APP_CONFIG } from 'config/app';
+import { APP_CONFIG, isWorkerRole } from 'config/app';
 import { useConversations } from 'hooks/useConversations';
 
 // Create navigator outside component to avoid recreation on each render
@@ -30,12 +36,12 @@ type ScreenConfig = {
 // Function to get screen config based on role
 const getScreenConfig = (role: string): Record<string, ScreenConfig> => ({
   [SCREENS.HOME]: {
-    component: Home,
+    component: role === APP_CONFIG.USER_ROLE ? ConsumerHomeHub : Home,
     iconName: 'home',
     componentName: VARIABLES.Feather,
     label: SCREENS.HOME,
   },
-  ...(role === APP_CONFIG.PROVIDER_ROLE
+  ...(isWorkerRole(role)
     ? {
         [SCREENS.MY_JOBS]: {
           component: MyJobs,
@@ -48,7 +54,7 @@ const getScreenConfig = (role: string): Record<string, ScreenConfig> => ({
   ...(role === APP_CONFIG.USER_ROLE
     ? {
         [SCREENS.ACTIVITIES]: {
-          component: Activities,
+          component: ConsumerMultiServiceActivity,
           iconName: 'newspaper-outline',
           componentName: VARIABLES.Ionicons,
           label: SCREENS.ACTIVITIES,
@@ -80,7 +86,7 @@ export const BottomNavigator = () => {
   const screenConfig = useMemo(() => getScreenConfig(role), [role]);
 
   const screenOrder = useMemo(() => {
-    if (role === APP_CONFIG.PROVIDER_ROLE) {
+    if (isWorkerRole(role)) {
       return [SCREENS.HOME, SCREENS.MY_JOBS, SCREENS.CHAT_FIREBASE, SCREENS.MY_ACCOUNT];
     } else {
       return [SCREENS.HOME, SCREENS.ACTIVITIES, SCREENS.CHAT_FIREBASE, SCREENS.MY_ACCOUNT];
@@ -95,13 +101,19 @@ export const BottomNavigator = () => {
   // Memoize tab bar style to avoid recreation
   const tabBarStyle = useMemo(
     () => ({
-      backgroundColor: COLORS.BOTTOM_NAVIGATION_BAR,
+      backgroundColor: COLORS.SURFACE,
+      borderTopWidth: 0,
+      elevation: 0,
       height: screenHeight(7),
       marginBottom: insets.bottom + 5,
       borderRadius: 50,
       marginHorizontal: 20,
       paddingTop: 5,
       paddingBottom: 0,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.16,
+      shadowRadius: 12,
     }),
     [insets.bottom],
   );
@@ -124,7 +136,7 @@ export const BottomNavigator = () => {
               iconName={config.iconName}
               componentName={config.componentName}
               size={FontSize.ExtraLarge}
-              color={focused ? COLORS.WHITE : COLORS.BORDER}
+              color={focused ? COLORS.PRIMARY : 'rgba(255,255,255,0.55)'}
             />
             {route.name === SCREENS.CHAT_FIREBASE && totalUnreadCount > 0 && (
               <View style={styles.chatBadge} />
@@ -135,7 +147,7 @@ export const BottomNavigator = () => {
           focused ? (
             <View style={styles.labelContainer}>
               <Typography style={styles.label}>{config.label}</Typography>
-              <View style={[styles.indicator, { backgroundColor: COLORS.WHITE }]} />
+              <View style={[styles.indicator, { backgroundColor: COLORS.PRIMARY }]} />
             </View>
           ) : null,
         tabBarHideOnKeyboard: true,
@@ -170,7 +182,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#FB344F',
     borderWidth: 1.5,
-    borderColor: COLORS.BOTTOM_NAVIGATION_BAR,
+    borderColor: 'rgba(255,255,255,0.35)',
   },
   labelContainer: {
     alignItems: 'center',
@@ -185,7 +197,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   label: {
-    color: COLORS.WHITE,
+    color: COLORS.PRIMARY,
     fontSize: FontSize.ExtraSmall,
     fontWeight: FontWeight.Bold,
   },

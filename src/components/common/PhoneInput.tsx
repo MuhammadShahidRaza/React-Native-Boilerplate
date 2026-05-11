@@ -52,13 +52,13 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   placeholder,
   error,
   onChangeText,
-  lineAfterIcon = true,
+  lineAfterIcon = false,
   style,
   touched,
   returnKeyType = 'next',
   onSubmitEditing,
   autoFocus,
-  isTitleInLine = true,
+  isTitleInLine = false,
   blurOnSubmit,
   defaultCode = 'NG',
   allowSpacing = true,
@@ -141,6 +141,11 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
               ref={phoneRef}
               defaultValue={value}
               defaultCode={defaultCode}
+              countryPickerProps={{
+                withEmoji: true,
+                withFlag: true,
+                ...(rest?.countryPickerProps || {}),
+              }}
               placeholder={i18n.t(placeholder)}
               containerStyle={[{ height }, styles.innerContainer]}
               countryPickerButtonStyle={styles.countryPickerButtonStyle}
@@ -192,12 +197,12 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
+    backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
     overflow: 'hidden',
     paddingHorizontal: 8,
     marginBottom: 5,
   },
-  inputContainerWithTitle: { width: '80%' },
+  inputContainerWithTitle: { width: '85%' },
   lineStyle: {
     backgroundColor: COLORS.BORDER,
     width: 1,
@@ -214,7 +219,7 @@ const styles = StyleSheet.create({
   startIcon: {
     padding: 10,
     fontSize: 24,
-    color: COLORS.PRIMARY,
+    color: COLORS.PLACEHOLDER,
   },
   endIcon: {
     padding: 10,
@@ -233,19 +238,20 @@ const styles = StyleSheet.create({
   innerContainer: {
     ...CENTER,
     borderRadius: 10,
+    backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   codeTextStyle: {
     height: isIOS() ? 18 : 22,
     ...CENTER,
   },
   countryPickerButtonStyle: {
-    borderRadius: 10,
+    borderRadius: INPUT_THEME.input.borderRadius,
     width: '20%',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
+    backgroundColor:  INPUT_THEME.inputBackground.backgroundColor,
   },
   textContainerStyle: {
     maxWidth: isIOS() ? '66%' : '68%',
-    backgroundColor: COLORS.INPUT_BACKGROUND,
+    backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   textInputStyle: {
     color: COLORS.PRIMARY,

@@ -9,10 +9,19 @@ export interface UserState {
   role: USER_TYPE;
 }
 
+/** Map API `user_type` / `user_role` into app role (legacy `dentor` → courier). */
+function normalizeApiRoleToAppRole(raw: string | undefined): USER_TYPE {
+  if (raw === APP_CONFIG.DRIVER_ROLE) return APP_CONFIG.DRIVER_ROLE;
+  if (raw === APP_CONFIG.COURIER_ROLE) {
+    return APP_CONFIG.COURIER_ROLE;
+  }
+  return APP_CONFIG.USER_ROLE;
+}
+
 const initialState: UserState = {
   userDetails: null,
   openGuestModal: false,
-  role: 'user',
+  role: APP_CONFIG.USER_ROLE,
 };
 
 const userSlice = createSlice({
@@ -22,9 +31,8 @@ const userSlice = createSlice({
     setUserDetails(state, action: PayloadAction<User | null>) {
       state.userDetails = action.payload;
       if (action.payload) {
-        const role = action.payload.user_type ?? action.payload.user_role ?? 'user';
-        state.role =
-          role === APP_CONFIG.PROVIDER_ROLE ? APP_CONFIG.PROVIDER_ROLE : APP_CONFIG.USER_ROLE;
+        const raw = action.payload.user_type ?? action.payload.user_role;
+        state.role = normalizeApiRoleToAppRole(raw);
       }
     },
     setUserAddressDefault(state, action: PayloadAction<UserAddress>) {
@@ -46,7 +54,7 @@ const userSlice = createSlice({
           }
         : null;
     },
-    setRole(state, action: PayloadAction<'user' | 'dentor'>) {
+    setRole(state, action: PayloadAction<USER_TYPE>) {
       state.role = action.payload;
       state.userDetails = state.userDetails
         ? {

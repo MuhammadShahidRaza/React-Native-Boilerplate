@@ -46,7 +46,12 @@ export const Button: React.FC<ButtonProps> = ({
   const isButtonLoading = loading;
   const isButtonDisabled = disabled || isButtonLoading;
 
-  const buttonStyles = [styles.button, isButtonDisabled ? styles.disabledButton : null, style];
+  const buttonStyles = [
+    styles.button,
+    { backgroundColor: COLORS.BUTTON_BACKGROUND },
+    isButtonDisabled ? styles.disabledButton : null,
+    style,
+  ];
 
   const textStyles = [styles.text, textStyle];
 
@@ -71,12 +76,10 @@ export const Button: React.FC<ButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     padding: 15,
-    backgroundColor: COLORS.PRIMARY,
     borderRadius: 50,
     opacity: 1,
   },
   disabledButton: {
-    backgroundColor: COLORS.PRIMARY,
     opacity: 0.5,
   },
   text: {

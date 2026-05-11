@@ -36,3 +36,4 @@ export * from './ImageFullScreenModal';
 export * from './ImageWithFullScreen';
 export * from './AnimatedCar';
 export * from './DateRangeFilter';
+export * from './AppGradient';

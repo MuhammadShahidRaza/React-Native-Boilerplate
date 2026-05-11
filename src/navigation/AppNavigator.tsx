@@ -33,6 +33,14 @@ import {
   MessagesFirebase,
   MessagesSocket,
   ChatSocket,
+  BookRideScreen,
+  SendParcelScreen,
+  SendParcelFindingScreen,
+  CourierMatchedScreen,
+  TrackParcelScreen,
+  OrderFoodScreen,
+  RestaurantMenuScreen,
+  FoodDeliveryCartScreen,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
@@ -84,6 +92,14 @@ export const AppNavigator = () => {
     [SCREENS.PROOF_OF_VERIFICATION]: ProofOfVerification,
     [SCREENS.BOOK_SERVICE_PROVIDER]: BookServiceProvider,
     [SCREENS.ALL_BIDS]: AllBids,
+    [SCREENS.BOOK_RIDE]: BookRideScreen,
+    [SCREENS.SEND_PARCEL]: SendParcelScreen,
+    [SCREENS.SEND_PARCEL_FINDING]: SendParcelFindingScreen,
+    [SCREENS.COURIER_MATCHED]: CourierMatchedScreen,
+    [SCREENS.TRACK_PARCEL]: TrackParcelScreen,
+    [SCREENS.ORDER_FOOD]: OrderFoodScreen,
+    [SCREENS.RESTAURANT_MENU]: RestaurantMenuScreen,
+    [SCREENS.FOOD_DELIVERY_CART]: FoodDeliveryCartScreen,
   };
 
   return (

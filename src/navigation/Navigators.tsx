@@ -133,6 +133,15 @@ export type RootStackParamList = {
     selectedTab?: JobStatus;
   };
 
+  [SCREENS.BOOK_RIDE]: undefined;
+  [SCREENS.SEND_PARCEL]: undefined;
+  [SCREENS.SEND_PARCEL_FINDING]: undefined;
+  [SCREENS.COURIER_MATCHED]: undefined;
+  [SCREENS.TRACK_PARCEL]: { phase?: 'picked_up' | 'delivered' } | undefined;
+  [SCREENS.ORDER_FOOD]: undefined;
+  [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
+  [SCREENS.FOOD_DELIVERY_CART]: undefined;
+
   // Auth Screens
   [SCREENS.GET_STARTED]: undefined;
   [SCREENS.ONBOARDING]: undefined;
@@ -149,11 +158,20 @@ export type RootStackParamList = {
     data:
       | {
           email?: string;
+          phone_number?: string;
+          country_code?: string;
+          calling_code?: string;
           otp_code?: string;
         }
       | undefined;
   };
-  [SCREENS.VERIFICATION]: { isFromForgot?: boolean; email: string };
+  [SCREENS.VERIFICATION]: {
+    isFromForgot?: boolean;
+    email?: string;
+    phone_number?: string;
+    country_code?: string;
+    calling_code?: string;
+  };
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -225,27 +243,28 @@ export const CustomBackIcon = ({
   <View
     style={[
       {
-        backgroundColor: COLORS.PRIMARY,
-        padding: 5,
-        borderRadius: 5,
+        borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        overflow: 'hidden',
+        backgroundColor: COLORS.PRIMARY,
+        alignSelf: 'flex-start',
       },
       style,
     ]}
   >
-    <Icon
-      iconStyle={[
-        {
-          transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
-        },
-      ]}
-      componentName={VARIABLES.Entypo}
-      iconName={'chevron-small-left'}
-      size={FontSize.ExtraLarge}
-      color={COLORS.WHITE}
-      onPress={onPress || onBack}
-    />
+    <View style={{ padding: 5 }}>
+      <Icon
+        iconStyle={[
+          {
+            transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
+          },
+        ]}
+        componentName={VARIABLES.Entypo}
+        iconName={'chevron-small-left'}
+        size={FontSize.ExtraLarge}
+        color={COLORS.WHITE}
+        onPress={onPress || onBack}
+      />
+    </View>
   </View>
 );

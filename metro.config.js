@@ -12,6 +12,8 @@ const { assetExts, sourceExts } = defaultConfig.resolver;
 const config = {
   watchFolders: [
     path.resolve(__dirname, "node_modules/react-native-calendars"),
+    path.resolve(__dirname, "node_modules/react-native-country-picker-modal"),
+    path.resolve(__dirname, "node_modules/react-native-phone-number-input"),
   ],
   transformer: {
     babelTransformerPath: require.resolve("react-native-svg-transformer"),

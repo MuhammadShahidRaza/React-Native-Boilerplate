@@ -1,3 +1,4 @@
+import { View, StyleSheet } from 'react-native';
 import { AppNavigator, AuthNavigator, navigationRef } from './index';
 import { useUserLoginStatus } from 'hooks/index';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,12 +16,20 @@ const MainNavigation = () => {
   }
 
   return (
-    <NavigationContainer theme={theme} ref={navigationRef} key={`nav-${themeVersion}`}>
-      {isUserLoggedIn ? <AppNavigator /> : <AuthNavigator />}
+    <View style={styles.shell}>
+      <NavigationContainer theme={theme} ref={navigationRef} key={`nav-${themeVersion}`}>
+        {isUserLoggedIn ? <AppNavigator /> : <AuthNavigator />}
+      </NavigationContainer>
       <Toast config={toastConfig} visibilityTime={4000} />
       <OfflineBanner />
-    </NavigationContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+  },
+});
 
 export default MainNavigation;

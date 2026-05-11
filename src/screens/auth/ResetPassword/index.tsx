@@ -64,9 +64,8 @@ export const ResetPassword = ({
     <AuthComponent
       heading1={COMMON_TEXT.RESET_PASSWORD}
       description={COMMON_TEXT.RESET_YOUR_PASSWORD_WITH}
-      showLogo={false}
       descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
-      containerStyle={{ marginTop: 50 }}
+      containerStyle={{ marginTop: 30 }}
       bottomButtonText=''
       bottomText=''
     >
@@ -86,10 +85,10 @@ export const ResetPassword = ({
             size: FontSize.MediumLarge,
             onPress: () => formik.setFieldValue('showNewPassword', !formik.values.showNewPassword),
           }}
-          // startIcon={{
-          //   componentName: VARIABLES.AntDesign,
-          //   iconName: 'lock1',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock',
+          }}
           secureTextEntry={!formik.values.showNewPassword}
           error={formik.errors.new_password}
           touched={Boolean(formik.touched.new_password && formik.submitCount)}
@@ -103,10 +102,10 @@ export const ResetPassword = ({
           allowSpacing={false}
           returnKeyType='done'
           placeholder={COMMON_TEXT.ENTER_CONFIRM_PASSWORD}
-          // startIcon={{
-          //   componentName: VARIABLES.AntDesign,
-          //   iconName: 'lock1',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock',
+          }}
           endIcon={{
             componentName: VARIABLES.Ionicons,
             iconName: formik.values.showConfirmPassword ? 'eye' : 'eye-off',

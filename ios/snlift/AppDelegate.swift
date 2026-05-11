@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   ) -> Bool {
     FirebaseApp.configure()
     // if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GoogleMapsAPIKey") as? String, !apiKey.isEmpty {
-      GMSServices.provideAPIKey(" ")
+      GMSServices.provideAPIKey("AIzaSyANHwsQzGfKQmtizEY7pHApMX4Gvig_OEI")
     // }
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)

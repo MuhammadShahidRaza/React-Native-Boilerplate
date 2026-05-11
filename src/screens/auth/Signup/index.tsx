@@ -128,10 +128,10 @@ export const SignUp = () => {
           onBlur={formik.handleBlur('full_name')}
           value={formik.values.full_name}
           placeholder={COMMON_TEXT.ENTER_FULL_NAME}
-          // startIcon={{
-          //   componentName: VARIABLES.Feather,
-          //   iconName: 'user',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'user',
+          }}
           error={formik.errors.full_name}
           touched={Boolean(formik.touched.full_name && formik.submitCount)}
         />
@@ -158,10 +158,10 @@ export const SignUp = () => {
           allowSpacing={false}
           autoCapitalize='none'
           autoCorrect={false}
-          // startIcon={{
-          //   componentName: VARIABLES.MaterialCommunityIcons,
-          //   iconName: 'email-outline',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'email-outline',
+          }}
           keyboardType={'email-address'}
           placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
           error={formik.errors.email}
@@ -214,10 +214,10 @@ export const SignUp = () => {
           onBlur={formik.handleBlur('password')}
           value={formik.values.password}
           allowSpacing={false}
-          // startIcon={{
-          //   componentName: VARIABLES.AntDesign,
-          //   iconName: 'lock1',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock',
+          }}
           placeholder={COMMON_TEXT.ENTER_YOUR_PASSWORD}
           endIcon={{
             componentName: VARIABLES.Ionicons,
@@ -237,10 +237,10 @@ export const SignUp = () => {
           onBlur={formik.handleBlur('confirmPassword')}
           value={formik.values.confirmPassword}
           allowSpacing={false}
-          // startIcon={{
-          //   componentName: VARIABLES.AntDesign,
-          //   iconName: 'lock1',
-          // }}
+          startIcon={{
+            componentName: VARIABLES.AntDesign,
+            iconName: 'lock',
+          }}
           placeholder={COMMON_TEXT.ENTER_CONFIRM_PASSWORD}
           returnKeyType='done'
           endIcon={{

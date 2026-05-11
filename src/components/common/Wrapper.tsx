@@ -119,7 +119,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
       {showAppLoader && isAppLoading && <Loader />}
       {/* Fixed Header - doesn't scroll */}
       {shouldShowHeader && (
-        <View style={styles.headerWrapper}>
+        <View style={[styles.headerWrapper, { backgroundColor: COLORS.BACKGROUND }]}>
           <Header
             title={headerTitle || ''}
             showBackButton={showBackButton || false}
@@ -163,12 +163,14 @@ export const Wrapper: React.FC<WrapperProps> = ({
     return <View style={styles.wrapper}>{content}</View>;
   }
 
+  const bgStyle = { backgroundColor: COLORS.BACKGROUND };
+
   // Handle different safe area edge combinations
   if (hasTopSafeArea && hasBottomSafeArea) {
     return (
       <View style={styles.wrapper}>
         <SafeAreaView edges={['top']} style={[styles.topSafeArea, { backgroundColor }]} />
-        <View style={styles.contentWrapper}>{content}</View>
+        <View style={[styles.contentWrapper, bgStyle]}>{content}</View>
         <View style={[styles.bottomSafeArea, { height: insets.bottom }]} />
       </View>
     );
@@ -178,7 +180,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
     return (
       <View style={styles.wrapper}>
         <SafeAreaView edges={['top']} style={[styles.topSafeArea, { backgroundColor }]} />
-        <View style={styles.contentWrapper}>{content}</View>
+        <View style={[styles.contentWrapper, bgStyle]}>{content}</View>
       </View>
     );
   }
@@ -214,7 +216,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.SURFACE,
   },
   headerWrapper: {
-    backgroundColor: COLORS.BACKGROUND,
+    position: 'relative',
     zIndex: 1000,
+    backgroundColor: COLORS.BACKGROUND,
   },
 });

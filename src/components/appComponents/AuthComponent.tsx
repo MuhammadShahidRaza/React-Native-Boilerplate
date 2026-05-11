@@ -44,27 +44,37 @@ export const AuthComponent = ({
     reset(SCREENS.LOGIN);
   },
 }: Props) => {
+  const showBottomSection = Boolean(bottomText || bottomButtonText);
   return (
-    <Wrapper useScrollView showBackButton={showBack}>
-      {showLogo && (
-        <SvgComponent Svg={SVG.LOGO} containerStyle={styles.logo} fill={COLORS.APP_ICON} />
+    <>
+      <Wrapper useScrollView showBackButton={showBack}>
+        <View style={styles.mainContainer}>
+          {showLogo && (
+            <SvgComponent Svg={SVG.LOGO} containerStyle={styles.logo} fill={COLORS.APP_ICON} />
+          )}
+          <View style={[styles.container, containerStyle]}>
+            {heading1 && (
+              <Typography style={[styles.heading1, heading1Style]}>{heading1}</Typography>
+            )}
+            <Typography
+              style={[styles.description, { marginBottom: description ? 20 : 5 }, descriptionStyle]}
+            >
+              {description}
+            </Typography>
+            {children}
+          </View>
+        </View>
+      </Wrapper>
+
+      {showBottomSection && (
+        <RowComponent style={styles.bottomText}>
+          <Typography style={styles.bottomTextStyle}>{bottomText}</Typography>
+          <Typography style={styles.bottomButtonTextStyle} onPress={onBottomTextPress}>
+            {bottomButtonText}
+          </Typography>
+        </RowComponent>
       )}
-      <View style={[styles.container, containerStyle]}>
-        {heading1 && <Typography style={[styles.heading1, heading1Style]}>{heading1}</Typography>}
-        <Typography
-          style={[styles.description, { marginBottom: description ? 20 : 5 }, descriptionStyle]}
-        >
-          {description}
-        </Typography>
-        {children}
-      </View>
-      <RowComponent style={styles.bottomText}>
-        <Typography style={styles.bottomTextStyle}>{bottomText}</Typography>
-        <Typography style={styles.bottomButtonTextStyle} onPress={onBottomTextPress}>
-          {bottomButtonText}
-        </Typography>
-      </RowComponent>
-    </Wrapper>
+    </>
   );
 };
 
@@ -84,13 +94,17 @@ export const SocialButton = ({
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+  },
   logo: {
-    marginTop: screenHeight(5),
+    marginTop: screenHeight(1),
     marginHorizontal: 20,
+    alignSelf: 'center',
   },
   container: {
     marginHorizontal: 20,
-    marginTop: 30,
+    marginTop: screenHeight(4),
     // minHeight: screenHeight(isIOS() ? 62 : 70),
   },
   heading1: {
@@ -98,6 +112,7 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.SemiBold,
   },
   bottomText: {
+    backgroundColor: COLORS.BACKGROUND,
     ...FLEX_CENTER,
     gap: 6,
     paddingVertical: 20,

@@ -16,7 +16,7 @@ import { submitProofOfVerification, getBookingDetailsById } from 'api/functions/
 import { useAppSelector } from 'types/reduxTypes';
 import type { AssignmentAttemptMedia } from 'types/responseTypes';
 import { markConversationCompleted } from '../../services/chat/firestoreChat';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { getDentorFromBooking } from 'utils/helpers/functions';
 
 const ProofOfVerificationSkeleton = () => (
@@ -96,7 +96,7 @@ export const ProofOfVerification = ({
   const bookingId = route?.params?.bookingId;
   const role = useAppSelector(state => state?.user?.role);
   const currentUserId = useAppSelector(state => state?.user?.userDetails?.id);
-  const isDentor = role === APP_CONFIG.PROVIDER_ROLE;
+  const isDentor = isWorkerRole(role);
 
   const [afterImage, setAfterImage] = useState<SelectedMedia | null>(null);
   const [submitting, setSubmitting] = useState(false);

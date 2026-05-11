@@ -143,7 +143,15 @@ const resetUserPassword = async <R extends MessageResponse, A extends { password
   return;
 };
 
-const forgotPassword = async <R extends MessageResponse, A extends { email: string }>({
+const forgotPassword = async <
+  R extends MessageResponse,
+  A extends {
+    email?: string;
+    phone_number?: string;
+    country_code?: string;
+    calling_code?: string;
+  },
+>({
   data,
 }: {
   data: A;
@@ -152,6 +160,9 @@ const forgotPassword = async <R extends MessageResponse, A extends { email: stri
     navigate(SCREENS.VERIFICATION, {
       isFromForgot: true,
       email: data?.email,
+      phone_number: data?.phone_number,
+      country_code: data?.country_code,
+      calling_code: data?.calling_code,
     });
     return;
   }
@@ -164,6 +175,9 @@ const forgotPassword = async <R extends MessageResponse, A extends { email: stri
     navigate(SCREENS.VERIFICATION, {
       isFromForgot: true,
       email: data?.email,
+      phone_number: data?.phone_number,
+      country_code: data?.country_code,
+      calling_code: data?.calling_code,
     });
   }
 };
@@ -264,9 +278,14 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
   const user: R | undefined = await handleApiRequest<R, A>({ url: API_ROUTES.LOGIN, data });
   if (user) {
     if (!user?.email_verified_at) {
-      resendEmailCode({ data: { email: data?.email } });
+      if (data?.email) {
+        resendEmailCode({ data: { email: data?.email } });
+      }
       navigate(SCREENS.VERIFICATION, {
         email: data?.email,
+        phone_number: data?.phone_number,
+        country_code: data?.country_code,
+        calling_code: data?.calling_code,
       });
       return;
     }

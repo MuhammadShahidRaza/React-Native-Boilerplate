@@ -12,13 +12,13 @@ import {
   hasUri,
 } from 'utils/index';
 import { updateUserDetails } from 'api/functions/app/user';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import { SelectedMedia } from 'hooks/useMediaPicker';
 
 export const EditProfile = () => {
   const { userDetails } = useAppSelector(state => state?.user);
   const role = useAppSelector(state => state?.user?.role);
-  const isDentor = role === APP_CONFIG.PROVIDER_ROLE;
+  const isDentor = isWorkerRole(role);
   // console.log({ userDetails });
 
   const initialValues = {

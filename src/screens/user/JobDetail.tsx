@@ -18,7 +18,7 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getDentorFromBooking } from 'utils/helpers/functions';
 import { markConversationCompleted } from '../../services/chat/firestoreChat';
-import { APP_CONFIG } from 'config/app';
+import { isWorkerRole } from 'config/app';
 import {
   getBookingDetailsById,
   createQuotation,
@@ -209,7 +209,7 @@ const skeletonStyles = StyleSheet.create({
 
 export const JobDetail: React.FC<AppScreenProps<typeof SCREENS.JOB_DETAIL>> = ({ route }) => {
   const role = useAppSelector(state => state?.user?.role);
-  const isDentor = role === APP_CONFIG.PROVIDER_ROLE;
+  const isDentor = isWorkerRole(role);
   const insetBottom = useSafeAreaInsets().bottom;
   const params = route?.params;
   const [jobData, setJobData] = useState<Booking | null>(null);
@@ -834,7 +834,7 @@ export const JobDetail: React.FC<AppScreenProps<typeof SCREENS.JOB_DETAIL>> = ({
                     />
                     <View style={styles.customerInfo}>
                       <Typography style={styles.customerLabel}>
-                        {role == 'dentor' ? 'Customer' : 'Service Provider'}
+                        {isWorkerRole(role) ? 'Customer' : 'Service Provider'}
                       </Typography>
                       <Typography
                         style={styles.customerName}
@@ -845,7 +845,7 @@ export const JobDetail: React.FC<AppScreenProps<typeof SCREENS.JOB_DETAIL>> = ({
                           [otherPerson?.first_name, otherPerson?.last_name]
                             .filter(Boolean)
                             .join(' ') ||
-                          (role === APP_CONFIG.PROVIDER_ROLE ? 'Customer' : 'Service Provider')}
+                          (isWorkerRole(role) ? 'Customer' : 'Service Provider')}
                       </Typography>
                     </View>
                     <TouchableOpacity

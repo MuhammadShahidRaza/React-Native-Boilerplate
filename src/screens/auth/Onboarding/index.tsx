@@ -130,6 +130,9 @@ export const OnBoarding = () => {
           }
           onPress={handleNext}
         />
+        <TouchableOpacity onPress={handleSkip} hitSlop={12} style={styles.skipWrap}>
+          <Typography style={styles.skipText}>{t(COMMON_TEXT.SKIP)}</Typography>
+        </TouchableOpacity>
       </View>
     </Wrapper>
   );
@@ -152,36 +155,36 @@ const styles = StyleSheet.create({
     // marginBottom: 14,
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 9,
+    height: 9,
     borderRadius: 8,
-    backgroundColor: COLORS.LIGHT_ORANGE,
+    backgroundColor: COLORS.LAVENDER,
     marginHorizontal: 3,
   },
   activeDot: {
     backgroundColor: COLORS.PRIMARY,
-    width: 25,
+    width: 35,
     borderRadius: 8,
-    height: 7,
+    height: 9,
   },
   scroll: { flex: 1 },
   bottomCard: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
+    // position: 'absolute',
+    // left: 0,
+    // right: 0,
+    // bottom: 0,
     backgroundColor: COLORS.SURFACE,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     paddingHorizontal: 35,
     paddingVertical: 30,
-    elevation: 3,
+    // elevation: 3,
     minHeight: screenHeight(30),
     gap: 20,
-    shadowColor: COLORS.BLACK,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    // shadowColor: COLORS.BLACK,
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.25,
+    // shadowRadius: 3.84,
   },
   heading: {
     textAlign: 'center',
@@ -195,5 +198,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MediumSmall,
     textAlign: 'center',
     color: COLORS.TEXT_SECONDARY,
+  },
+  skipWrap: {
+    alignSelf: 'center',
+    paddingVertical: 4,
+  },
+  skipText: {
+    fontSize: FontSize.MediumSmall,
+    color: COLORS.TEXT_SECONDARY,
+    // textDecorationLine: 'underline',
   },
 });

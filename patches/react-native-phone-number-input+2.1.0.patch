@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-phone-number-input/lib/index.js b/node_modules/react-native-phone-number-input/lib/index.js
+index 3333333..4444444 100644
+--- a/node_modules/react-native-phone-number-input/lib/index.js
++++ b/node_modules/react-native-phone-number-input/lib/index.js
+@@ -133,6 +133,8 @@ export default class PhoneInput extends PureComponent {
+       return (
+         <Flag
+           countryCode={countryCode}
++          withEmoji
++          withFlagButton
+           flagSize={flagSize ? flagSize : DEFAULT_THEME.flagSize}
+         />
+       );
