@@ -6,6 +6,7 @@ import {
   screenWidth,
   deviceDetails,
   getUserDetailsByRole,
+  buildPhonePayload,
 } from 'utils/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
@@ -59,9 +60,7 @@ export const Login = () => {
       email: values?.email,
       password: values?.password,
       user_type: values?.user_type,
-      phone_number: values?.phone_number,
-      country_code: values?.country_code,
-      calling_code: values?.calling_code,
+      ...buildPhonePayload(values),
       ...deviceInfo,
     };
 

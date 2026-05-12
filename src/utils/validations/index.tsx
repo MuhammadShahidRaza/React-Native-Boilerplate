@@ -222,7 +222,7 @@ export const signUpValidationSchema = createObjectShape({
   //   minLength: 3,
   //   maxLength: 25,
   // }),
-  // phone_number: phoneNumberSchema,
+  phone_number: phoneNumberSchema,
   confirmPassword: confirmPasswordSchema({ name: 'password' }),
 });
 

@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
-import { forgotPasswordValidationSchema } from 'utils/index';
+import { forgotPasswordValidationSchema, buildPhonePayload } from 'utils/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
 import { Button, AuthComponent, PhoneInputComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
@@ -20,12 +20,7 @@ export const ForgotPassword = () => {
   };
 
   const handleSubmit = async (values: ForgotPasswordFormValues) => {
-    const data = {
-      phone_number: values?.phone_number,
-      country_code: values?.country_code,
-      calling_code: values?.calling_code,
-    };
-    await forgotPassword({ data });
+    await forgotPassword({ data: buildPhonePayload(values) });
   };
 
   const formik = useFormikForm<ForgotPasswordFormValues>({

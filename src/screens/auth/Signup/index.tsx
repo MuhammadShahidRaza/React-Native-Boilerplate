@@ -3,7 +3,7 @@ import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
 import {
   COLORS,
   deviceDetails,
-  // normalizePhoneNumber,
+  buildPhonePayload,
   screenWidth,
   signUpValidationSchemaWithProfileImage,
 } from 'utils/index';
@@ -13,7 +13,7 @@ import {
   Button,
   Input,
   AuthComponent,
-  // PhoneInputComponent,
+  PhoneInputComponent,
   Checkbox,
   RowComponent,
   Typography,
@@ -56,9 +56,9 @@ export const SignUp = () => {
     profile_image: null,
     // user_name: __DEV__ ? 'shahid26' : '',
     // country: __DEV__ ? 'Pakistan' : '',
-    // phone_number: __DEV__ ? '3242445623' : '',
-    // country_code: __DEV__ ? 'PK' : 'NG',
-    // calling_code: __DEV__ ? '+92' : '+234',
+    phone_number: __DEV__ ? '3242445623' : '',
+    country_code: __DEV__ ? 'PK' : 'NG',
+    calling_code: __DEV__ ? '+92' : '+234',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
     agreeToTerms: false,
@@ -67,7 +67,6 @@ export const SignUp = () => {
 
   const handleSubmit = async (values: SignUpFormValues) => {
     const deviceInfo = await deviceDetails();
-    // const phone_number = normalizePhoneNumber(values.phone_number, values.calling_code);
     const data: Login_SignUp = {
       email: values?.email,
       password: values?.password,
@@ -78,9 +77,7 @@ export const SignUp = () => {
       }),
       // user_name: values?.user_name,
       // country: values?.country,
-      // country_code: values.country_code,
-      // calling_code: values.calling_code,
-      // phone_number,
+      ...buildPhonePayload(values),
       ...deviceInfo,
     };
     await signUpUser({ data });
@@ -189,7 +186,7 @@ export const SignUp = () => {
           error={formik.errors.country}
           touched={Boolean(formik.touched.country && formik.submitCount)}
         /> */}
-        {/* <PhoneInputComponent
+        <PhoneInputComponent
           name={COMMON_TEXT.PHONE_NUMBER}
           title={COMMON_TEXT.PHONE_NUMBER}
           onChangeText={formik.handleChange('phone_number')}
@@ -198,14 +195,10 @@ export const SignUp = () => {
           onChangeCallingCode={formik.handleChange('calling_code')}
           allowSpacing={false}
           defaultCode={__DEV__ ? 'PK' : 'NG'}
-          // startIcon={{
-          //   componentName: VARIABLES.Feather,
-          //   iconName: 'phone',
-          // }}
           placeholder={COMMON_TEXT.PHONE_NUMBER}
           error={formik.errors.phone_number}
           touched={Boolean(formik.touched.phone_number && formik.submitCount)}
-        /> */}
+        />
 
         <Input
           name={COMMON_TEXT.PASSWORD}
