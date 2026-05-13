@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View, TextInput, Pressable, Image } from 'react-native';
-import { Icon, Typography, Wrapper } from 'components/index';
+import { Icon, Photo, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
@@ -68,7 +68,7 @@ export const OrderFoodScreen = () => {
             onPress={() => navigate(SCREENS.RESTAURANT_MENU, { restaurantId: r.id, name: r.name })}
           >
             <View style={styles.imgWrap}>
-              <Image source={IMAGES.USER} style={styles.restImg} resizeMode="cover" />
+              <Photo source={r.id === '1' ? IMAGES.RESTAURANT_ONE : IMAGES.RESTAURANT_TWO} imageStyle={styles.restImg} resizeMode="cover" />
               {r.featured && (
                 <View style={styles.featured}>
                   <Typography style={styles.featuredTxt}>Featured</Typography>

@@ -11,8 +11,7 @@ export const IMAGES = {
   NO_BOOKINGS: require('assets/images/common/no_bookings.png'),
   NO_JOBS: require('assets/images/common/no_jobs.png'),
 
-  //TEMPORARY:
-  HOME: require('assets/images/temp/home.png'),
+
 
   //ONBOARDING:
   ONBOARDING_ONE: require('assets/images/onboarding/onboarding_one.png'),
@@ -29,6 +28,11 @@ export const IMAGES = {
   PORTUGUESE: require('assets/images/languages/portuguese.png'),
 
   //TEMPORARY:
+  HOME: require('assets/images/temp/home.png'),
+  RESTAURANT_ONE: require('assets/images/temp/res1.png'),
+  RESTAURANT_TWO: require('assets/images/temp/res2.png'),
+  RESTAURANT_ITEM_1: require('assets/images/temp/res3.png'),
+  RESTAURANT_ITEM_2: require('assets/images/temp/res4.png'),
 };
 
 export const VIDEO = {
