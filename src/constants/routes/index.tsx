@@ -97,7 +97,6 @@ export const SCREENS = {
   CHAT_STACK: 'ChatStackScreen',
   BOTTOM_STACK: 'BottomStackScreen',
   DOCUMENTATION_UPLOAD: 'DocumentationUpload',
-  JOB_DETAIL: 'JobDetail',
   PROOF_OF_VERIFICATION: 'ProofOfVerification',
   BOOK_SERVICE_PROVIDER: 'BookServiceProvider',
   SERVICE_TYPE: 'ServiceType',

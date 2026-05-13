@@ -13,7 +13,6 @@ import { SCREENS } from 'constants/routes';
 import { JobStatus } from 'screens/user/MyJobs';
 import { APP_CONFIG, isWorkerRole } from 'config/app';
 import type { USER_TYPE } from 'types/auth';
-import { ActivityStatus } from 'screens/user/Activities';
 import {
   AuthorizationStatus,
   getMessaging,
@@ -153,11 +152,7 @@ export const handleNotificationNavigation = (notificationData: any) => {
     case 'result-of-work-approved':
       if (role !== 'user') return;
       if (jobId) {
-        navigate(SCREENS.JOB_DETAIL, {
-          jobId,
-          status: ActivityStatus.Completed,
-          subType: '',
-        });
+      
       } else {
         navigate(SCREENS.HOME);
       }
@@ -185,11 +180,11 @@ export const handleNotificationNavigation = (notificationData: any) => {
     case 'proof-of-work-submitted':
       if (role !== 'user') return;
       if (jobId) {
-        navigate(SCREENS.JOB_DETAIL, {
-          jobId,
-          status: ActivityStatus.Confirmed,
-          subType: 'In-Progress',
-        });
+        // navigate(SCREENS.JOB_DETAIL, {
+        //   jobId,
+        //   status: ActivityStatus.Confirmed,
+        //   subType: 'In-Progress',
+        // });
       } else {
         navigate(SCREENS.PROOF_OF_VERIFICATION, { isEditable: false, bookingId: jobId });
       }

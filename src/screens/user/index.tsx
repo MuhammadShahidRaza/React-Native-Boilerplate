@@ -28,7 +28,6 @@ export * from './AddCard';
 export * from './Wallet';
 export * from './Cart';
 export * from './Checkout';
-export * from './JobDetail';
 export * from './ProofOfVerification';
 export * from './BookServiceProvider';
 export * from './ServiceType';
@@ -37,7 +36,6 @@ export { ThemeSelectorScreen as ThemeSelector } from './ThemeSelector';
 export * from './TransactionHistory';
 export * from './MyWallet';
 export {
-  ConsumerHomeHub,
   ConsumerMultiServiceActivity,
   BookRideScreen,
   SendParcelScreen,

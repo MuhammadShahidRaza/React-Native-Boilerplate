@@ -1,9 +1,8 @@
 import { StyleSheet, View, Pressable, TextInput } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { Icon, Wrapper } from 'components/index';
+import { Icon, Wrapper, GradientIcon, AppGradient } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY, APP_GRADIENT_PRIMARY_LIGHT } from 'utils/index';
+import { COLORS } from 'utils/index';
 import { useState } from 'react';
 
 const consumerBackIcon = {
@@ -30,14 +29,14 @@ export const BookRideScreen = () => {
           value={where}
           onChangeText={setWhere}
         />
-        <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.searchGo}>
-          <Icon
-            componentName={VARIABLES.Feather}
-            iconName="arrow-right"
-            size={FontSize.Medium}
-            color={COLORS.WHITE}
-          />
-        </LinearGradient>
+        <GradientIcon
+          componentName={VARIABLES.Feather}
+          iconName="arrow-right"
+          size={FontSize.Medium}
+          color={COLORS.WHITE}
+          containerStyle={styles.searchGo}
+          containerSize={44}
+        />
       </View>
 
       <View style={styles.map}>
@@ -45,9 +44,9 @@ export const BookRideScreen = () => {
         <View style={[styles.car, { top: 120, left: 180 }]} />
         <View style={[styles.car, { top: 200, left: 60 }]} />
         <View style={[styles.car, { top: 160, right: 50 }]} />
-        <LinearGradient colors={[...APP_GRADIENT_PRIMARY_LIGHT]} style={styles.pin}>
+        <AppGradient variant="primaryLight" style={styles.pin}>
           <View style={styles.pinInner} />
-        </LinearGradient>
+        </AppGradient>
         <Pressable style={styles.locate}>
           <Icon
             componentName={VARIABLES.MaterialCommunityIcons}

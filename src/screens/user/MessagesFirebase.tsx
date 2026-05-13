@@ -108,7 +108,7 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
       const fetchData = async () => {
         const fetcher = isDentor ? fetchDentorBookingsPage : fetchUserBookingsPage;
         const res = await fetcher({ page: 1, limit: 20 });
-        const bookings = res.data.booking;
+        const bookings = res?.data?.booking;
         const id = getActiveBookingId(bookings);
         setActiveBookingId(id);
       };
@@ -166,7 +166,6 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
     sendMessage,
     bookingCompleted,
   } = useMessages(resolvedConversationId ?? undefined, currentUserId, paramBookingId);
-  console.log(paramBookingId, bookingCompleted);
 
   const messages: Message[] = firestoreMessages.map(m => ({
     id: m.id,

@@ -1,3 +1,6 @@
+// Old basic Wallet screen — replaced by WorkerWalletScreen (commission-based design).
+// Kept here for reference. Re-export WorkerWalletScreen as Wallet from user/index if needed.
+/*
 import { View, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import {
@@ -94,3 +97,7 @@ const styles = StyleSheet.create({
   },
   leftInviteText: { color: COLORS.BORDER, textAlign: 'center', paddingHorizontal: 30 },
 });
+*/
+
+// New wallet screen — use WorkerWalletScreen
+export { WorkerWalletScreen as Wallet } from '../consumer/WorkerWalletScreen';

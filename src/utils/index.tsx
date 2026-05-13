@@ -12,3 +12,4 @@ export * from './notifications';
 export * from './helpers/index';
 export * from './themedStyleSheet';
 export * from './appIcon';
+export * from './haptic';

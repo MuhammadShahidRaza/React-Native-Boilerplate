@@ -1,5 +1,3 @@
-import { ActivityStatus } from 'screens/user';
-import { JobStatus } from 'screens/user/MyJobs';
 
 export interface SignUpResponse {
   data: {
@@ -265,7 +263,6 @@ export interface Booking {
   drop_off_latitude: string | null;
   drop_off_longitude: string | null;
 
-  status: JobStatus | ActivityStatus;
 
   payment_status: string | null;
   payment_method: string | null;

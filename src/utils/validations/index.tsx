@@ -167,13 +167,13 @@ const phoneNumberSchema = createStringValidationSchema({
   maxLength: 17,
 });
 
-const userNameSchema = createStringValidationSchema({
-  regex: REGEX.USERNAME,
-  regexMessage: VALIDATION_MESSAGES.INVALID_USERNAME,
-  name: COMMON_TEXT.USERNAME,
-  minLength: 3,
-  maxLength: 20,
-});
+// const userNameSchema = createStringValidationSchema({
+//   regex: REGEX.USERNAME,
+//   regexMessage: VALIDATION_MESSAGES.INVALID_USERNAME,
+//   name: COMMON_TEXT.USERNAME,
+//   minLength: 3,
+//   maxLength: 20,
+// });
 const verificationCodeSchema = createStringValidationSchema({
   regex: REGEX.VERIFICATION,
   name: COMMON_TEXT.VERIFICATION_CODE,

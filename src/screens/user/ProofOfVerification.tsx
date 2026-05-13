@@ -293,7 +293,7 @@ export const ProofOfVerification = ({
               <ImageUpload
                 label='Upload After Image'
                 onImageSelected={setAfterImage}
-                selectedImage={afterImage?.uri ?? afterMediaUrl ?? IMAGES.BOX_CAR}
+                selectedImage={afterImage?.uri ?? afterMediaUrl ?? IMAGES.USER}
                 disabled={!isEditable}
                 height={screenHeight(25)}
                 showReplaceRemoveOptions={false}
