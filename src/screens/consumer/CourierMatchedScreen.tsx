@@ -1,12 +1,11 @@
 import { StyleSheet, View, Image } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { Icon, Typography, Button, Wrapper } from 'components/index';
+import { Icon, Typography, Button, Wrapper, GradientIcon } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
-import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
+import { COLORS } from 'utils/index';
 
 const consumerBackIcon = {
   backgroundColor: COLORS.APP_PRIMARY,
@@ -23,14 +22,13 @@ export const CourierMatchedScreen = () => {
       darkMode={false}
     >
       <View style={styles.body}>
-        <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.check}>
-          <Icon
-            componentName={VARIABLES.Feather}
-            iconName="check"
-            size={40}
-            color={COLORS.WHITE}
-          />
-        </LinearGradient>
+        <GradientIcon
+          componentName={VARIABLES.Feather}
+          iconName="check"
+          size={40}
+          color={COLORS.WHITE}
+          containerStyle={styles.check}
+        />
         <Typography style={styles.headline}>Courier Found!</Typography>
 
         <View style={styles.card}>

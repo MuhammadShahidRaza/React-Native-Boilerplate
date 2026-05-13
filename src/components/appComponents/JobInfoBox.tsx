@@ -341,7 +341,7 @@ export const JobInfoBox = memo<JobInfoBoxProps>(({ item, style, onBidSuccess, on
         <Photo
           containerStyle={styles.photoContainer}
           imageStyle={styles.photoImage}
-          source={IMAGES.BOX_CAR}
+          source={IMAGES.USER}
         />
         <View style={styles.infoCol}>
           {item?.vehicle_make && (

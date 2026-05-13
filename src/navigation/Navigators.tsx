@@ -4,12 +4,11 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Icon } from 'components/index';
-import { LANGUAGES, VARIABLES } from 'constants/common';
+import { Icon, GradientIcon } from 'components/index';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
-import { StyleProp, View, ViewStyle } from 'react-native';
-import { ActivityStatus } from 'screens/user';
+import { LANGUAGES, VARIABLES } from 'constants/common';
 import { JobStatus } from 'screens/user/MyJobs';
 import { Address, Booking, Service, FontSize, FontWeight, User } from 'types/index';
 import { COLORS } from 'utils/colors';
@@ -126,9 +125,7 @@ export type RootStackParamList = {
   [SCREENS.TRANSACTION_HISTORY]: undefined;
   [SCREENS.MY_WALLET]: undefined;
   [SCREENS.SERVICE_TYPE]: undefined;
-  [SCREENS.ACTIVITIES]: {
-    selectedTab?: ActivityStatus;
-  };
+  [SCREENS.ACTIVITIES]: {};
   [SCREENS.MY_JOBS]: {
     selectedTab?: JobStatus;
   };
@@ -240,31 +237,19 @@ export const CustomBackIcon = ({
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }) => (
-  <View
-    style={[
+  <GradientIcon
+    componentName={VARIABLES.Entypo}
+    iconName={'chevron-small-left'}
+    size={FontSize.ExtraLarge}
+    color={COLORS.WHITE}
+    borderRadius={12}
+    containerSize={44}
+    containerStyle={style}
+    iconStyle={[
       {
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: COLORS.PRIMARY,
-        alignSelf: 'flex-start',
+        transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
       },
-      style,
     ]}
-  >
-    <View style={{ padding: 5 }}>
-      <Icon
-        iconStyle={[
-          {
-            transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
-          },
-        ]}
-        componentName={VARIABLES.Entypo}
-        iconName={'chevron-small-left'}
-        size={FontSize.ExtraLarge}
-        color={COLORS.WHITE}
-        onPress={onPress || onBack}
-      />
-    </View>
-  </View>
+    onPress={onPress || onBack}
+  />
 );

@@ -12,9 +12,9 @@ import { screenHeight } from 'utils/index';
 import {
   Home,
   MyAccount,
-  ChatFirebase,
-  ConsumerHomeHub,
   ConsumerMultiServiceActivity,
+  WorkerWalletScreen,
+  WorkerHomeScreen,
 } from 'screens/user';
 import { useTranslation } from 'hooks/useTranslation';
 import { MyJobs } from 'screens/user/MyJobs';
@@ -34,46 +34,55 @@ type ScreenConfig = {
 };
 
 // Function to get screen config based on role
-const getScreenConfig = (role: string): Record<string, ScreenConfig> => ({
-  [SCREENS.HOME]: {
-    component: role === APP_CONFIG.USER_ROLE ? ConsumerHomeHub : Home,
-    iconName: 'home',
-    componentName: VARIABLES.Feather,
-    label: SCREENS.HOME,
-  },
-  ...(isWorkerRole(role)
-    ? {
-        [SCREENS.MY_JOBS]: {
-          component: MyJobs,
-          iconName: 'briefcase',
-          componentName: VARIABLES.Feather,
-          label: SCREENS.MY_JOBS,
-        },
-      }
-    : {}),
-  ...(role === APP_CONFIG.USER_ROLE
-    ? {
-        [SCREENS.ACTIVITIES]: {
-          component: ConsumerMultiServiceActivity,
-          iconName: 'newspaper-outline',
-          componentName: VARIABLES.Ionicons,
-          label: SCREENS.ACTIVITIES,
-        },
-      }
-    : {}),
-  [SCREENS.CHAT_FIREBASE]: {
-    component: ChatFirebase,
-    iconName: 'chatbubble-ellipses-outline',
-    componentName: VARIABLES.Ionicons,
-    label: SCREENS.CHAT,
-  },
-  [SCREENS.MY_ACCOUNT]: {
-    component: MyAccount,
-    iconName: 'user-o',
-    componentName: VARIABLES.FontAwesome,
-    label: SCREENS.PROFILE,
-  },
-});
+const getScreenConfig = (role: string): Record<string, ScreenConfig> => {
+  const isWorker = isWorkerRole(role);
+  const isConsumer = role === APP_CONFIG.USER_ROLE;
+
+  return {
+    [SCREENS.HOME]: {
+      component: isConsumer ? Home : WorkerHomeScreen,
+      iconName: 'home',
+      componentName: VARIABLES.Feather,
+      label: SCREENS.HOME,
+    },
+    // Worker-only tabs
+    ...(isWorker ? {
+      [SCREENS.ACTIVITIES]: {
+        component: ConsumerMultiServiceActivity,
+        iconName: 'clock',
+        componentName: VARIABLES.Feather,
+        label: 'History',
+      },
+      [SCREENS.MY_JOBS]: {
+        component: MyJobs,
+        iconName: 'dollar-sign',
+        componentName: VARIABLES.Feather,
+        label: 'Earnings',
+      },
+      [SCREENS.WALLET]: {
+        component: WorkerWalletScreen,
+        iconName: 'credit-card',
+        componentName: VARIABLES.Feather,
+        label: 'Wallet',
+      },
+    } : {}),
+    // Consumer-only tabs
+    ...(isConsumer ? {
+      [SCREENS.ACTIVITIES]: {
+        component: ConsumerMultiServiceActivity,
+        iconName: 'clock',
+        componentName: VARIABLES.Feather,
+        label: 'History',
+      },
+    } : {}),
+    [SCREENS.MY_ACCOUNT]: {
+      component: MyAccount,
+      iconName: 'user-o',
+      componentName: VARIABLES.FontAwesome,
+      label: SCREENS.PROFILE,
+    },
+  };
+};
 
 // Screen order - can be easily reordered
 export const BottomNavigator = () => {
@@ -87,9 +96,11 @@ export const BottomNavigator = () => {
 
   const screenOrder = useMemo(() => {
     if (isWorkerRole(role)) {
-      return [SCREENS.HOME, SCREENS.MY_JOBS, SCREENS.CHAT_FIREBASE, SCREENS.MY_ACCOUNT];
+      // Worker: Home, History, Earnings, Wallet, Profile (5 tabs)
+      return [SCREENS.HOME, SCREENS.ACTIVITIES, SCREENS.MY_JOBS, SCREENS.WALLET, SCREENS.MY_ACCOUNT];
     } else {
-      return [SCREENS.HOME, SCREENS.ACTIVITIES, SCREENS.CHAT_FIREBASE, SCREENS.MY_ACCOUNT];
+      // Consumer: Home, History, Profile (3 tabs)
+      return [SCREENS.HOME, SCREENS.ACTIVITIES, SCREENS.MY_ACCOUNT];
     }
   }, [role]);
 
@@ -101,7 +112,7 @@ export const BottomNavigator = () => {
   // Memoize tab bar style to avoid recreation
   const tabBarStyle = useMemo(
     () => ({
-      backgroundColor: COLORS.SURFACE,
+      backgroundColor: COLORS.SECONDARY,
       borderTopWidth: 0,
       elevation: 0,
       height: screenHeight(7),
@@ -136,7 +147,7 @@ export const BottomNavigator = () => {
               iconName={config.iconName}
               componentName={config.componentName}
               size={FontSize.ExtraLarge}
-              color={focused ? COLORS.PRIMARY : 'rgba(255,255,255,0.55)'}
+              color={focused ? COLORS.WHITE : COLORS.TRANSPARENT}
             />
             {route.name === SCREENS.CHAT_FIREBASE && totalUnreadCount > 0 && (
               <View style={styles.chatBadge} />
@@ -147,7 +158,7 @@ export const BottomNavigator = () => {
           focused ? (
             <View style={styles.labelContainer}>
               <Typography style={styles.label}>{config.label}</Typography>
-              <View style={[styles.indicator, { backgroundColor: COLORS.PRIMARY }]} />
+              <View style={[styles.indicator, { backgroundColor: COLORS.WHITE }]} />
             </View>
           ) : null,
         tabBarHideOnKeyboard: true,
@@ -197,7 +208,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   label: {
-    color: COLORS.PRIMARY,
+    color: COLORS.WHITE,
     fontSize: FontSize.ExtraSmall,
     fontWeight: FontWeight.Bold,
   },

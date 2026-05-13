@@ -109,10 +109,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
     }
     await setKeychainItem(VARIABLES.USER_TOKEN, user?.token ?? '');
     store.dispatch(setUserDetails(user));
-    if (
-      isWorkerRole(user?.user_type) &&
-      (!user?.is_onboarded || !user?.is_admin_verified)
-    ) {
+    if (isWorkerRole(user?.user_type) && (!user?.is_onboarded || !user?.is_admin_verified)) {
       navigate(SCREENS.COMPLETE_PROFILE);
       return;
     }
@@ -183,7 +180,7 @@ const forgotPassword = async <
 };
 const verifyEmailCode = async <
   R extends User,
-  A extends { email: string; otp: string; user_type: USER_TYPE | 'dentor' },
+  A extends { otp: string; user_type: USER_TYPE | 'dentor' },
 >({
   data,
 }: {
@@ -292,10 +289,7 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
     await setKeychainItem(VARIABLES.USER_TOKEN, user?.token ?? '');
     store.dispatch(setUserDetails(user));
 
-    if (
-      isWorkerRole(user?.user_type) &&
-      (!user?.is_onboarded || !user?.is_admin_verified)
-    ) {
+    if (isWorkerRole(user?.user_type) && (!user?.is_onboarded || !user?.is_admin_verified)) {
       navigate(SCREENS.COMPLETE_PROFILE);
       return;
     }

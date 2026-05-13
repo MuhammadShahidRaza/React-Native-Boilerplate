@@ -68,7 +68,6 @@ export const Verification = ({
     } else {
       await verifyEmailCode({
         data: {
-          email: email,
           otp: code,
           user_type: role,
         },

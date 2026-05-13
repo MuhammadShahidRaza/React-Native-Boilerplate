@@ -1,5 +1,4 @@
 export { CancelReasonModal } from './CancelReasonModal';
-export { ConsumerHomeHub } from './ConsumerHomeHub';
 export { ConsumerMultiServiceActivity } from './ConsumerMultiServiceActivity';
 export { BookRideScreen } from './BookRideScreen';
 export { SendParcelScreen } from './SendParcelScreen';
@@ -9,3 +8,5 @@ export { TrackParcelScreen } from './TrackParcelScreen';
 export { OrderFoodScreen } from './OrderFoodScreen';
 export { RestaurantMenuScreen } from './RestaurantMenuScreen';
 export { FoodDeliveryCartScreen } from './FoodDeliveryCartScreen';
+export { WorkerWalletScreen } from './WorkerWalletScreen';
+export { WorkerHomeScreen } from './WorkerHomeScreen';

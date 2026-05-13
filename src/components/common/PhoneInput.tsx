@@ -8,7 +8,7 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import { CENTER, COLORS, INPUT_THEME, isIOS, REGEX, safeString } from 'utils/index';
+import { COLORS, INPUT_THEME, isIOS, REGEX, safeString } from 'utils/index';
 import { Typography } from './Typography';
 import { StyleType } from 'types/index';
 import { useFocus } from 'hooks/useFocus';
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 5,
   },
-  inputContainerWithTitle: { width: '85%' },
+  inputContainerWithTitle: { flex: 1 },
   lineStyle: {
     backgroundColor: COLORS.BORDER,
     width: 1,
@@ -236,24 +236,25 @@ const styles = StyleSheet.create({
     fontSize: INPUT_THEME.error.fontSize,
   },
   innerContainer: {
-    ...CENTER,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 10,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   codeTextStyle: {
-    height: isIOS() ? 18 : 22,
-    ...CENTER,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   countryPickerButtonStyle: {
     borderRadius: INPUT_THEME.input.borderRadius,
-    width: '20%',
-    backgroundColor:  INPUT_THEME.inputBackground.backgroundColor,
+    width: 80,
+    backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   textContainerStyle: {
-    maxWidth: isIOS() ? '66%' : '68%',
+    flex: 1,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   textInputStyle: {
-    color: COLORS.PRIMARY,
+    color: COLORS.TEXT,
   },
 });

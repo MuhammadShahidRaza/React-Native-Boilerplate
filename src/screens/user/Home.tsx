@@ -1,274 +1,360 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
+import type { SvgProps } from 'react-native-svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
 import {
-  Button,
-  FlatListComponent,
-  HomeHeader,
-  InfoBoxSkeleton,
+  Typography,
   Photo,
   RowComponent,
-  Typography,
-  Wrapper,
+  SvgComponent,
+  GradientButton,
+  AppGradient,
+  GradientIcon,
+  Button,
 } from 'components/index';
-import { COLORS, formatTitle, screenHeight, screenWidth, STYLES } from 'utils/index';
-import { COMMON_TEXT } from 'constants/screens';
-import { BookingInfoBox } from 'components/appComponents/BookingInfoBox';
-import { JobActivityBanner } from 'components/appComponents/JobActivityBanner';
-import { FontSize } from 'types/fontTypes';
+import { VARIABLES } from 'constants/common';
+import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { useAppSelector } from 'types/reduxTypes';
-import { JobInfoBox } from 'components/appComponents/JobInfoBox';
-import { ActivityStatus } from './Activities';
-import { JobStatus } from './MyJobs';
-import { useBookings } from 'hooks/useBookings';
-import { Booking } from 'types/responseTypes';
-import { isWorkerRole } from 'config/app';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, SVG } from 'constants/assets';
+import { COLORS, screenWidth, STYLES } from 'utils/index';
 
-/** User: all active jobs. Dentor: jobs after bid placed (excludes pending/new inquiries). */
-const ACTIVE_STATUSES_USER = ['pending', 'bidding', 'upcoming', 'in_progress', 'completed'];
-const ACTIVE_STATUSES_DENTOR = ['bidding', 'upcoming', 'in_progress', 'completed'];
+// Hero gradient – teal palette (consumer branding, same as original design)
+
+const promoCodes = [
+  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
+  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
+];
 
 export const Home = () => {
-  const role = useAppSelector(state => state?.user?.role);
-  const newInquiriesUnreadCount = useAppSelector(
-    state => state?.notification?.newInquiriesUnreadCount ?? 0,
-  );
-  const isDentor = isWorkerRole(role);
-  const { items, loading, loadingMore, loadMore, hasMore, refetch } = useBookings({
-    isDentor,
-    status: 'upcoming',
-  });
-  const { items: allItems, refetch: refetchActivity } = useBookings({
-    isDentor,
-  });
-  const activeStatuses = isDentor ? ACTIVE_STATUSES_DENTOR : ACTIVE_STATUSES_USER;
-  const activityItems = allItems
-    .filter((b: Booking) => activeStatuses.includes((b?.status ?? '').toString().toLowerCase()))
-    .slice(0, 1);
-
-  // Helper functions for cleaner code
-  const getTitle = () => {
-    const title = isDentor
-      ? 'Explore New Jobs And Get Paid'
-      : 'Explore Technicians With Your Requests';
-    return formatTitle(title);
-  };
-  const getButtonTitle = () => (isDentor ? 'View New Inquiries' : 'Book Service Provider');
-  const getSectionTitle = () => (isDentor ? 'Recent Jobs' : 'Recent Bookings');
-
-  const getButtonPress = () =>
-    isDentor
-      ? () =>
-          navigate(SCREENS.MY_JOBS, {
-            selectedTab: JobStatus.NewInquiries,
-          })
-      : () => navigate(SCREENS.SERVICE_TYPE);
-
-  const renderListItem = ({ item }: { item: Booking }) => {
-    return isDentor ? (
-      <JobInfoBox item={{ ...item, status: JobStatus.Confirmed, sub_type: 'Upcoming' }} /> //'In-Progress'
-    ) : (
-      <BookingInfoBox item={{ ...item, status: ActivityStatus.Confirmed, sub_type: 'Upcoming' }} /> //'In-Progress'
-    );
-  };
-
-  const listHeader = (
-    <>
-      {activityItems.length > 0 && (
-        <>
-          {activityItems.map((item: Booking) => (
-            <JobActivityBanner
-              key={item?.id}
-              item={item}
-              isDentor={isDentor}
-              onPress={() => navigate(SCREENS.JOB_DETAIL, { jobId: item?.id })}
-            />
-          ))}
-        </>
-      )}
-      <RowComponent style={{ marginTop: 16, marginBottom: 8 }}>
-        <Typography style={{ fontWeight: 'bold', fontSize: FontSize.Large }}>
-          {getSectionTitle()}
-        </Typography>
-        {items.length > 0 && (
-          <Typography
-            onPress={() => {
-              if (isDentor) {
-                navigate(SCREENS.MY_JOBS, {
-                  selectedTab: JobStatus.Confirmed,
-                });
-              } else {
-                navigate(SCREENS.ACTIVITIES, {
-                  selectedTab: ActivityStatus.Confirmed,
-                });
-              }
-            }}
-            style={{ color: COLORS.PRIMARY }}
-          >
-            {COMMON_TEXT.SEE_ALL}
-          </Typography>
-        )}
-      </RowComponent>
-    </>
-  );
-
-  const EmptyHomeCard = ({ isDentor }: { isDentor: boolean }) => {
-    return (
-      <Photo
-        onPress={isDentor ? () => navigate(SCREENS.MY_JOBS) : () => navigate(SCREENS.SERVICE_TYPE)}
-        source={isDentor ? IMAGES.NO_JOBS : IMAGES.NO_BOOKINGS}
-        imageStyle={{
-          width: screenWidth(100),
-          height: screenHeight(activityItems?.length > 0 ? 35 : 50),
-          resizeMode: 'cover',
-        }}
-      />
-    );
-  };
-
   return (
-    <Wrapper
-      backgroundColor={COLORS.LIGHT_ORANGE}
-      useSafeArea={false}
-      darkMode={false}
-      wantPaddingBottom={false}
-      showBackButton={false}
-    >
-      <HomeHeader />
+    <View style={styles.root}>
+      {/* ── Hero section ── */}
+      <AppGradient style={styles.hero}>
+        <SafeAreaView edges={['top']}>
+          <View style={styles.topRow}>
+            {/* Location pill — gradient square icon + stacked label/text */}
+            <RowComponent style={styles.locPillWrap}>
+              <GradientIcon
+                componentName={VARIABLES.Ionicons}
+                iconName='location-sharp'
+                size={FontSize.Small}
+                color={COLORS.WHITE}
+              />
 
-      <View style={styles.container}>
-        <RowComponent>
-          <Typography
-            numberOfLines={2}
-            style={{ fontWeight: 'bold', fontSize: FontSize.Large, flex: 1 }}
-          >
-            {getTitle()}
-          </Typography>
-        </RowComponent>
-        <View style={styles.newInquiriesButtonWrap}>
-          <Button
-            style={{
-              marginVertical: 15,
-              marginHorizontal: 20,
-              backgroundColor: COLORS.BOTTOM_NAVIGATION_BAR,
-            }}
-            title={getButtonTitle()}
-            onPress={getButtonPress()}
-          />
-          {isDentor && newInquiriesUnreadCount > 0 ? (
-            <View style={styles.newInquiriesBadge}>
-              <Typography style={styles.newInquiriesBadgeText}>
-                {newInquiriesUnreadCount > 99 ? '99+' : String(newInquiriesUnreadCount)}
-              </Typography>
-            </View>
-          ) : null}
-        </View>
-        {loading && items.length === 0 ? (
-          <View style={styles.shimmerContainer}>
-            <InfoBoxSkeleton count={2} />
+              <View>
+                <Typography style={styles.locLabel}>Location</Typography>
+                <Typography style={styles.locText} numberOfLines={1}>
+                  New York, United States
+                </Typography>
+              </View>
+            </RowComponent>
+            {/* Bell — gradient square icon */}
+            <GradientIcon
+              componentName={VARIABLES.Feather}
+              iconName='bell'
+              size={FontSize.Medium}
+              color={COLORS.WHITE}
+            />
           </View>
-        ) : (
-          <FlatListComponent
-            data={items?.slice(0, 3) ?? []}
-            scrollEnabled={true}
-            renderItem={renderListItem}
-            keyExtractor={item => item?.id?.toString() ?? ''}
-            onRefresh={() => {
-              refetch();
-              refetchActivity();
-            }}
-            refreshing={loading}
-            onEndReached={hasMore && !loadingMore ? loadMore : undefined}
-            onEndReachedThreshold={0.3}
-            noItemProps={{
-              containerHeight: screenHeight(25),
-              message: 'No upcoming results found',
-            }}
-            EmptyComponent={
-              items.length === 0 && activityItems.length === 0 && !loading
-                ? () => <EmptyHomeCard isDentor={isDentor} />
-                : undefined
-            }
-            ListHeaderComponent={listHeader}
-            ListFooterComponent={
-              loadingMore ? (
-                <Typography style={{ padding: 12, textAlign: 'center' }}>Loading more…</Typography>
-              ) : null
-            }
-          />
-        )}
-      </View>
-    </Wrapper>
+          <View style={{ paddingHorizontal: 20 }}>
+            <Typography style={styles.greet}>Hello, Sarah!</Typography>
+            <Typography style={styles.sub}>Where would you like to go today?</Typography>
+
+            <Pressable style={styles.banner}>
+              <Photo source={IMAGES.HOME} imageStyle={styles.bannerImg} />
+              <View style={styles.bannerText}>
+                <Typography style={styles.bannerTitle}>First Ride Free!</Typography>
+                <Typography style={styles.bannerSub}>Use Code First 50 for Rs. 50 off</Typography>
+                <Button
+                  title='Book Now'
+                  onPress={() => navigate(SCREENS.BOOK_RIDE)}
+                  style={styles.bookNow}
+                  textStyle={styles.bookNowText}
+                />
+              </View>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </AppGradient>
+
+      {/* ── Scrollable body – theme-aware background ── */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* "What do you need?" */}
+        <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
+          <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+            What do you need?
+          </Typography>
+          <View style={styles.services}>
+            <ServiceCard
+              label='Book a Ride'
+              subLabel='Get Anywhere Safely'
+              SvgIcon={SVG.BOOK_RIDE}
+              onPress={() => navigate(SCREENS.BOOK_RIDE)}
+            />
+            <ServiceCard
+              label='Send Parcel'
+              subLabel='Fast             Delivery'
+              SvgIcon={SVG.SEND_PARCEL}
+              onPress={() => navigate(SCREENS.SEND_PARCEL)}
+            />
+            <ServiceCard
+              label='Order Food'
+              subLabel='From Top Restaurant'
+              SvgIcon={SVG.ORDER_FOOD}
+              onPress={() => navigate(SCREENS.ORDER_FOOD)}
+            />
+          </View>
+        </View>
+
+        {/* Promo Codes */}
+        <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
+          <View style={styles.promoHeader}>
+            <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+              Promo Codes
+            </Typography>
+            <Typography style={styles.seeAll}>See All</Typography>
+          </View>
+          {promoCodes.map((p, i) => (
+            <View key={i} style={[styles.promoCard]}>
+              <SvgComponent
+                Svg={SVG.COUPON}
+                svgWidth={40}
+                svgHeight={40}
+                containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
+              />
+              <View style={styles.promoBody}>
+                <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
+                  {p.code}
+                </Typography>
+                <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
+                  {p.desc}
+                </Typography>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={{ height: 24 }} />
+      </ScrollView>
+    </View>
   );
 };
+
+// ── Service Card ──────────────────────────────────────────────────────────────
+const ServiceCard = ({
+  label,
+  subLabel,
+  SvgIcon,
+  svgSize = 70,
+  onPress,
+}: {
+  label: string;
+  subLabel: string;
+  SvgIcon: React.FC<SvgProps>;
+  svgSize?: number;
+  onPress: () => void;
+}) => (
+  <Pressable
+    style={[styles.serviceCard, { backgroundColor: COLORS.SURFACE, borderColor: COLORS.BORDER }]}
+    onPress={onPress}
+  >
+    <SvgComponent Svg={SvgIcon} svgWidth={svgSize} svgHeight={svgSize} />
+    <Typography style={[styles.serviceLabel, { color: COLORS.TEXT }]} numberOfLines={2}>
+      {label}
+    </Typography>
+    <Typography style={[styles.serviceSub, { color: COLORS.TEXT_SECONDARY }]} numberOfLines={2}>
+      {subLabel}
+    </Typography>
+  </Pressable>
+);
+
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    ...STYLES.CONTAINER,
-    marginBottom: 5,
   },
-  sectionTitle: {
-    fontWeight: 'bold',
-    fontSize: FontSize.Large,
-    marginBottom: 4,
+  hero: {
+    paddingBottom: 20,
+    borderBottomLeftRadius: 24,
+    backgroundColor: COLORS.BACKGROUND,
+    borderBottomRightRadius: 24,
   },
-  shimmerContainer: {
-    flexGrow: 1,
-    paddingVertical: 20,
-  },
-  newInquiriesButtonWrap: {
-    position: 'relative',
-  },
-  newInquiriesBadge: {
-    position: 'absolute',
-    right: 28,
-    top: 6,
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: COLORS.RED,
-    borderWidth: 1,
-    borderColor: COLORS.WHITE,
-    justifyContent: 'center',
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 5,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    marginBottom: 16,
+    gap: 10,
   },
-  newInquiriesBadgeText: {
+  locPillWrap: {
+    flex: 1,
+    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  locIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  locLabel: {
     color: COLORS.WHITE,
     fontSize: FontSize.Small,
-    fontWeight: '700',
-    lineHeight: FontSize.Small + 1,
   },
-  emptyAction: {
-    marginTop: 14,
-    color: COLORS.PRIMARY,
-    fontWeight: '600',
+  locText: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.SemiBold,
   },
-  emptyCard: {
-    backgroundColor: COLORS.SURFACE,
+  bellBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  greet: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.MediumLarge,
+    fontWeight: FontWeight.SemiBold,
+  },
+  sub: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: FontSize.Small,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  banner: {
+    height: 180,
+    marginBottom: 10,
     borderRadius: 16,
-    padding: 20,
-    marginVertical: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
+    overflow: 'hidden',
+    backgroundColor: COLORS.APP_MAP_BG,
   },
-
-  emptyTitle: {
-    fontWeight: 'bold',
-    color: COLORS.TEXT_SECONDARY,
-    fontSize: 18,
+  bannerImg: {
+    width: '100%',
+    height: '100%',
   },
-
-  emptyDesc: {
-    marginTop: 6,
-    color: '#666',
-    lineHeight: 20,
+  bannerText: {
+    position: 'absolute',
+    left: 15,
+    right: 22,
+    bottom: 22,
   },
-  emptyEmoji: {
-    fontSize: 28,
-    marginBottom: 6,
+  bannerTitle: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.ExtraLarge,
+    fontWeight: FontWeight.SemiBold,
+  },
+  bannerSub: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.MediumSmall,
+  },
+  bookNow: {
+    alignSelf: 'flex-start',
+    padding: 10,  
+    backgroundColor: COLORS.APP_PRIMARY,
+    width: screenWidth(30),
+    marginTop: 10,
+  },
+  bookNowText: {
+    fontSize: FontSize.MediumSmall,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  bodySection: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  sectionTitle: {
+    fontSize: FontSize.MediumLarge,
+    fontWeight: FontWeight.SemiBold,
+    marginBottom: 4,
+  },
+  services: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+    marginBottom: 24,
+  },
+  serviceCard: {
+    flex: 1,
+    borderRadius: 16,
+    alignItems: 'center',
+    paddingTop: 5,
+    paddingBottom: 10,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+  },
+  serviceIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  serviceLabel: {
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.Bold,
+    textAlign: 'center',
+  },
+  serviceSub: {
+    fontSize: FontSize.ExtraSmall,
+    textAlign: 'center',
+    marginTop: 2,
+    paddingHorizontal: 15,
+  },
+  promoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  seeAll: {
+    color: COLORS.APP_PRIMARY,
+    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.Small,
+  },
+  promoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 100,
+    borderWidth: 1,
+    padding: 7,
+    gap: 15,
+    marginBottom: 10,
+    backgroundColor: COLORS.SURFACE,
+    borderColor: COLORS.BORDER,
+  },
+  promoIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  promoBody: {
+    flex: 1,
+  },
+  promoCode: {
+    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.Medium,
+  },
+  promoDesc: {
+    fontSize: FontSize.Small,
+    marginTop: 2,
   },
 });

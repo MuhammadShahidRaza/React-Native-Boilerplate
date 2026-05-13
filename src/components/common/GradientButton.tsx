@@ -4,6 +4,7 @@ import {
   TouchableOpacityProps,
   StyleSheet,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import { FontSize, StyleType } from 'types/index';
 import { COLORS } from 'utils/index';
@@ -11,17 +12,17 @@ import { triggerHaptic } from 'utils/haptic';
 import { Typography } from './Typography';
 import { Icon, IconComponentProps } from './Icon';
 import { RowComponent } from './Row';
-import { StyleProp } from 'react-native';
+import { AppGradient } from './AppGradient';
 
-interface ButtonProps extends TouchableOpacityProps {
+interface GradientButtonProps extends TouchableOpacityProps {
   title: string;
   onPress?: () => void;
   style?: StyleType;
+  gradientStyle?: StyleType;
   containerStyle?: StyleType;
   textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
   loading?: boolean;
-  /** When loading, show this text instead of/in addition to spinner (e.g. "Uploading 45%") */
   loadingText?: string;
   loaderColor?: string;
   loaderSize?: 'small' | 'large';
@@ -29,10 +30,11 @@ interface ButtonProps extends TouchableOpacityProps {
   endIcon?: IconComponentProps;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const GradientButton: React.FC<GradientButtonProps> = ({
   title,
   onPress,
   style,
+  gradientStyle,
   textStyle,
   disabled,
   endIcon,
@@ -47,54 +49,50 @@ export const Button: React.FC<ButtonProps> = ({
   const isButtonLoading = loading;
   const isButtonDisabled = disabled || isButtonLoading;
 
-  const buttonStyles = [
-    styles.button,
-    { backgroundColor: COLORS.BUTTON_BACKGROUND },
-    isButtonDisabled ? styles.disabledButton : null,
-    style,
-  ];
-
   const textStyles = [styles.text, textStyle];
 
   return (
     <TouchableOpacity
-      style={buttonStyles}
+      style={[styles.wrap, isButtonDisabled ? styles.disabledButton : null, style]}
       onPress={() => { triggerHaptic(); onPress?.(); }}
       disabled={isButtonDisabled}
+      activeOpacity={0.85}
       {...props}
     >
-      {isButtonLoading ? (
-        <RowComponent style={{ gap: 10, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={loaderColor} size={loaderSize} />
-          {loadingText ? <Typography style={textStyles}>{loadingText}</Typography> : null}
-        </RowComponent>
-      ) : (
-        <RowComponent style={[{ gap: 10, justifyContent: 'center' }, containerStyle]}>
-          {startIcon && <Icon {...startIcon} />}
-          <Typography style={textStyles}>{title}</Typography>
-          {endIcon && <Icon {...endIcon} />}
-        </RowComponent>
-      )}
+      <AppGradient style={[styles.gradient, gradientStyle]}>
+        {isButtonLoading ? (
+          <RowComponent style={{ gap: 10, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator color={loaderColor} size={loaderSize} />
+            {loadingText ? <Typography style={textStyles}>{loadingText}</Typography> : null}
+          </RowComponent>
+        ) : (
+          <RowComponent style={[{ gap: 10, justifyContent: 'center' }, containerStyle]}>
+            {startIcon && <Icon {...startIcon} />}
+            <Typography style={textStyles}>{title}</Typography>
+            {endIcon && <Icon {...endIcon} />}
+          </RowComponent>
+        )}
+      </AppGradient>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
-    padding: 15,
+  wrap: {
     borderRadius: 50,
+    overflow: 'hidden',
     opacity: 1,
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  gradient: {
+    padding: 15,
   },
   text: {
     color: COLORS.WHITE,
     textAlign: 'center',
     textTransform: 'capitalize',
     fontSize: FontSize.MediumLarge,
-  },
-  disabledText: {
-    color: COLORS.DARK_GREY,
   },
 });

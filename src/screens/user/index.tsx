@@ -15,7 +15,6 @@ export * from './EditProfile';
 export * from './ContactUs';
 export * from './Languages';
 export * from './Settings';
-export * from './Activities';
 export * from './Location';
 export * from './LocationMapPicker';
 export * from './LocationAddDetails';
@@ -48,4 +47,6 @@ export {
   OrderFoodScreen,
   RestaurantMenuScreen,
   FoodDeliveryCartScreen,
+  WorkerWalletScreen,
+  WorkerHomeScreen,
 } from '../consumer';

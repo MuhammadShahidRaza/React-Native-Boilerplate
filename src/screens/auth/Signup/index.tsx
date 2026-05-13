@@ -190,11 +190,15 @@ export const SignUp = () => {
           name={COMMON_TEXT.PHONE_NUMBER}
           title={COMMON_TEXT.PHONE_NUMBER}
           onChangeText={formik.handleChange('phone_number')}
-          value={formik.values.phone_number}
+          value={formik.values.phone_number ?? ''}
           onChangeCountryCode={formik.handleChange('country_code')}
           onChangeCallingCode={formik.handleChange('calling_code')}
           allowSpacing={false}
           defaultCode={__DEV__ ? 'PK' : 'NG'}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'phone',
+          }}
           placeholder={COMMON_TEXT.PHONE_NUMBER}
           error={formik.errors.phone_number}
           touched={Boolean(formik.touched.phone_number && formik.submitCount)}

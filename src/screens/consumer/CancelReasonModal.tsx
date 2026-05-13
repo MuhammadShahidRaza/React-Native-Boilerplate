@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, TextInput } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { Icon, Typography, Button } from 'components/index';
+import { GradientIcon, Typography, Button } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
+import { COLORS } from 'utils/index';
 
 type Props = {
   visible: boolean;
@@ -24,14 +23,13 @@ export const CancelReasonModal = ({ visible, onClose, onContinue }: Props) => {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable style={styles.card} onPress={e => e.stopPropagation()}>
-          <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.iconCircle}>
-            <Icon
-              componentName={VARIABLES.Feather}
-              iconName="x"
-              size={FontSize.ExtraLarge}
-              color={COLORS.WHITE}
-            />
-          </LinearGradient>
+          <GradientIcon
+            componentName={VARIABLES.Feather}
+            iconName="x"
+            size={FontSize.ExtraLarge}
+            color={COLORS.WHITE}
+            containerStyle={styles.iconCircle}
+          />
           <Typography style={styles.heading}>Reason For Cancelling</Typography>
           <TextInput
             style={styles.input}
