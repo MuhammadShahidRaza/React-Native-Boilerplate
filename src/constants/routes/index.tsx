@@ -106,7 +106,12 @@ export const SCREENS = {
   MY_JOBS: 'MyJobs',
 
   /** Multi-service consumer UI (rides, parcel, food) */
+  RIDE_LOCATION_PICKER: 'RideLocationPicker',
   BOOK_RIDE: 'BookRide',
+  CHOOSE_RIDE: 'ChooseRide',
+  FINDING_DRIVER: 'FindingDriver',
+  DRIVER_FOUND: 'DriverFound',
+  TRACK_RIDE: 'TrackRide',
   SEND_PARCEL: 'SendParcel',
   SEND_PARCEL_FINDING: 'SendParcelFinding',
   COURIER_MATCHED: 'CourierMatched',

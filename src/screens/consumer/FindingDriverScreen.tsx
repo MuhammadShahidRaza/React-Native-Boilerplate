@@ -1,30 +1,32 @@
 import { useEffect, useRef } from 'react';
 import { StyleSheet, View, Animated, Pressable } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { GradientIcon, Icon, Typography, Wrapper } from 'components/index';
+import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Icon, Wrapper, GradientIcon, Typography } from 'components/index';
 import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { COLORS } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS } from 'utils/index';
 import { useState } from 'react';
 import { CancelReasonModal } from './CancelReasonModal';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
-const DRIVER_COORDS = [
-  { latitude: INITIAL_REGION.latitude + 0.012, longitude: INITIAL_REGION.longitude - 0.006 },
-  { latitude: INITIAL_REGION.latitude + 0.005, longitude: INITIAL_REGION.longitude + 0.009 },
-  { latitude: INITIAL_REGION.latitude - 0.002, longitude: INITIAL_REGION.longitude - 0.008 },
+const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
+const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
+const ROUTE_COORDS = [
+  PICKUP,
+  { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
+  DROPOFF,
 ];
 const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude,
-  longitude: INITIAL_REGION.longitude,
-  latitudeDelta: 0.04,
-  longitudeDelta: 0.025,
+  latitude: INITIAL_REGION.latitude + 0.002,
+  longitude: INITIAL_REGION.longitude + 0.002,
+  latitudeDelta: 0.028,
+  longitudeDelta: 0.018,
 };
 
-export const SendParcelFindingScreen = () => {
+export const FindingDriverScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
@@ -45,7 +47,7 @@ export const SendParcelFindingScreen = () => {
     pulse.start();
     const timer = setTimeout(() => {
       pulse.stop();
-      navigate(SCREENS.COURIER_MATCHED);
+      navigate(SCREENS.DRIVER_FOUND);
     }, 2800);
     return () => {
       pulse.stop();
@@ -55,13 +57,13 @@ export const SendParcelFindingScreen = () => {
 
   return (
     <Wrapper
-      headerTitle="Send Parcel"
+      headerTitle="Book a Ride"
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView={false}
       darkMode={false}
     >
-      {/* Map with available courier markers */}
+      {/* Map */}
       <View style={styles.mapContainer}>
         <MapView
           provider={PROVIDER_GOOGLE}
@@ -73,18 +75,18 @@ export const SendParcelFindingScreen = () => {
           showsCompass={false}
           userInterfaceStyle="light"
         >
-          {DRIVER_COORDS.map((coord, i) => (
-            <Marker key={`courier-${i}`} coordinate={coord} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.courierMarker}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName="bicycle"
-                  size={14}
-                  color={COLORS.APP_TEXT}
-                />
-              </View>
-            </Marker>
-          ))}
+          <Polyline coordinates={ROUTE_COORDS} strokeColor="#374151" strokeWidth={3} />
+          <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
+            <Icon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName="map-marker"
+              size={34}
+              color={COLORS.APP_PRIMARY}
+            />
+          </Marker>
+          <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.dropoffDot} />
+          </Marker>
         </MapView>
       </View>
 
@@ -93,15 +95,15 @@ export const SendParcelFindingScreen = () => {
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <GradientIcon
             componentName={VARIABLES.MaterialCommunityIcons}
-            iconName="bicycle"
+            iconName="car"
             size={52}
             color={COLORS.WHITE}
             containerSize={120}
             borderRadius={60}
           />
         </Animated.View>
-        <Typography style={styles.title}>Finding a Courier...</Typography>
-        <Typography style={styles.sub}>Please wait while we match you</Typography>
+        <Typography style={styles.title}>Finding Your Driver...</Typography>
+        <Typography style={styles.sub}>This Usually Takes 30 Seconds</Typography>
         <Pressable style={styles.cancelBtn} onPress={() => setCancelVisible(true)}>
           <Typography style={styles.cancelTxt}>Cancel</Typography>
         </Pressable>
@@ -123,16 +125,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
   },
-  courierMarker: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 6,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
+  dropoffDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.APP_SECONDARY,
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
   },
   center: {
     flex: 1,

@@ -38,6 +38,11 @@ export * from './MyWallet';
 export {
   ConsumerMultiServiceActivity,
   BookRideScreen,
+  RideLocationPickerScreen,
+  ChooseRideScreen,
+  FindingDriverScreen,
+  DriverFoundScreen,
+  TrackRideScreen,
   SendParcelScreen,
   SendParcelFindingScreen,
   CourierMatchedScreen,

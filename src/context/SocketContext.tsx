@@ -16,7 +16,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    if (!ENV_CONSTANTS.SOCKET_BASE_URL) return;
+    if (!ENV_CONSTANTS.SOCKET_BASE_URL || !ENV_CONSTANTS.IS_ALPHA_PHASE) return;
 
     let socketInstance: Socket | null = null;
 

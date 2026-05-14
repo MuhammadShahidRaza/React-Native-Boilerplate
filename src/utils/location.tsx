@@ -74,7 +74,8 @@ const reverseGeocode = async ({
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address|route|postal_code&key=${ENV_CONSTANTS.MAP_API_KEY}`,
     );
-
+    logger.log('Reverse geocoding response:', response);
+    logger.log('ENV_CONSTANTS.MAP_API_KEY', ENV_CONSTANTS.MAP_API_KEY);
     if (!response.ok) {
       throw new Error('Failed to fetch reverse geocoding data');
     }

@@ -130,7 +130,29 @@ export type RootStackParamList = {
     selectedTab?: JobStatus;
   };
 
-  [SCREENS.BOOK_RIDE]: undefined;
+  [SCREENS.RIDE_LOCATION_PICKER]: { field: 'pickup' | 'dropoff' } | undefined;
+  [SCREENS.BOOK_RIDE]: {
+    pickedAddress?: {
+      fullAddress: string; postalCode: string; street: string; city: string;
+      state: string; country: string; latitude: number; longitude: number;
+    };
+    pickerField?: 'pickup' | 'dropoff';
+  } | undefined;
+  [SCREENS.CHOOSE_RIDE]: {
+    pickupAddress?: string;
+    dropoffAddress?: string;
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
+  } | undefined;
+  [SCREENS.FINDING_DRIVER]: {
+    rideType?: string;
+    pickupAddress?: string;
+    dropoffAddress?: string;
+  } | undefined;
+  [SCREENS.DRIVER_FOUND]: undefined;
+  [SCREENS.TRACK_RIDE]: { phase?: 'in_progress' | 'completed' } | undefined;
   [SCREENS.SEND_PARCEL]: undefined;
   [SCREENS.SEND_PARCEL_FINDING]: undefined;
   [SCREENS.COURIER_MATCHED]: undefined;

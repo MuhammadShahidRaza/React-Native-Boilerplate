@@ -1,6 +1,11 @@
 export { CancelReasonModal } from './CancelReasonModal';
 export { ConsumerMultiServiceActivity } from './ConsumerMultiServiceActivity';
 export { BookRideScreen } from './BookRideScreen';
+export { RideLocationPickerScreen } from './RideLocationPickerScreen';
+export { ChooseRideScreen } from './ChooseRideScreen';
+export { FindingDriverScreen } from './FindingDriverScreen';
+export { DriverFoundScreen } from './DriverFoundScreen';
+export { TrackRideScreen } from './TrackRideScreen';
 export { SendParcelScreen } from './SendParcelScreen';
 export { SendParcelFindingScreen } from './SendParcelFindingScreen';
 export { CourierMatchedScreen } from './CourierMatchedScreen';

@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
 import { StyleSheet, View, Image, Pressable } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Icon, Typography, Button, Wrapper, GradientIcon, AppGradient } from 'components/index';
+import { Icon, Wrapper, GradientIcon, AppGradient, Button, Typography } from 'components/index';
 import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import type { RootStackParamList } from 'navigation/Navigators';
-import { SCREENS } from 'constants/routes';
-import { navigate, onBack } from 'navigation/index';
-import { CancelReasonModal } from './CancelReasonModal';
-import { IMAGES } from 'constants/assets';
 import { COLORS } from 'utils/index';
+import { IMAGES } from 'constants/assets';
+import { navigate, onBack } from 'navigation/index';
+import { SCREENS } from 'constants/routes';
+import type { RootStackParamList } from 'navigation/Navigators';
+import { CancelReasonModal } from './CancelReasonModal';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
 const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
 const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
-const COURIER_POS = { latitude: INITIAL_REGION.latitude + 0.002, longitude: INITIAL_REGION.longitude + 0.001 };
+const DRIVER_POS = { latitude: INITIAL_REGION.latitude + 0.004, longitude: INITIAL_REGION.longitude + 0.001 };
 const ROUTE_COORDS = [
   PICKUP,
   { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
@@ -29,15 +29,19 @@ const MAP_REGION = {
   longitudeDelta: 0.018,
 };
 
-export const TrackParcelScreen = () => {
-  const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_PARCEL>>();
-  const phase = route.params?.phase ?? 'picked_up';
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const isDelivered = phase === 'delivered';
+const PROGRESS_STEPS = ['Driver en route', 'In Progress', 'Completed'];
+
+export const TrackRideScreen = () => {
+  const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_RIDE>>();
+  const phase = route.params?.phase ?? 'in_progress';
+  const [cancelVisible, setCancelVisible] = useState(false);
+
+  const isCompleted = phase === 'completed';
+  const activeStep = isCompleted ? 2 : 1;
 
   return (
     <Wrapper
-      headerTitle="Track Parcel"
+      headerTitle="Book a Ride"
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
@@ -67,12 +71,12 @@ export const TrackParcelScreen = () => {
           <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.dropoffDot} />
           </Marker>
-          {!isDelivered && (
-            <Marker coordinate={COURIER_POS} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.courierMarker}>
+          {!isCompleted && (
+            <Marker coordinate={DRIVER_POS} anchor={{ x: 0.5, y: 0.5 }}>
+              <View style={styles.carMarker}>
                 <Icon
                   componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName="bicycle"
+                  iconName="car"
                   size={14}
                   color={COLORS.APP_TEXT}
                 />
@@ -85,108 +89,114 @@ export const TrackParcelScreen = () => {
       <View style={styles.content}>
         {/* Progress bar */}
         <View style={styles.progressRow}>
-          {[0, 1, 2].map(i => (
+          {PROGRESS_STEPS.map((_, i) => (
             <View key={i} style={styles.progressSegWrap}>
               <View
                 style={[
                   styles.progressSeg,
-                  (isDelivered || i === 0) ? styles.segActive : styles.segInactive,
+                  i <= activeStep ? styles.segActive : styles.segInactive,
                 ]}
               />
-              {isDelivered && i === 2 && <View style={styles.progressDot} />}
-              {!isDelivered && i === 0 && <View style={styles.progressDot} />}
+              {i === activeStep && <View style={styles.progressDot} />}
             </View>
           ))}
-        </View>
-
-        {/* Tracking badge */}
-        <View style={styles.badge}>
-          <Typography style={styles.badgeTxt}>Tracking ID: SN-PKL-2847</Typography>
         </View>
 
         {/* Status icon + text */}
         <View style={styles.statusWrap}>
           <GradientIcon
             componentName={VARIABLES.Feather}
-            iconName={isDelivered ? 'check' : 'package'}
+            iconName={isCompleted ? 'check' : 'send'}
             size={36}
             color={COLORS.WHITE}
             containerSize={88}
             borderRadius={44}
           />
           <Typography style={styles.statusTitle}>
-            {isDelivered ? 'Delivered' : 'Parcel Picked Up'}
+            {isCompleted ? 'Ride Completed' : 'Ride In Progress'}
           </Typography>
           <Typography style={styles.statusSub}>
-            {isDelivered ? 'Parcel has been delivered' : 'Courier has collected your parcel'}
+            {isCompleted ? 'Thank you for riding with us' : 'Enjoy your ride!'}
           </Typography>
         </View>
 
-        {/* Courier card */}
+        {/* Driver card */}
         <View style={styles.card}>
-          <View style={styles.courierRow}>
+          <View style={styles.driverRow}>
             <Image source={IMAGES.USER} style={styles.avatar} />
-            <View style={styles.courierInfo}>
-              <Typography style={styles.name}>John Doe</Typography>
-              <Typography style={styles.phone}>+01 000 0000 00</Typography>
+            <View style={styles.driverInfo}>
+              <Typography style={styles.driverName}>John Doe</Typography>
+              <View style={styles.ratingRow}>
+                <Icon
+                  componentName={VARIABLES.Ionicons}
+                  iconName="star"
+                  size={FontSize.Small}
+                  color={COLORS.APP_STAR}
+                />
+                <Typography style={styles.rating}>4.9</Typography>
+              </View>
             </View>
             <AppGradient variant="primaryLight" style={styles.contactCircle}>
               <Icon componentName={VARIABLES.Feather} iconName="phone" size={16} color={COLORS.WHITE} />
             </AppGradient>
-            <View style={[styles.contactCircle, { backgroundColor: COLORS.APP_TINT_SOFT, marginLeft: 8 }]}>
-              <Icon componentName={VARIABLES.Feather} iconName="mail" size={16} color={COLORS.APP_SECONDARY} />
+            <View style={[styles.contactCircle, { backgroundColor: COLORS.APP_SECONDARY, marginLeft: 8 }]}>
+              <Icon componentName={VARIABLES.Feather} iconName="mail" size={16} color={COLORS.WHITE} />
             </View>
+          </View>
+
+          {!isCompleted && (
+            <>
+              <View style={styles.cardDivider} />
+              <View style={styles.carRow}>
+                <View>
+                  <Typography style={styles.carModel}>Toyota Corolla</Typography>
+                  <Typography style={styles.carPlate}>ABC-1234</Typography>
+                </View>
+                <Pressable style={styles.inlineCancelBtn} onPress={() => setCancelVisible(true)}>
+                  <Typography style={styles.inlineCancelTxt}>Cancel</Typography>
+                </Pressable>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Vehicle stats */}
+        <View style={styles.statsRow}>
+          <StatItem icon="car" label="Vehicle Type" value="Toyota" />
+          <View style={styles.statDivider} />
+          <StatItem icon="card-text-outline" label="License Plate" value="AA-001-AA" />
+          <View style={styles.statDivider} />
+          <StatItem icon="water" label="Color" value="Black" />
+        </View>
+
+        {/* Fare */}
+        <View style={styles.fareCard}>
+          <View style={styles.fareRow}>
+            <Typography style={styles.fareLabel}>Estimate Fare</Typography>
+            <Typography style={styles.fareValue}>CFA 330</Typography>
+          </View>
+          <View style={styles.fareDivider} />
+          <View style={styles.fareRow}>
+            <Typography style={styles.fareTotalLabel}>Payment</Typography>
+            <Typography style={styles.fareTotalValue}>Cash</Typography>
           </View>
         </View>
 
-        {/* Vehicle stats or rating */}
-        {!isDelivered ? (
-          <View style={styles.statsRow}>
-            <StatItem icon="motorbike" label="Vehicle Type" value="YAMAHA" />
-            <View style={styles.statDivider} />
-            <StatItem icon="card-text-outline" label="License Plate" value="AA-001-AA" />
-            <View style={styles.statDivider} />
-            <StatItem icon="water" label="Color" value="Black" />
-          </View>
-        ) : (
-          <View style={styles.rateWrap}>
-            <Typography style={styles.rateTitle}>Rate your experience</Typography>
-            <View style={styles.stars}>
-              {[1, 2, 3, 4, 5].map(i => (
-                <Icon
-                  key={i}
-                  componentName={VARIABLES.Ionicons}
-                  iconName="star-outline"
-                  size={32}
-                  color={COLORS.APP_STAR}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* CTA */}
-        {isDelivered ? (
+        {isCompleted ? (
           <Button title="Done" style={styles.ctaBtn} onPress={() => onBack()} />
         ) : (
           <Button
-            title="Track Delivery"
+            title="Mark as Completed"
             style={styles.ctaBtn}
-            onPress={() => navigate(SCREENS.TRACK_PARCEL, { phase: 'delivered' })}
+            onPress={() => navigate(SCREENS.TRACK_RIDE, { phase: 'completed' })}
           />
-        )}
-
-        {!isDelivered && (
-          <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
-            <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
-          </Pressable>
         )}
       </View>
 
       <CancelReasonModal
-        visible={cancelOpen}
-        onClose={() => setCancelOpen(false)}
-        onContinue={() => setCancelOpen(false)}
+        visible={cancelVisible}
+        onClose={() => setCancelVisible(false)}
+        onContinue={() => { setCancelVisible(false); navigate(SCREENS.BOOK_RIDE); }}
       />
     </Wrapper>
   );
@@ -221,7 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.WHITE,
   },
-  courierMarker: {
+  carMarker: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 6,
     padding: 4,
@@ -237,11 +247,12 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
+  /* Progress */
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   progressSegWrap: {
     flex: 1,
@@ -265,36 +276,25 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.WHITE,
   },
-  badge: {
-    alignSelf: 'center',
-    marginBottom: 16,
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  badgeTxt: {
-    color: COLORS.APP_PRIMARY_DARK,
-    fontSize: FontSize.ExtraSmall,
-    fontWeight: FontWeight.Bold,
-  },
+  /* Status */
   statusWrap: {
     alignItems: 'center',
     marginBottom: 20,
   },
   statusTitle: {
-    fontSize: FontSize.Large,
+    fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
-    marginTop: 12,
     textAlign: 'center',
+    marginTop: 12,
   },
   statusSub: {
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 4,
     fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
     textAlign: 'center',
+    marginTop: 4,
   },
+  /* Driver card */
   card: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
-  courierRow: {
+  driverRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -315,16 +315,21 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginRight: 10,
   },
-  courierInfo: { flex: 1 },
-  name: {
+  driverInfo: { flex: 1 },
+  driverName: {
+    fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
-    fontSize: FontSize.MediumSmall,
   },
-  phone: {
-    color: COLORS.APP_TEXT_MUTED,
-    fontSize: FontSize.Small,
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginTop: 2,
+  },
+  rating: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
   },
   contactCircle: {
     width: 38,
@@ -333,6 +338,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  cardDivider: {
+    height: 1,
+    backgroundColor: COLORS.APP_LINE,
+    marginVertical: 12,
+  },
+  carRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  carModel: {
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  carPlate: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+    marginTop: 2,
+  },
+  inlineCancelBtn: {
+    backgroundColor: COLORS.APP_DANGER_BG,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  inlineCancelTxt: {
+    color: COLORS.APP_DANGER_TEXT,
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
+  },
+  /* Stats */
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -367,31 +404,44 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.APP_LINE,
     marginHorizontal: 4,
   },
-  rateWrap: {
-    alignItems: 'center',
-    marginBottom: 16,
+  /* Fare */
+  fareCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
   },
-  rateTitle: {
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
-    marginBottom: 12,
-    fontSize: FontSize.MediumSmall,
-  },
-  stars: {
+  fareRow: {
     flexDirection: 'row',
-    gap: 8,
-  },
-  ctaBtn: { marginTop: 4 },
-  cancelSoft: {
-    marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 28,
-    backgroundColor: COLORS.APP_DANGER_BG,
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 4,
   },
-  cancelSoftTxt: {
-    color: COLORS.APP_DANGER_TEXT,
+  fareLabel: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+  },
+  fareValue: {
     fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
   },
+  fareDivider: {
+    height: 1,
+    backgroundColor: COLORS.APP_LINE,
+    marginVertical: 4,
+  },
+  fareTotalLabel: {
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  fareTotalValue: {
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.Bold,
+    color: COLORS.APP_PRIMARY,
+  },
+  ctaBtn: { marginTop: 4 },
 });

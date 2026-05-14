@@ -1,22 +1,32 @@
 import { useState } from 'react';
-import { StyleSheet, View, TextInput } from 'react-native';
-import { Button, Typography, Wrapper } from 'components/index';
+import { StyleSheet, View } from 'react-native';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Autocomplete, Button, GradientIcon, Icon, Input, Typography, Wrapper } from 'components/index';
+import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS } from 'utils/index';
+import type { AddressDetails } from 'utils/location';
 
-const consumerBackIcon = {
-  backgroundColor: COLORS.APP_PRIMARY,
-  borderRadius: 12,
+const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
+
+const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
+const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
+const ROUTE_COORDS = [PICKUP, DROPOFF];
+const MAP_REGION = {
+  latitude: INITIAL_REGION.latitude + 0.002,
+  longitude: INITIAL_REGION.longitude + 0.002,
+  latitudeDelta: 0.03,
+  longitudeDelta: 0.02,
 };
 
 export const SendParcelScreen = () => {
-  const [receiverName, setReceiverName] = useState('');
-  const [pickup, setPickup] = useState('');
-  const [dropoff, setDropoff] = useState('');
+  const [pickupAddress, setPickupAddress] = useState<AddressDetails | null>(null);
+  const [dropoffAddress, setDropoffAddress] = useState<AddressDetails | null>(null);
   const [senderName, setSenderName] = useState('');
   const [senderPhone, setSenderPhone] = useState('');
+  const [receiverName, setReceiverName] = useState('');
   const [receiverPhone, setReceiverPhone] = useState('');
   const [pkg, setPkg] = useState('');
 
@@ -24,187 +34,282 @@ export const SendParcelScreen = () => {
     <Wrapper
       headerTitle="Send Parcel"
       showBackButton
-      backIconStyle={consumerBackIcon}
+      backIconStyle={BACK_ICON_STYLE}
       useScrollView
       darkMode={false}
     >
-      <Typography style={styles.label}>Pickup & Drop-Off</Typography>
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <View style={[styles.dot, { backgroundColor: COLORS.APP_PRIMARY }]} />
-          <View style={{ flex: 1 }}>
-            <Typography style={styles.mutedSmall}>Pickup location</Typography>
-            <TextInput
-              style={styles.inlineInput}
-              placeholder="Enter pickup"
-              placeholderTextColor={COLORS.APP_TEXT_MUTED}
-              value={pickup}
-              onChangeText={setPickup}
-            />
-          </View>
-        </View>
-        <View style={styles.vline} />
-        <View style={styles.row}>
-          <View style={[styles.dot, { backgroundColor: COLORS.APP_SECONDARY }]} />
-          <View style={{ flex: 1 }}>
-            <Typography style={styles.mutedSmall}>Drop-off location</Typography>
-            <TextInput
-              style={styles.inlineInput}
-              placeholder="Enter drop-off"
-              placeholderTextColor={COLORS.APP_TEXT_MUTED}
-              value={dropoff}
-              onChangeText={setDropoff}
-            />
-          </View>
-        </View>
+      {/* Map */}
+      <View style={styles.mapContainer}>
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={StyleSheet.absoluteFill}
+          initialRegion={MAP_REGION}
+          scrollEnabled={false}
+          showsUserLocation
+          showsMyLocationButton={false}
+          showsCompass={false}
+          userInterfaceStyle="light"
+        >
+          {pickupAddress && dropoffAddress && (
+            <>
+              <Polyline coordinates={ROUTE_COORDS} strokeColor="#374151" strokeWidth={3} />
+              <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
+                <Icon
+                  componentName={VARIABLES.MaterialCommunityIcons}
+                  iconName="map-marker"
+                  size={34}
+                  color={COLORS.APP_PRIMARY}
+                />
+              </Marker>
+              <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
+                <View style={styles.dropoffDot} />
+              </Marker>
+            </>
+          )}
+        </MapView>
       </View>
 
-      <Typography style={styles.label}>Pricing</Typography>
-      <View style={styles.priceBox}>
-        <Typography style={styles.muted}>Base Fare</Typography>
-        <Typography style={styles.price}>CFA 550</Typography>
+      <View style={styles.content}>
+        {/* Pickup & Drop-off */}
+        <Typography style={styles.sectionTitle}>Pickup & Drop-Off</Typography>
+        <View style={styles.locationCard}>
+          <View style={styles.connectLine} />
+
+          <View style={styles.locationRow}>
+            <View style={styles.pickupDot} />
+            <View style={styles.inputWrap}>
+              <Autocomplete
+                placeholder="Pickup Location"
+                value={pickupAddress?.fullAddress ?? ''}
+                setReverseGeocodedAddress={setPickupAddress}
+                showCurrentLocationButton
+                containerStyle={styles.autocompleteContainer}
+                keepResultsAfterBlur
+                keyboardShouldPersistTaps="handled"
+              />
+            </View>
+          </View>
+
+          <View style={styles.locationRow}>
+            <Icon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName="map-marker"
+              size={22}
+              color={COLORS.APP_SECONDARY}
+            />
+            <View style={styles.inputWrap}>
+              <Autocomplete
+                placeholder="Drop-Off Location"
+                value={dropoffAddress?.fullAddress ?? ''}
+                setReverseGeocodedAddress={setDropoffAddress}
+                showCurrentLocationButton={false}
+                containerStyle={styles.autocompleteContainer}
+                keepResultsAfterBlur
+                keyboardShouldPersistTaps="handled"
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* Pricing */}
+        <Typography style={styles.sectionTitle}>Pricing</Typography>
+        <View style={styles.priceBox}>
+          <View style={styles.priceRow}>
+            <GradientIcon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName="package-variant"
+              size={20}
+              color={COLORS.WHITE}
+              containerSize={40}
+              borderRadius={10}
+            />
+            <View style={styles.priceInfo}>
+              <Typography style={styles.priceLabel}>Base Fare</Typography>
+              <Typography style={styles.priceSub}>Standard delivery</Typography>
+            </View>
+            <Typography style={styles.priceAmount}>CFA 550</Typography>
+          </View>
+        </View>
+
+        {/* Sender Details */}
+        <Typography style={styles.sectionTitle}>Sender Details</Typography>
+        <Input
+          name="senderName"
+          placeholder="Sender Name"
+          value={senderName}
+          onChangeText={setSenderName}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'user',
+            size: FontSize.Medium,
+            color: COLORS.APP_TEXT_MUTED,
+          }}
+        />
+        <Input
+          name="senderPhone"
+          placeholder="Sender Phone"
+          value={senderPhone}
+          onChangeText={setSenderPhone}
+          keyboardType="phone-pad"
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'phone',
+            size: FontSize.Medium,
+            color: COLORS.APP_TEXT_MUTED,
+          }}
+        />
+
+        {/* Receiver Details */}
+        <Typography style={styles.sectionTitle}>Receiver Details</Typography>
+        <Input
+          name="receiverName"
+          placeholder="Receiver Name"
+          value={receiverName}
+          onChangeText={setReceiverName}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'user',
+            size: FontSize.Medium,
+            color: COLORS.APP_TEXT_MUTED,
+          }}
+        />
+        <Input
+          name="receiverPhone"
+          placeholder="Receiver Phone"
+          value={receiverPhone}
+          onChangeText={setReceiverPhone}
+          keyboardType="phone-pad"
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'phone',
+            size: FontSize.Medium,
+            color: COLORS.APP_TEXT_MUTED,
+          }}
+        />
+
+        {/* Package Description */}
+        <Typography style={styles.sectionTitle}>Package Description</Typography>
+        <Input
+          name="pkg"
+          placeholder="What are you sending?"
+          value={pkg}
+          onChangeText={setPkg}
+          multiline
+          maxLines={4}
+          startIcon={{
+            componentName: VARIABLES.Feather,
+            iconName: 'package',
+            size: FontSize.Medium,
+            color: COLORS.APP_TEXT_MUTED,
+          }}
+        />
+
+        <Button
+          title="Request Courier"
+          onPress={() => navigate(SCREENS.SEND_PARCEL_FINDING)}
+          style={styles.ctaBtn}
+          disabled={!pickupAddress || !dropoffAddress || !senderName || !receiverName}
+        />
       </View>
-
-      <Typography style={styles.label}>Sender Details</Typography>
-      <TextInput
-        style={styles.input}
-        placeholder="Sender Name"
-        placeholderTextColor={COLORS.APP_TEXT_MUTED}
-        value={senderName}
-        onChangeText={setSenderName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Sender Phone"
-        placeholderTextColor={COLORS.APP_TEXT_MUTED}
-        value={senderPhone}
-        onChangeText={setSenderPhone}
-      />
-
-      <Typography style={styles.label}>Receiver Details</Typography>
-      <TextInput
-        style={[styles.input, receiverName ? styles.inputFocus : null]}
-        placeholder="Receiver Name"
-        placeholderTextColor={COLORS.APP_TEXT_MUTED}
-        value={receiverName}
-        onChangeText={setReceiverName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Receiver Phone"
-        placeholderTextColor={COLORS.APP_TEXT_MUTED}
-        value={receiverPhone}
-        onChangeText={setReceiverPhone}
-      />
-
-      <Typography style={styles.label}>Package Description</Typography>
-      <TextInput
-        style={[styles.input, styles.area]}
-        placeholder="What are you sending?"
-        placeholderTextColor={COLORS.APP_TEXT_MUTED}
-        multiline
-        value={pkg}
-        onChangeText={setPkg}
-      />
-
-      <Button
-        title="Request Courier"
-        onPress={() => navigate(SCREENS.SEND_PARCEL_FINDING)}
-        style={styles.cta}
-        textStyle={styles.ctaText}
-      />
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  label: {
-    fontWeight: FontWeight.Bold,
+  mapContainer: {
+    height: 200,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  dropoffDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.APP_SECONDARY,
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
+  },
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  sectionTitle: {
     fontSize: FontSize.Medium,
+    fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
-    marginBottom: 8,
+    marginBottom: 10,
     marginTop: 8,
   },
-  card: {
+  locationCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    marginBottom: 8,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginTop: 22,
-  },
-  vline: {
+  connectLine: {
+    position: 'absolute',
+    left: 27,
+    top: 46,
     width: 2,
-    height: 24,
+    height: 48,
     backgroundColor: COLORS.APP_LINE,
-    marginLeft: 5,
-    marginVertical: 4,
   },
-  mutedSmall: {
-    color: COLORS.APP_TEXT_MUTED,
-    fontSize: FontSize.ExtraSmall,
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  inlineInput: {
-    fontSize: FontSize.Medium,
-    color: COLORS.APP_TEXT,
-    paddingVertical: 8,
+  pickupDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: COLORS.APP_PRIMARY,
+    backgroundColor: COLORS.WHITE,
+    marginRight: 10,
+  },
+  inputWrap: { flex: 1 },
+  autocompleteContainer: {
+    borderWidth: 0,
+    backgroundColor: COLORS.APP_SURFACE,
+    borderRadius: 10,
+    marginBottom: 0,
   },
   priceBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-  },
-  muted: {
-    color: COLORS.APP_TEXT_MUTED,
-    fontSize: FontSize.Small,
-  },
-  price: {
-    color: COLORS.APP_SECONDARY,
-    fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Large,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: FontSize.Medium,
-    color: COLORS.APP_TEXT,
-    marginBottom: 10,
     backgroundColor: COLORS.WHITE,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
   },
-  inputFocus: {
-    borderColor: COLORS.APP_SECONDARY,
-    borderWidth: 2,
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  area: {
-    minHeight: 100,
-    textAlignVertical: 'top',
+  priceInfo: { flex: 1 },
+  priceLabel: {
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
   },
-  cta: {
-    marginTop: 20,
-    backgroundColor: COLORS.APP_SECONDARY,
-    borderRadius: 999,
+  priceSub: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+    marginTop: 2,
   },
-  ctaText: {
-    color: COLORS.WHITE,
+  priceAmount: {
+    fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
+    color: COLORS.APP_SECONDARY,
   },
+  ctaBtn: { marginTop: 20 },
 });

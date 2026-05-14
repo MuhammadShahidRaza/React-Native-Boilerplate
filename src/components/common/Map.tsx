@@ -45,6 +45,12 @@ interface MapProps {
   currentLocationButtonStyle?: ViewStyle;
   /** Ref to access map (e.g. animateToRegion) */
   mapRef?: React.MutableRefObject<MapView | null>;
+  /** Children rendered inside MapView (e.g. Polyline, Marker) */
+  children?: React.ReactNode;
+  /** Override min zoom level (default 14) */
+  minZoomLevel?: number;
+  /** Override max zoom level (default 20) */
+  maxZoomLevel?: number;
 }
 
 export const Map: FC<MapProps> = ({
@@ -68,6 +74,9 @@ export const Map: FC<MapProps> = ({
   centerMarkerStyle,
   currentLocationButtonStyle,
   mapRef: mapRefProp,
+  children,
+  minZoomLevel = 14,
+  maxZoomLevel = 20,
 }) => {
   const { isDark } = useTheme();
   const resolvedMapStyle = mapStyle === 'auto' ? (isDark ? 'dark' : 'light') : mapStyle;
@@ -132,11 +141,11 @@ export const Map: FC<MapProps> = ({
           provider={PROVIDER_GOOGLE}
           style={[styles.map, style]}
           scrollEnabled={scrollEnabled}
-          maxZoomLevel={20}
+          maxZoomLevel={maxZoomLevel}
           showsUserLocation={showCenterMarker ? false : true}
           showsMyLocationButton={false}
           showsCompass={false}
-          minZoomLevel={14}
+          minZoomLevel={minZoomLevel}
           userInterfaceStyle={resolvedMapStyle}
           {...(showCenterMarker
             ? { initialRegion: region, onRegionChangeComplete: handleRegionChangeComplete }
@@ -158,6 +167,7 @@ export const Map: FC<MapProps> = ({
                 {customPopup && <Callout onPress={customPopupPress}>{customPopup}</Callout>}
               </Marker>
             ))}
+          {children}
         </MapView>
         {showCenterMarker && (
           <View style={[styles.centerMarker, centerMarkerStyle]} pointerEvents='none'>
