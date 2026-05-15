@@ -58,8 +58,8 @@ const FONT_WEIGHT_MAP: Record<string, FontWeight> = {
 
 // Font family mapping
 const FONT_FAMILY_MAP: Record<FontWeight, string> = {
-  [FontWeight.Light]: FONT_FAMILY.GORDITA.LIGHT,
-  [FontWeight.Black]: FONT_FAMILY.GORDITA.BLACK,
+  [FontWeight.Light]: FONT_FAMILY.POPPINS.LIGHT,
+  [FontWeight.Black]: FONT_FAMILY.POPPINS.BLACK,
   [FontWeight.Bold]: FONT_FAMILY.POPPINS.BOLD,
   [FontWeight.SemiBold]: FONT_FAMILY.POPPINS.SEMIBOLD,
   [FontWeight.Medium]: FONT_FAMILY.POPPINS.MEDIUM,

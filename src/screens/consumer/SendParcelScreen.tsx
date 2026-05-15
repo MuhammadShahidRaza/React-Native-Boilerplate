@@ -39,7 +39,7 @@ export const SendParcelScreen = () => {
       darkMode={false}
     >
       {/* Map */}
-      <View style={styles.mapContainer}>
+      {/* <View style={styles.mapContainer}>
         <MapView
           provider={PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFill}
@@ -67,7 +67,7 @@ export const SendParcelScreen = () => {
             </>
           )}
         </MapView>
-      </View>
+      </View> */}
 
       <View style={styles.content}>
         {/* Pickup & Drop-off */}

@@ -176,7 +176,14 @@ jest.mock('i18n/index', () => ({
 jest.mock('constants/assets/fonts', () => ({
   FONT_FAMILY: {
     GORDITA: { BLACK: 'GorditaBlack', BOLD: 'GorditaBold', MEDIUM: 'GorditaMedium', REGULAR: 'GorditaRegular', LIGHT: 'GorditaLight' },
-    POPPINS: { BOLD: 'PoppinsBold', SEMIBOLD: 'PoppinsSemiBold', MEDIUM: 'PoppinsMedium', REGULAR: 'PoppinsRegular' },
+    POPPINS: {
+      BOLD: 'PoppinsBold',
+      SEMIBOLD: 'PoppinsSemiBold',
+      MEDIUM: 'PoppinsMedium',
+      REGULAR: 'PoppinsRegular',
+      LIGHT: 'PoppinsLight',
+      BLACK: 'PoppinsBlack',
+    },
   },
 }));
 

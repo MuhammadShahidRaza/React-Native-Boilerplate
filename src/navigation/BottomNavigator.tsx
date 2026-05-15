@@ -70,9 +70,9 @@ const getScreenConfig = (role: string): Record<string, ScreenConfig> => {
     ...(isConsumer ? {
       [SCREENS.ACTIVITIES]: {
         component: ConsumerMultiServiceActivity,
-        iconName: 'clock',
+        iconName: 'briefcase',
         componentName: VARIABLES.Feather,
-        label: 'History',
+        label: 'Activity',
       },
     } : {}),
     [SCREENS.MY_ACCOUNT]: {

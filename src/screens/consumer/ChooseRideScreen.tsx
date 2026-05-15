@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Icon, Wrapper, AppGradient, Button, Typography, Input } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { Marker } from 'react-native-maps';
+import type MapView from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
+import { Icon, Wrapper, Button, Typography, Input, SvgComponent, Map } from 'components/index';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
+import { COLORS, getCurrentLocation, screenHeight } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from 'navigation/Navigators';
+import { SVG } from 'constants/assets/svg';
+import { logger } from 'utils/logger';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
@@ -19,7 +23,8 @@ const RIDE_TYPES = [
     desc: 'Affordable Everyday Rides',
     price: 'CFA 330',
     eta: '5-8 min',
-    colors: [COLORS.APP_SECONDARY, '#003B99'] as string[],
+    colors: '#004AADB3',
+    background: 'rgba(0, 74, 173, 0.2)',
   },
   {
     id: 'ac_comfort',
@@ -27,7 +32,8 @@ const RIDE_TYPES = [
     desc: 'Cool & Comfortable Rides',
     price: 'CFA 330',
     eta: '5-8 min',
-    colors: [COLORS.APP_PRIMARY, COLORS.APP_PRIMARY_LIGHT] as string[],
+    colors: '#00B76CB3',
+    background: 'rgba(0, 183, 108, 0.2)', 
   },
   {
     id: 'premium',
@@ -35,31 +41,62 @@ const RIDE_TYPES = [
     desc: 'Luxury',
     price: 'CFA 330',
     eta: '5-8 min',
-    colors: ['#4B5563', '#1F2937'] as string[],
+    colors: '#1E1E1EB3',
+    background: 'rgba(30, 30, 30, 0.2)',
   },
 ];
-
-const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
-const DROPOFF = {
-  latitude: INITIAL_REGION.latitude - 0.004,
-  longitude: INITIAL_REGION.longitude + 0.005,
-};
-const ROUTE_COORDS = [
-  PICKUP,
-  { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
-  DROPOFF,
-];
-const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude + 0.002,
-  longitude: INITIAL_REGION.longitude + 0.002,
-  latitudeDelta: 0.028,
-  longitudeDelta: 0.018,
-};
 
 export const ChooseRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.CHOOSE_RIDE>>();
   const [selected, setSelected] = useState('basic');
   const [promo, setPromo] = useState('');
+  const [currentLocationFallback, setCurrentLocationFallback] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const mapRef = useRef<MapView>(null);
+
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+
+  useEffect(() => {
+    const shouldUseCurrentLocation =
+      pickupLat == null || pickupLng == null || dropoffLat == null || dropoffLng == null;
+    if (!shouldUseCurrentLocation) return;
+
+    const loadCurrentLocation = async () => {
+      try {
+        const pos = await getCurrentLocation();
+        if (!pos) return;
+        setCurrentLocationFallback({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      } catch (error) {
+        logger.error('Failed to get current location for ChooseRideScreen:', error);
+      }
+    };
+
+    loadCurrentLocation();
+  }, [pickupLat, pickupLng, dropoffLat, dropoffLng]);
+
+  const baseLatitude = currentLocationFallback?.latitude ?? INITIAL_REGION.latitude;
+  const baseLongitude = currentLocationFallback?.longitude ?? INITIAL_REGION.longitude;
+
+  const pickupCoord = {
+    latitude: pickupLat ?? baseLatitude + 0.008,
+    longitude: pickupLng ?? baseLongitude,
+  };
+  const dropoffCoord = {
+    latitude: dropoffLat ?? baseLatitude - 0.004,
+    longitude: dropoffLng ?? baseLongitude + 0.005,
+  };
+
+  const mapRegion = {
+    latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
+    longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
+    latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
+    longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+  };
 
   return (
     <Wrapper
@@ -67,22 +104,28 @@ export const ChooseRideScreen = () => {
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
       {/* Map */}
       <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFill}
-          initialRegion={MAP_REGION}
+        <Map
+          mapRef={mapRef}
+          region={mapRegion}
           scrollEnabled={false}
-          showsUserLocation={false}
-          showsMyLocationButton={false}
-          showsCompass={false}
-          userInterfaceStyle='light'
+          showCurrentLocation={false}
+          showCurrentLocationButton={false}
+          mapStyle='light'
+          minZoomLevel={0}
         >
-          <Polyline coordinates={ROUTE_COORDS} strokeColor='#374151' strokeWidth={3} />
-          <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
+          <MapViewDirections
+            origin={pickupCoord}
+            destination={dropoffCoord}
+            apikey={ENV_CONSTANTS.MAP_API_KEY}
+            strokeColor={COLORS.APP_PRIMARY}
+            strokeWidth={4}
+          />
+          <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 1 }}>
             <Icon
               componentName={VARIABLES.MaterialCommunityIcons}
               iconName='map-marker'
@@ -90,32 +133,29 @@ export const ChooseRideScreen = () => {
               color={COLORS.APP_PRIMARY}
             />
           </Marker>
-          <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
+          <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.dropoffDot} />
           </Marker>
-        </MapView>
+        </Map>
       </View>
 
       <View style={styles.content}>
         <Typography style={styles.sectionTitle}>Choose Ride Type</Typography>
-        <Typography translate={false} style={styles.distanceTxt}>Estimated Distance: 12 km</Typography>
+        <Typography translate={false} style={styles.distanceTxt}>
+          Estimated Distance: 12 km
+        </Typography>
 
         {RIDE_TYPES.map(ride => {
           const isSel = selected === ride.id;
           return (
             <Pressable
               key={ride.id}
-              style={[styles.rideCard, isSel && { borderColor: ride.colors[0], borderWidth: 1.5 }]}
+              style={[styles.rideCard,  { borderColor: ride.colors, borderWidth: 1 , backgroundColor: isSel ? ride.background : COLORS.BACKGROUND }]}
               onPress={() => setSelected(ride.id)}
             >
-              <AppGradient colors={ride.colors} style={styles.rideIcon}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName='car'
-                  size={28}
-                  color={COLORS.WHITE}
-                />
-              </AppGradient>
+              <View style={[{ backgroundColor: ride.colors, borderRadius: 14 }, styles.rideIcon]}>
+                <SvgComponent Svg={SVG.CAR} svgWidth={25} svgHeight={25} />
+              </View>
               <View style={styles.rideInfo}>
                 <Typography style={styles.rideName}>{ride.label}</Typography>
                 <Typography style={styles.rideDesc}>{ride.desc}</Typography>
@@ -131,7 +171,7 @@ export const ChooseRideScreen = () => {
         <Typography style={styles.sectionTitle}>Promo Code</Typography>
         <View style={styles.promoRow}>
           <View style={styles.promoInput}>
-            <Input name='promo' placeholder='Enter Code' value={promo} onChangeText={setPromo} />
+            <Input containerStyle={styles.promoInput} name='promo' placeholder='Enter Code' value={promo} onChangeText={setPromo} />
           </View>
           <Button title='Apply' style={styles.promoBtn} onPress={() => {}} />
         </View>
@@ -156,6 +196,10 @@ export const ChooseRideScreen = () => {
               rideType: selected,
               pickupAddress: route.params?.pickupAddress,
               dropoffAddress: route.params?.dropoffAddress,
+              pickupLat: pickupCoord.latitude,
+              pickupLng: pickupCoord.longitude,
+              dropoffLat: dropoffCoord.latitude,
+              dropoffLng: dropoffCoord.longitude,
             })
           }
         />
@@ -166,9 +210,9 @@ export const ChooseRideScreen = () => {
 
 const styles = StyleSheet.create({
   mapContainer: {
-    height: 200,
-    marginHorizontal: 16,
-    borderRadius: 16,
+    height: screenHeight(40),
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
     overflow: 'hidden',
     marginBottom: 4,
   },
@@ -188,28 +232,28 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FontSize.Large,
-    fontWeight: FontWeight.Bold,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
   },
   distanceTxt: {
     fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
+    color: COLORS.APP_TEXT_SMALL,
     marginTop: -4,
     marginBottom: 14,
   },
   rideCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.WHITE,
+    // backgroundColor: COLORS.WHITE,
     borderRadius: 14,
     padding: 12,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    // borderWidth: 1,
+    // borderColor: COLORS.APP_LINE,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.05,
+    // shadowRadius: 8,
+    // elevation: 2,
   },
   rideIcon: {
     width: 56,
@@ -221,14 +265,13 @@ const styles = StyleSheet.create({
   },
   rideInfo: { flex: 1 },
   rideName: {
-    fontSize: FontSize.MediumSmall,
+    fontSize: FontSize.MediumLarge,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
   },
   rideDesc: {
-    fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 2,
+    fontSize: FontSize.MediumSmall,
+    color: COLORS.APP_TEXT_SMALL,
   },
   rideRight: { alignItems: 'flex-end' },
   ridePrice: {
@@ -238,16 +281,15 @@ const styles = StyleSheet.create({
   },
   rideEta: {
     fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 2,
+    color: COLORS.APP_TEXT_SMALL,
   },
   promoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 10,
   },
-  promoInput: { flex: 1 },
+  promoInput: { flex: 1, marginBottom: 0 },
   promoBtn: {
     paddingHorizontal: 20,
     paddingVertical: 12,

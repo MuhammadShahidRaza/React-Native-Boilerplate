@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { Region } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import { Map } from 'components/common/Map';
@@ -8,11 +8,11 @@ import { Autocomplete, Button, GradientIcon, Icon, Typography, Wrapper } from 'c
 import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight } from 'utils/index';
-import { reverseGeocode, type AddressDetails } from 'utils/location';
-import { navigate } from 'navigation/index';
+import { reverseGeocode, getLocationPermission, type AddressDetails } from 'utils/location';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { logger } from 'utils/logger';
+import { setPickerResult } from 'utils/pickerStore';
 
 // ── Saved quick-picks ─────────────────────────────────────────────────────────
 
@@ -39,7 +39,12 @@ const SAVED = [
 
 export const RideLocationPickerScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RIDE_LOCATION_PICKER>>();
+  const navigation = useNavigation();
   const field = route.params?.field ?? 'dropoff';
+
+  useEffect(() => {
+    void getLocationPermission();
+  }, []);
 
   const mapRef = useRef<MapView>(null);
   const [address, setAddress] = useState<AddressDetails | null>(null);
@@ -96,7 +101,8 @@ export const RideLocationPickerScreen = () => {
 
   const handleConfirm = () => {
     if (!address) return;
-    navigate(SCREENS.BOOK_RIDE, { pickedAddress: address, pickerField: field });
+    setPickerResult({ address, field });
+    navigation.goBack();
   };
 
   const title = field === 'pickup' ? 'Set Pickup Location' : 'Set Drop-Off Location';
@@ -127,9 +133,11 @@ export const RideLocationPickerScreen = () => {
         <Map
           mapRef={mapRef}
           showCenterMarker
+          showCurrentLocation
           showCurrentLocationButton
           scrollEnabled
           mapStyle='light'
+          minZoomLevel={0}
           style={styles.map}
           onRegionChangeComplete={handleRegionChangeComplete}
           currentLocationButtonStyle={styles.locBtn}

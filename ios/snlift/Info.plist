@@ -112,6 +112,8 @@
 		<string>PoppinsMedium.ttf</string>
 		<string>PoppinsRegular.ttf</string>
 		<string>PoppinsSemiBold.ttf</string>
+		<string>PoppinsBlack.ttf</string>
+		<string>PoppinsLight.ttf</string>
 	</array>
 	<key>UIApplicationSupportsAlternateIcons</key>
 	<true/>

@@ -1,41 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { Icon, Wrapper, GradientIcon, Button, Typography, Map } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
+import { Marker } from 'react-native-maps';
+import type MapView from 'react-native-maps';
+import type { Region } from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
+import { Icon, Wrapper, Button, Typography, Map } from 'components/index';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { AddressDetails } from 'utils/location';
 import type { RootStackParamList } from 'navigation/Navigators';
+import { getAndClearPickerResult } from 'utils/pickerStore';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
-const SAVED_LOCATIONS = [
-  { id: 'home', label: 'Home', address: '67 Murray Street, NY', icon: 'home' },
-  { id: 'work', label: 'Work', address: '67 Murray Street, NY', icon: 'briefcase' },
-];
-
 export const BookRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.BOOK_RIDE>>();
 
-  const [pickup, setPickup] = useState<AddressDetails | null>(null);
-  const [dropoff, setDropoff] = useState<AddressDetails | null>(null);
-  // const [bikeCoord, setBikeCoord] = useState(ANIM_START);
-  // const frameRef = useRef(0);
+  // Initialize from stored params so values survive screen remounts
+  const [pickup, setPickup] = useState<AddressDetails | null>(route.params?.storedPickup ?? null);
+  const [dropoff, setDropoff] = useState<AddressDetails | null>(
+    route.params?.storedDropoff ?? null,
+  );
+  const mapRef = useRef<MapView>(null);
 
-  // Pick up address returned from RideLocationPickerScreen
+  // Receive picker result when this screen regains focus.
+  useFocusEffect(
+    useCallback(() => {
+      const result = getAndClearPickerResult();
+      if (!result) return;
+      if (result.field === 'pickup') {
+        setPickup(result.address);
+      } else {
+        setDropoff(result.address);
+      }
+    }, []),
+  );
+
+  // Animate map to fit both pickup and dropoff when both are set
   useEffect(() => {
-    const params = route.params;
-    if (params?.pickedAddress && params?.pickerField) {
-      const addr: AddressDetails = { ...params.pickedAddress };
-      if (params.pickerField === 'pickup') setPickup(addr);
-      else setDropoff(addr);
-    }
-  }, [route.params]);
+    if (!pickup || !dropoff) return;
+    const latDelta = Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02;
+    const lngDelta = Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02;
+    const region: Region = {
+      latitude: (pickup.latitude + dropoff.latitude) / 2,
+      longitude: (pickup.longitude + dropoff.longitude) / 2,
+      latitudeDelta: latDelta,
+      longitudeDelta: lngDelta,
+    };
+    mapRef.current?.animateToRegion(region, 600);
+  }, [pickup, dropoff]);
 
   // // Bike marker: loop A → B over 3 seconds (30 fps)
   // useEffect(() => {
@@ -51,19 +70,6 @@ export const BookRideScreen = () => {
   //   return () => clearInterval(timer);
   // }, []);
 
-  const handleSavedLocation = (address: string) => {
-    setDropoff({
-      fullAddress: address,
-      postalCode: '',
-      street: '',
-      city: '',
-      state: '',
-      country: '',
-      latitude: INITIAL_REGION.latitude,
-      longitude: INITIAL_REGION.longitude,
-    });
-  };
-
   const handleLetsGo = () => {
     navigate(SCREENS.CHOOSE_RIDE, {
       pickupAddress: pickup?.fullAddress,
@@ -75,17 +81,64 @@ export const BookRideScreen = () => {
     });
   };
 
+  const showDirections = pickup?.latitude && dropoff?.latitude;
   return (
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
       {/* ── Live map ──────────────────────────────────────────────────────── */}
       <View style={styles.mapContainer}>
-        <Map showCurrentLocation showCurrentLocationButton={false} scrollEnabled={false} />
+        <Map
+          mapRef={mapRef}
+          showCurrentLocation={showDirections ? false : true}
+          scrollEnabled={showDirections ? true : false}
+          // region={
+          //   showDirections
+          //     ? {
+          //         latitude: (pickup.latitude + dropoff.latitude) / 2,
+          //         longitude: (pickup.longitude + dropoff.longitude) / 2,
+          //         latitudeDelta: Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02,
+          //         longitudeDelta: Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02,
+          //       }
+          //     : undefined
+          // }
+          showCurrentLocationButton={false}
+          minZoomLevel={0}
+        >
+          {showDirections && (
+            <>
+              <MapViewDirections
+                origin={{ latitude: pickup.latitude, longitude: pickup.longitude }}
+                destination={{ latitude: dropoff.latitude, longitude: dropoff.longitude }}
+                apikey={ENV_CONSTANTS.MAP_API_KEY}
+                strokeColor={COLORS.APP_PRIMARY}
+                strokeWidth={4}
+              />
+              <Marker
+                coordinate={{ latitude: pickup.latitude, longitude: pickup.longitude }}
+                anchor={{ x: 0.5, y: 0.5 }}
+              >
+                <View style={styles.pickupMapDot} />
+              </Marker>
+              <Marker
+                coordinate={{ latitude: dropoff.latitude, longitude: dropoff.longitude }}
+                anchor={{ x: 0.5, y: 1 }}
+              >
+                <Icon
+                  componentName={VARIABLES.MaterialCommunityIcons}
+                  iconName='map-marker'
+                  size={30}
+                  color={COLORS.APP_SECONDARY}
+                />
+              </Marker>
+            </>
+          )}
+        </Map>
       </View>
 
       <View style={styles.content}>
@@ -108,7 +161,13 @@ export const BookRideScreen = () => {
               {/* Pickup row */}
               <Pressable
                 style={styles.locationRow}
-                onPress={() => navigate(SCREENS.RIDE_LOCATION_PICKER, { field: 'pickup' })}
+                onPress={() =>
+                  navigate(SCREENS.RIDE_LOCATION_PICKER, {
+                    field: 'pickup',
+                    storedPickup: pickup ?? undefined,
+                    storedDropoff: dropoff ?? undefined,
+                  })
+                }
               >
                 <View style={styles.inputFakeWrap}>
                   <Typography
@@ -123,7 +182,13 @@ export const BookRideScreen = () => {
               {/* Drop-off row */}
               <Pressable
                 style={styles.locationRow}
-                onPress={() => navigate(SCREENS.RIDE_LOCATION_PICKER, { field: 'dropoff' })}
+                onPress={() =>
+                  navigate(SCREENS.RIDE_LOCATION_PICKER, {
+                    field: 'dropoff',
+                    storedPickup: pickup ?? undefined,
+                    storedDropoff: dropoff ?? undefined,
+                  })
+                }
               >
                 <View style={styles.inputFakeWrap}>
                   <Typography
@@ -221,6 +286,14 @@ const styles = StyleSheet.create({
     borderColor: COLORS.APP_PRIMARY,
     backgroundColor: COLORS.WHITE,
   },
+  pickupMapDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.APP_PRIMARY,
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
+  },
   inputFakeWrap: {
     flex: 1,
     backgroundColor: COLORS.INPUT_BACKGROUND,
@@ -251,7 +324,7 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
     marginTop: 2,
   },
-  ctaBtn: { marginTop: 80, },
+  ctaBtn: { marginTop: 80 },
 });
 
 {

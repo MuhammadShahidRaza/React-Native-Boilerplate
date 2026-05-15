@@ -130,13 +130,19 @@ export type RootStackParamList = {
     selectedTab?: JobStatus;
   };
 
-  [SCREENS.RIDE_LOCATION_PICKER]: { field: 'pickup' | 'dropoff' } | undefined;
+  [SCREENS.RIDE_LOCATION_PICKER]: {
+    field: 'pickup' | 'dropoff';
+    storedPickup?: { fullAddress: string; postalCode: string; street: string; city: string; state: string; country: string; latitude: number; longitude: number };
+    storedDropoff?: { fullAddress: string; postalCode: string; street: string; city: string; state: string; country: string; latitude: number; longitude: number };
+  } | undefined;
   [SCREENS.BOOK_RIDE]: {
     pickedAddress?: {
       fullAddress: string; postalCode: string; street: string; city: string;
       state: string; country: string; latitude: number; longitude: number;
     };
     pickerField?: 'pickup' | 'dropoff';
+    storedPickup?: { fullAddress: string; postalCode: string; street: string; city: string; state: string; country: string; latitude: number; longitude: number };
+    storedDropoff?: { fullAddress: string; postalCode: string; street: string; city: string; state: string; country: string; latitude: number; longitude: number };
   } | undefined;
   [SCREENS.CHOOSE_RIDE]: {
     pickupAddress?: string;
@@ -150,6 +156,10 @@ export type RootStackParamList = {
     rideType?: string;
     pickupAddress?: string;
     dropoffAddress?: string;
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
   } | undefined;
   [SCREENS.DRIVER_FOUND]: undefined;
   [SCREENS.TRACK_RIDE]: { phase?: 'in_progress' | 'completed' } | undefined;

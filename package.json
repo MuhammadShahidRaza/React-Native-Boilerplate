@@ -88,6 +88,7 @@
     "react-native-keychain": "^10.0.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "^1.27.1",
+    "react-native-maps-directions": "^1.9.0",
     "react-native-pager-view": "^8.0.0",
     "react-native-permissions": "^5.4.4",
     "react-native-phone-number-input": "^2.1.0",

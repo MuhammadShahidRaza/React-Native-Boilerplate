@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useCallback, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { COLORS, getCurrentLocation } from 'utils/index';
@@ -85,14 +85,15 @@ export const Map: FC<MapProps> = ({
   const [currentRegion, setCurrentRegion] = useState<Region>(region);
   const [currentLocation, setCurrentLocation] = useState<Region>(region);
 
-  const fetchCurrentLocation = async () => {
+  const fetchCurrentLocation = useCallback(async () => {
     try {
       const position = await getCurrentLocation();
       if (position) {
         const newRegion: Region = {
-          ...currentRegion,
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          latitudeDelta: region.latitudeDelta,
+          longitudeDelta: region.longitudeDelta,
         };
         setCurrentLocation(newRegion);
         setCurrentRegion(newRegion);
@@ -100,19 +101,13 @@ export const Map: FC<MapProps> = ({
       }
     } catch (error) {
       logger.error('Error getting user current location:', error);
-      // You could add user feedback here, e.g., showing an alert or fallback UI
     }
-  };
+  }, [region.latitudeDelta, region.longitudeDelta, mapRef]);
 
-  useEffect(() => {
-    if (showCurrentLocation) {
-      fetchCurrentLocation();
-    }
+  // Ref is only set after MapView mounts — fetch location on map ready (not in a bare useEffect).
+  const handleMapReady = useCallback(() => {
+    if (showCurrentLocation) void fetchCurrentLocation();
   }, [showCurrentLocation, fetchCurrentLocation]);
-
-  // useEffect(() => {
-  //   setCurrentRegion(region);
-  // }, [region]);
 
   const handleRegionChangeComplete = useCallback(
     (newRegion: Region) => {
@@ -147,6 +142,7 @@ export const Map: FC<MapProps> = ({
           showsCompass={false}
           minZoomLevel={minZoomLevel}
           userInterfaceStyle={resolvedMapStyle}
+          onMapReady={handleMapReady}
           {...(showCenterMarker
             ? { initialRegion: region, onRegionChangeComplete: handleRegionChangeComplete }
             : { region: currentRegion, onRegionChangeComplete: handleRegionChangeComplete })}

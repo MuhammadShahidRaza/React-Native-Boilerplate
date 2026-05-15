@@ -92,6 +92,7 @@ const BASE_COLORS = {
   APP_DANGER_TEXT: '#BE123C',
   APP_STAR: '#FBBF24',
   APP_CHIP_INACTIVE: '#F9FAFB',
+  APP_TEXT_SMALL: '#1E1E1E',
 };
 
 /** Primary brand gradients for `LinearGradient` (all roles) */

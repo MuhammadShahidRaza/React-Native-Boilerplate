@@ -9,11 +9,11 @@ export const FONT_FAMILY = {
     LIGHT: isIOS() ? 'Gordita-Light' : 'GorditaLight',
   },
   POPPINS: {
-    // BLACK: isIOS() ? 'Poppins-Black' : 'PoppinsBlack', // NOT ADDED
+    BLACK: isIOS() ? 'Poppins-Black' : 'PoppinsBlack',
     BOLD: isIOS() ? 'Poppins-Bold' : 'PoppinsBold',
     SEMIBOLD: isIOS() ? 'Poppins-SemiBold' : 'PoppinsSemiBold',
     MEDIUM: isIOS() ? 'Poppins-Medium' : 'PoppinsMedium',
     REGULAR: isIOS() ? 'Poppins-Regular' : 'PoppinsRegular',
-    // LIGHT: isIOS() ? 'Poppins-Light' : 'PoppinsLight', // NOT ADDED
+    LIGHT: isIOS() ? 'Poppins-Light' : 'PoppinsLight',
   },
 };
