@@ -42,7 +42,7 @@ export const MyAccount = () => {
     ...(role === APP_CONFIG.USER_ROLE
       ? [
           {
-            title: COMMON_TEXT.EDIT_PROFILE,
+            title: "My Profile",
             iconName: 'user-circle',
             onPress: () => navigate(SCREENS.PROFILE),
             iconComponent: VARIABLES.FontAwesome,

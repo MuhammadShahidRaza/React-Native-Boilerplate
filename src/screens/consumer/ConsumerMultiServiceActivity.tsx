@@ -9,7 +9,7 @@ import { Icon, Typography, Wrapper } from 'components/index';
 import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY, screenWidth } from 'utils/index';
+import { COLORS, APP_GRADIENT_PRIMARY, screenWidth, STYLES, APP_GRADIENT_PRIMARY_LIGHT } from 'utils/index';
 
 // ─── Mock model (bookings removed — static demo cards) ───────────────────────
 
@@ -34,27 +34,110 @@ const ADDR = {
 };
 
 const MOCK_ACTIVE_BASE: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[] = [
-  { serviceLabel: 'Ride', price: '610', pickupTitle: 'Home', pickupAddr: ADDR.home, dropTitle: 'Little Park', dropAddr: ADDR.park },
-  { serviceLabel: 'Ride', price: '585', pickupTitle: 'Home', pickupAddr: ADDR.home, dropTitle: 'Downtown Hub', dropAddr: ADDR.cafe },
-  { serviceLabel: 'Ride', price: '642', pickupTitle: 'Midtown West', pickupAddr: ADDR.cafe, dropTitle: 'Little Park', dropAddr: ADDR.park },
-  { serviceLabel: 'Food', price: '980', pickupTitle: 'Kitchen A', pickupAddr: ADDR.home, dropTitle: 'You', dropAddr: ADDR.park },
-  { serviceLabel: 'Food', price: '720', pickupTitle: 'Kitchen B', pickupAddr: ADDR.cafe, dropTitle: 'You', dropAddr: ADDR.home },
-  { serviceLabel: 'Food', price: '810', pickupTitle: 'Sushi Spot', pickupAddr: ADDR.park, dropTitle: 'You', dropAddr: ADDR.home },
-  { serviceLabel: 'Parcel', price: '450', pickupTitle: 'Sender', pickupAddr: ADDR.home, dropTitle: 'Receiver', dropAddr: ADDR.park },
-  { serviceLabel: 'Parcel', price: '520', pickupTitle: 'Sender', pickupAddr: ADDR.cafe, dropTitle: 'Receiver', dropAddr: ADDR.home },
-  { serviceLabel: 'Parcel', price: '390', pickupTitle: 'Sender', pickupAddr: ADDR.park, dropTitle: 'Receiver', dropAddr: ADDR.cafe },
+  {
+    serviceLabel: 'Ride',
+    price: '610',
+    pickupTitle: 'Home',
+    pickupAddr: ADDR.home,
+    dropTitle: 'Little Park',
+    dropAddr: ADDR.park,
+  },
+  {
+    serviceLabel: 'Ride',
+    price: '585',
+    pickupTitle: 'Home',
+    pickupAddr: ADDR.home,
+    dropTitle: 'Downtown Hub',
+    dropAddr: ADDR.cafe,
+  },
+  {
+    serviceLabel: 'Ride',
+    price: '642',
+    pickupTitle: 'Midtown West',
+    pickupAddr: ADDR.cafe,
+    dropTitle: 'Little Park',
+    dropAddr: ADDR.park,
+  },
+  {
+    serviceLabel: 'Food',
+    price: '980',
+    pickupTitle: 'Kitchen A',
+    pickupAddr: ADDR.home,
+    dropTitle: 'You',
+    dropAddr: ADDR.park,
+  },
+  {
+    serviceLabel: 'Food',
+    price: '720',
+    pickupTitle: 'Kitchen B',
+    pickupAddr: ADDR.cafe,
+    dropTitle: 'You',
+    dropAddr: ADDR.home,
+  },
+  {
+    serviceLabel: 'Food',
+    price: '810',
+    pickupTitle: 'Sushi Spot',
+    pickupAddr: ADDR.park,
+    dropTitle: 'You',
+    dropAddr: ADDR.home,
+  },
+  {
+    serviceLabel: 'Parcel',
+    price: '450',
+    pickupTitle: 'Sender',
+    pickupAddr: ADDR.home,
+    dropTitle: 'Receiver',
+    dropAddr: ADDR.park,
+  },
+  {
+    serviceLabel: 'Parcel',
+    price: '520',
+    pickupTitle: 'Sender',
+    pickupAddr: ADDR.cafe,
+    dropTitle: 'Receiver',
+    dropAddr: ADDR.home,
+  },
+  {
+    serviceLabel: 'Parcel',
+    price: '390',
+    pickupTitle: 'Sender',
+    pickupAddr: ADDR.park,
+    dropTitle: 'Receiver',
+    dropAddr: ADDR.cafe,
+  },
   // fourth group of three (Ride / Food / Parcel again)
-  { serviceLabel: 'Ride', price: '600', pickupTitle: 'Uptown', pickupAddr: ADDR.park, dropTitle: 'Soho', dropAddr: ADDR.home },
-  { serviceLabel: 'Food', price: '695', pickupTitle: 'Burger Lab', pickupAddr: ADDR.home, dropTitle: 'You', dropAddr: ADDR.cafe },
-  { serviceLabel: 'Parcel', price: '478', pickupTitle: 'Sender', pickupAddr: ADDR.home, dropTitle: 'Receiver', dropAddr: ADDR.park },
+  {
+    serviceLabel: 'Ride',
+    price: '600',
+    pickupTitle: 'Uptown',
+    pickupAddr: ADDR.park,
+    dropTitle: 'Soho',
+    dropAddr: ADDR.home,
+  },
+  {
+    serviceLabel: 'Food',
+    price: '695',
+    pickupTitle: 'Burger Lab',
+    pickupAddr: ADDR.home,
+    dropTitle: 'You',
+    dropAddr: ADDR.cafe,
+  },
+  {
+    serviceLabel: 'Parcel',
+    price: '478',
+    pickupTitle: 'Sender',
+    pickupAddr: ADDR.home,
+    dropTitle: 'Receiver',
+    dropAddr: ADDR.park,
+  },
 ];
 
-const MOCK_HISTORY_BASE: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[] = MOCK_ACTIVE_BASE.map(
-  (row, i) => ({
+const MOCK_HISTORY_BASE: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[] =
+  MOCK_ACTIVE_BASE.map((row, i) => ({
     ...row,
     price: String(Number(row.price) + 40 + i),
-  }),
-);
+  }));
 
 const buildMockList = (
   seed: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[],
@@ -87,20 +170,24 @@ const MOCK_ACTIVE = buildMockList(
   ['Arriving', 'In Progress', 'Prepared', 'Picked Up', 'On The Way'],
 );
 
-const MOCK_HISTORY = buildMockList(MOCK_HISTORY_BASE, [
-  '2026-02-03T08:41:00',
-  '2026-02-07T21:06:00',
-  '2026-02-09T09:52:00',
-  '2026-02-14T17:09:00',
-  '2026-02-21T06:58:00',
-  '2026-03-03T21:51:00',
-  '2026-03-06T06:54:00',
-  '2026-03-06T07:53:00',
-  '2026-03-06T07:53:00',
-  '2026-03-06T07:53:00',
-  '2026-03-06T07:53:00',
-  '2026-03-06T07:53:00',
-], ['Delivered', 'Completed', 'Completed', 'Cancelled']);
+const MOCK_HISTORY = buildMockList(
+  MOCK_HISTORY_BASE,
+  [
+    '2026-02-03T08:41:00',
+    '2026-02-07T21:06:00',
+    '2026-02-09T09:52:00',
+    '2026-02-14T17:09:00',
+    '2026-02-21T06:58:00',
+    '2026-03-03T21:51:00',
+    '2026-03-06T06:54:00',
+    '2026-03-06T07:53:00',
+    '2026-03-06T07:53:00',
+    '2026-03-06T07:53:00',
+    '2026-03-06T07:53:00',
+    '2026-03-06T07:53:00',
+  ],
+  ['Delivered', 'Completed', 'Completed', 'Cancelled'],
+);
 
 const CAT_FILTER: Record<ServiceCat, ((s: MockActivityItem) => boolean) | null> = {
   All: null,
@@ -119,8 +206,16 @@ const ICON_FOR: Record<MockActivityItem['serviceLabel'], string> = {
 
 const formatDateTimeLine = (raw: string) => {
   const d = new Date(raw);
-  const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const timePart = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const datePart = d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const timePart = d.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
   return `${datePart} at ${timePart}`;
 };
 
@@ -140,15 +235,19 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
             <Pressable key={route.key} onPress={onPress} style={styles.pillHalf}>
               {focused ? (
                 <LinearGradient
-                  colors={[...APP_GRADIENT_PRIMARY]}
+                  colors={[...APP_GRADIENT_PRIMARY_LIGHT]}
                   start={{ x: 0, y: 0.5 }}
                   end={{ x: 1, y: 0.5 }}
                   style={styles.pillGradient}
                 >
-                  <Typography translate={false} style={styles.pillTxtOn}>{label}</Typography>
+                  <Typography translate={false} style={styles.pillTxtOn}>
+                    {label}
+                  </Typography>
                 </LinearGradient>
               ) : (
-                <Typography translate={false} style={styles.pillTxtOff}>{label}</Typography>
+                <Typography translate={false} style={styles.pillTxtOff}>
+                  {label}
+                </Typography>
               )}
             </Pressable>
           );
@@ -165,13 +264,38 @@ const activitySkeletonItem = () => (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
       <SkeletonPlaceholder.Item width={44} height={44} borderRadius={12} />
       <View style={{ flex: 1 }}>
-        <SkeletonPlaceholder.Item width={screenWidth(76)} height={16} borderRadius={6} marginBottom={10} />
-        <SkeletonPlaceholder.Item width={screenWidth(54)} height={12} borderRadius={6} marginBottom={14} />
-        <SkeletonPlaceholder.Item width={screenWidth(36)} height={12} borderRadius={6} marginBottom={16} />
+        <SkeletonPlaceholder.Item
+          width={screenWidth(76)}
+          height={16}
+          borderRadius={6}
+          marginBottom={10}
+        />
+        <SkeletonPlaceholder.Item
+          width={screenWidth(54)}
+          height={12}
+          borderRadius={6}
+          marginBottom={14}
+        />
+        <SkeletonPlaceholder.Item
+          width={screenWidth(36)}
+          height={12}
+          borderRadius={6}
+          marginBottom={16}
+        />
         <SkeletonPlaceholder.Item width='100%' height={1} borderRadius={2} marginBottom={12} />
         <SkeletonPlaceholder.Item width='34%' height={12} borderRadius={6} marginBottom={8} />
-        <SkeletonPlaceholder.Item width={screenWidth(88)} height={12} borderRadius={6} marginBottom={14} />
-        <SkeletonPlaceholder.Item width={screenWidth(32)} height={12} borderRadius={6} marginBottom={8} />
+        <SkeletonPlaceholder.Item
+          width={screenWidth(88)}
+          height={12}
+          borderRadius={6}
+          marginBottom={14}
+        />
+        <SkeletonPlaceholder.Item
+          width={screenWidth(32)}
+          height={12}
+          borderRadius={6}
+          marginBottom={8}
+        />
         <SkeletonPlaceholder.Item width={screenWidth(86)} height={12} borderRadius={6} />
       </View>
       <View style={{ alignItems: 'flex-end' }}>
@@ -228,7 +352,12 @@ const ActivityCard = ({ item }: { item: MockActivityItem }) => (
         <View style={styles.rail}>
           <View style={styles.originDot} />
           <View style={styles.vline} />
-          <Icon componentName={VARIABLES.MaterialCommunityIcons} iconName='map-marker' size={14} color={COLORS.APP_SECONDARY} />
+          <Icon
+            componentName={VARIABLES.MaterialCommunityIcons}
+            iconName='map-marker'
+            size={14}
+            color={COLORS.APP_SECONDARY}
+          />
         </View>
         <View style={styles.routeTxt}>
           <Typography style={styles.placeTitle}>{item.pickupTitle}</Typography>
@@ -325,10 +454,9 @@ export const ConsumerMultiServiceActivity = () => (
 
 const styles = StyleSheet.create({
   pillWrap: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    width: '70%',
+    alignSelf: 'center',
     paddingBottom: 4,
-    backgroundColor: COLORS.WHITE,
   },
   pillTrack: {
     flexDirection: 'row',

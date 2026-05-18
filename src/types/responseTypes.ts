@@ -54,7 +54,7 @@ export interface User {
   phone?: string | null;
   provider_id?: string | null;
   provider?: string | null;
-  user_type?: 'user' | 'courier' | 'driver';
+  user_type?: 'user' | 'courier' | 'driver' | 'dentor';
   user_role?: 'user' | 'courier' | 'driver';
   bio?: string | null;
   profile_image?: string | null | undefined;
@@ -248,6 +248,8 @@ export interface Booking {
   service_type_id: number;
 
   sub_type: 'Quote Pending' | 'Bids Received' | 'Upcoming' | 'In-Progress' | 'Rejected' | string;
+  /** UI / API job status label (may mirror sub_type) */
+  status?: string;
   vehicle_make: string;
   vehicle_year: string;
   additional_notes: string;

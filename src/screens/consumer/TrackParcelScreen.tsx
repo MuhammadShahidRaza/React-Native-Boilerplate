@@ -1,186 +1,244 @@
-import { useState } from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { StyleSheet, View, Image, Pressable } from 'react-native';
-import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Icon, Typography, Button, Wrapper, GradientIcon, AppGradient } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import type MapView from 'react-native-maps';
+import { Marker } from 'react-native-maps';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import {
+  Button,
+  Icon,
+  MOCK_PARCEL_COURIER,
+  ParcelCourierCard,
+  ParcelRouteMap,
+  ParcelTrackingBadge,
+  RideAnimatedStatusBlock,
+  RideProgressSegments,
+  RideVehicleStatsRow,
+  Typography,
+  Wrapper,
+} from 'components/index';
+import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import type { RootStackParamList } from 'navigation/Navigators';
+import type { ParcelTrackPhase } from 'types/parcelTrip';
+import {
+  COLORS,
+  coordinateAlongPolyline,
+  openPhoneNumber,
+  resolveParcelTripCoords,
+} from 'utils/index';
+import type { MapCoord } from 'utils/parcelTripCoords';
+import type { RootStackParamList } from 'navigation/index';
+import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { navigate, onBack } from 'navigation/index';
 import { CancelReasonModal } from './CancelReasonModal';
-import { IMAGES } from 'constants/assets';
-import { COLORS } from 'utils/index';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
-const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
-const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
-const COURIER_POS = { latitude: INITIAL_REGION.latitude + 0.002, longitude: INITIAL_REGION.longitude + 0.001 };
-const ROUTE_COORDS = [
-  PICKUP,
-  { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
-  DROPOFF,
-];
-const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude + 0.002,
-  longitude: INITIAL_REGION.longitude + 0.002,
-  latitudeDelta: 0.028,
-  longitudeDelta: 0.018,
+const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
+  picked_up: 0,
+  in_transit: 1,
+  delivered: 2,
+};
+
+const PHASE_AUTO_MS: Record<Exclude<ParcelTrackPhase, 'delivered'>, number> = {
+  picked_up: 4500,
+  in_transit: 9000,
 };
 
 export const TrackParcelScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_PARCEL>>();
-  const phase = route.params?.phase ?? 'picked_up';
+  const phaseParam = route.params?.phase;
+  const initialPhase: ParcelTrackPhase =
+    phaseParam === 'delivered'
+      ? 'delivered'
+      : phaseParam === 'picked_up'
+        ? 'picked_up'
+        : 'picked_up';
+
+  const { pickup, dropoff, mapRegion } = useMemo(
+    () => resolveParcelTripCoords(route.params),
+    [route.params],
+  );
+
+  const [phase, setPhase] = useState<ParcelTrackPhase>(initialPhase);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const [courierCoord, setCourierCoord] = useState<MapCoord | null>(null);
+  const mapRef = useRef<MapView>(null);
+
+  const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
+    setRouteCoords(coordinates);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'delivered') return undefined;
+    const ms = PHASE_AUTO_MS[phase];
+    const tid = setTimeout(() => {
+      setPhase(curr => {
+        if (curr === 'picked_up') return 'in_transit';
+        if (curr === 'in_transit') return 'delivered';
+        return curr;
+      });
+    }, ms);
+    return () => clearTimeout(tid);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === 'delivered') {
+      setCourierCoord(null);
+      return undefined;
+    }
+    let raf = 0;
+
+    const loop = () => {
+      const t = Date.now() / 1000;
+      const wave = (Math.sin(t * Math.PI * 2 * 0.22) + 1) / 2;
+
+      if (phase === 'picked_up') {
+        setCourierCoord(pickup);
+      } else if (phase === 'in_transit' && routeCoords.length >= 2) {
+        setCourierCoord(coordinateAlongPolyline(routeCoords, 0.08 + wave * 0.84));
+      }
+
+      raf = requestAnimationFrame(loop);
+    };
+
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [phase, pickup, routeCoords]);
+
+  const status = useMemo(() => {
+    switch (phase) {
+      case 'picked_up':
+        return {
+          animationKey: 'picked',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'package',
+            size: 36,
+            color: COLORS.WHITE,
+          },
+          title: 'Parcel Picked Up',
+          subtitle: 'Courier has collected your parcel',
+        } as const;
+      case 'in_transit':
+        return {
+          animationKey: 'transit',
+          iconProps: {
+            componentName: VARIABLES.FontAwesome,
+            iconName: 'bicycle',
+            size: 36,
+            color: COLORS.WHITE,
+          },
+          title: 'On the Way',
+          subtitle: 'Your parcel is heading to the destination',
+        } as const;
+      default:
+        return {
+          animationKey: 'delivered',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'check',
+            size: 40,
+            color: COLORS.WHITE,
+          },
+          title: 'Delivered',
+          subtitle: 'Parcel has been delivered',
+        } as const;
+    }
+  }, [phase]);
+
   const isDelivered = phase === 'delivered';
 
   return (
     <Wrapper
-      headerTitle="Track Parcel"
+      headerTitle='Track Parcel'
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* Map */}
-      <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFill}
-          initialRegion={MAP_REGION}
-          scrollEnabled={false}
-          showsUserLocation={false}
-          showsMyLocationButton={false}
-          showsCompass={false}
-          userInterfaceStyle="light"
-        >
-          <Polyline coordinates={ROUTE_COORDS} strokeColor="#374151" strokeWidth={3} />
-          <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
-            <Icon
-              componentName={VARIABLES.MaterialCommunityIcons}
-              iconName="map-marker"
-              size={34}
-              color={COLORS.APP_PRIMARY}
-            />
+      <ParcelRouteMap
+        pickup={pickup}
+        dropoff={dropoff}
+        mapRegion={mapRegion}
+        mapRef={mapRef}
+        onDirectionsReady={onDirectionsReady}
+      >
+        {courierCoord ? (
+          <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.courierMarker}>
+              <Icon
+                componentName={VARIABLES.MaterialCommunityIcons}
+                iconName='bicycle'
+                size={14}
+                color={COLORS.APP_TEXT}
+              />
+            </View>
           </Marker>
-          <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.dropoffDot} />
-          </Marker>
-          {!isDelivered && (
-            <Marker coordinate={COURIER_POS} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.courierMarker}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName="bicycle"
-                  size={14}
-                  color={COLORS.APP_TEXT}
-                />
-              </View>
-            </Marker>
-          )}
-        </MapView>
-      </View>
+        ) : null}
+      </ParcelRouteMap>
 
       <View style={styles.content}>
-        {/* Progress bar */}
-        <View style={styles.progressRow}>
-          {[0, 1, 2].map(i => (
-            <View key={i} style={styles.progressSegWrap}>
-              <View
-                style={[
-                  styles.progressSeg,
-                  (isDelivered || i === 0) ? styles.segActive : styles.segInactive,
-                ]}
-              />
-              {isDelivered && i === 2 && <View style={styles.progressDot} />}
-              {!isDelivered && i === 0 && <View style={styles.progressDot} />}
-            </View>
-          ))}
-        </View>
+        <RideProgressSegments stepCount={3} activeSegmentIndex={PROGRESS_PHASE_INDEX[phase]} />
 
-        {/* Tracking badge */}
-        <View style={styles.badge}>
-          <Typography style={styles.badgeTxt}>Tracking ID: SN-PKL-2847</Typography>
-        </View>
+        <ParcelTrackingBadge trackingId={MOCK_PARCEL_COURIER.trackingId} />
 
-        {/* Status icon + text */}
-        <View style={styles.statusWrap}>
-          <GradientIcon
-            componentName={VARIABLES.Feather}
-            iconName={isDelivered ? 'check' : 'package'}
-            size={36}
-            color={COLORS.WHITE}
-            containerSize={88}
-            borderRadius={44}
-          />
-          <Typography style={styles.statusTitle}>
-            {isDelivered ? 'Delivered' : 'Parcel Picked Up'}
-          </Typography>
-          <Typography style={styles.statusSub}>
-            {isDelivered ? 'Parcel has been delivered' : 'Courier has collected your parcel'}
-          </Typography>
-        </View>
+        <RideAnimatedStatusBlock
+          animationKey={status.animationKey}
+          iconProps={status.iconProps}
+          title={status.title}
+          subtitle={status.subtitle}
+        />
 
-        {/* Courier card */}
-        <View style={styles.card}>
-          <View style={styles.courierRow}>
-            <Image source={IMAGES.USER} style={styles.avatar} />
-            <View style={styles.courierInfo}>
-              <Typography style={styles.name}>John Doe</Typography>
-              <Typography style={styles.phone}>+01 000 0000 00</Typography>
-            </View>
-            <AppGradient variant="primaryLight" style={styles.contactCircle}>
-              <Icon componentName={VARIABLES.Feather} iconName="phone" size={16} color={COLORS.WHITE} />
-            </AppGradient>
-            <View style={[styles.contactCircle, { backgroundColor: COLORS.APP_TINT_SOFT, marginLeft: 8 }]}>
-              <Icon componentName={VARIABLES.Feather} iconName="mail" size={16} color={COLORS.APP_SECONDARY} />
-            </View>
-          </View>
-        </View>
+        <ParcelCourierCard
+          courierName={MOCK_PARCEL_COURIER.courierName}
+          phone={MOCK_PARCEL_COURIER.phone}
+          avatarSource={MOCK_PARCEL_COURIER.avatar}
+          onPhonePress={() => openPhoneNumber(MOCK_PARCEL_COURIER.phone)}
+          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+        />
 
-        {/* Vehicle stats or rating */}
         {!isDelivered ? (
-          <View style={styles.statsRow}>
-            <StatItem icon="motorbike" label="Vehicle Type" value="YAMAHA" />
-            <View style={styles.statDivider} />
-            <StatItem icon="card-text-outline" label="License Plate" value="AA-001-AA" />
-            <View style={styles.statDivider} />
-            <StatItem icon="water" label="Color" value="Black" />
-          </View>
-        ) : (
-          <View style={styles.rateWrap}>
-            <Typography style={styles.rateTitle}>Rate your experience</Typography>
-            <View style={styles.stars}>
-              {[1, 2, 3, 4, 5].map(i => (
-                <Icon
-                  key={i}
-                  componentName={VARIABLES.Ionicons}
-                  iconName="star-outline"
-                  size={32}
-                  color={COLORS.APP_STAR}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* CTA */}
-        {isDelivered ? (
-          <Button title="Done" style={styles.ctaBtn} onPress={() => onBack()} />
-        ) : (
-          <Button
-            title="Track Delivery"
-            style={styles.ctaBtn}
-            onPress={() => navigate(SCREENS.TRACK_PARCEL, { phase: 'delivered' })}
+          <RideVehicleStatsRow
+            items={[...MOCK_PARCEL_COURIER.vehicleStats]}
+            showVerticalDividers
+            elevated
+            marginHorizontal={0}
           />
+        ) : (
+          <>
+            <View style={styles.rateWrap}>
+              <Typography style={styles.rateTitle}>Rate your experience</Typography>
+              <View style={styles.stars}>
+                {[1, 2, 3, 4, 5].map(step => (
+                  <Pressable key={step} onPress={() => setRating(step)} hitSlop={8}>
+                    <Icon
+                      componentName={VARIABLES.Ionicons}
+                      iconName={step <= rating ? 'star' : 'star-outline'}
+                      size={50}
+                      color={step <= rating ? COLORS.APP_STAR : COLORS.APP_LINE}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            <Button
+              title='Done'
+              onPress={() => {
+                reset(SCREENS.BOTTOM_STACK);
+              }}
+              style={styles.doneBtn}
+            />
+          </>
         )}
 
-        {!isDelivered && (
+        {!isDelivered ? (
           <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
             <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
           </Pressable>
-        )}
+        ) : null}
       </View>
 
       <CancelReasonModal
@@ -192,35 +250,7 @@ export const TrackParcelScreen = () => {
   );
 };
 
-const StatItem = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
-  <View style={styles.statItem}>
-    <Icon
-      componentName={VARIABLES.MaterialCommunityIcons}
-      iconName={icon}
-      size={22}
-      color={COLORS.APP_PRIMARY}
-    />
-    <Typography style={styles.statValue}>{value}</Typography>
-    <Typography style={styles.statLabel}>{label}</Typography>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  mapContainer: {
-    height: 200,
-    marginHorizontal: 16,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 4,
-  },
-  dropoffDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: COLORS.APP_SECONDARY,
-    borderWidth: 2,
-    borderColor: COLORS.WHITE,
-  },
   courierMarker: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 6,
@@ -237,151 +267,22 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 16,
-  },
-  progressSegWrap: {
-    flex: 1,
-    height: 6,
-    position: 'relative',
-  },
-  progressSeg: {
-    height: 5,
-    borderRadius: 4,
-  },
-  segActive: { backgroundColor: COLORS.APP_PRIMARY },
-  segInactive: { backgroundColor: COLORS.APP_LINE },
-  progressDot: {
-    position: 'absolute',
-    right: -6,
-    top: -3,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.APP_PRIMARY,
-    borderWidth: 2,
-    borderColor: COLORS.WHITE,
-  },
-  badge: {
-    alignSelf: 'center',
-    marginBottom: 16,
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  badgeTxt: {
-    color: COLORS.APP_PRIMARY_DARK,
-    fontSize: FontSize.ExtraSmall,
-    fontWeight: FontWeight.Bold,
-  },
-  statusWrap: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  statusTitle: {
-    fontSize: FontSize.Large,
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  statusSub: {
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 4,
-    fontSize: FontSize.Small,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  courierRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 10,
-  },
-  courierInfo: { flex: 1 },
-  name: {
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
-    fontSize: FontSize.MediumSmall,
-  },
-  phone: {
-    color: COLORS.APP_TEXT_MUTED,
-    fontSize: FontSize.Small,
-    marginTop: 2,
-  },
-  contactCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  statValue: {
-    fontSize: FontSize.Small,
-    fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: FontSize.XsSmall,
-    color: COLORS.APP_TEXT_MUTED,
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    alignSelf: 'stretch',
-    backgroundColor: COLORS.APP_LINE,
-    marginHorizontal: 4,
-  },
   rateWrap: {
     alignItems: 'center',
     marginBottom: 16,
   },
   rateTitle: {
-    fontWeight: FontWeight.Bold,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
-    marginBottom: 12,
-    fontSize: FontSize.MediumSmall,
+    marginBottom: 5,
+    fontSize: FontSize.ExtraLarge,
   },
   stars: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
+    justifyContent: 'center',
   },
-  ctaBtn: { marginTop: 4 },
+
   cancelSoft: {
     marginTop: 12,
     paddingVertical: 14,
@@ -393,5 +294,8 @@ const styles = StyleSheet.create({
     color: COLORS.APP_DANGER_TEXT,
     fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.SemiBold,
+  },
+  doneBtn: {
+    marginTop: 16,
   },
 });

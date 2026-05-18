@@ -104,6 +104,7 @@ export const SCREENS = {
   TRANSACTION_HISTORY: 'TransactionHistory',
   MY_WALLET: 'MyWallet',
   MY_JOBS: 'MyJobs',
+  JOB_DETAIL: 'JobDetail',
 
   /** Multi-service consumer UI (rides, parcel, food) */
   RIDE_LOCATION_PICKER: 'RideLocationPicker',

@@ -1,7 +1,7 @@
 import { StyleProp, ViewStyle } from 'react-native';
 import { AppGradient } from './AppGradient';
 import { Icon, IconComponentProps } from './Icon';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { COLORS } from 'utils/index';
 
 type GradientVariant = 'primary' | 'primaryLight';
 

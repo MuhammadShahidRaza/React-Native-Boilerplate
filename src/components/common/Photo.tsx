@@ -16,7 +16,7 @@ import { ImageFullScreenModal } from './ImageFullScreenModal';
 type ImageSource = string | number;
 
 interface PhotoProps extends TouchableOpacityProps {
-  source: ImageSourcePropType | null | undefined;
+  source: ImageSourcePropType | string | null | undefined;
   size?: number;
   onPress?: () => void;
   disabled?: boolean;

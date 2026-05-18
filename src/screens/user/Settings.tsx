@@ -62,12 +62,12 @@ export const Settings = () => {
   };
 
   const tabs = [
-    {
-      title: 'Change Theme',
-      iconName: 'theme-light-dark',
-      iconComponent: VARIABLES.MaterialCommunityIcons,
-      onPress: () => navigate(SCREENS.THEME_SELECTOR),
-    },
+    // {
+    //   title: 'Change Theme',
+    //   iconName: 'theme-light-dark',
+    //   iconComponent: VARIABLES.MaterialCommunityIcons,
+    //   onPress: () => navigate(SCREENS.THEME_SELECTOR),
+    // },
     {
       title: 'Change Password',
       iconName: 'lock',
@@ -115,21 +115,21 @@ export const Settings = () => {
       iconName: 'privacy-tip',
       iconComponent: VARIABLES.MaterialIcons,
     },
-    {
-      title: 'Cancellation Policy',
-      onPress: () =>
-        navigate(SCREENS.PRIVACY_POLICY, {
-          title: 'Cancellation Policy',
-        }),
-      iconName: 'cancel',
-      iconComponent: VARIABLES.MaterialCommunityIcons,
-    },
-    {
-      title: 'Icon Selector',
-      iconName: 'credit-card',
-      iconComponent: VARIABLES.Entypo,
-      onPress: () => navigate(SCREENS.ICON_SELECTOR),
-    },
+    // {
+    //   title: 'Cancellation Policy',
+    //   onPress: () =>
+    //     navigate(SCREENS.PRIVACY_POLICY, {
+    //       title: 'Cancellation Policy',
+    //     }),
+    //   iconName: 'cancel',
+    //   iconComponent: VARIABLES.MaterialCommunityIcons,
+    // },
+    // {
+    //   title: 'Icon Selector',
+    //   iconName: 'credit-card',
+    //   iconComponent: VARIABLES.Entypo,
+    //   onPress: () => navigate(SCREENS.ICON_SELECTOR),
+    // },
     // {
     //   title: COMMON_TEXT.CONTACT_US,
 

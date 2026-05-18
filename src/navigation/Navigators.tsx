@@ -4,13 +4,14 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Icon, GradientIcon } from 'components/index';
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { GradientIcon } from 'components/index';
+import { StyleProp, ViewStyle } from 'react-native';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { JobStatus } from 'screens/user/MyJobs';
 import { Address, Booking, Service, FontSize, FontWeight, User } from 'types/index';
+import type { ParcelTrackPhase, ParcelTripCoords } from 'types/parcelTrip';
 import type { RideTrackPhase } from 'types/rideTracking';
 import { COLORS } from 'utils/colors';
 
@@ -184,8 +185,8 @@ export type RootStackParamList = {
     dropoffLat?: number;
     dropoffLng?: number;
   } | undefined;
-  [SCREENS.COURIER_MATCHED]: undefined;
-  [SCREENS.TRACK_PARCEL]: { phase?: 'picked_up' | 'delivered' } | undefined;
+  [SCREENS.COURIER_MATCHED]: ParcelTripCoords | undefined;
+  [SCREENS.TRACK_PARCEL]: (ParcelTripCoords & { phase?: ParcelTrackPhase }) | undefined;
   [SCREENS.ORDER_FOOD]: undefined;
   [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;

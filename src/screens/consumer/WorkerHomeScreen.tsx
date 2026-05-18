@@ -55,7 +55,7 @@ export const WorkerHomeScreen = () => {
 
       {/* Bottom info card */}
       <View style={styles.card}>
-        <Typography style={styles.greet}>Good day, {firstName}!</Typography>
+        <Typography style={styles.greet}>{`Good day, ${firstName}!`}</Typography>
         <Typography style={styles.status}>{isOnline ? "You're online" : "You're offline"}</Typography>
 
         <View style={styles.statsRow}>

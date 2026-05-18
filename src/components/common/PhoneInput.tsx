@@ -89,9 +89,13 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   };
 
   const validateNumber = (text: string) => {
-    const isValid = phoneRef.current?.isValidNumber(text);
+    // const isValid = phoneRef.current?.isValidNumber(text);
     const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
-    if ((touched && !isValid) || (touched && startsWithPlusZero)) {
+    if (
+      // (touched && !isValid) ||
+      touched &&
+      startsWithPlusZero
+    ) {
       setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
     } else {
       setShowError('');

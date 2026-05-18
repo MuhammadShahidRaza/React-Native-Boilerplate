@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Typography } from '../Typography';
-import { FontSize, FontWeight } from 'types/fontTypes';
+import { FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
 
 export interface RideFareSummaryProps {

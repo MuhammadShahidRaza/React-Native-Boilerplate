@@ -115,7 +115,7 @@ export const BottomNavigator = () => {
       backgroundColor: COLORS.SECONDARY,
       borderTopWidth: 0,
       elevation: 0,
-      position: 'absolute',
+      position: 'absolute' as const,
       bottom: 15 + insets.bottom,
       left: 0,
       right: 0,

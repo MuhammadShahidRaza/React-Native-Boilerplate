@@ -96,6 +96,9 @@ export const ContactUs = () => {
             placeholder={COMMON_TEXT.ENTER_YOUR_MESSAGE}
             maxLines={15}
             style={{ height: screenHeight(20) }}
+            secondContainerStyle={{
+              borderRadius: 10,
+            }}
             textAlignVertical='top'
             error={formik.errors.message}
             touched={Boolean(formik.touched.message && formik.submitCount)}
