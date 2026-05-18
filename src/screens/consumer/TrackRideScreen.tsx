@@ -1,233 +1,380 @@
-import { useState } from 'react';
-import { StyleSheet, View, Image, Pressable } from 'react-native';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Icon, Wrapper, GradientIcon, AppGradient, Button, Typography } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import type MapView from 'react-native-maps';
+import { Marker } from 'react-native-maps';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import MapViewDirections from 'react-native-maps-directions';
+import {
+  Button,
+  Icon,
+  Map,
+  MOCK_RIDE_TRIP,
+  RideAnimatedStatusBlock,
+  RideDriverCard,
+  RideFareSummary,
+  RideProgressSegments,
+  RideVehicleStatsRow,
+  Typography,
+  Wrapper,
+} from 'components/index';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
-import { IMAGES } from 'constants/assets';
-import { navigate, onBack } from 'navigation/index';
+import type { RideTrackPhase } from 'types/rideTracking';
+import {
+  COLORS,
+  coordinateAlongPolyline,
+  extrapolatePastEnd,
+  fitMapToDirectionCoordinates,
+  interpolateMapCoord,
+  mapCoordDistanceApprox,
+  openPhoneNumber,
+  screenHeight,
+} from 'utils/index';
+import type { RootStackParamList } from 'navigation/index';
+import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
-const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
-const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
-const DRIVER_POS = { latitude: INITIAL_REGION.latitude + 0.004, longitude: INITIAL_REGION.longitude + 0.001 };
-const ROUTE_COORDS = [
-  PICKUP,
-  { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
-  DROPOFF,
-];
-const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude + 0.002,
-  longitude: INITIAL_REGION.longitude + 0.002,
-  latitudeDelta: 0.028,
-  longitudeDelta: 0.018,
+const PROGRESS_PHASE_INDEX: Record<RideTrackPhase, number> = {
+  arriving: 0,
+  arrived: 1,
+  in_progress: 2,
+  completed: 3,
 };
 
-const PROGRESS_STEPS = ['Driver en route', 'In Progress', 'Completed'];
+type MapCoord = { latitude: number; longitude: number };
+
+/** Road-facing route line (Directions API polyline); matches ride mock grey path */
+const ROUTE_STROKE = '#374151';
+const ROUTE_STROKE_WIDTH = 5;
+
+const PHASE_AUTO_MS: Record<Exclude<RideTrackPhase, 'completed'>, number> = {
+  arriving: 5500,
+  arrived: 4000,
+  in_progress: 9500,
+};
 
 export const TrackRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_RIDE>>();
-  const phase = route.params?.phase ?? 'in_progress';
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng, phase: phaseParam } = route.params ?? {};
+  const tripKey = `${pickupLat}-${pickupLng}-${dropoffLat}-${dropoffLng}`;
+  const tripKeyRef = useRef(tripKey);
+
+  const [phase, setPhase] = useState<RideTrackPhase>(() => phaseParam ?? 'arriving');
+
+  const mapRef = useRef<MapView>(null);
   const [cancelVisible, setCancelVisible] = useState(false);
+  const [rideRating, setRideRating] = useState(0);
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const [carCoord, setCarCoord] = useState<MapCoord | null>(null);
+
+  const pickupCoord = useMemo(
+    () =>
+      ({
+        latitude: pickupLat ?? INITIAL_REGION.latitude + 0.008,
+        longitude: pickupLng ?? INITIAL_REGION.longitude,
+      }) satisfies MapCoord,
+    [pickupLat, pickupLng],
+  );
+
+  const dropoffCoord = useMemo(
+    () =>
+      ({
+        latitude: dropoffLat ?? INITIAL_REGION.latitude - 0.004,
+        longitude: dropoffLng ?? INITIAL_REGION.longitude + 0.005,
+      }) satisfies MapCoord,
+    [dropoffLat, dropoffLng],
+  );
+
+  const mapRegion = useMemo(
+    () => ({
+      latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
+      longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
+      latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
+      longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+    }),
+    [pickupCoord, dropoffCoord],
+  );
+
+  const onDirectionsReady = useCallback((result: { coordinates: MapCoord[] }) => {
+    setRouteCoords(result.coordinates);
+    fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+  }, []);
+
+  useEffect(() => {
+    if (tripKeyRef.current !== tripKey) {
+      tripKeyRef.current = tripKey;
+      setPhase(phaseParam ?? 'arriving');
+      setRouteCoords([]);
+      setRideRating(0);
+    }
+  }, [tripKey, phaseParam]);
+
+  useEffect(() => {
+    if (phase === 'completed') return undefined;
+    const ms = PHASE_AUTO_MS[phase];
+    const tid = setTimeout(() => {
+      setPhase(curr => {
+        if (curr === 'arriving') return 'arrived';
+        if (curr === 'arrived') return 'in_progress';
+        if (curr === 'in_progress') return 'completed';
+        return curr;
+      });
+    }, ms);
+    return () => clearTimeout(tid);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === 'completed') {
+      setCarCoord(null);
+      return undefined;
+    }
+    let raf = 0;
+
+    const loop = () => {
+      const t = Date.now() / 1000;
+
+      if (phase === 'arrived') {
+        setCarCoord(pickupCoord);
+      } else if (routeCoords.length >= 2) {
+        const wave = (Math.sin(t * Math.PI * 2 * 0.22) + 1) / 2;
+
+        if (phase === 'arriving') {
+          const pickupOnPath = routeCoords[0];
+          const inward = routeCoords[1];
+          const approachFrom = extrapolatePastEnd(
+            inward,
+            pickupOnPath,
+            mapCoordDistanceApprox(inward, pickupOnPath) * 1.35,
+          );
+          const along = interpolateMapCoord(approachFrom, pickupOnPath, 0.12 + wave * 0.86);
+          setCarCoord(along);
+        } else if (phase === 'in_progress') {
+          const alongRoute = coordinateAlongPolyline(routeCoords, 0.08 + wave * 0.84);
+          setCarCoord(alongRoute);
+        }
+      } else {
+        const fallbackWave = (Math.sin(t * Math.PI * 2 * 0.22) + 1) / 2;
+        if (phase === 'arriving') {
+          setCarCoord(interpolateMapCoord(pickupCoord, dropoffCoord, 0.04 + fallbackWave * 0.1));
+        } else if (phase === 'in_progress') {
+          setCarCoord(interpolateMapCoord(pickupCoord, dropoffCoord, 0.1 + fallbackWave * 0.75));
+        }
+      }
+
+      raf = requestAnimationFrame(loop);
+    };
+
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [phase, pickupCoord, dropoffCoord, routeCoords]);
+
+  const status = useMemo(() => {
+    switch (phase) {
+      case 'arriving':
+        return {
+          animationKey: 'arriving',
+          iconProps: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'car-side',
+            size: 38,
+            color: COLORS.WHITE,
+          },
+          title: 'Driver is arriving',
+          subtitle: 'Estimated arrival in 3 min',
+        } as const;
+      case 'arrived':
+        return {
+          animationKey: 'arrived',
+          iconProps: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'car-outline',
+            size: 38,
+            color: COLORS.WHITE,
+          },
+          title: 'Driver has arrived',
+          subtitle: 'The driver is waiting',
+        } as const;
+      case 'in_progress':
+        return {
+          animationKey: 'trip',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'send',
+            size: 38,
+            color: COLORS.WHITE,
+          },
+          title: 'Ride in progress',
+          subtitle: 'Enjoy your ride!',
+        } as const;
+      default:
+        return {
+          animationKey: 'done',
+          iconProps: {
+            componentName: VARIABLES.Entypo,
+            iconName: 'check',
+            size: 42,
+            color: COLORS.WHITE,
+          },
+          title: 'Ride Completed',
+          subtitle: 'Thank you for riding with us',
+        } as const;
+    }
+  }, [phase]);
 
   const isCompleted = phase === 'completed';
-  const activeStep = isCompleted ? 2 : 1;
 
   return (
     <Wrapper
-      headerTitle="Book a Ride"
+      headerTitle='Book a Ride'
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* Map */}
       <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFill}
-          initialRegion={MAP_REGION}
+        <Map
+          key={`track-ride-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
+          mapRef={mapRef}
+          region={mapRegion}
+          regionTracking='initialOnly'
           scrollEnabled={false}
-          showsUserLocation={false}
-          showsMyLocationButton={false}
-          showsCompass={false}
-          userInterfaceStyle="light"
+          showsUserLocationDot={false}
+          showCurrentLocation={false}
+          showCurrentLocationButton={false}
+          mapStyle='light'
+          minZoomLevel={0}
         >
-          <Polyline coordinates={ROUTE_COORDS} strokeColor="#374151" strokeWidth={3} />
-          <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
+          <MapViewDirections
+            key={`dir-${tripKey}`}
+            origin={pickupCoord}
+            destination={dropoffCoord}
+            apikey={ENV_CONSTANTS.MAP_API_KEY}
+            mode='DRIVING'
+            precision='high'
+            timePrecision='none'
+            resetOnChange
+            language='en'
+            strokeWidth={ROUTE_STROKE_WIDTH}
+            strokeColor={ROUTE_STROKE}
+            lineCap='round'
+            lineJoin='round'
+            onReady={onDirectionsReady}
+          />
+          <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.pickupMapDot} />
+          </Marker>
+          <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 1 }}>
             <Icon
               componentName={VARIABLES.MaterialCommunityIcons}
-              iconName="map-marker"
-              size={34}
-              color={COLORS.APP_PRIMARY}
+              iconName='map-marker'
+              size={30}
+              color={COLORS.APP_SECONDARY}
             />
           </Marker>
-          <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.dropoffDot} />
-          </Marker>
-          {!isCompleted && (
-            <Marker coordinate={DRIVER_POS} anchor={{ x: 0.5, y: 0.5 }}>
+          {carCoord ? (
+            <Marker coordinate={carCoord} anchor={{ x: 0.5, y: 0.5 }}>
               <View style={styles.carMarker}>
                 <Icon
                   componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName="car"
+                  iconName='car'
                   size={14}
                   color={COLORS.APP_TEXT}
                 />
               </View>
             </Marker>
-          )}
-        </MapView>
+          ) : null}
+        </Map>
       </View>
 
       <View style={styles.content}>
-        {/* Progress bar */}
-        <View style={styles.progressRow}>
-          {PROGRESS_STEPS.map((_, i) => (
-            <View key={i} style={styles.progressSegWrap}>
-              <View
-                style={[
-                  styles.progressSeg,
-                  i <= activeStep ? styles.segActive : styles.segInactive,
-                ]}
-              />
-              {i === activeStep && <View style={styles.progressDot} />}
-            </View>
-          ))}
-        </View>
+        <RideProgressSegments stepCount={4} activeSegmentIndex={PROGRESS_PHASE_INDEX[phase]} />
 
-        {/* Status icon + text */}
-        <View style={styles.statusWrap}>
-          <GradientIcon
-            componentName={VARIABLES.Feather}
-            iconName={isCompleted ? 'check' : 'send'}
-            size={36}
-            color={COLORS.WHITE}
-            containerSize={88}
-            borderRadius={44}
+        <RideAnimatedStatusBlock
+          animationKey={status.animationKey}
+          iconProps={status.iconProps}
+          title={status.title}
+          subtitle={status.subtitle}
+        />
+
+        <RideDriverCard
+          driverName={MOCK_RIDE_TRIP.driverName}
+          rating={MOCK_RIDE_TRIP.rating}
+          avatarSource={MOCK_RIDE_TRIP.avatar}
+          onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
+          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+          vehicleModel={MOCK_RIDE_TRIP.vehicleModel}
+          vehiclePlate={MOCK_RIDE_TRIP.vehiclePlate}
+          showVehicleSection={!isCompleted}
+          variant='elevatedMuted'
+          onCancelPress={isCompleted ? undefined : () => setCancelVisible(true)}
+        />
+
+        <RideVehicleStatsRow items={[...MOCK_RIDE_TRIP.vehicleStats]} marginHorizontal={20} />
+
+        <View>
+          <RideFareSummary
+            fareValue={MOCK_RIDE_TRIP.estimateFare}
+            paymentValue={MOCK_RIDE_TRIP.paymentMethod}
           />
-          <Typography style={styles.statusTitle}>
-            {isCompleted ? 'Ride Completed' : 'Ride In Progress'}
-          </Typography>
-          <Typography style={styles.statusSub}>
-            {isCompleted ? 'Thank you for riding with us' : 'Enjoy your ride!'}
-          </Typography>
-        </View>
-
-        {/* Driver card */}
-        <View style={styles.card}>
-          <View style={styles.driverRow}>
-            <Image source={IMAGES.USER} style={styles.avatar} />
-            <View style={styles.driverInfo}>
-              <Typography style={styles.driverName}>John Doe</Typography>
-              <View style={styles.ratingRow}>
-                <Icon
-                  componentName={VARIABLES.Ionicons}
-                  iconName="star"
-                  size={FontSize.Small}
-                  color={COLORS.APP_STAR}
-                />
-                <Typography style={styles.rating}>4.9</Typography>
-              </View>
-            </View>
-            <AppGradient variant="primaryLight" style={styles.contactCircle}>
-              <Icon componentName={VARIABLES.Feather} iconName="phone" size={16} color={COLORS.WHITE} />
-            </AppGradient>
-            <View style={[styles.contactCircle, { backgroundColor: COLORS.APP_SECONDARY, marginLeft: 8 }]}>
-              <Icon componentName={VARIABLES.Feather} iconName="mail" size={16} color={COLORS.WHITE} />
-            </View>
-          </View>
-
-          {!isCompleted && (
-            <>
-              <View style={styles.cardDivider} />
-              <View style={styles.carRow}>
-                <View>
-                  <Typography style={styles.carModel}>Toyota Corolla</Typography>
-                  <Typography style={styles.carPlate}>ABC-1234</Typography>
-                </View>
-                <Pressable style={styles.inlineCancelBtn} onPress={() => setCancelVisible(true)}>
-                  <Typography style={styles.inlineCancelTxt}>Cancel</Typography>
-                </Pressable>
-              </View>
-            </>
-          )}
-        </View>
-
-        {/* Vehicle stats */}
-        <View style={styles.statsRow}>
-          <StatItem icon="car" label="Vehicle Type" value="Toyota" />
-          <View style={styles.statDivider} />
-          <StatItem icon="card-text-outline" label="License Plate" value="AA-001-AA" />
-          <View style={styles.statDivider} />
-          <StatItem icon="water" label="Color" value="Black" />
-        </View>
-
-        {/* Fare */}
-        <View style={styles.fareCard}>
-          <View style={styles.fareRow}>
-            <Typography style={styles.fareLabel}>Estimate Fare</Typography>
-            <Typography style={styles.fareValue}>CFA 330</Typography>
-          </View>
-          <View style={styles.fareDivider} />
-          <View style={styles.fareRow}>
-            <Typography style={styles.fareTotalLabel}>Payment</Typography>
-            <Typography style={styles.fareTotalValue}>Cash</Typography>
-          </View>
         </View>
 
         {isCompleted ? (
-          <Button title="Done" style={styles.ctaBtn} onPress={() => onBack()} />
-        ) : (
-          <Button
-            title="Mark as Completed"
-            style={styles.ctaBtn}
-            onPress={() => navigate(SCREENS.TRACK_RIDE, { phase: 'completed' })}
-          />
-        )}
+          <>
+            <View style={styles.rateWrap}>
+              <Typography style={styles.rateTitle}>Rate your ride</Typography>
+              <View style={styles.rateStars}>
+                {[1, 2, 3, 4, 5].map(step => (
+                  <Pressable key={step} onPress={() => setRideRating(step)} hitSlop={8}>
+                    <Icon
+                      componentName={VARIABLES.Ionicons}
+                      iconName={step <= rideRating ? 'star' : 'star-outline'}
+                      size={50}
+                      color={step <= rideRating ? COLORS.APP_STAR : COLORS.APP_LINE}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            <Button
+              title='Done'
+              onPress={() => {
+                reset(SCREENS.BOTTOM_STACK);
+              }}
+              style={styles.doneBtn}
+            />
+          </>
+        ) : null}
       </View>
 
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => { setCancelVisible(false); navigate(SCREENS.BOOK_RIDE); }}
+        onContinue={() => {
+          setCancelVisible(false);
+          navigate(SCREENS.BOOK_RIDE);
+        }}
       />
     </Wrapper>
   );
 };
 
-const StatItem = ({ icon, label, value }: { icon: string; label: string; value: string }) => (
-  <View style={styles.statItem}>
-    <Icon
-      componentName={VARIABLES.MaterialCommunityIcons}
-      iconName={icon}
-      size={22}
-      color={COLORS.APP_PRIMARY}
-    />
-    <Typography style={styles.statValue}>{value}</Typography>
-    <Typography style={styles.statLabel}>{label}</Typography>
-  </View>
-);
-
 const styles = StyleSheet.create({
   mapContainer: {
-    height: 200,
-    marginHorizontal: 16,
-    borderRadius: 16,
+    height: screenHeight(40),
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
     overflow: 'hidden',
     marginBottom: 4,
   },
-  dropoffDot: {
+  pickupMapDot: {
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: COLORS.APP_SECONDARY,
+    backgroundColor: COLORS.APP_PRIMARY,
     borderWidth: 2,
     borderColor: COLORS.WHITE,
   },
@@ -247,201 +394,22 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 32,
   },
-  /* Progress */
-  progressRow: {
-    flexDirection: 'row',
+  rateWrap: {
     alignItems: 'center',
-    gap: 4,
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  progressSegWrap: {
-    flex: 1,
-    height: 6,
-    position: 'relative',
-  },
-  progressSeg: {
-    height: 5,
-    borderRadius: 4,
-  },
-  segActive: { backgroundColor: COLORS.APP_PRIMARY },
-  segInactive: { backgroundColor: COLORS.APP_LINE },
-  progressDot: {
-    position: 'absolute',
-    right: -6,
-    top: -3,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.APP_PRIMARY,
-    borderWidth: 2,
-    borderColor: COLORS.WHITE,
-  },
-  /* Status */
-  statusWrap: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  statusTitle: {
+  rateTitle: {
+    marginBottom: 5,
     fontSize: FontSize.ExtraLarge,
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
-    textAlign: 'center',
-    marginTop: 12,
-  },
-  statusSub: {
-    fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  /* Driver card */
-  card: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  driverRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 10,
-  },
-  driverInfo: { flex: 1 },
-  driverName: {
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.Bold,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
   },
-  ratingRow: {
+  rateStars: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 2,
-  },
-  rating: {
-    fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-  },
-  contactCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
+    gap: 10,
     justifyContent: 'center',
   },
-  cardDivider: {
-    height: 1,
-    backgroundColor: COLORS.APP_LINE,
-    marginVertical: 12,
+  doneBtn: {
+    marginTop: 16,
   },
-  carRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  carModel: {
-    fontSize: FontSize.Small,
-    fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT,
-  },
-  carPlate: {
-    fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 2,
-  },
-  inlineCancelBtn: {
-    backgroundColor: COLORS.APP_DANGER_BG,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  inlineCancelTxt: {
-    color: COLORS.APP_DANGER_TEXT,
-    fontSize: FontSize.Small,
-    fontWeight: FontWeight.SemiBold,
-  },
-  /* Stats */
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  statValue: {
-    fontSize: FontSize.Small,
-    fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: FontSize.XsSmall,
-    color: COLORS.APP_TEXT_MUTED,
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    alignSelf: 'stretch',
-    backgroundColor: COLORS.APP_LINE,
-    marginHorizontal: 4,
-  },
-  /* Fare */
-  fareCard: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-  },
-  fareRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  fareLabel: {
-    fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-  },
-  fareValue: {
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT,
-  },
-  fareDivider: {
-    height: 1,
-    backgroundColor: COLORS.APP_LINE,
-    marginVertical: 4,
-  },
-  fareTotalLabel: {
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT,
-  },
-  fareTotalValue: {
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_PRIMARY,
-  },
-  ctaBtn: { marginTop: 4 },
 });

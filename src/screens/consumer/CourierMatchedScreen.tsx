@@ -15,7 +15,7 @@ const consumerBackIcon = {
 export const CourierMatchedScreen = () => {
   return (
     <Wrapper
-      headerTitle="Courier Matched"
+      headerTitle='Courier Matched'
       showBackButton
       backIconStyle={consumerBackIcon}
       useScrollView={false}
@@ -24,7 +24,7 @@ export const CourierMatchedScreen = () => {
       <View style={styles.body}>
         <GradientIcon
           componentName={VARIABLES.Feather}
-          iconName="check"
+          iconName='check'
           size={40}
           color={COLORS.WHITE}
           containerStyle={styles.check}
@@ -32,20 +32,16 @@ export const CourierMatchedScreen = () => {
         <Typography style={styles.headline}>Courier Found!</Typography>
 
         <View style={styles.card}>
-          <View style={styles.profileRow}>
-            <Image source={IMAGES.USER} style={styles.avatar} />
-            <View style={{ flex: 1 }}>
-              <Typography style={styles.name}>John Doe</Typography>
-              <View style={styles.ratingRow}>
-                <Icon
-                  componentName={VARIABLES.Ionicons}
-                  iconName="star"
-                  size={FontSize.Small}
-                  color={COLORS.APP_STAR}
-                />
-                <Typography style={styles.rating}>4.9</Typography>
-              </View>
-            </View>
+          <Image source={IMAGES.USER} style={styles.avatar} />
+          <Typography style={styles.name}>John Doe</Typography>
+          <View style={styles.ratingRow}>
+            <Icon
+              componentName={VARIABLES.Ionicons}
+              iconName='star'
+              size={FontSize.Small}
+              color={COLORS.APP_STAR}
+            />
+            <Typography style={styles.rating}>4.9</Typography>
           </View>
           <View style={styles.feeBlock}>
             <Typography style={styles.feeLabel}>Delivery Fee</Typography>
@@ -53,16 +49,16 @@ export const CourierMatchedScreen = () => {
             <Typography style={styles.cash}>Cash Payment</Typography>
           </View>
           <View style={styles.stats}>
-            <Stat icon="motorbike" label="Vehicle Type" value="YAMAHA" />
+            <Stat icon='motorbike' label='Vehicle Type' value='YAMAHA' />
             <View style={styles.div} />
-            <Stat icon="card-text-outline" label="License Plate" value="AA-001-AA" />
+            <Stat icon='card-text-outline' label='License Plate' value='AA-001-AA' />
             <View style={styles.div} />
-            <Stat icon="water" label="Color" value="Black" />
+            <Stat icon='water' label='Color' value='Black' />
           </View>
         </View>
 
         <Button
-          title="Track Delivery"
+          title='Track Delivery'
           onPress={() => navigate(SCREENS.TRACK_PARCEL, { phase: 'picked_up' })}
           style={styles.cta}
           textStyle={styles.ctaText}
@@ -101,16 +97,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headline: {
-    fontSize: 22,
-    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.XL,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
     marginBottom: 20,
   },
   card: {
-    width: '100%',
+    width: '80%',
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
     marginBottom: 24,
@@ -132,39 +129,40 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   avatar: {
-    width: 56,
-    height: 56,
+    width: 60,
+    height: 60,
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
     borderRadius: 28,
   },
   name: {
-    fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Large,
+    fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.ExtraLarge,
     color: COLORS.APP_TEXT,
+    marginTop: 3,
   },
   rating: {
-    fontSize: FontSize.Small,
+    // fontSize: FontSize.MediumSmall,
     color: COLORS.APP_TEXT,
+    marginBottom: -4,
   },
   feeBlock: {
-    borderTopWidth: 1,
     borderColor: COLORS.APP_LINE,
     paddingTop: 12,
+    alignItems: 'center',
     marginBottom: 12,
   },
   feeLabel: {
-    color: COLORS.APP_TEXT_MUTED,
+    color: COLORS.APP_TEXT_SMALL,
     fontSize: FontSize.Small,
   },
   feeAmt: {
-    fontSize: 24,
-    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.XXL,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
-    marginTop: 4,
   },
   cash: {
     color: COLORS.APP_PRIMARY,
-    fontWeight: FontWeight.Bold,
-    marginTop: 4,
   },
   stats: {
     flexDirection: 'row',
@@ -191,9 +189,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   cta: {
-    width: '100%',
+    width: '90%',
+    marginTop: 100,
     backgroundColor: COLORS.APP_SECONDARY,
-    borderRadius: 14,
   },
   ctaText: {
     color: COLORS.WHITE,

@@ -83,7 +83,7 @@ export const SendParcelFindingScreen = () => {
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      <View style={styles.mapContainer}>
+      {/* <View style={styles.mapContainer}>
         <Map
           key={`parcel-finding-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
           mapRef={mapRef}
@@ -116,12 +116,12 @@ export const SendParcelFindingScreen = () => {
             />
           </Marker>
         </Map>
-      </View>
+      </View> */}
 
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <GradientIcon
-            componentName={VARIABLES.MaterialCommunityIcons}
+            componentName={VARIABLES.FontAwesome}
             iconName='bicycle'
             size={52}
             color={COLORS.WHITE}
@@ -131,9 +131,9 @@ export const SendParcelFindingScreen = () => {
         </Animated.View>
         <Typography style={styles.title}>Finding a Courier...</Typography>
         <Typography style={styles.sub}>Please wait while we match you</Typography>
-        <Pressable style={styles.cancelBtn} onPress={() => setCancelVisible(true)}>
+        {/* <Pressable style={styles.cancelBtn} onPress={() => setCancelVisible(true)}>
           <Typography style={styles.cancelTxt}>Cancel</Typography>
-        </Pressable>
+        </Pressable> */}
       </View>
 
       <CancelReasonModal
@@ -162,24 +162,22 @@ const styles = StyleSheet.create({
     borderColor: COLORS.WHITE,
   },
   center: {
-    flex: 1,
+    flex: 0.8,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
     paddingBottom: 24,
   },
   title: {
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.XL,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
     textAlign: 'center',
     marginTop: 28,
   },
   sub: {
-    fontSize: FontSize.MediumSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    color: COLORS.APP_TEXT_SMALL,
     textAlign: 'center',
-    marginTop: 8,
   },
   cancelBtn: {
     marginTop: 32,

@@ -11,6 +11,7 @@ export * from './linking';
 export * from './notifications';
 export * from './helpers/index';
 export * from './mapDirections';
+export * from './coordinateAlongPolyline';
 export * from './themedStyleSheet';
 export * from './appIcon';
 export * from './haptic';

@@ -11,6 +11,7 @@ import i18n from 'i18n/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { JobStatus } from 'screens/user/MyJobs';
 import { Address, Booking, Service, FontSize, FontWeight, User } from 'types/index';
+import type { RideTrackPhase } from 'types/rideTracking';
 import { COLORS } from 'utils/colors';
 
 export type RootStackParamList = {
@@ -167,7 +168,15 @@ export type RootStackParamList = {
     dropoffLat?: number;
     dropoffLng?: number;
   } | undefined;
-  [SCREENS.TRACK_RIDE]: { phase?: 'in_progress' | 'completed' } | undefined;
+  [SCREENS.TRACK_RIDE]:
+    | {
+        phase?: RideTrackPhase;
+        pickupLat?: number;
+        pickupLng?: number;
+        dropoffLat?: number;
+        dropoffLng?: number;
+      }
+    | undefined;
   [SCREENS.SEND_PARCEL]: undefined;
   [SCREENS.SEND_PARCEL_FINDING]: {
     pickupLat?: number;

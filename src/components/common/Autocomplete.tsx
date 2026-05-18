@@ -142,7 +142,8 @@ export const Autocomplete = ({
           placeholder={t(placeholder)}
           fetchDetails={true}
           onFail={e => logger.log(e)}
-          enableHighAccuracyLocation={true}
+          // enableHighAccuracyLocation={true}
+          debounce={1000}
           isRowScrollable={true}
           keyboardShouldPersistTaps={keyboardShouldPersistTaps}
           keepResultsAfterBlur={keepResultsAfterBlur}

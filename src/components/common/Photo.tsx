@@ -3,6 +3,7 @@ import { IMAGES } from 'constants/assets';
 import {
   Image,
   ImageResizeMode,
+  ImageSourcePropType,
   ImageStyle,
   StyleProp,
   StyleSheet,
@@ -15,7 +16,7 @@ import { ImageFullScreenModal } from './ImageFullScreenModal';
 type ImageSource = string | number;
 
 interface PhotoProps extends TouchableOpacityProps {
-  source: string | number | null | undefined;
+  source: ImageSourcePropType | null | undefined;
   size?: number;
   onPress?: () => void;
   disabled?: boolean;

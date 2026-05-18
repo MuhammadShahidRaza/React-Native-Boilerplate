@@ -573,3 +573,37 @@ export const editProfileValidationSchemaWithProfileImage = ({
   }
   return editProfileValidationSchema;
 };
+
+const parcelAddressSchema = mixed()
+  .nullable()
+  .test(
+    'address-required',
+    'Pick a location from search results',
+    val =>
+      val != null &&
+      typeof val === 'object' &&
+      typeof (val as { latitude?: number }).latitude === 'number' &&
+      typeof (val as { longitude?: number }).longitude === 'number',
+  );
+
+export const sendParcelValidationSchema = createObjectShape({
+  pickup: parcelAddressSchema,
+  dropoff: parcelAddressSchema,
+  senderName: createStringValidationSchema({
+    name: 'Sender name',
+    minLength: 1,
+    maxLength: 80,
+  }),
+  senderPhone: phoneNumberSchema,
+  receiverName: createStringValidationSchema({
+    name: 'Receiver name',
+    minLength: 1,
+    maxLength: 80,
+  }),
+  receiverPhone: phoneNumberSchema,
+  pkg: createStringValidationSchema({
+    name: 'Package description',
+    minLength: 25,
+    maxLength: 300,
+  }),
+});
