@@ -4,14 +4,24 @@ import { Marker } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { Icon, Wrapper, GradientIcon, Typography, Map } from 'components/index';
+import {
+  Icon,
+  Wrapper,
+  GradientIcon,
+  Typography,
+  Map,
+  Button,
+  SvgComponent,
+  AppGradient,
+} from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, screenHeight } from 'utils/index';
-import { navigate } from 'navigation/index';
+import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
+import { navigate, onBack, replace } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
+import { SVG } from 'constants/assets/svg';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
@@ -66,8 +76,13 @@ export const FindingDriverScreen = () => {
     pulse.start();
     const timer = setTimeout(() => {
       pulse.stop();
-      navigate(SCREENS.DRIVER_FOUND);
-    }, 2800);
+      replace(SCREENS.DRIVER_FOUND, {
+        pickupLat: pickupCoord.latitude,
+        pickupLng: pickupCoord.longitude,
+        dropoffLat: dropoffCoord.latitude,
+        dropoffLng: dropoffCoord.longitude,
+      });
+    }, 3000);
     return () => {
       pulse.stop();
       clearTimeout(timer);
@@ -85,9 +100,12 @@ export const FindingDriverScreen = () => {
     >
       <View style={styles.mapContainer}>
         <Map
+          key={`finding-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
           mapRef={mapRef}
           region={mapRegion}
+          regionTracking='initialOnly'
           scrollEnabled={false}
+          showsUserLocationDot={false}
           showCurrentLocation={false}
           showCurrentLocationButton={false}
           mapStyle='light'
@@ -99,6 +117,7 @@ export const FindingDriverScreen = () => {
             apikey={ENV_CONSTANTS.MAP_API_KEY}
             strokeColor={COLORS.APP_PRIMARY}
             strokeWidth={4}
+            onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
           />
           <Marker
             coordinate={{ latitude: pickupCoord.latitude, longitude: pickupCoord.longitude }}
@@ -121,22 +140,30 @@ export const FindingDriverScreen = () => {
       </View>
 
       <View style={styles.center}>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
-          <GradientIcon
-            componentName={VARIABLES.MaterialCommunityIcons}
-            iconName='car'
-            size={52}
-            color={COLORS.WHITE}
-            containerSize={120}
-            borderRadius={60}
-          />
-        </Animated.View>
+        <AppGradient
+          variant='icon'
+          style={{
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
+            <SvgComponent Svg={SVG.CAR} svgWidth={52} svgHeight={52} />
+          </Animated.View>
+        </AppGradient>
         <Typography style={styles.title}>Finding Your Driver...</Typography>
         <Typography style={styles.sub}>This Usually Takes 30 Seconds</Typography>
-        <Pressable style={styles.cancelBtn} onPress={() => setCancelVisible(true)}>
-          <Typography style={styles.cancelTxt}>Cancel</Typography>
-        </Pressable>
       </View>
+      <Button
+        style={styles.cancelBtn}
+        textStyle={styles.cancelTxt}
+        title='Cancel'
+        // onPress={() => setCancelVisible(true)}
+        onPress={() => onBack()}
+      />
 
       <CancelReasonModal
         visible={cancelVisible}
@@ -171,28 +198,24 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   title: {
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.ExtraExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
     textAlign: 'center',
     marginTop: 28,
   },
   sub: {
-    fontSize: FontSize.MediumSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    color: COLORS.APP_TEXT_SMALL,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   cancelBtn: {
-    marginTop: 32,
+    marginBottom: 32,
     backgroundColor: COLORS.APP_DANGER_BG,
-    paddingHorizontal: 44,
-    paddingVertical: 14,
+    marginHorizontal: 20,
     borderRadius: 28,
   },
   cancelTxt: {
-    color: COLORS.APP_DANGER_TEXT,
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.SemiBold,
+    color: COLORS.RED,
   },
 });

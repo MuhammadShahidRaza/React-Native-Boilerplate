@@ -8,7 +8,7 @@ import { COLORS } from 'utils/colors';
 import { Icon, Typography } from 'components/common';
 import type { IconComponentProps } from 'components/common/Icon';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { screenHeight } from 'utils/index';
+import { screenHeight, screenWidth } from 'utils/index';
 import {
   Home,
   MyAccount,
@@ -115,10 +115,13 @@ export const BottomNavigator = () => {
       backgroundColor: COLORS.SECONDARY,
       borderTopWidth: 0,
       elevation: 0,
+      position: 'absolute',
+      bottom: 15 + insets.bottom,
+      left: 0,
+      right: 0,
       height: screenHeight(7),
-      marginBottom: insets.bottom + 5,
       borderRadius: 50,
-      marginHorizontal: 20,
+      marginHorizontal: 60,
       paddingTop: 5,
       paddingBottom: 0,
       shadowColor: '#000',

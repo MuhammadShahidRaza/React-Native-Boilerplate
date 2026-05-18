@@ -15,7 +15,7 @@ interface GradientIconProps extends IconComponentProps {
 
 export const GradientIcon = ({
   variant = 'primary',
-  gradientColors = [COLORS.APP_PRIMARY_DARK, COLORS.APP_PRIMARY_LIGHT,COLORS.APP_PRIMARY_DARK],
+  gradientColors = [COLORS.APP_PRIMARY_DARK, COLORS.APP_PRIMARY_LIGHT],
   containerSize = 44,
   containerStyle,
   borderRadius,
@@ -29,12 +29,14 @@ export const GradientIcon = ({
         {
           width: containerSize,
           height: containerSize,
-          borderRadius: borderRadius ?? 20,
+          borderRadius: borderRadius ?? 14,
           alignItems: 'center',
           justifyContent: 'center',
         },
         containerStyle,
       ]}
+      start={{ x: 0, y: 0 }} // Top-left
+      end={{ x: 1, y: 1 }} // Bottom-right
     >
       <Icon {...iconProps} />
     </AppGradient>

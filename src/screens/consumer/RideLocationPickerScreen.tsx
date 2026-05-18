@@ -163,9 +163,11 @@ export const RideLocationPickerScreen = () => {
             {/* {loading ? (
               <Typography style={styles.addressLoading}>Locating address...</Typography>
             ) : ( */}
-              <Typography style={styles.addressText} numberOfLines={2}>
-                {loading ? 'Locating address...' : address?.fullAddress ?? 'Move the map to select a location'}
-              </Typography>
+            <Typography style={styles.addressText} numberOfLines={2}>
+              {loading
+                ? 'Locating address...'
+                : (address?.fullAddress ?? 'Move the map to select a location')}
+            </Typography>
             {/* // )} */}
           </View>
         </View>
@@ -252,7 +254,8 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 16,
   },
-  addressTextWrap: { flex: 1, 
+  addressTextWrap: {
+    flex: 1,
     height: 70,
     backgroundColor: COLORS.INPUT_BACKGROUND,
     padding: 10,

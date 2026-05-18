@@ -88,7 +88,7 @@ const BASE_COLORS = {
   APP_TEXT_MUTED: '#6B7280',
   APP_LINE: '#E5E7EB',
   APP_MAP_BG: '#E8EAED',
-  APP_DANGER_BG: '#FFE4E6',
+  APP_DANGER_BG: '#FFF0F0',
   APP_DANGER_TEXT: '#BE123C',
   APP_STAR: '#FBBF24',
   APP_CHIP_INACTIVE: '#F9FAFB',
@@ -97,12 +97,8 @@ const BASE_COLORS = {
 
 /** Primary brand gradients for `LinearGradient` (all roles) */
 export const APP_GRADIENT_PRIMARY = [
-  '#0A7EA4',
-  '#0A7EA4',
-  '#0A7EA4',
-  '#0BB89C',
-  '#0A7EA4',
-  '#004AAD',
+  '#008589',
+  '#005ea1',
 ] as const;
 export const APP_GRADIENT_PRIMARY_LIGHT = [BRAND_PRIMARY, BRAND_PRIMARY_LIGHT] as const;
 

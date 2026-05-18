@@ -1,33 +1,54 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, Animated, Pressable } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { GradientIcon, Icon, Typography, Wrapper } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { Marker } from 'react-native-maps';
+import type MapView from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { GradientIcon, Icon, Typography, Wrapper, Map } from 'components/index';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS } from 'utils/index';
-import { useState } from 'react';
+import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
-const DRIVER_COORDS = [
-  { latitude: INITIAL_REGION.latitude + 0.012, longitude: INITIAL_REGION.longitude - 0.006 },
-  { latitude: INITIAL_REGION.latitude + 0.005, longitude: INITIAL_REGION.longitude + 0.009 },
-  { latitude: INITIAL_REGION.latitude - 0.002, longitude: INITIAL_REGION.longitude - 0.008 },
-];
-const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude,
-  longitude: INITIAL_REGION.longitude,
-  latitudeDelta: 0.04,
-  longitudeDelta: 0.025,
-};
-
 export const SendParcelFindingScreen = () => {
+  const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL_FINDING>>();
   const [cancelVisible, setCancelVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
+  const mapRef = useRef<MapView>(null);
+
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+
+  const pickupCoord = useMemo(
+    () => ({
+      latitude: pickupLat ?? INITIAL_REGION.latitude + 0.008,
+      longitude: pickupLng ?? INITIAL_REGION.longitude,
+    }),
+    [pickupLat, pickupLng],
+  );
+
+  const dropoffCoord = useMemo(
+    () => ({
+      latitude: dropoffLat ?? INITIAL_REGION.latitude - 0.004,
+      longitude: dropoffLng ?? INITIAL_REGION.longitude + 0.005,
+    }),
+    [dropoffLat, dropoffLng],
+  );
+
+  const mapRegion = useMemo(
+    () => ({
+      latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
+      longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
+      latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
+      longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+    }),
+    [pickupCoord, dropoffCoord],
+  );
 
   useEffect(() => {
     const pulse = Animated.loop(
@@ -55,45 +76,53 @@ export const SendParcelFindingScreen = () => {
 
   return (
     <Wrapper
-      headerTitle="Send Parcel"
+      headerTitle='Send Parcel'
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView={false}
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* Map with available courier markers */}
       <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFill}
-          initialRegion={MAP_REGION}
+        <Map
+          key={`parcel-finding-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
+          mapRef={mapRef}
+          region={mapRegion}
+          regionTracking='initialOnly'
           scrollEnabled={false}
-          showsUserLocation
-          showsMyLocationButton={false}
-          showsCompass={false}
-          userInterfaceStyle="light"
+          showsUserLocationDot={false}
+          showCurrentLocation={false}
+          showCurrentLocationButton={false}
+          mapStyle='light'
+          minZoomLevel={0}
         >
-          {DRIVER_COORDS.map((coord, i) => (
-            <Marker key={`courier-${i}`} coordinate={coord} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.courierMarker}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName="bicycle"
-                  size={14}
-                  color={COLORS.APP_TEXT}
-                />
-              </View>
-            </Marker>
-          ))}
-        </MapView>
+          <MapViewDirections
+            origin={pickupCoord}
+            destination={dropoffCoord}
+            apikey={ENV_CONSTANTS.MAP_API_KEY}
+            strokeColor={COLORS.APP_PRIMARY}
+            strokeWidth={4}
+            onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
+          />
+          <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.pickupDot} />
+          </Marker>
+          <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 1 }}>
+            <Icon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName='map-marker'
+              size={30}
+              color={COLORS.APP_SECONDARY}
+            />
+          </Marker>
+        </Map>
       </View>
 
-      {/* Finding content */}
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <GradientIcon
             componentName={VARIABLES.MaterialCommunityIcons}
-            iconName="bicycle"
+            iconName='bicycle'
             size={52}
             color={COLORS.WHITE}
             containerSize={120}
@@ -118,21 +147,19 @@ export const SendParcelFindingScreen = () => {
 
 const styles = StyleSheet.create({
   mapContainer: {
-    height: 220,
-    marginHorizontal: 16,
-    borderRadius: 16,
+    height: screenHeight(40),
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
     overflow: 'hidden',
+    marginBottom: 4,
   },
-  courierMarker: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 6,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
+  pickupDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.APP_PRIMARY,
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
   },
   center: {
     flex: 1,

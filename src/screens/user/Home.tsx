@@ -11,6 +11,7 @@ import {
   AppGradient,
   GradientIcon,
   Button,
+  Wrapper,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -24,25 +25,31 @@ import { COLORS, screenWidth, STYLES } from 'utils/index';
 const promoCodes = [
   { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
   { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
+  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
 ];
 
 export const Home = () => {
   return (
-    <View style={styles.root}>
+    <Wrapper
+      showBackButton={false}
+      safeAreaEdges={[]}
+      wantPaddingBottom={false}
+      backgroundColor={COLORS.WHITE}
+      darkMode={false}
+    >
       {/* ── Hero section ── */}
-      <AppGradient style={styles.hero}>
+      <AppGradient style={styles.hero} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
             {/* Location pill — gradient square icon + stacked label/text */}
             <RowComponent style={styles.locPillWrap}>
               <GradientIcon
-                componentName={VARIABLES.Ionicons}
-                iconName='location-sharp'
-                size={FontSize.Small}
+                componentName={VARIABLES.EvilIcons}
+                iconName='location'
+                size={FontSize.ExtraLarge}
                 color={COLORS.WHITE}
               />
-
-              <View>
+              <View style={{ marginLeft: 10 }}>
                 <Typography style={styles.locLabel}>Location</Typography>
                 <Typography style={styles.locText} numberOfLines={1}>
                   New York, United States
@@ -79,40 +86,43 @@ export const Home = () => {
       </AppGradient>
 
       {/* ── Scrollable body – theme-aware background ── */}
+
+      {/* "What do you need?" */}
+      <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
+        <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+          What do you need?
+        </Typography>
+        <View style={styles.services}>
+          <ServiceCard
+            label='Book a Ride'
+            subLabel={'Get Anywhere\nSafely'}
+            SvgIcon={SVG.BOOK_RIDE}
+            onPress={() => navigate(SCREENS.BOOK_RIDE)}
+          />
+          <ServiceCard
+            label='Send Parcel'
+            subLabel={'Fast\nDelivery'}
+            SvgIcon={SVG.SEND_PARCEL}
+            onPress={() => navigate(SCREENS.SEND_PARCEL)}
+          />
+          <ServiceCard
+            label='Order Food'
+            subLabel={'From Top\nRestaurant'}
+            SvgIcon={SVG.ORDER_FOOD}
+            onPress={() => navigate(SCREENS.ORDER_FOOD)}
+          />
+        </View>
+      </View>
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* "What do you need?" */}
-        <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
-          <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
-            What do you need?
-          </Typography>
-          <View style={styles.services}>
-            <ServiceCard
-              label='Book a Ride'
-              subLabel='Get Anywhere Safely'
-              SvgIcon={SVG.BOOK_RIDE}
-              onPress={() => navigate(SCREENS.BOOK_RIDE)}
-            />
-            <ServiceCard
-              label='Send Parcel'
-              subLabel='Fast             Delivery'
-              SvgIcon={SVG.SEND_PARCEL}
-              onPress={() => navigate(SCREENS.SEND_PARCEL)}
-            />
-            <ServiceCard
-              label='Order Food'
-              subLabel='From Top Restaurant'
-              SvgIcon={SVG.ORDER_FOOD}
-              onPress={() => navigate(SCREENS.ORDER_FOOD)}
-            />
-          </View>
-        </View>
-
         {/* Promo Codes */}
-        <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
+        <View
+          style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND, marginBottom: 70 }]}
+        >
           <View style={styles.promoHeader}>
             <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
               Promo Codes
@@ -141,7 +151,7 @@ export const Home = () => {
 
         <View style={{ height: 24 }} />
       </ScrollView>
-    </View>
+    </Wrapper>
   );
 };
 
@@ -260,7 +270,7 @@ const styles = StyleSheet.create({
   },
   bookNow: {
     alignSelf: 'flex-start',
-    padding: 10,  
+    padding: 10,
     backgroundColor: COLORS.APP_PRIMARY,
     width: screenWidth(30),
     marginTop: 10,

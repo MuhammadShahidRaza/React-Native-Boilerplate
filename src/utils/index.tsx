@@ -10,6 +10,7 @@ export * from './location';
 export * from './linking';
 export * from './notifications';
 export * from './helpers/index';
+export * from './mapDirections';
 export * from './themedStyleSheet';
 export * from './appIcon';
 export * from './haptic';

@@ -5,7 +5,7 @@ export const IMAGES = {
   USER_IMAGE: require('assets/images/common/user_image.png'),
   VISA_LARGE: require('assets/images/common/visa_large.png'),
   USER_ICON: require('assets/images/common/user_icon.png'),
-  LOCATION_ICON: require('assets/images/common/location_icon.png'),
+  LOCATION_ICON: require('assets/images/common/location.png'),
   NO_DATA_FOUND: require('assets/images/common/no_bookings.png'),
   NO_INTERNET_CONNECTION: require('assets/images/common/noInternetConnection.png'),
   NO_BOOKINGS: require('assets/images/common/no_bookings.png'),

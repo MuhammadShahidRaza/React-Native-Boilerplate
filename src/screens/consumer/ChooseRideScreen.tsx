@@ -6,7 +6,7 @@ import MapViewDirections from 'react-native-maps-directions';
 import { Icon, Wrapper, Button, Typography, Input, SvgComponent, Map } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, getCurrentLocation, screenHeight } from 'utils/index';
+import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
@@ -110,9 +110,12 @@ export const ChooseRideScreen = () => {
       {/* Map */}
       <View style={styles.mapContainer}>
         <Map
+          key={`choose-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
           mapRef={mapRef}
           region={mapRegion}
+          regionTracking='initialOnly'
           scrollEnabled={false}
+          showsUserLocationDot={false}
           showCurrentLocation={false}
           showCurrentLocationButton={false}
           mapStyle='light'
@@ -124,17 +127,24 @@ export const ChooseRideScreen = () => {
             apikey={ENV_CONSTANTS.MAP_API_KEY}
             strokeColor={COLORS.APP_PRIMARY}
             strokeWidth={4}
+            onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
           />
-          <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 1 }}>
+          <Marker
+            coordinate={pickupCoord}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <View style={styles.pickupMapDot} />
+          </Marker>
+          <Marker
+            coordinate={dropoffCoord}
+            anchor={{ x: 0.5, y: 1 }}
+          >
             <Icon
               componentName={VARIABLES.MaterialCommunityIcons}
               iconName='map-marker'
-              size={34}
-              color={COLORS.APP_PRIMARY}
+              size={30}
+              color={COLORS.APP_SECONDARY}
             />
-          </Marker>
-          <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.dropoffDot} />
           </Marker>
         </Map>
       </View>
@@ -216,11 +226,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 4,
   },
-  dropoffDot: {
+  pickupMapDot: {
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: COLORS.APP_SECONDARY,
+    backgroundColor: COLORS.APP_PRIMARY,
     borderWidth: 2,
     borderColor: COLORS.WHITE,
   },

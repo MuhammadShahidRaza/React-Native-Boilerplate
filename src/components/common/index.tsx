@@ -33,6 +33,7 @@ export * from './SkeletonLoader';
 export * from './ThemeSelector';
 export * from './AppIconSelector';
 export * from './ImageUpload';
+export * from './ride';
 export * from './ImageFullScreenModal';
 export * from './ImageWithFullScreen';
 export * from './DateRangeFilter';

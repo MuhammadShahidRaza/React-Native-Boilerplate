@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { COLORS, getCurrentLocation } from 'utils/index';
@@ -43,6 +43,8 @@ interface MapProps {
   centerMarkerStyle?: ViewStyle;
   /** Override current location button style */
   currentLocationButtonStyle?: ViewStyle;
+  /** When false, hides the blue user-location dot (use during route preview). Default: true unless `showCenterMarker`. */
+  showsUserLocationDot?: boolean;
   /** Ref to access map (e.g. animateToRegion) */
   mapRef?: React.MutableRefObject<MapView | null>;
   /** Children rendered inside MapView (e.g. Polyline, Marker) */
@@ -51,6 +53,11 @@ interface MapProps {
   minZoomLevel?: number;
   /** Override max zoom level (default 20) */
   maxZoomLevel?: number;
+  /**
+   * `live`: controlled `region` synced from props (pickers).
+   * `initialOnly`: `initialRegion` only — camera can stay after `fitToCoordinates` / directions (no snap-back).
+   */
+  regionTracking?: 'live' | 'initialOnly';
 }
 
 export const Map: FC<MapProps> = ({
@@ -69,14 +76,16 @@ export const Map: FC<MapProps> = ({
   scrollEnabled = true,
   customPopup,
   markersCoordinate = [],
-  mapStyle = 'auto',
+  mapStyle = 'light',
   wrapperStyle,
   centerMarkerStyle,
   currentLocationButtonStyle,
+  showsUserLocationDot,
   mapRef: mapRefProp,
   children,
   minZoomLevel = 14,
   maxZoomLevel = 20,
+  regionTracking = 'live',
 }) => {
   const { isDark } = useTheme();
   const resolvedMapStyle = mapStyle === 'auto' ? (isDark ? 'dark' : 'light') : mapStyle;
@@ -84,6 +93,25 @@ export const Map: FC<MapProps> = ({
   const mapRef = mapRefProp ?? internalRef;
   const [currentRegion, setCurrentRegion] = useState<Region>(region);
   const [currentLocation, setCurrentLocation] = useState<Region>(region);
+
+  useEffect(() => {
+    if (showCenterMarker || regionTracking === 'initialOnly') return;
+    setCurrentRegion(r => {
+      const same =
+        r.latitude === region.latitude &&
+        r.longitude === region.longitude &&
+        r.latitudeDelta === region.latitudeDelta &&
+        r.longitudeDelta === region.longitudeDelta;
+      return same ? r : region;
+    });
+  }, [
+    showCenterMarker,
+    regionTracking,
+    region.latitude,
+    region.longitude,
+    region.latitudeDelta,
+    region.longitudeDelta,
+  ]);
 
   const fetchCurrentLocation = useCallback(async () => {
     try {
@@ -96,18 +124,19 @@ export const Map: FC<MapProps> = ({
           longitudeDelta: region.longitudeDelta,
         };
         setCurrentLocation(newRegion);
-        setCurrentRegion(newRegion);
+        if (regionTracking !== 'initialOnly') {
+          setCurrentRegion(newRegion);
+        }
         mapRef.current?.animateToRegion(newRegion, 500);
       }
     } catch (error) {
-      logger.error('Error getting user current location:', error);
+      logger.warn('Map: could not read current location', error);
     }
-  }, [region.latitudeDelta, region.longitudeDelta, mapRef]);
+  }, [region.latitudeDelta, region.longitudeDelta, mapRef, regionTracking]);
 
-  // Ref is only set after MapView mounts — fetch location on map ready (not in a bare useEffect).
   const handleMapReady = useCallback(() => {
-    if (showCurrentLocation) void fetchCurrentLocation();
-  }, [showCurrentLocation, fetchCurrentLocation]);
+    if (showCurrentLocation && regionTracking !== 'initialOnly') void fetchCurrentLocation();
+  }, [showCurrentLocation, fetchCurrentLocation, regionTracking]);
 
   const handleRegionChangeComplete = useCallback(
     (newRegion: Region) => {
@@ -137,7 +166,7 @@ export const Map: FC<MapProps> = ({
           style={[styles.map, style]}
           scrollEnabled={scrollEnabled}
           maxZoomLevel={maxZoomLevel}
-          showsUserLocation={showCenterMarker ? false : true}
+          showsUserLocation={showsUserLocationDot ?? !showCenterMarker}
           showsMyLocationButton={false}
           showsCompass={false}
           minZoomLevel={minZoomLevel}
@@ -145,7 +174,9 @@ export const Map: FC<MapProps> = ({
           onMapReady={handleMapReady}
           {...(showCenterMarker
             ? { initialRegion: region, onRegionChangeComplete: handleRegionChangeComplete }
-            : { region: currentRegion, onRegionChangeComplete: handleRegionChangeComplete })}
+            : regionTracking === 'initialOnly'
+              ? { initialRegion: region }
+              : { region: currentRegion, onRegionChangeComplete: handleRegionChangeComplete })}
         >
           {showMarker && (
             <Marker

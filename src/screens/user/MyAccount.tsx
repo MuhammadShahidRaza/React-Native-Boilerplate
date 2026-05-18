@@ -93,7 +93,7 @@ export const MyAccount = () => {
   ];
 
   return (
-    <Wrapper backgroundColor={COLORS.LIGHT_ORANGE} showBackButton={false} darkMode={false}>
+    <Wrapper showBackButton={false} darkMode={false}>
       <ImageBackground
         source={IMAGES.MY_ACCOUNT_BACKGROUND}
         resizeMode='cover'

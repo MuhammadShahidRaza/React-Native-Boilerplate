@@ -161,10 +161,20 @@ export type RootStackParamList = {
     dropoffLat?: number;
     dropoffLng?: number;
   } | undefined;
-  [SCREENS.DRIVER_FOUND]: undefined;
+  [SCREENS.DRIVER_FOUND]: {
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
+  } | undefined;
   [SCREENS.TRACK_RIDE]: { phase?: 'in_progress' | 'completed' } | undefined;
   [SCREENS.SEND_PARCEL]: undefined;
-  [SCREENS.SEND_PARCEL_FINDING]: undefined;
+  [SCREENS.SEND_PARCEL_FINDING]: {
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
+  } | undefined;
   [SCREENS.COURIER_MATCHED]: undefined;
   [SCREENS.TRACK_PARCEL]: { phase?: 'picked_up' | 'delivered' } | undefined;
   [SCREENS.ORDER_FOOD]: undefined;

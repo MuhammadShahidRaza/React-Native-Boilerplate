@@ -1,76 +1,119 @@
 import { StyleSheet, View, Image, Pressable } from 'react-native';
-import MapView, { Polyline, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Icon, Wrapper, GradientIcon, AppGradient, Button, Typography } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import type MapView from 'react-native-maps';
+import { Marker } from 'react-native-maps';
+import {
+  Icon,
+  Wrapper,
+  GradientIcon,
+  AppGradient,
+  Button,
+  Typography,
+  Map,
+} from 'components/index';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
+import { COLORS, fitMapToDirectionCoordinates, openPhoneNumber, screenHeight } from 'utils/index';
 import { IMAGES } from 'constants/assets';
-import { navigate } from 'navigation/index';
+import { navigate, replace, type RootStackParamList } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { CancelReasonModal } from './CancelReasonModal';
+import MapViewDirections from 'react-native-maps-directions';
+import { RouteProp, useRoute } from '@react-navigation/native';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
-const PICKUP = { latitude: INITIAL_REGION.latitude + 0.008, longitude: INITIAL_REGION.longitude };
-const DROPOFF = { latitude: INITIAL_REGION.latitude - 0.004, longitude: INITIAL_REGION.longitude + 0.005 };
-const ROUTE_COORDS = [
-  PICKUP,
-  { latitude: INITIAL_REGION.latitude + 0.003, longitude: INITIAL_REGION.longitude + 0.002 },
-  DROPOFF,
-];
-const MAP_REGION = {
-  latitude: INITIAL_REGION.latitude + 0.002,
-  longitude: INITIAL_REGION.longitude + 0.002,
-  latitudeDelta: 0.028,
-  longitudeDelta: 0.018,
-};
 
 export const DriverFoundScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
 
+  const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.DRIVER_FOUND>>();
+  const mapRef = useRef<MapView>(null);
+
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+
+  const pickupCoord = useMemo(
+    () => ({
+      latitude: pickupLat ?? INITIAL_REGION.latitude + 0.008,
+      longitude: pickupLng ?? INITIAL_REGION.longitude,
+    }),
+    [pickupLat, pickupLng],
+  );
+
+  const dropoffCoord = useMemo(
+    () => ({
+      latitude: dropoffLat ?? INITIAL_REGION.latitude - 0.004,
+      longitude: dropoffLng ?? INITIAL_REGION.longitude + 0.005,
+    }),
+    [dropoffLat, dropoffLng],
+  );
+
+  const mapRegion = useMemo(
+    () => ({
+      latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
+      longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
+      latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
+      longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+    }),
+    [pickupCoord, dropoffCoord],
+  );
+
   return (
     <Wrapper
-      headerTitle="Book a Ride"
+      headerTitle='Book a Ride'
       showBackButton
       backIconStyle={BACK_ICON_STYLE}
       useScrollView
+      backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* Map */}
       <View style={styles.mapContainer}>
-        <MapView
-          provider={PROVIDER_GOOGLE}
-          style={StyleSheet.absoluteFill}
-          initialRegion={MAP_REGION}
+        <Map
+          key={`driver-found-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
+          mapRef={mapRef}
+          region={mapRegion}
+          regionTracking='initialOnly'
           scrollEnabled={false}
-          showsUserLocation
-          showsMyLocationButton={false}
-          showsCompass={false}
-          userInterfaceStyle="light"
+          showsUserLocationDot={false}
+          showCurrentLocation={false}
+          showCurrentLocationButton={false}
+          mapStyle='light'
+          minZoomLevel={0}
         >
-          <Polyline coordinates={ROUTE_COORDS} strokeColor="#374151" strokeWidth={3} />
-          <Marker coordinate={PICKUP} anchor={{ x: 0.5, y: 1 }}>
+          <MapViewDirections
+            origin={pickupCoord}
+            destination={dropoffCoord}
+            apikey={ENV_CONSTANTS.MAP_API_KEY}
+            strokeColor={COLORS.APP_PRIMARY}
+            strokeWidth={4}
+            onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
+          />
+          <Marker
+            coordinate={{ latitude: pickupCoord.latitude, longitude: pickupCoord.longitude }}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            <View style={styles.pickupMapDot} />
+          </Marker>
+          <Marker
+            coordinate={{ latitude: dropoffCoord.latitude, longitude: dropoffCoord.longitude }}
+            anchor={{ x: 0.5, y: 1 }}
+          >
             <Icon
               componentName={VARIABLES.MaterialCommunityIcons}
-              iconName="map-marker"
-              size={34}
-              color={COLORS.APP_PRIMARY}
+              iconName='map-marker'
+              size={30}
+              color={COLORS.APP_SECONDARY}
             />
           </Marker>
-          <Marker coordinate={DROPOFF} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.dropoffDot} />
-          </Marker>
-        </MapView>
+        </Map>
       </View>
 
       <View style={styles.content}>
         {/* Check icon */}
         <View style={styles.iconWrap}>
           <GradientIcon
-            componentName={VARIABLES.Feather}
-            iconName="check"
-            size={40}
+            componentName={VARIABLES.Entypo}
+            iconName='check'
+            size={50}
             color={COLORS.WHITE}
             containerSize={88}
             borderRadius={44}
@@ -86,18 +129,35 @@ export const DriverFoundScreen = () => {
               <View style={styles.ratingRow}>
                 <Icon
                   componentName={VARIABLES.Ionicons}
-                  iconName="star"
+                  iconName='star'
                   size={FontSize.Small}
                   color={COLORS.APP_STAR}
                 />
                 <Typography style={styles.rating}>4.9</Typography>
               </View>
             </View>
-            <AppGradient variant="primaryLight" style={styles.contactCircle}>
-              <Icon componentName={VARIABLES.Feather} iconName="phone" size={16} color={COLORS.WHITE} />
+            <AppGradient variant='primaryLight' style={styles.contactCircle}>
+              <Icon
+                componentName={VARIABLES.Feather}
+                iconName='phone'
+                size={16}
+                color={COLORS.WHITE}
+                onPress={() => openPhoneNumber('+237 6 99 99 99 99')}
+              />
             </AppGradient>
-            <View style={[styles.contactCircle, { backgroundColor: COLORS.APP_SECONDARY, marginLeft: 8 }]}>
-              <Icon componentName={VARIABLES.Feather} iconName="mail" size={16} color={COLORS.WHITE} />
+            <View
+              style={[
+                styles.contactCircle,
+                { backgroundColor: COLORS.APP_SECONDARY, marginLeft: 8 },
+              ]}
+            >
+              <Icon
+                componentName={VARIABLES.Feather}
+                iconName='mail'
+                size={16}
+                color={COLORS.WHITE}
+                onPress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+              />
             </View>
           </View>
 
@@ -116,24 +176,27 @@ export const DriverFoundScreen = () => {
 
         {/* Vehicle stats */}
         <View style={styles.statsRow}>
-          <StatItem icon="car" label="Vehicle Type" value="Toyota" />
-          <View style={styles.statDivider} />
-          <StatItem icon="card-text-outline" label="License Plate" value="AA-001-AA" />
-          <View style={styles.statDivider} />
-          <StatItem icon="water" label="Color" value="Black" />
+          <StatItem icon='car' label='Vehicle Type' value='Toyota' />
+          {/* <View style={styles.statDivider} /> */}
+          <StatItem icon='card-text-outline' label='License Plate' value='AA-001-AA' />
+          {/* <View style={styles.statDivider} /> */}
+          <StatItem icon='water' label='Color' value='Black' />
         </View>
 
         <Button
-          title="Track Ride"
+          title='Track Ride'
           style={styles.ctaBtn}
-          onPress={() => navigate(SCREENS.TRACK_RIDE, { phase: 'in_progress' })}
+          onPress={() => replace(SCREENS.TRACK_RIDE, { phase: 'in_progress' })}
         />
       </View>
 
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => { setCancelVisible(false); navigate(SCREENS.BOOK_RIDE); }}
+        onContinue={() => {
+          setCancelVisible(false);
+          replace(SCREENS.BOOK_RIDE);
+        }}
       />
     </Wrapper>
   );
@@ -154,12 +217,22 @@ const StatItem = ({ icon, label, value }: { icon: string; label: string; value: 
 
 const styles = StyleSheet.create({
   mapContainer: {
-    height: 200,
-    marginHorizontal: 16,
-    borderRadius: 16,
+    height: screenHeight(40),
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
     overflow: 'hidden',
     marginBottom: 4,
   },
+
+  pickupMapDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.APP_PRIMARY,
+    borderWidth: 2,
+    borderColor: COLORS.WHITE,
+  },
+
   dropoffDot: {
     width: 16,
     height: 16,
@@ -178,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   card: {
-    backgroundColor: COLORS.WHITE,
+    backgroundColor: COLORS.SEARCH_BAR,
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
@@ -199,7 +272,6 @@ const styles = StyleSheet.create({
   },
   driverInfo: { flex: 1 },
   driverName: {
-    fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
   },
@@ -217,13 +289,14 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
+    opacity: 0.7,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardDivider: {
-    height: 1,
+    // height: 1,
     backgroundColor: COLORS.APP_LINE,
-    marginVertical: 12,
+    marginVertical: 7,
   },
   carRow: {
     flexDirection: 'row',
@@ -231,18 +304,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   carModel: {
-    fontSize: FontSize.Small,
+    fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
   },
   carPlate: {
     fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
-    marginTop: 2,
+    color: COLORS.APP_TEXT_SMALL,
   },
   inlineCancelBtn: {
     backgroundColor: COLORS.APP_DANGER_BG,
-    paddingHorizontal: 18,
+    paddingHorizontal: 25,
     paddingVertical: 8,
     borderRadius: 20,
   },
@@ -258,25 +330,26 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    marginHorizontal: 20,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.05,
+    // shadowRadius: 8,
+    // elevation: 2,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: 1,
   },
   statValue: {
-    fontSize: FontSize.Small,
+    fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: FontSize.XsSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_SMALL,
     textAlign: 'center',
   },
   statDivider: {
@@ -285,5 +358,5 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.APP_LINE,
     marginHorizontal: 4,
   },
-  ctaBtn: { marginTop: 4 },
+  ctaBtn: { marginTop: 4, marginHorizontal: 30 },
 });

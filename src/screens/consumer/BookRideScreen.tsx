@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 import { useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
 import { Marker } from 'react-native-maps';
 import type MapView from 'react-native-maps';
-import type { Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { Icon, Wrapper, Button, Typography, Map } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, screenHeight } from 'utils/index';
+import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { AddressDetails } from 'utils/location';
@@ -29,6 +28,16 @@ export const BookRideScreen = () => {
   );
   const mapRef = useRef<MapView>(null);
 
+  const routeFitRegion =
+    pickup && dropoff
+      ? {
+          latitude: (pickup.latitude + dropoff.latitude) / 2,
+          longitude: (pickup.longitude + dropoff.longitude) / 2,
+          latitudeDelta: Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02,
+          longitudeDelta: Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02,
+        }
+      : undefined;
+
   // Receive picker result when this screen regains focus.
   useFocusEffect(
     useCallback(() => {
@@ -42,34 +51,6 @@ export const BookRideScreen = () => {
     }, []),
   );
 
-  // Animate map to fit both pickup and dropoff when both are set
-  useEffect(() => {
-    if (!pickup || !dropoff) return;
-    const latDelta = Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02;
-    const lngDelta = Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02;
-    const region: Region = {
-      latitude: (pickup.latitude + dropoff.latitude) / 2,
-      longitude: (pickup.longitude + dropoff.longitude) / 2,
-      latitudeDelta: latDelta,
-      longitudeDelta: lngDelta,
-    };
-    mapRef.current?.animateToRegion(region, 600);
-  }, [pickup, dropoff]);
-
-  // // Bike marker: loop A → B over 3 seconds (30 fps)
-  // useEffect(() => {
-  //   const TOTAL = 90;
-  //   const timer = setInterval(() => {
-  //     frameRef.current = (frameRef.current + 1) % TOTAL;
-  //     const t = frameRef.current / TOTAL;
-  //     setBikeCoord({
-  //       latitude: ANIM_START.latitude + (ANIM_END.latitude - ANIM_START.latitude) * t,
-  //       longitude: ANIM_START.longitude + (ANIM_END.longitude - ANIM_START.longitude) * t,
-  //     });
-  //   }, 33);
-  //   return () => clearInterval(timer);
-  // }, []);
-
   const handleLetsGo = () => {
     navigate(SCREENS.CHOOSE_RIDE, {
       pickupAddress: pickup?.fullAddress,
@@ -81,7 +62,7 @@ export const BookRideScreen = () => {
     });
   };
 
-  const showDirections = pickup?.latitude && dropoff?.latitude;
+  const showDirections = !!(pickup?.latitude && dropoff?.latitude);
   return (
     <Wrapper
       headerTitle='Book a Ride'
@@ -94,23 +75,22 @@ export const BookRideScreen = () => {
       {/* ── Live map ──────────────────────────────────────────────────────── */}
       <View style={styles.mapContainer}>
         <Map
+          key={
+            showDirections && pickup && dropoff
+              ? `book-${pickup.latitude}-${pickup.longitude}-${dropoff.latitude}-${dropoff.longitude}`
+              : 'book-map'
+          }
           mapRef={mapRef}
+          {...(routeFitRegion ? { region: routeFitRegion } : {})}
+          regionTracking={showDirections ? 'initialOnly' : 'live'}
+          showsUserLocationDot={!showDirections}
           showCurrentLocation={showDirections ? false : true}
-          scrollEnabled={showDirections ? true : false}
-          // region={
-          //   showDirections
-          //     ? {
-          //         latitude: (pickup.latitude + dropoff.latitude) / 2,
-          //         longitude: (pickup.longitude + dropoff.longitude) / 2,
-          //         latitudeDelta: Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02,
-          //         longitudeDelta: Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02,
-          //       }
-          //     : undefined
-          // }
+          scrollEnabled={!!showDirections}
           showCurrentLocationButton={false}
+          mapStyle='light'
           minZoomLevel={0}
         >
-          {showDirections && (
+          {showDirections && pickup && dropoff ? (
             <>
               <MapViewDirections
                 origin={{ latitude: pickup.latitude, longitude: pickup.longitude }}
@@ -118,6 +98,7 @@ export const BookRideScreen = () => {
                 apikey={ENV_CONSTANTS.MAP_API_KEY}
                 strokeColor={COLORS.APP_PRIMARY}
                 strokeWidth={4}
+                onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
               />
               <Marker
                 coordinate={{ latitude: pickup.latitude, longitude: pickup.longitude }}
@@ -137,7 +118,7 @@ export const BookRideScreen = () => {
                 />
               </Marker>
             </>
-          )}
+          ) : null}
         </Map>
       </View>
 
