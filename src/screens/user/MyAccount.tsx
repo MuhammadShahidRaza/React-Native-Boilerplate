@@ -62,16 +62,16 @@ export const MyAccount = () => {
       iconComponent: VARIABLES.MaterialIcons,
       onPress: () => navigate(SCREENS.CONTACT_US),
     },
-    ...(isWorkerRole(role)
-      ? [
-          {
-            title: 'My Wallet',
-            iconName: 'support-agent',
-            iconComponent: VARIABLES.MaterialIcons,
-            onPress: () => navigate(SCREENS.MY_WALLET),
-          },
-        ]
-      : []),
+    // ...(isWorkerRole(role)
+    //   ? [
+    //       {
+    //         title: 'My Wallet',
+    //         iconName: 'support-agent',
+    //         iconComponent: VARIABLES.MaterialIcons,
+    //         onPress: () => navigate(SCREENS.MY_WALLET),
+    //       },
+    //     ]
+    //   : []),
     // {
     //   title: "Transaction History",
     //   iconName: 'support-agent',
@@ -86,14 +86,14 @@ export const MyAccount = () => {
         setisLogoutModalVisible(true);
       },
       style: {
-        marginTop: isWorkerRole(role) ? 75 : 200,
+        marginTop: 200,
         borderBottomWidth: 0,
       },
     },
   ];
 
   return (
-    <Wrapper showBackButton={false} darkMode={false}>
+    <Wrapper showBackButton={false} useSafeArea={false} darkMode={false}>
       <ImageBackground
         source={IMAGES.MY_ACCOUNT_BACKGROUND}
         resizeMode='cover'
@@ -114,7 +114,7 @@ export const MyAccount = () => {
       <View style={styles.tabsContainer}>
         <Typography style={styles.titleText}>{'My Account'}</Typography>
         {/* Pause Profile Toggle for Dentors */}
-        {isWorkerRole(role) && (
+        {/* {isWorkerRole(role) && (
           <RowComponent
             style={[
               styles.rowContainer,
@@ -141,7 +141,7 @@ export const MyAccount = () => {
               onValueChange={handlePauseProfile}
             />
           </RowComponent>
-        )}
+        )} */}
 
         {tabs.map(({ title, iconName, iconComponent, onPress, style }) => (
           <RowComponent style={[styles.rowContainer, style]} onPress={onPress} key={title}>
@@ -187,7 +187,7 @@ export const MyAccount = () => {
 const styles = StyleSheet.create({
   backgroundImage: {
     width: screenWidth(100),
-    height: screenHeight(20),
+    height: screenHeight(25),
     alignItems: 'center',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,

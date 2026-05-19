@@ -102,7 +102,7 @@ export const OnBoarding = () => {
       >
         {renderedPages.map((page, index) => (
           <View key={index} style={[styles.page, { width: fullScreenWidth }]}>
-            <Photo source={page.image} imageStyle={styles.image} />
+            <Photo source={page.image} imageStyle={styles.image} resizeMode="contain" />
           </View>
         ))}
       </ScrollView>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   page: {
     flex: 1,
     ...FLEX_CENTER,
-    height: screenHeight(100),
+    height: screenHeight(65),
   },
   image: {
     width: screenWidth(100),
@@ -155,8 +155,8 @@ const styles = StyleSheet.create({
     // marginBottom: 14,
   },
   dot: {
-    width: 9,
-    height: 9,
+    width: 8,
+    height: 8,
     borderRadius: 8,
     backgroundColor: COLORS.LAVENDER,
     marginHorizontal: 3,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.PRIMARY,
     width: 35,
     borderRadius: 8,
-    height: 9,
+    height: 7,
   },
   scroll: { flex: 1 },
   bottomCard: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
     paddingVertical: 30,
     // elevation: 3,
-    minHeight: screenHeight(30),
+    minHeight: screenHeight(40),
     gap: 20,
     // shadowColor: COLORS.BLACK,
     // shadowOffset: { width: 0, height: 2 },
@@ -188,14 +188,13 @@ const styles = StyleSheet.create({
   },
   heading: {
     textAlign: 'center',
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.XL,
     // width: screenWidth(50),
     alignSelf: 'center',
     fontWeight: FontWeight.Bold,
     color: COLORS.TEXT,
   },
   description: {
-    fontSize: FontSize.MediumSmall,
     textAlign: 'center',
     color: COLORS.TEXT_SECONDARY,
   },
@@ -204,8 +203,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   skipText: {
-    fontSize: FontSize.MediumSmall,
-    color: COLORS.TEXT_SECONDARY,
+    fontSize: FontSize.Large,
+    color: COLORS.APP_TEXT_SMALL,
     // textDecorationLine: 'underline',
   },
 });

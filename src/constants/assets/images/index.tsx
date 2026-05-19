@@ -33,6 +33,7 @@ export const IMAGES = {
   RESTAURANT_TWO: require('assets/images/temp/res2.png'),
   RESTAURANT_ITEM_1: require('assets/images/temp/res3.png'),
   RESTAURANT_ITEM_2: require('assets/images/temp/res4.png'),
+  RESTAURANT_ITEM_3: require('assets/images/temp/res5.png'),
 };
 
 export const VIDEO = {
