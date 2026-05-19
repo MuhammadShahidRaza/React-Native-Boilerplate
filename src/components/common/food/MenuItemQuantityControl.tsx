@@ -64,15 +64,15 @@ export const MenuItemQuantityControl = ({
 
 const styles = StyleSheet.create({
   addBtnWrap: {
-    borderRadius: 10,
+    borderRadius: 20,
   },
   addBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingHorizontal:30,
+    paddingVertical: 5,
     borderRadius: 10,
   },
   addTxt: {
-    fontSize: FontSize.Small,
+    fontSize: FontSize.MediumSmall,
   },
   qtyControl: {
     flexDirection: 'row',
@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   qtyBtn: {
-    width: 34,
-    height: 34,
+    width: 30,
+    height: 30,
     borderRadius: 17,
     backgroundColor: '#D1FAE5',
     alignItems: 'center',

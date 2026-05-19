@@ -13,10 +13,10 @@ import {
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { navigate } from 'navigation/index';
+import { CustomBackIcon, navigate, onBack } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
-import { COLORS } from 'utils/index';
+import { COLORS, screenHeight, screenWidth } from 'utils/index';
 
 const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
@@ -33,7 +33,7 @@ const ITEMS: MenuItem[] = [
   {
     id: '1',
     title: 'Double Smash Burger',
-    desc: 'Two smashed patties with cheddar cheese',
+    desc: 'Two smashed patties with cheddar cheese and lettuce',
     price: 330,
     priceLabel: 'CFA 330',
     popular: true,
@@ -41,7 +41,7 @@ const ITEMS: MenuItem[] = [
   {
     id: '2',
     title: 'Loaded Fries',
-    desc: 'Crispy fries with cheese sauce and jalapenos',
+    desc: 'Crispy fries with cheese sauce and jalapenos and lettuce',
     price: 330,
     priceLabel: 'CFA 330',
     popular: false,
@@ -84,15 +84,15 @@ export const RestaurantMenuScreen = () => {
 
   const cartTotalLabel = `CFA ${cartTotal.toLocaleString()}`;
 
+  // Wrapper
+  // headerTitle={name}
+  // showBackButton={false}
+  // backIconStyle={BACK_ICON_STYLE}
+  // useScrollView={false}
+  // backgroundColor={COLORS.WHITE}
+  // darkMode={false}
   return (
-    <Wrapper
-      headerTitle={name}
-      showBackButton
-      backIconStyle={BACK_ICON_STYLE}
-      useScrollView={false}
-      backgroundColor={COLORS.WHITE}
-      darkMode={false}
-    >
+    <>
       <View style={styles.root}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -103,18 +103,34 @@ export const RestaurantMenuScreen = () => {
           keyboardShouldPersistTaps='handled'
         >
           <View style={styles.hero}>
-            <Photo source={IMAGES.RESTAURANT_ONE} imageStyle={styles.heroImg} resizeMode='cover' />
-            <LinearGradient colors={['transparent', 'rgba(0,0,0,0.75)']} style={styles.heroGrad} />
-            <View style={styles.metaRow}>
-              <Icon
-                componentName={VARIABLES.Ionicons}
-                iconName='star'
-                size={14}
-                color={COLORS.APP_STAR}
-              />
-              <Typography style={styles.metaTxt}>
-                {`4.9 · 15-25 min · CFA 30 Delivery`}
-              </Typography>
+            <CustomBackIcon
+              onPress={() => onBack()}
+              style={[BACK_ICON_STYLE, { position: 'absolute', top: 50, left: 16, zIndex: 1 }]}
+            />
+            <Photo source={IMAGES.RESTAURANT_ITEM_3} imageStyle={styles.heroImg} />
+            {/* <LinearGradient colors={['transparent', 'rgba(0,0,0,0.75)']} style={styles.heroGrad} /> */}
+            <View
+              style={{
+                position: 'absolute',
+                bottom: 40,
+                left: 25,
+                right: 0,
+                zIndex: 1,
+              }}
+            >
+              <Typography style={styles.heroTitle}>{name}</Typography>
+              <Typography style={styles.heroSubtitle}>Fast Food</Typography>
+              <View style={styles.metaRow}>
+                <Icon
+                  componentName={VARIABLES.Ionicons}
+                  iconName='star'
+                  size={14}
+                  color={COLORS.APP_STAR}
+                />
+                <Typography
+                  style={styles.metaTxt}
+                >{`4.9 · 15-25 min · CFA 30 Delivery`}</Typography>
+              </View>
             </View>
           </View>
 
@@ -168,7 +184,7 @@ export const RestaurantMenuScreen = () => {
           onPress={() => navigate(SCREENS.FOOD_DELIVERY_CART)}
         />
       </View>
-    </Wrapper>
+    </>
   );
 };
 
@@ -183,21 +199,30 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   hero: {
-    height: 220,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    height: screenHeight(40),
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
     overflow: 'hidden',
-    marginBottom: 16,
-    justifyContent: 'flex-end',
-    padding: 16,
+    marginBottom: 20,
+    // padding: 16,
+  },
+  heroSubtitle: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.Bold,
+    marginBottom: 5,
   },
   heroImg: {
-    ...StyleSheet.absoluteFill,
-    width: undefined,
-    height: undefined,
+    width: '100%',
+    height: '100%',
   },
   heroGrad: {
-    ...StyleSheet.absoluteFill,
+    // ...StyleSheet.absoluteFill,
+  },
+  heroTitle: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.ExtraLarge,
+    fontWeight: FontWeight.Bold,
   },
   metaRow: {
     flexDirection: 'row',
@@ -235,20 +260,18 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Medium,
   },
   itemDesc: {
-    color: COLORS.APP_TEXT_MUTED,
-    fontSize: FontSize.ExtraSmall,
-    marginTop: 4,
+    color: COLORS.APP_TEXT_SMALL,
+    fontSize: FontSize.Small,
+    maxWidth: 150,
   },
   price: {
     color: COLORS.APP_PRIMARY,
     fontWeight: FontWeight.Bold,
-    marginTop: 8,
-    fontSize: FontSize.Small,
   },
   popular: {
     position: 'absolute',
     top: 8,
-    right: 88,
+    right: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
@@ -265,6 +288,7 @@ const styles = StyleSheet.create({
   qtyCol: {
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 52,
+    minWidth: 70,
+    alignSelf: 'flex-end',
   },
 });

@@ -4,6 +4,8 @@ import { Typography } from '../Typography';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
+import { AppGradient } from 'components/index';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export interface FoodCartBarProps {
   itemCount: number;
@@ -13,45 +15,41 @@ export interface FoodCartBarProps {
 
 export const FoodCartBar = ({ itemCount, totalLabel, onPress }: FoodCartBarProps) => {
   if (itemCount <= 0) return null;
-
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.wrap}>
-      <Pressable style={styles.bar} onPress={onPress}>
-        <View style={styles.left}>
-          <View style={styles.badge}>
-            <Typography style={styles.badgeTxt}>{String(itemCount)}</Typography>
+    <View style={[styles.wrap, { paddingBottom: insets.bottom + 12 }]}>
+      <AppGradient variant='primary' style={{ borderRadius: 30 }}>
+        <Pressable style={styles.bar} onPress={onPress}>
+          <View style={styles.left}>
+            <View style={styles.badge}>
+              <Typography style={styles.badgeTxt}>{String(itemCount)}</Typography>
+            </View>
+            <Typography style={styles.label}>View Cart</Typography>
           </View>
-          <Typography style={styles.label}>View Cart</Typography>
-        </View>
-        <View style={styles.right}>
-          <Typography style={styles.total}>{totalLabel}</Typography>
-          <Icon
-            componentName={VARIABLES.Feather}
-            iconName='chevron-right'
-            size={FontSize.Medium}
-            color={COLORS.WHITE}
-          />
-        </View>
-      </Pressable>
+          <View style={styles.right}>
+            <Typography style={styles.total}>{totalLabel}</Typography>
+            <Icon
+              componentName={VARIABLES.Feather}
+              iconName='chevron-right'
+              size={FontSize.Medium}
+              color={COLORS.WHITE}
+            />
+          </View>
+        </Pressable>
+      </AppGradient>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   wrap: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
-    backgroundColor: COLORS.WHITE,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.APP_LINE,
   },
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: COLORS.APP_SECONDARY,
-    borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
@@ -64,15 +62,16 @@ const styles = StyleSheet.create({
     minWidth: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: COLORS.APP_PRIMARY,
+    backgroundColor: COLORS.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
   },
   badgeTxt: {
-    color: COLORS.WHITE,
+    color: COLORS.APP_TEXT,
     fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Small,
+    lineHeight: 26,
+    fontSize: FontSize.MediumSmall,
   },
   label: {
     color: COLORS.WHITE,

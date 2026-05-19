@@ -5,8 +5,9 @@ import { Icon, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
-import { onBack } from 'navigation/index';
+import { onBack, reset } from 'navigation/index';
 import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
+import { SCREENS } from 'constants/routes';
 
 const consumerBackIcon = {
   backgroundColor: COLORS.APP_PRIMARY,
@@ -19,7 +20,7 @@ export const FoodDeliveryCartScreen = () => {
 
   return (
     <Wrapper
-      headerTitle="Cart 1"
+      headerTitle='Cart 1'
       showBackButton
       backIconStyle={consumerBackIcon}
       useScrollView
@@ -35,14 +36,14 @@ export const FoodDeliveryCartScreen = () => {
             </Typography>
             <Typography style={styles.itemPrice}>CFA 330</Typography>
             <View style={styles.qtyRow}>
-              <Pressable
-                style={styles.qtyBtn}
-                onPress={() => setQty(q => Math.max(1, q - 1))}
-              >
+              <Pressable style={styles.qtyBtn} onPress={() => setQty(q => Math.max(1, q - 1))}>
                 <Typography style={styles.qtyTxt}>-</Typography>
               </Pressable>
               <Typography style={styles.qtyVal}>{String(qty).padStart(2, '0')}</Typography>
-              <Pressable style={[styles.qtyBtn, styles.qtyBtnPlus]} onPress={() => setQty(q => q + 1)}>
+              <Pressable
+                style={[styles.qtyBtn, styles.qtyBtnPlus]}
+                onPress={() => setQty(q => q + 1)}
+              >
                 <Typography style={[styles.qtyTxt, { color: COLORS.WHITE }]}>+</Typography>
               </Pressable>
             </View>
@@ -50,7 +51,7 @@ export const FoodDeliveryCartScreen = () => {
           <Pressable style={styles.trash}>
             <Icon
               componentName={VARIABLES.Feather}
-              iconName="trash-2"
+              iconName='trash-2'
               size={FontSize.Small}
               color={COLORS.APP_DANGER_TEXT}
             />
@@ -61,7 +62,7 @@ export const FoodDeliveryCartScreen = () => {
         <View style={styles.promoRow}>
           <TextInput
             style={styles.promoInput}
-            placeholder="Enter Promo Code"
+            placeholder='Enter Promo Code'
             placeholderTextColor={COLORS.APP_TEXT_MUTED}
             value={promo}
             onChangeText={setPromo}
@@ -73,13 +74,13 @@ export const FoodDeliveryCartScreen = () => {
 
         <Typography style={styles.section}>Order Summary</Typography>
         <View style={styles.summary}>
-          <Row label="Subtotal" value="CFA 550" />
-          <Row label="Delivery Fee" value="CFA 50" />
+          <Row label='Subtotal' value='CFA 550' />
+          <Row label='Delivery Fee' value='CFA 50' />
           <Typography style={styles.total}>CFA 600</Typography>
           <View style={styles.payBadge}>
             <Icon
               componentName={VARIABLES.Feather}
-              iconName="dollar-sign"
+              iconName='dollar-sign'
               size={FontSize.Small}
               color={COLORS.APP_PRIMARY}
             />
@@ -90,12 +91,17 @@ export const FoodDeliveryCartScreen = () => {
         <Typography style={styles.section}>Delivery Note (Optional)</Typography>
         <TextInput
           style={styles.note}
-          placeholder="Any Special Instructions..."
+          placeholder='Any Special Instructions...'
           placeholderTextColor={COLORS.APP_TEXT_MUTED}
           multiline
         />
 
-        <Pressable onPress={() => onBack()} style={styles.placeWrap}>
+        <Pressable
+          onPress={() => {
+            reset(SCREENS.BOTTOM_STACK);
+          }}
+          style={styles.placeWrap}
+        >
           <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.placeBtn}>
             <Typography style={styles.placeTxt}>Place Order - CFA 600</Typography>
           </LinearGradient>
