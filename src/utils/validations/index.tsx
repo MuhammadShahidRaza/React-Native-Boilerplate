@@ -455,6 +455,50 @@ export const documentationUploadValidationSchema = createObjectShape({
   insurance_document: optionalImageSchema,
 });
 
+export const vehicleDetailsValidationSchema = createObjectShape({
+  vehicle_brand: createStringValidationSchema({
+    name: 'Vehicle Brand',
+    minLength: 1,
+    maxLength: 40,
+  }),
+  vehicle_model: createStringValidationSchema({
+    name: 'Vehicle Model',
+    minLength: 1,
+    maxLength: 40,
+  }),
+  vehicle_license_plate: createStringValidationSchema({
+    name: 'Vehicle License Plate',
+    minLength: 2,
+    maxLength: 20,
+  }),
+  vehicle_year: createStringValidationSchema({
+    name: 'Vehicle Make',
+    minLength: 4,
+    maxLength: 4,
+  }),
+  vehicle_color: createStringValidationSchema({
+    name: 'Vehicle Color',
+    minLength: 1,
+    maxLength: 30,
+  }),
+  vehicle_type: createStringValidationSchema({
+    name: 'Vehicle Type',
+    minLength: 1,
+    maxLength: 40,
+  }),
+});
+
+export const workerDocumentsValidationSchema = createObjectShape({
+  driver_license_validity_date: createStringValidationSchema({
+    name: 'Driver License validity date',
+    minLength: 8,
+    maxLength: 12,
+  }),
+  driver_license_front: requiredImageSchema,
+  driver_license_back: requiredImageSchema,
+  mot_picture: requiredImageSchema,
+});
+
 export const professionalDetailsValidationSchema = createObjectShape({
   years_of_experience: createStringValidationSchema({
     name: 'Years of Experience',

@@ -62,7 +62,7 @@ export const HomeHeader = () => {
         <MessageBox
           onPress={() => {
             if (isWorkerRole(role)) {
-              navigate(SCREENS.PROFESSIONAL_DETAILS);
+              navigate(SCREENS.VEHICLE_DETAILS, { isFromSettings: true });
             } else {
               navigate(SCREENS.LOCATION);
             }

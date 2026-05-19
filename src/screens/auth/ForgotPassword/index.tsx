@@ -50,7 +50,7 @@ export const ForgotPassword = () => {
           // onBlur={formik.handleBlur('phone_number')}
           onChangeCountryCode={formik.handleChange('country_code')}
           onChangeCallingCode={formik.handleChange('calling_code')}
-          defaultCode={(formik.values.country_code || 'NG') as any}
+          defaultCode={(formik.values.country_code || 'US') as any}
           allowSpacing={false}
           returnKeyType='go'
           placeholder={COMMON_TEXT.PHONE_NUMBER}

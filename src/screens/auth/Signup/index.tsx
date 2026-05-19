@@ -194,7 +194,6 @@ export const SignUp = () => {
           onChangeCountryCode={formik.handleChange('country_code')}
           onChangeCallingCode={formik.handleChange('calling_code')}
           allowSpacing={false}
-          defaultCode={__DEV__ ? 'PK' : 'NG'}
           startIcon={{
             componentName: VARIABLES.Feather,
             iconName: 'phone',

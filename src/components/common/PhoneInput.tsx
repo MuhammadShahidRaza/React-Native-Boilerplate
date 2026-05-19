@@ -60,7 +60,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   autoFocus,
   isTitleInLine = false,
   blurOnSubmit,
-  defaultCode = 'NG',
+  defaultCode = 'US',
   allowSpacing = true,
   name,
   startIcon,

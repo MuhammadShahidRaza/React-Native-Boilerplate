@@ -93,6 +93,11 @@ export const Map: FC<MapProps> = ({
   const mapRef = mapRefProp ?? internalRef;
   const [currentRegion, setCurrentRegion] = useState<Region>(region);
   const [currentLocation, setCurrentLocation] = useState<Region>(region);
+  const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
+
+  /** Native `showsUserLocation` emits `topUserLocationChange`, which Fabric does not support yet. */
+  const wantsUserLocationDot = showsUserLocationDot ?? !showCenterMarker;
+  const useCustomUserLocationMarker = wantsUserLocationDot || showCurrentLocation;
 
   useEffect(() => {
     if (showCenterMarker || regionTracking === 'initialOnly') return;
@@ -124,6 +129,10 @@ export const Map: FC<MapProps> = ({
           longitudeDelta: region.longitudeDelta,
         };
         setCurrentLocation(newRegion);
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
         if (regionTracking !== 'initialOnly') {
           setCurrentRegion(newRegion);
         }
@@ -135,8 +144,10 @@ export const Map: FC<MapProps> = ({
   }, [region.latitudeDelta, region.longitudeDelta, mapRef, regionTracking]);
 
   const handleMapReady = useCallback(() => {
-    if (showCurrentLocation && regionTracking !== 'initialOnly') void fetchCurrentLocation();
-  }, [showCurrentLocation, fetchCurrentLocation, regionTracking]);
+    if (useCustomUserLocationMarker && regionTracking !== 'initialOnly') {
+      void fetchCurrentLocation();
+    }
+  }, [useCustomUserLocationMarker, fetchCurrentLocation, regionTracking]);
 
   const handleRegionChangeComplete = useCallback(
     (newRegion: Region) => {
@@ -166,7 +177,7 @@ export const Map: FC<MapProps> = ({
           style={[styles.map, style]}
           scrollEnabled={scrollEnabled}
           maxZoomLevel={maxZoomLevel}
-          showsUserLocation={showsUserLocationDot ?? !showCenterMarker}
+          showsUserLocation={false}
           showsMyLocationButton={false}
           showsCompass={false}
           minZoomLevel={minZoomLevel}
@@ -194,6 +205,9 @@ export const Map: FC<MapProps> = ({
                 {customPopup && <Callout onPress={customPopupPress}>{customPopup}</Callout>}
               </Marker>
             ))}
+          {useCustomUserLocationMarker && userLocation ? (
+            <Marker coordinate={userLocation} pinColor={COLORS.APP_PRIMARY} />
+          ) : null}
           {children}
         </MapView>
         {showCenterMarker && (

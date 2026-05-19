@@ -97,7 +97,7 @@ const navigateToJobsFallback = (params?: { selectedTab?: JobStatus }) => {
   const role = getRole();
   if (isWorkerRole(role)) {
     navigate(SCREENS.BOTTOM_STACK, {
-      screen: SCREENS.MY_JOBS,
+      screen: SCREENS.WORKER_EARNINGS,
       params,
     });
   } else {

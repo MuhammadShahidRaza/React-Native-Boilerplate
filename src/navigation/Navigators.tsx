@@ -190,6 +190,13 @@ export type RootStackParamList = {
   [SCREENS.ORDER_FOOD]: undefined;
   [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
+  [SCREENS.WORKER_RIDE_HISTORY]: undefined;
+  [SCREENS.WORKER_EARNINGS]: undefined;
+  [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: undefined;
+  [SCREENS.WORKER_REQUESTS]: undefined;
+  [SCREENS.WORKER_REQUEST_DETAIL]: { requestId: string };
+  [SCREENS.WORKER_JOB_NAVIGATION]: { requestId: string; phase?: 'pickup' | 'dropoff' };
+  [SCREENS.WORKER_JOB_COMPLETED]: { requestId: string };
 
   // Auth Screens
   [SCREENS.GET_STARTED]: undefined;
@@ -199,6 +206,9 @@ export type RootStackParamList = {
     isFromSettings?: boolean;
   };
   [SCREENS.PROFESSIONAL_DETAILS]: {
+    isFromSettings?: boolean;
+  };
+  [SCREENS.VEHICLE_DETAILS]: {
     isFromSettings?: boolean;
   };
   [SCREENS.SIGN_UP]: undefined;

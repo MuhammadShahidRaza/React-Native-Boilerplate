@@ -17,7 +17,7 @@ export interface RestaurantCardProps {
 export const RestaurantCard = ({ restaurant, isLiked, onPress, onToggleLike }: RestaurantCardProps) => (
   <Pressable style={styles.card} onPress={onPress}>
     <View style={styles.imgWrap}>
-      <Photo source={restaurant.image} imageStyle={styles.restImg} resizeMode='cover' />
+      <Photo source={restaurant.image} onPress={onPress} imageStyle={styles.restImg} resizeMode='cover' />
       {restaurant.featured ? (
         <View style={styles.featured} pointerEvents='none'>
           <Typography style={styles.featuredTxt}>Featured</Typography>

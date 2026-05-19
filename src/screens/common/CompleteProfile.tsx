@@ -45,11 +45,11 @@ export const CompleteProfile = ({
 
   const tabs = [
     {
-      title: 'Professional Details',
-      onPress: () => navigate(SCREENS.PROFESSIONAL_DETAILS, { isFromSettings }),
+      title: 'Vehicle Details',
+      onPress: () => navigate(SCREENS.VEHICLE_DETAILS, { isFromSettings }),
     },
     {
-      title: 'Documentation Upload',
+      title: 'Documents',
       onPress: () => navigate(SCREENS.DOCUMENTATION_UPLOAD, { isFromSettings }),
     },
     ...(isFromSettings

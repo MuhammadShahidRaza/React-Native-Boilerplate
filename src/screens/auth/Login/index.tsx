@@ -129,7 +129,7 @@ export const Login = () => {
           allowSpacing={false}
           onChangeCountryCode={formik.handleChange('country_code')}
           onChangeCallingCode={formik.handleChange('calling_code')}
-          defaultCode={(formik.values.country_code || 'NG') as any}
+          defaultCode={(formik.values.country_code || 'US') as any}
           startIcon={{
             componentName: VARIABLES.Feather,
             iconName: 'phone',

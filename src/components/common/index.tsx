@@ -36,6 +36,7 @@ export * from './ImageUpload';
 export * from './ride';
 export * from './parcel';
 export * from './food';
+export * from './worker';
 export * from './ImageFullScreenModal';
 export * from './ImageWithFullScreen';
 export * from './DateRangeFilter';

@@ -7,6 +7,7 @@ export const SCREENS = {
   CHANGE_PASSWORD: 'ChangePassword',
   COMPLETE_PROFILE: 'CompleteProfile',
   PROFESSIONAL_DETAILS: 'ProfessionalDetails',
+  VEHICLE_DETAILS: 'VehicleDetails',
   LANGUAGE: 'Language',
   PRIVACY_POLICY: 'PrivacyPolicy',
   TERMS_AND_CONDITIONS: 'TermsAndConditions',
@@ -120,4 +121,13 @@ export const SCREENS = {
   ORDER_FOOD: 'OrderFood',
   RESTAURANT_MENU: 'RestaurantMenu',
   FOOD_DELIVERY_CART: 'FoodDeliveryCart',
+
+  /** Worker (driver / courier) */
+  WORKER_RIDE_HISTORY: 'WorkerRideHistory',
+  WORKER_EARNINGS: 'WorkerEarnings',
+  WORKER_LOOKING_FOR_DELIVERIES: 'WorkerLookingForDeliveries',
+  WORKER_REQUESTS: 'WorkerRequests',
+  WORKER_REQUEST_DETAIL: 'WorkerRequestDetail',
+  WORKER_JOB_NAVIGATION: 'WorkerJobNavigation',
+  WORKER_JOB_COMPLETED: 'WorkerJobCompleted',
 } as const;

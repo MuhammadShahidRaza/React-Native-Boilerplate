@@ -1,38 +1,58 @@
-import { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Map } from 'components/index';
-import { Typography, RowComponent } from 'components/index';
+import { Button, Map, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
-import { useAppSelector } from 'types/reduxTypes';
+import { COLORS, APP_GRADIENT_PRIMARY, screenHeight } from 'utils/index';
+import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import { navigate } from 'navigation/index';
+import { SCREENS } from 'constants/routes';
+import { setLookingForDeliveries, setWorkerOnline } from 'store/slices/worker';
+import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 
 export const WorkerHomeScreen = () => {
-  const [isOnline, setIsOnline] = useState(false);
+  const dispatch = useAppDispatch();
   const userDetails = useAppSelector(state => state?.user?.userDetails);
+  const role = useAppSelector(state => state?.user?.role);
+  const { isOnline } = useAppSelector(state => state.worker);
+  const copy = getWorkerRoleCopy(role);
   const firstName = userDetails?.full_name?.split(' ')?.[0] ?? 'Alex';
+
+  const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
+
+  const openRequests = () => {
+    if (!isOnline) {
+      dispatch(setWorkerOnline(true));
+    }
+    dispatch(setLookingForDeliveries(true));
+    navigate(SCREENS.WORKER_REQUESTS);
+  };
 
   return (
     <View style={styles.root}>
-      {/* Map fills screen */}
-      <Map
-        style={styles.map}
-        showCurrentLocation
-        showCurrentLocationButton={false}
-        scrollEnabled={true}
-      />
+      <View style={styles.mapContainer}>
+        <Map
+          style={styles.map}
+          showCurrentLocation
+          showCurrentLocationButton={false}
+          scrollEnabled
+        />
+      </View>
 
-      {/* Offline / Online toggle — floats over map */}
-      <SafeAreaView edges={['top']} style={styles.overlayTop} pointerEvents="box-none">
+      <SafeAreaView edges={['top']} style={styles.overlayTop} pointerEvents='box-none'>
         <View style={styles.togglePill}>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => setIsOnline(false)}
+            onPress={() => dispatch(setWorkerOnline(false))}
             style={[styles.toggleOption, !isOnline && styles.toggleActive]}
           >
             {!isOnline ? (
-              <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} start={{x:0,y:0}} end={{x:1,y:0}} style={StyleSheet.absoluteFill} />
+              <LinearGradient
+                colors={[...APP_GRADIENT_PRIMARY]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
             ) : null}
             <Typography style={[styles.toggleTxt, !isOnline && styles.toggleActiveTxt]}>
               Offline
@@ -40,11 +60,16 @@ export const WorkerHomeScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => setIsOnline(true)}
+            onPress={() => dispatch(setWorkerOnline(true))}
             style={[styles.toggleOption, isOnline && styles.toggleActive]}
           >
             {isOnline ? (
-              <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} start={{x:0,y:0}} end={{x:1,y:0}} style={StyleSheet.absoluteFill} />
+              <LinearGradient
+                colors={[...APP_GRADIENT_PRIMARY]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
             ) : null}
             <Typography style={[styles.toggleTxt, isOnline && styles.toggleActiveTxt]}>
               Online
@@ -53,11 +78,11 @@ export const WorkerHomeScreen = () => {
         </View>
       </SafeAreaView>
 
-      {/* Bottom info card */}
       <View style={styles.card}>
-        <Typography style={styles.greet}>{`Good day, ${firstName}!`}</Typography>
-        <Typography style={styles.status}>{isOnline ? "You're online" : "You're offline"}</Typography>
-
+        <View style={styles.cardInner}>
+          <Typography style={styles.greet}>{`Good day, ${firstName}!`}</Typography>
+          <Typography style={styles.status}>{statusText}</Typography>
+        </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Typography style={styles.statValue}>CFA 87.50</Typography>
@@ -66,7 +91,7 @@ export const WorkerHomeScreen = () => {
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Typography style={styles.statValue}>12</Typography>
-            <Typography style={styles.statLabel}>Rides</Typography>
+            <Typography style={styles.statLabel}>{copy.tripsStatLabel}</Typography>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
@@ -75,14 +100,30 @@ export const WorkerHomeScreen = () => {
           </View>
         </View>
       </View>
+
+      {isOnline ? (
+        <Button
+          title={copy.lookingButton}
+          style={styles.lookingBtn}
+          textStyle={styles.lookingBtnTxt}
+          onPress={openRequests}
+        />
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mapContainer: {
+    height: screenHeight(52),
+    borderBottomLeftRadius: 35,
+    borderBottomRightRadius: 35,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
   root: {
     flex: 1,
-    backgroundColor: COLORS.APP_MAP_BG,
+    backgroundColor: COLORS.BACKGROUND,
   },
   map: {
     flex: 1,
@@ -112,58 +153,67 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     overflow: 'hidden',
   },
-  toggleActive: {
-    // gradient applied via LinearGradient child
-  },
+  toggleActive: {},
   toggleTxt: {
     fontSize: FontSize.Small,
     fontWeight: FontWeight.SemiBold,
-    color: COLORS.APP_TEXT_MUTED,
+    color: COLORS.APP_TEXT_SMALL,
   },
   toggleActiveTxt: {
     color: COLORS.WHITE,
   },
   card: {
     backgroundColor: COLORS.BACKGROUND,
-    paddingHorizontal: 24,
     paddingTop: 24,
     paddingBottom: 16,
   },
+  cardInner: {
+    paddingHorizontal: 24,
+  },
   greet: {
-    fontSize: FontSize.ExtraLarge,
-    fontWeight: FontWeight.Bold,
-    color: COLORS.TEXT,
+    fontSize: FontSize.XL,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
   },
   status: {
-    fontSize: FontSize.Small,
-    color: COLORS.TEXT_SECONDARY,
-    marginTop: 4,
+    fontSize: FontSize.MediumSmall,
+    color: COLORS.APP_TEXT_SMALL,
     marginBottom: 20,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.SURFACE,
-    borderRadius: 16,
-    paddingVertical: 16,
+    backgroundColor: COLORS.SEARCH_BAR,
+    paddingHorizontal: 24,
+    paddingVertical: 25,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: FontSize.MediumLarge,
+    fontSize: FontSize.ExtraExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.TEXT,
   },
   statLabel: {
-    fontSize: FontSize.ExtraSmall,
-    color: COLORS.TEXT_SECONDARY,
-    marginTop: 4,
+    fontSize: FontSize.MediumSmall,
+    color: COLORS.APP_TEXT_SMALL,
   },
   statDivider: {
-    width: 1,
+    width: 2,
     height: 36,
     backgroundColor: COLORS.BORDER,
+  },
+  lookingBtn: {
+    marginHorizontal: 24,
+    marginTop: 25,
+    backgroundColor: COLORS.BACKGROUND,
+    borderWidth: 1,
+    borderColor: COLORS.SECONDARY,
+  },
+  lookingBtnTxt: {
+    color: COLORS.SECONDARY,
+    fontSize: FontSize.MediumLarge,
   },
 });

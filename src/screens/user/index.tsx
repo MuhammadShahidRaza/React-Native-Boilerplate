@@ -52,4 +52,11 @@ export {
   FoodDeliveryCartScreen,
   WorkerWalletScreen,
   WorkerHomeScreen,
+  WorkerRideHistoryScreen,
+  WorkerEarningsScreen,
+  WorkerLookingForDeliveriesScreen,
+  WorkerRequestsScreen,
+  WorkerRequestDetailScreen,
+  WorkerJobNavigationScreen,
+  WorkerJobCompletedScreen,
 } from '../consumer';

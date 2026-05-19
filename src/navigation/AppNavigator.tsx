@@ -45,6 +45,11 @@ import {
   OrderFoodScreen,
   RestaurantMenuScreen,
   FoodDeliveryCartScreen,
+  WorkerLookingForDeliveriesScreen,
+  WorkerRequestsScreen,
+  WorkerRequestDetailScreen,
+  WorkerJobNavigationScreen,
+  WorkerJobCompletedScreen,
 } from 'screens/user';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
@@ -108,6 +113,11 @@ export const AppNavigator = () => {
     [SCREENS.ORDER_FOOD]: OrderFoodScreen,
     [SCREENS.RESTAURANT_MENU]: RestaurantMenuScreen,
     [SCREENS.FOOD_DELIVERY_CART]: FoodDeliveryCartScreen,
+    [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: WorkerLookingForDeliveriesScreen,
+    [SCREENS.WORKER_REQUESTS]: WorkerRequestsScreen,
+    [SCREENS.WORKER_REQUEST_DETAIL]: WorkerRequestDetailScreen,
+    [SCREENS.WORKER_JOB_NAVIGATION]: WorkerJobNavigationScreen,
+    [SCREENS.WORKER_JOB_COMPLETED]: WorkerJobCompletedScreen,
   };
 
   return (

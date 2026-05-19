@@ -8,6 +8,7 @@ import {
   NotificationReducer,
   ServicesReducer,
   UserReducer,
+  WorkerReducer,
 } from './slices/index';
 
 // Combine reducers
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   address: AddressReducer,
   services: ServicesReducer,
   bookings: BookingsReducer,
+  worker: WorkerReducer,
 });
 
 // Redux Persist configuration
@@ -28,7 +30,7 @@ const persistConfig = {
   // Only persist these reducers (theme and language will be auto-saved)
   whitelist: ['app', 'user', 'address'],
   // Don't persist notification state (it's temporary)
-  blacklist: ['notification', 'services', 'bookings'],
+  blacklist: ['notification', 'services', 'bookings', 'worker'],
   // Debug mode in development
   debug: __DEV__,
   // Migration function to handle version changes

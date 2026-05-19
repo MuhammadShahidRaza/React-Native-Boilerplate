@@ -5,6 +5,7 @@ import { BookingsState } from 'store/slices/bookings';
 import { NotificationState } from 'store/slices/notification';
 import { ServicesState } from 'store/slices/services';
 import { UserState } from 'store/slices/user';
+import type { WorkerAvailabilityState } from 'store/slices/worker';
 import store from 'store/store';
 
 export type RootState = {
@@ -14,6 +15,7 @@ export type RootState = {
   notification: NotificationState;
   services: ServicesState;
   bookings: BookingsState;
+  worker: WorkerAvailabilityState;
 };
 
 export type AppDispatch = typeof store.dispatch;
