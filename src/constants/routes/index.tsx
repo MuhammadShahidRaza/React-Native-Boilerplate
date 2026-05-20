@@ -121,6 +121,7 @@ export const SCREENS = {
   ORDER_FOOD: 'OrderFood',
   RESTAURANT_MENU: 'RestaurantMenu',
   FOOD_DELIVERY_CART: 'FoodDeliveryCart',
+  TRACK_FOOD_ORDER: 'TrackFoodOrder',
 
   /** Worker (driver / courier) */
   WORKER_RIDE_HISTORY: 'WorkerRideHistory',

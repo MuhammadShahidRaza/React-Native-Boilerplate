@@ -6,6 +6,8 @@ import { NotificationState } from 'store/slices/notification';
 import { ServicesState } from 'store/slices/services';
 import { UserState } from 'store/slices/user';
 import type { WorkerAvailabilityState } from 'store/slices/worker';
+
+export type { WorkerAvailabilityState };
 import store from 'store/store';
 
 export type RootState = {

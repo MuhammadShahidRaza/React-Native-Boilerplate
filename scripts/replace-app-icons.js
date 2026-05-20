@@ -40,6 +40,9 @@ const ANDROID_FOREGROUND = {
 
 const PLAYSTORE_SIZE = 512;
 
+/** Apple App Store marketing icon must not have alpha; matches SNLIFT logo blue. */
+const IOS_ICON_FLATTEN_BG = { r: 0, g: 74, b: 173 };
+
 /** AppIcon.appiconset filenames → edge length in px */
 const IOS_FILENAME_PX = {
   'Icon-App-20x20@1x.png': 20,
@@ -69,12 +72,13 @@ function toDarkFilename(filename) {
   return String(filename).replace(/\.png$/i, '.dark.png');
 }
 
-async function resizeSquarePng(srcPath, destPath, px) {
+async function resizeSquarePng(srcPath, destPath, px, { flattenForIos = false } = {}) {
   await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
-  const buf = await sharp(srcPath)
-    .resize(px, px, { fit: 'cover', position: 'centre' })
-    .png()
-    .toBuffer();
+  let pipeline = sharp(srcPath).resize(px, px, { fit: 'cover', position: 'centre' });
+  if (flattenForIos) {
+    pipeline = pipeline.flatten({ background: IOS_ICON_FLATTEN_BG });
+  }
+  const buf = await pipeline.png().toBuffer();
   await fs.promises.writeFile(destPath, buf);
 }
 
@@ -188,7 +192,7 @@ async function writeIos(lightPng, darkPng) {
       const isDark = isDarkAppearanceEntry(img);
       const src = isDark ? darkPng : lightPng;
       const dest = path.join(appIconDir, fn);
-      await resizeSquarePng(src, dest, px);
+      await resizeSquarePng(src, dest, px, { flattenForIos: true });
       written.add(fn);
     }
   }

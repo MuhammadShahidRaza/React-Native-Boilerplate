@@ -11,6 +11,7 @@ import i18n from 'i18n/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { JobStatus } from 'screens/user/MyJobs';
 import { Address, Booking, Service, FontSize, FontWeight, User } from 'types/index';
+import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import type { ParcelTrackPhase, ParcelTripCoords } from 'types/parcelTrip';
 import type { RideTrackPhase } from 'types/rideTracking';
 import { COLORS } from 'utils/colors';
@@ -190,6 +191,7 @@ export type RootStackParamList = {
   [SCREENS.ORDER_FOOD]: undefined;
   [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
+  [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase } | undefined;
   [SCREENS.WORKER_RIDE_HISTORY]: undefined;
   [SCREENS.WORKER_EARNINGS]: undefined;
   [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: undefined;
