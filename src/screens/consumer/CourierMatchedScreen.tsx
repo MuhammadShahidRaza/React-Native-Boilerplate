@@ -12,7 +12,7 @@ import {
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
+import { COLORS, isIOS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
@@ -58,7 +58,9 @@ export const CourierMatchedScreen = () => {
           <View style={styles.feeBlock}>
             <Typography style={styles.feeLabel}>Delivery Fee</Typography>
             <Typography style={styles.feeAmt}>{MOCK_PARCEL_COURIER.deliveryFee}</Typography>
-            <Typography style={styles.cash}>{`${MOCK_PARCEL_COURIER.paymentMethod} Payment`}</Typography>
+            <Typography
+              style={styles.cash}
+            >{`${MOCK_PARCEL_COURIER.paymentMethod} Payment`}</Typography>
           </View>
           <RideVehicleStatsRow
             items={[...MOCK_PARCEL_COURIER.vehicleStats]}
@@ -101,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    width: '80%',
+    width: isIOS() ? '90%' : '80%',
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,

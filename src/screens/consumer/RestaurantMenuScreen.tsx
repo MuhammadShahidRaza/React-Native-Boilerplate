@@ -190,6 +190,7 @@ export const RestaurantMenuScreen = () => {
 
 const styles = StyleSheet.create({
   root: {
+    backgroundColor: COLORS.BACKGROUND,
     flex: 1,
   },
   scrollContent: {

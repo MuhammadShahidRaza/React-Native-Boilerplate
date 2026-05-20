@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View, TextInput, Image, Pressable } from 'react-native';
-import { AppGradient, Icon, Typography, Wrapper } from 'components/index';
+import { AppGradient, Icon, Input, RowComponent, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { navigate, onBack } from 'navigation/index';
-import { COLORS } from 'utils/index';
+import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { SCREENS } from 'constants/routes';
 
 const consumerBackIcon = {
@@ -16,7 +16,7 @@ const consumerBackIcon = {
 export const FoodDeliveryCartScreen = () => {
   const [qty, setQty] = useState(1);
   const [promo, setPromo] = useState('');
-
+  const [note, setNote] = useState('');
   return (
     <Wrapper
       headerTitle='Cart 1'
@@ -28,7 +28,7 @@ export const FoodDeliveryCartScreen = () => {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Typography style={styles.section}>Burger Lab</Typography>
         <View style={styles.itemCard}>
-          <Image source={IMAGES.USER} style={styles.thumb} />
+          <Image source={IMAGES.RESTAURANT_ITEM_2} style={styles.thumb} />
           <View style={{ flex: 1 }}>
             <Typography style={styles.itemName} numberOfLines={1}>
               Double Smash Burger
@@ -59,12 +59,15 @@ export const FoodDeliveryCartScreen = () => {
 
         <Typography style={styles.section}>Promo Code</Typography>
         <View style={styles.promoRow}>
-          <TextInput
-            style={styles.promoInput}
-            placeholder='Enter Promo Code'
-            placeholderTextColor={COLORS.APP_TEXT_MUTED}
+          <Input
             value={promo}
             onChangeText={setPromo}
+            name='promo'
+            placeholder='Enter Promo Code'
+            secondContainerStyle={{
+              marginBottom: 0,
+              width: screenWidth(70),
+            }}
           />
           <Pressable style={styles.apply}>
             <Typography style={styles.applyTxt}>Apply</Typography>
@@ -75,7 +78,10 @@ export const FoodDeliveryCartScreen = () => {
         <View style={styles.summary}>
           <Row label='Subtotal' value='CFA 550' />
           <Row label='Delivery Fee' value='CFA 50' />
-          <Typography style={styles.total}>CFA 600</Typography>
+          <RowComponent style={styles.totalRow}>
+            <Typography style={styles.totalLabel}>Total</Typography>
+            <Typography style={styles.total}>CFA 600</Typography>
+          </RowComponent>
           <View style={styles.payBadge}>
             <Icon
               componentName={VARIABLES.Feather}
@@ -88,11 +94,15 @@ export const FoodDeliveryCartScreen = () => {
         </View>
 
         <Typography style={styles.section}>Delivery Note (Optional)</Typography>
-        <TextInput
-          style={styles.note}
+        <Input
+          value={note}
+          onChangeText={text => setNote(text)}
+          name='note'
+          secondContainerStyle={{ height: screenHeight(20), borderRadius: 15 }}
           placeholder='Any Special Instructions...'
-          placeholderTextColor={COLORS.APP_TEXT_MUTED}
-          multiline
+          style={styles.note}
+          multiline={true}
+          maxLines={5}
         />
 
         <Pressable
@@ -134,13 +144,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
     borderRadius: 14,
-    padding: 12,
+    padding: 10,
     gap: 12,
     alignItems: 'center',
   },
   thumb: {
-    width: 64,
-    height: 64,
+    width: 80,
+    height: 80,
     borderRadius: 10,
   },
   itemName: {
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
   qtyRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 4,
     gap: 12,
   },
   qtyBtn: {
@@ -198,7 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.APP_SECONDARY,
     paddingHorizontal: 20,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 50,
   },
   applyTxt: {
     color: COLORS.WHITE,
@@ -221,6 +231,18 @@ const styles = StyleSheet.create({
   rowVal: {
     color: COLORS.APP_TEXT,
   },
+  totalRow: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.APP_LINE,
+    paddingTop: 10,
+  },
+  totalLabel: {
+    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.Medium,
+    color: COLORS.APP_TEXT,
+    textAlign: 'right',
+    marginTop: 8,
+  },
   total: {
     fontWeight: FontWeight.Bold,
     fontSize: FontSize.Large,
@@ -233,21 +255,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    alignSelf: 'center',
     marginTop: 12,
+    width: '70%',
     backgroundColor: '#D1FAE5',
     paddingVertical: 10,
     borderRadius: 999,
   },
   payTxt: {
     color: COLORS.APP_PRIMARY_DARK,
-    fontWeight: FontWeight.Bold,
     fontSize: FontSize.Small,
   },
   note: {
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    borderRadius: 12,
-    minHeight: 90,
+    height: screenHeight(20),
     padding: 12,
     textAlignVertical: 'top',
     color: COLORS.APP_TEXT,

@@ -85,39 +85,38 @@ export const Home = () => {
       </AppGradient>
 
       {/* ── Scrollable body – theme-aware background ── */}
-
-      {/* "What do you need?" */}
-      <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
-        <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
-          What do you need?
-        </Typography>
-        <View style={styles.services}>
-          <ServiceCard
-            label='Book a Ride'
-            subLabel={'Get Anywhere\nSafely'}
-            SvgIcon={SVG.BOOK_RIDE}
-            onPress={() => navigate(SCREENS.BOOK_RIDE)}
-          />
-          <ServiceCard
-            label='Send Parcel'
-            subLabel={'Fast\nDelivery'}
-            SvgIcon={SVG.SEND_PARCEL}
-            onPress={() => navigate(SCREENS.SEND_PARCEL)}
-          />
-          <ServiceCard
-            label='Order Food'
-            subLabel={'From Top\nRestaurant'}
-            SvgIcon={SVG.ORDER_FOOD}
-            onPress={() => navigate(SCREENS.ORDER_FOOD)}
-          />
-        </View>
-      </View>
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* "What do you need?" */}
+        <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
+          <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+            What do you need?
+          </Typography>
+          <View style={styles.services}>
+            <ServiceCard
+              label='Book a Ride'
+              subLabel={'Get Anywhere\nSafely'}
+              SvgIcon={SVG.BOOK_RIDE}
+              onPress={() => navigate(SCREENS.BOOK_RIDE)}
+            />
+            <ServiceCard
+              label='Send Parcel'
+              subLabel={'Fast\nDelivery'}
+              SvgIcon={SVG.SEND_PARCEL}
+              onPress={() => navigate(SCREENS.SEND_PARCEL)}
+            />
+            <ServiceCard
+              label='Order Food'
+              subLabel={'From Top\nRestaurant'}
+              SvgIcon={SVG.ORDER_FOOD}
+              onPress={() => navigate(SCREENS.ORDER_FOOD)}
+            />
+          </View>
+        </View>
+
         {/* Promo Codes */}
         <View
           style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND, marginBottom: 70 }]}
