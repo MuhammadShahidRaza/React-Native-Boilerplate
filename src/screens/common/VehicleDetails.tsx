@@ -59,7 +59,7 @@ export const VehicleDetails = ({
   };
 
   const handleSubmit = async (values: VehicleDetailsFormValues) => {
-    await completeProfile({
+    const user = await completeProfile({
       data: {
         vehicle_brand: values.vehicle_brand,
         vehicle_model: values.vehicle_model,
@@ -70,6 +70,8 @@ export const VehicleDetails = ({
         vehicle_make: values.vehicle_brand,
       },
     });
+    if (!user) return;
+
     dispatch(setVehicleDetailsComplete(true));
     if (isFromSettings) {
       setIsEditing(false);

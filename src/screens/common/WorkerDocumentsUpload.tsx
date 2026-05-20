@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { AppStatusModal, Input, Button, Wrapper } from 'components/index';
+import { Input, Button, Wrapper } from 'components/index';
+import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { VARIABLES } from 'constants/common';
+import { COMMON_TEXT } from 'constants/index';
+import { setIsUserLoggedIn } from 'store/slices/appSettings';
+import { resetWorkerAvailability, setDocumentsComplete } from 'store/slices/worker';
+import store from 'store/store';
 import { useAppDispatch } from 'types/reduxTypes';
-import { setDocumentsComplete } from 'store/slices/worker';
-import { onBack, reset } from 'navigation/index';
-import { STYLES, hasUri, screenHeight, COLORS } from 'utils/index';
+import { onBack } from 'navigation/index';
+import { STYLES, hasUri, screenHeight, COLORS, removeKeychainItem } from 'utils/index';
 import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
 import { ImageUpload } from 'components/common/ImageUpload';
 import { workerDocumentsValidationSchema } from 'utils/validations';
@@ -28,17 +32,19 @@ export const WorkerDocumentsUpload = (
 ) => {
   const dispatch = useAppDispatch();
   const isFromSettings = Boolean(props.route.params?.isFromSettings);
-  const [thankYouVisible, setThankYouVisible] = useState(false);
+  const [submittedModalVisible, setSubmittedModalVisible] = useState(false);
   const user = useAppSelector(state => state.user.userDetails?.details);
   const userRoot = useAppSelector(state => state.user.userDetails);
 
-  const finishThankYou = () => {
-    setThankYouVisible(false);
-    if (isFromSettings) {
-      onBack();
-    } else {
-      reset(SCREENS.BOTTOM_STACK);
-    }
+  const returnToLoginAfterSignup = async () => {
+    setSubmittedModalVisible(false);
+    store.dispatch(setIsUserLoggedIn(false));
+    dispatch(resetWorkerAvailability());
+    await removeKeychainItem(VARIABLES.USER_TOKEN);
+    props.navigation.reset({
+      index: 1,
+      routes: [{ name: SCREENS.GET_STARTED }, { name: SCREENS.LOGIN }],
+    });
   };
 
   const handleSubmit = async (values: WorkerDocumentsFormValues) => {
@@ -54,10 +60,12 @@ export const WorkerDocumentsUpload = (
         business_license_front: values.mot_picture,
       }),
     };
-    await completeProfile({ data });
+    const user = await completeProfile({ data });
+    if (!user) return;
+
     dispatch(setDocumentsComplete(true));
     if (!isFromSettings) {
-      setThankYouVisible(true);
+      setSubmittedModalVisible(true);
     } else {
       onBack();
     }
@@ -143,18 +151,17 @@ export const WorkerDocumentsUpload = (
         </FocusProvider>
       </View>
 
-      <AppStatusModal
-        visible={thankYouVisible}
-        onClose={finishThankYou}
-        onPrimaryPress={finishThankYou}
-        title='Thank You!'
-        description='Your account has been sent for approval.'
-        primaryButtonText='Done'
-        iconProps={{
-          componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'thumb-up-outline',
-          size: 30,
-        }}
+      <SuccessFailureModal
+        isVisible={submittedModalVisible}
+        setIsVisible={setSubmittedModalVisible}
+        onConfirm={returnToLoginAfterSignup}
+        title={COMMON_TEXT.REQUEST_SUBMITTED_SUCCESSFULLY}
+        description={
+          COMMON_TEXT.YOUR_REQUEST_HAS_BEEN_SUBMITTED_TO_THE_ADMIN_YOU_WILL_BE_INFORMED_ONCE_APPROVED
+        }
+        primaryButtonText={COMMON_TEXT.BACK_TO_LOGIN}
+        wantTwoButtons={false}
+        iconStyle={{ componentName: VARIABLES.Entypo, iconName: 'check', color: COLORS.BACKGROUND }}
       />
     </Wrapper>
   );

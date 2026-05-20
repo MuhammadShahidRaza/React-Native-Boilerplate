@@ -126,7 +126,7 @@ export const Home = () => {
             <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
               Promo Codes
             </Typography>
-            <Typography style={styles.seeAll}>See All</Typography>
+            {/* <Typography style={styles.seeAll}>See All</Typography> */}
           </View>
           {promoCodes.map((p, i) => (
             <View key={i} style={[styles.promoCard]}>

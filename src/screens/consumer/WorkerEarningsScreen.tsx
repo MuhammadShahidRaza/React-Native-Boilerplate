@@ -19,16 +19,15 @@ export const WorkerEarningsScreen = () => (
       <Typography style={styles.header}>Earnings</Typography>
     </SafeAreaView>
 
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.scroll}
-    >
-      <AppGradient style={styles.totalCard} colors={[BRAND_SECONDARY, BRAND_PRIMARY]} start={{ x: -1, y: 0 }} end={{ x: 1, y: 0.5 }}>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <AppGradient
+        style={styles.totalCard}
+        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+        start={{ x: -1, y: 0 }}
+        end={{ x: 1, y: 0.5 }}
+      >
         <View style={styles.totalIconWrap}>
-          <Image
-            source={IMAGES.BAG}
-            style={styles.totalIcon}
-          />
+          <Image source={IMAGES.BAG} style={styles.totalIcon} />
         </View>
         <View style={styles.totalInfo}>
           <Typography style={styles.totalLabel}>Total Earnings</Typography>
@@ -46,7 +45,8 @@ export const WorkerEarningsScreen = () => (
             <AppGradient
               colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
               start={{ x: -1, y: 0 }}
-              end={{ x: 1, y: 0.5 }}              style={styles.summaryIcon}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.summaryIcon}
             >
               <Icon
                 componentName={VARIABLES.MaterialCommunityIcons}
@@ -54,7 +54,6 @@ export const WorkerEarningsScreen = () => (
                 size={15}
                 color={COLORS.WHITE}
               />
-
             </AppGradient>
 
             <Typography style={styles.summaryLabel}>{row.label}</Typography>
@@ -88,23 +87,24 @@ const styles = StyleSheet.create({
   },
   totalCard: {
     borderRadius: 25,
-    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    // gap: 10,
+    paddingHorizontal: 10,
     marginBottom: 8,
   },
   totalIconWrap: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 25,
+    marginVertical: 10,
     backgroundColor: COLORS.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   totalInfo: {
     flex: 1,
-    gap: 2,
+    // gap: 5,
   },
   totalLabel: {
     color: COLORS.WHITE,
@@ -114,9 +114,8 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     color: COLORS.WHITE,
-    fontSize: FontSize.Enormous,
+    fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
-    lineHeight: 40,
     textAlign: 'center',
   },
   summaryCard: {

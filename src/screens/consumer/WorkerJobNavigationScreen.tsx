@@ -17,7 +17,14 @@ import { INITIAL_REGION } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, openMessage, openPhoneNumber, screenHeight } from 'utils/index';
+import {
+  BRAND_PRIMARY,
+  BRAND_SECONDARY,
+  COLORS,
+  openMessage,
+  openPhoneNumber,
+  screenHeight,
+} from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
@@ -79,10 +86,8 @@ export const WorkerJobNavigationScreen = () => {
     () => ({
       latitude: (routeOrigin.latitude + routeDestination.latitude) / 2,
       longitude: (routeOrigin.longitude + routeDestination.longitude) / 2,
-      latitudeDelta:
-        Math.abs(routeOrigin.latitude - routeDestination.latitude) * 2.4 + 0.018,
-      longitudeDelta:
-        Math.abs(routeOrigin.longitude - routeDestination.longitude) * 2.4 + 0.018,
+      latitudeDelta: Math.abs(routeOrigin.latitude - routeDestination.latitude) * 2.4 + 0.018,
+      longitudeDelta: Math.abs(routeOrigin.longitude - routeDestination.longitude) * 2.4 + 0.018,
     }),
     [routeOrigin, routeDestination],
   );
@@ -98,8 +103,7 @@ export const WorkerJobNavigationScreen = () => {
     [navSteps, live.progress],
   );
 
-  const distanceCaption =
-    phase === 'pickup' ? 'Distance to pickup' : 'Distance to drop off';
+  const distanceCaption = phase === 'pickup' ? 'Distance to pickup' : 'Distance to drop off';
 
   const lastCameraAt = useRef(0);
   useEffect(() => {
@@ -155,61 +159,59 @@ export const WorkerJobNavigationScreen = () => {
 
   return (
     <Wrapper
-    showBackButton={false}
-    useScrollView={false}
-    backgroundColor={COLORS.TRANSPARENT}
-    darkMode={false}
+      showBackButton={false}
+      useScrollView={false}
+      backgroundColor={COLORS.TRANSPARENT}
+      darkMode={false}
     >
-      
-    <View style={styles.root}>
-      <View style={styles.mapSection}>
-        <WorkerJobRouteMap
-          origin={routeOrigin}
-          destination={routeDestination}
-          mapRegion={mapRegion}
-          mapRef={mapRef}
-          
-          vehicleCoord={live.vehicleCoord}
-          onDirectionsReady={onDirectionsReady}
-        />
-        <View style={styles.navOverlay} pointerEvents='box-none'>
-          <WorkerNavInstructionCard
-            distanceCaption={distanceCaption}
-            distanceLabel={live.distanceLabel}
-            etaLabel={live.etaLabel}
-            step={activeStep}
+      <View style={styles.root}>
+        <View style={styles.mapSection}>
+          <WorkerJobRouteMap
+            origin={routeOrigin}
+            destination={routeDestination}
+            mapRegion={mapRegion}
+            mapRef={mapRef}
+            vehicleCoord={live.vehicleCoord}
+            onDirectionsReady={onDirectionsReady}
           />
+          <View style={styles.navOverlay} pointerEvents='box-none'>
+            <WorkerNavInstructionCard
+              distanceCaption={distanceCaption}
+              distanceLabel={live.distanceLabel}
+              etaLabel={live.etaLabel}
+              step={activeStep}
+            />
+          </View>
+        </View>
+
+        <View style={styles.bottom}>
+          <RideDriverCard
+            driverName={detail.customerName}
+            rating='5.0'
+            avatarSource={IMAGES.USER}
+            onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
+            onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+            showVehicleSection={false}
+            variant='elevatedWhite'
+          />
+
+          {/* {phase === 'dropoff' ? (
+            <AppGradient
+              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+              start={{ x: -1, y: -1 }}
+              end={{ x: 1, y: -1 }}
+              style={styles.headingPill}
+            >
+              <Typography style={styles.headingTxt}>
+                {copy.headingToDestination(detail.dropoffShortName)}
+              </Typography>
+            </AppGradient>
+          ) : null} */}
+
+          <Button title={primaryCta} onPress={onPrimaryPress} style={styles.cta} />
         </View>
       </View>
-
-      <View style={styles.bottom}>
-        <RideDriverCard
-          driverName={detail.customerName}
-          rating='5.0'
-          avatarSource={IMAGES.USER}
-          onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
-          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
-          showVehicleSection={false}
-          variant='elevatedWhite'
-        />
-
-        {phase === 'dropoff' ? (
-          <AppGradient
-          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-          start={{ x: -1, y: -1 }}
-          end={{ x: 1, y: -1 }}
-          style={styles.headingPill}>
-            <Typography style={styles.headingTxt}>
-              {copy.headingToDestination(detail.dropoffShortName)}
-            </Typography>
-          </AppGradient>
-        ) : null}
-
-        <Button title={primaryCta} onPress={onPrimaryPress} style={styles.cta} />
-      </View>
-    </View>
     </Wrapper>
-
   );
 };
 
@@ -239,16 +241,15 @@ const styles = StyleSheet.create({
     paddingBottom: 34,
   },
   headingPill: {
-    borderRadius: 50,
-    paddingVertical: 20,
+    borderRadius: 30,
     paddingHorizontal: 20,
-    marginHorizontal: 50,
+    marginHorizontal: 20,
     alignItems: 'center',
   },
   headingTxt: {
     color: COLORS.WHITE,
-    fontWeight: FontWeight.Medium,
-    fontSize: FontSize.MediumLarge,
+    // fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.Small,
   },
   cta: {
     marginHorizontal: 20,

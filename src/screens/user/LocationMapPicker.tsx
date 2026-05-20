@@ -11,7 +11,7 @@ import {
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
-import { navigate } from 'navigation/Navigators';
+import { CustomBackIcon, navigate } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
 import { Map } from 'components/common/Map';
 import { INITIAL_REGION } from 'constants/common';
@@ -237,12 +237,7 @@ export const LocationMapPicker = () => {
           onPress={() => setShowAddressSheet(false)}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <Icon
-            componentName={VARIABLES.MaterialCommunityIcons}
-            iconName='arrow-left'
-            size={FontSize.Large}
-            color={COLORS.TEXT}
-          />
+          <CustomBackIcon/>
         </TouchableOpacity>
         <View style={styles.addressSheetHeader}>
           <View style={styles.addressSheetInputWrapper}>
@@ -298,7 +293,7 @@ const styles = StyleSheet.create({
   addressSheetHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginVertical: 16,
     gap: 12,
   },
   addressSheetInputWrapper: {

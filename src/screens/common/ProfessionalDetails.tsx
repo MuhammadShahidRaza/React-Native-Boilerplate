@@ -6,6 +6,7 @@ import { professionalDetailsValidationSchema } from 'utils/validations';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS } from 'constants/index';
 import { completeProfile } from 'api/functions/app/settings';
+import { onBack } from 'navigation/index';
 import { useAppSelector } from 'types/reduxTypes';
 
 export interface ProfessionalDetailsFormValues {
@@ -40,7 +41,10 @@ export const ProfessionalDetails = ({
       radius: values?.service_radius,
       area: values?.service_area,
     };
-    await completeProfile({ data });
+    const user = await completeProfile({ data });
+    if (user) {
+      onBack();
+    }
   };
 
   const formik = useFormikForm({

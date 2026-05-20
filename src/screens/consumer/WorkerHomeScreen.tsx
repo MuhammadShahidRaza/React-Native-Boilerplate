@@ -104,7 +104,7 @@ export const WorkerHomeScreen = () => {
 
 const styles = StyleSheet.create({
   mapContainer: {
-    height: screenHeight(52),
+    height: screenHeight(50),
     borderBottomLeftRadius: 35,
     borderBottomRightRadius: 35,
     overflow: 'hidden',
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: FontSize.ExtraExtraLarge,
+    fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
     color: COLORS.TEXT,
   },
@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.BORDER,
   },
   lookingBtn: {
-    marginHorizontal: 24,
-    marginTop: 25,
+    marginHorizontal: 25,
+    marginTop: 15,
     backgroundColor: COLORS.BACKGROUND,
     borderWidth: 1,
     borderColor: COLORS.SECONDARY,

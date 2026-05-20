@@ -52,10 +52,7 @@ export const WorkerWalletScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         
 
-        <AppGradient 
-         start={{ x: -1, y: 0 }}
-         end={{ x: 1, y: 0.5 }}
-        colors={[BRAND_SECONDARY, BRAND_PRIMARY]} style={styles.card}>
+        <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.card}>
           <View style={styles.cardIconWrap}>
             <Image source={IMAGES.WALLET} style={styles.cardIcon} />
           </View>
@@ -73,10 +70,7 @@ export const WorkerWalletScreen = () => {
               key={item.id}
               style={[styles.txRow, index < DUMMY_TRANSACTIONS.length - 1 && styles.txRowBorder]}
             >
-              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} style={styles.summaryIcon}
-               start={{ x: -1, y: 0 }}
-               end={{ x: 1, y: 0.5 }}
-              >
+              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
                 <Icon
                   componentName={VARIABLES.Ionicons}
                   iconName='wallet-outline'
@@ -152,6 +146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     marginBottom: 8,
+    overflow: 'hidden',
   },
   cardIconWrap: {
     width: 100,
@@ -164,20 +159,20 @@ const styles = StyleSheet.create({
   cardInfo: { flex: 1, gap: 4 },
   cardLabel: {
     color: COLORS.WHITE,
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.Large,
     opacity: 0.9,
     textAlign: 'center',
   },
   cardAmount: {
     color: COLORS.WHITE,
-    fontSize: FontSize.Enormous,
+    fontSize: FontSize.XL,
     fontWeight: FontWeight.Bold,
     lineHeight: 40,
     textAlign: 'center',
   },
   cardSub: {
     color: COLORS.WHITE,
-    fontSize: FontSize.Medium,
+    fontSize: FontSize.MediumSmall,
     opacity: 0.8,
     textAlign: 'center',
   },
@@ -196,6 +191,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   summaryTitle: {
     fontSize: FontSize.MediumLarge,
@@ -219,6 +215,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     backgroundColor: '#D5E3F6',
   },
-  infoText: { color: BRAND_SECONDARY, fontSize: FontSize.Medium, lineHeight: 20 },
+  infoText: { color: BRAND_SECONDARY, fontSize: FontSize.MediumSmall, lineHeight: 20 },
   cardIcon: { width: 50, height: 50, resizeMode: 'contain' },
 });

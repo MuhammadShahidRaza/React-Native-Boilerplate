@@ -645,9 +645,9 @@ export const sendParcelValidationSchema = createObjectShape({
     maxLength: 80,
   }),
   receiverPhone: phoneNumberSchema,
-  pkg: createStringValidationSchema({
-    name: 'Package description',
-    minLength: 25,
-    maxLength: 300,
-  }),
+  // pkg: createStringValidationSchema({
+  //   name: 'Package description',
+  //   minLength: 25,
+  //   maxLength: 300,
+  // }),
 });

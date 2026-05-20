@@ -57,7 +57,7 @@ export const SignUp = () => {
     // user_name: __DEV__ ? 'shahid26' : '',
     // country: __DEV__ ? 'Pakistan' : '',
     phone_number: __DEV__ ? '3242445623' : '',
-    country_code: __DEV__ ? 'PK' : 'NG',
+    country_code: __DEV__ ? 'PK' : 'US',
     calling_code: __DEV__ ? '+92' : '+234',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
     showPassword: false,

@@ -7,6 +7,7 @@ import { documentationUploadValidationSchema, formatSSN } from 'utils/validation
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS } from 'constants/index';
 import { completeProfile } from 'api/functions/app/settings';
+import { onBack } from 'navigation/index';
 import { SelectedMedia } from 'hooks/useMediaPicker';
 import { useAppSelector } from 'types/reduxTypes';
 
@@ -37,7 +38,10 @@ export const LegacyDocumentationUpload = ({
       ...(hasUri(values?.business_license) && { business_license_front: values.business_license }),
       ...(hasUri(values?.insurance_document) && { insurance_document: values.insurance_document }),
     };
-    await completeProfile({ data });
+    const user = await completeProfile({ data });
+    if (user) {
+      onBack();
+    }
   };
 
   const getImageDisplayUri = (val: SelectedMedia | null | string | undefined) =>

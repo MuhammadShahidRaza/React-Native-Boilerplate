@@ -15,7 +15,7 @@ interface ForgotPasswordFormValues {
 export const ForgotPassword = () => {
   const initialValues: ForgotPasswordFormValues = {
     phone_number: '',
-    country_code: 'NG',
+    country_code: 'US',
     calling_code: '',
   };
 

@@ -5,6 +5,7 @@ import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
 import { navigate, reset } from 'navigation/Navigators';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
+import { resetWorkerAvailability } from 'store/slices/worker';
 import { setUserDetails } from 'store/slices/user';
 import store from 'store/store';
 import { Login_SignUp, SocialLogin, VerifyOtp, type USER_TYPE } from 'types/auth';
@@ -187,10 +188,24 @@ const verifyEmailCode = async <
   data: A;
 }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    const userData = { ...DUMMY_USER, user_type: data?.user_type };
-    store.dispatch(setIsUserLoggedIn(true));
+    const isWorker = isWorkerRole(data?.user_type);
+    const userData = {
+      ...DUMMY_USER,
+      user_type: data?.user_type,
+      email_verified_at: new Date().toISOString(),
+      ...(isWorker
+        ? { is_onboarded: 0, is_admin_verified: 0, is_approved: 0 }
+        : {}),
+    };
     store.dispatch(setUserDetails(userData));
     await setKeychainItem(VARIABLES.USER_TOKEN, 'temp_token');
+    if (isWorker) {
+      store.dispatch(resetWorkerAvailability());
+      navigate(SCREENS.COMPLETE_PROFILE);
+      return;
+    }
+    store.dispatch(setIsUserLoggedIn(true));
+    return;
   }
   const user: R | undefined = await handleApiRequest<R, A>({
     url: API_ROUTES.VERIFY_EMAIL,
@@ -200,6 +215,7 @@ const verifyEmailCode = async <
     await setKeychainItem(VARIABLES.USER_TOKEN, user?.token ?? '');
     store.dispatch(setUserDetails(user));
     if (isWorkerRole(user?.user_type)) {
+      store.dispatch(resetWorkerAvailability());
       navigate(SCREENS.COMPLETE_PROFILE);
     } else {
       store.dispatch(setIsUserLoggedIn(true));

@@ -53,8 +53,7 @@ const contactUs = async (data: ContactUsFormValues) => {
 
 const completeProfile = async ({ data }: { data: CompleteProfileFormValues }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    onBack();
-    return;
+    return store.getState().user.userDetails as User;
   }
   const user: User | undefined = await handleFormDataPatchRequest<User, CompleteProfileFormValues>({
     url: API_ROUTES.COMPLETE_PROFILE,
@@ -63,8 +62,8 @@ const completeProfile = async ({ data }: { data: CompleteProfileFormValues }) =>
 
   if (user) {
     store.dispatch(setUserDetails(user));
-    onBack();
   }
+  return user;
 };
 
 // const toggleNotification = async () => {

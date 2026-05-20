@@ -74,8 +74,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
           style={[
             styles.container,
             {
-              borderBottomRightRadius: isOpen ? 0 : INPUT_THEME.input.borderRadius,
-              borderBottomStartRadius: isOpen ? 0 : INPUT_THEME.input.borderRadius,
+              borderBottomRightRadius: isOpen ? 10 : INPUT_THEME.input.borderRadius,
+              borderBottomStartRadius: isOpen ? 10 : INPUT_THEME.input.borderRadius,
+              borderTopStartRadius: isOpen ? 10 : INPUT_THEME.input.borderRadius,
+              borderTopEndRadius: isOpen ? 10 : INPUT_THEME.input.borderRadius,
               width,
               borderWidth: 1,
               borderColor: isErrorShown ? COLORS.RED : COLORS.BORDER,
@@ -180,8 +182,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderTopWidth: 0,
     borderColor: COLORS.BORDER,
-    borderBottomEndRadius: INPUT_THEME.input.borderRadius,
-    borderBottomStartRadius: INPUT_THEME.input.borderRadius,
+    borderBottomEndRadius: 10,
+    borderBottomStartRadius: 10,
     borderTopStartRadius: 0,
     //     // position: 'absolute', //TODO: //LANGUAGE ISSUE
     borderTopEndRadius: 0,
