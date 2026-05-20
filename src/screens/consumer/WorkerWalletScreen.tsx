@@ -50,17 +50,7 @@ export const WorkerWalletScreen = () => {
       </SafeAreaView>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {!profileGate.isComplete ? (
-          <Pressable
-            style={styles.completeBanner}
-            onPress={() => navigate(SCREENS.COMPLETE_PROFILE, { isFromSettings: false })}
-          >
-            <Typography style={styles.completeBannerTitle}>Complete your profile</Typography>
-            <Typography style={styles.completeBannerText}>
-              Add vehicle details and documents before using your wallet.
-            </Typography>
-          </Pressable>
-        ) : null}
+        
 
         <AppGradient 
          start={{ x: -1, y: 0 }}

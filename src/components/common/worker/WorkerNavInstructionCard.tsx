@@ -72,13 +72,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   caption: {
-    fontSize: FontSize.ExtraSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.ExtraLarge,
+    color: COLORS.BLACK,
   },
   metric: {
     fontSize: FontSize.MediumLarge,
     fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
+    color: COLORS.BLACK,
     marginTop: 2,
   },
   divider: {
@@ -92,10 +92,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   arrowCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.APP_TEXT_MUTED,
+    width: 50,
+    height: 50,
+  
+    borderRadius: 50,
+    backgroundColor:'#B5B5B7',
     alignItems: 'center',
     justifyContent: 'center',
   },

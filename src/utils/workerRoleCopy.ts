@@ -26,6 +26,7 @@ export type WorkerRoleCopy = {
   fareLabel: string;
   acceptButton: string;
   arrivedAtPickup: string;
+  startJob: string;
   headingToDestination: (destination: string) => string;
   completeJob: string;
   jobCompletedTitle: string;
@@ -46,8 +47,9 @@ export function getWorkerRoleCopy(role: string | null | undefined): WorkerRoleCo
       fareLabel: 'Fee',
       acceptButton: 'Accept Delivery',
       arrivedAtPickup: 'Arrived at Pickup',
+      startJob: 'Start Ride',
       headingToDestination: dest => `Heading to ${dest}`,
-      completeJob: 'Complete Delivery',
+      completeJob: 'Complete Ride',
       jobCompletedTitle: 'Delivery Completed',
       jobCompletedSubtitle: "Great job! Here's your delivery summary",
     };
@@ -65,6 +67,7 @@ export function getWorkerRoleCopy(role: string | null | undefined): WorkerRoleCo
     fareLabel: 'Fare',
     acceptButton: 'Accept Ride',
     arrivedAtPickup: 'Arrived at Pickup',
+    startJob: 'Start Ride',
     headingToDestination: dest => `Heading to ${dest}`,
     completeJob: 'Complete Ride',
     jobCompletedTitle: 'Ride Completed',

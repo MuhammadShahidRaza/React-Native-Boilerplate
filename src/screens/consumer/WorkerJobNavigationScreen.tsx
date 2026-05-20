@@ -9,14 +9,15 @@ import {
   Typography,
   WorkerJobRouteMap,
   WorkerNavInstructionCard,
+  Wrapper,
 } from 'components/index';
-import { FontWeight } from 'types/fontTypes';
+import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { INITIAL_REGION } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS, screenHeight } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
@@ -40,6 +41,7 @@ export const WorkerJobNavigationScreen = () => {
     [route.params?.requestId],
   );
   const [phase, setPhase] = useState<JobPhase>(route.params?.phase ?? 'pickup');
+  const [pickupConfirmed, setPickupConfirmed] = useState(false);
   const mapRef = useRef<MapView>(null);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const [navSteps, setNavSteps] = useState<NavStep[]>([]);
@@ -129,12 +131,22 @@ export const WorkerJobNavigationScreen = () => {
     [],
   );
 
-  const primaryCta = phase === 'pickup' ? copy.arrivedAtPickup : copy.completeJob;
+  const primaryCta =
+    phase === 'pickup'
+      ? pickupConfirmed
+        ? copy.startJob
+        : copy.arrivedAtPickup
+      : copy.completeJob;
 
   const onPrimaryPress = () => {
     if (phase === 'pickup') {
+      if (!pickupConfirmed) {
+        setPickupConfirmed(true);
+        return;
+      }
       setRouteCoords([]);
       setNavSteps([]);
+      setPickupConfirmed(false);
       setPhase('dropoff');
       return;
     }
@@ -142,6 +154,13 @@ export const WorkerJobNavigationScreen = () => {
   };
 
   return (
+    <Wrapper
+    showBackButton={false}
+    useScrollView={false}
+    backgroundColor={COLORS.TRANSPARENT}
+    darkMode={false}
+    >
+      
     <View style={styles.root}>
       <View style={styles.mapSection}>
         <WorkerJobRouteMap
@@ -149,6 +168,7 @@ export const WorkerJobNavigationScreen = () => {
           destination={routeDestination}
           mapRegion={mapRegion}
           mapRef={mapRef}
+          
           vehicleCoord={live.vehicleCoord}
           onDirectionsReady={onDirectionsReady}
         />
@@ -174,7 +194,11 @@ export const WorkerJobNavigationScreen = () => {
         />
 
         {phase === 'dropoff' ? (
-          <AppGradient style={styles.headingPill}>
+          <AppGradient
+          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          start={{ x: -1, y: -1 }}
+          end={{ x: 1, y: -1 }}
+          style={styles.headingPill}>
             <Typography style={styles.headingTxt}>
               {copy.headingToDestination(detail.dropoffShortName)}
             </Typography>
@@ -184,6 +208,8 @@ export const WorkerJobNavigationScreen = () => {
         <Button title={primaryCta} onPress={onPrimaryPress} style={styles.cta} />
       </View>
     </View>
+    </Wrapper>
+
   );
 };
 
@@ -193,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.BACKGROUND,
   },
   mapSection: {
-    height: screenHeight(52),
+    height: screenHeight(68),
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     overflow: 'hidden',
@@ -210,20 +236,22 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     gap: 10,
     justifyContent: 'flex-end',
-    paddingBottom: 24,
+    paddingBottom: 34,
   },
   headingPill: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: 50,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    marginHorizontal: 50,
     alignItems: 'center',
   },
   headingTxt: {
     color: COLORS.WHITE,
-    fontWeight: FontWeight.SemiBold,
-    fontSize: 14,
+    fontWeight: FontWeight.Medium,
+    fontSize: FontSize.MediumLarge,
   },
   cta: {
-    backgroundColor: COLORS.SECONDARY,
+    marginHorizontal: 20,
+    backgroundColor: '#21409A',
   },
 });

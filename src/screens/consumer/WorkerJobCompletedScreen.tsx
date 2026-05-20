@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Button, Icon, Typography, Wrapper } from 'components/index';
+import { AppGradient, Button, Icon, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
@@ -37,15 +37,21 @@ export const WorkerJobCompletedScreen = () => {
       darkMode={false}
     >
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.successIcon}>
-          <Icon
-            componentName={VARIABLES.Feather}
+      <AppGradient
+        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+        start={{ x: -1, y: -1 }}
+        end={{ x: 1, y: -1 }}
+        style={styles.successIcon}
+      >
+  <Icon
+            componentName={VARIABLES.Entypo}
             iconName='check'
-            size={FontSize.ExtraExtraLarge}
+            size={FontSize.Huge}
             color={COLORS.WHITE}
           />
-        </View>
-        <Typography style={styles.title}>{copy.jobCompletedTitle}</Typography>
+      </AppGradient>
+        
+        <Typography style={styles.title}>Ride Completed</Typography>
         <Typography style={styles.subtitle}>{copy.jobCompletedSubtitle}</Typography>
 
         <View style={styles.card}>
@@ -101,25 +107,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   successIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: COLORS.APP_PRIMARY,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   title: {
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.ExtraExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: FontSize.Small,
-    color: COLORS.APP_TEXT_MUTED,
+    
     textAlign: 'center',
-    marginTop: 8,
+    // marginTop: 8,
+    color: COLORS.BLACK,
     marginBottom: 24,
   },
   card: {
@@ -175,7 +182,7 @@ const styles = StyleSheet.create({
   walletRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     gap: 12,
   },
   walletPrev: {
@@ -189,7 +196,8 @@ const styles = StyleSheet.create({
   },
   finishBtn: {
     width: '100%',
-    marginTop: 8,
-    backgroundColor: COLORS.SECONDARY,
+    marginTop: 100,
+    backgroundColor: '#21409A',
+   
   },
 });

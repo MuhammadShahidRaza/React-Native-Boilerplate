@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingTop: 90,
     ...CARD_SHADOW,
-    marginTop: screenHeight(16),
+    marginTop: screenHeight(15),
     paddingBottom: 100,
     overflow: 'visible',
   },
@@ -251,8 +251,9 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT,
   },
   statLabel: {
-    fontSize: FontSize.ExtraSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.MediumLarge,
+    color: COLORS.BLACK,
+
   },
   acceptBtn: {
     marginTop: 30,

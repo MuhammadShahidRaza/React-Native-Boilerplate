@@ -40,7 +40,7 @@ export const RideDriverCard = ({
   onCancelPress,
   variant = 'elevatedMuted',
 }: RideDriverCardProps) => {
-  const cardBg = variant === 'elevatedMuted' ? COLORS.SEARCH_BAR : COLORS.WHITE;
+  const cardBg = variant === 'elevatedMuted' ? COLORS.SEARCH_BAR : '#F5F9FF';
 
   return (
     <View style={[styles.card, { backgroundColor: cardBg }]}>
