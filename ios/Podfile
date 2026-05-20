@@ -20,6 +20,11 @@ node_require('react-native-permissions/scripts/setup.rb')
 
 ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
+# Prebuilt React.xcframework headers include Fabric, but the binary is missing debug/renderer
+# symbols (Sealable, DebugStringConvertible, ShadowNode::getDebug*) that RNSVG, RNScreens,
+# and RNGoogleSignin need when linking with use_frameworks! :static.
+ENV['RCT_USE_PREBUILT_RNCORE'] = '0' unless ENV['RCT_USE_PREBUILT_RNCORE']
+
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
