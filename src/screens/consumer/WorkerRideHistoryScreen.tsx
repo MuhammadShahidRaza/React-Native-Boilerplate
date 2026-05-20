@@ -22,7 +22,7 @@ export const WorkerRideHistoryScreen = () => {
   return (
   <View style={styles.root}>
     <SafeAreaView edges={['top']} style={styles.safeTop}>
-      <Typography style={styles.header}>{copy.historyTitle}</Typography>
+      <Typography style={styles.header}>Ride History</Typography>
     </SafeAreaView>
 
     <FlatList
@@ -54,5 +54,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 120,
+    marginHorizontal: 16,
   },
 });

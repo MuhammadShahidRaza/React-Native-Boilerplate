@@ -3,7 +3,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Map, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY, screenHeight } from 'utils/index';
+import { COLORS, APP_GRADIENT_PRIMARY, screenHeight, BRAND_SECONDARY, BRAND_PRIMARY } from 'utils/index';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
@@ -48,9 +48,9 @@ export const WorkerHomeScreen = () => {
           >
             {!isOnline ? (
               <LinearGradient
-                colors={[...APP_GRADIENT_PRIMARY]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+              start={{ x: -1, y: 0 }}
+              end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -65,9 +65,9 @@ export const WorkerHomeScreen = () => {
           >
             {isOnline ? (
               <LinearGradient
-                colors={[...APP_GRADIENT_PRIMARY]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                start={{ x: -1, y: 0 }}
+              end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
             ) : null}

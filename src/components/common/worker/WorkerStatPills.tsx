@@ -29,7 +29,7 @@ export const WorkerStatPills = ({ stats }: WorkerStatPillsProps) => (
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    marginHorizontal: 16,
+    marginHorizontal: 30,
     marginBottom: 16,
     gap: 10,
   },
@@ -38,8 +38,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.APP_PRIMARY,
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 20,
     paddingHorizontal: 8,
+    
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.WHITE,

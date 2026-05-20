@@ -1,10 +1,11 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppGradient, Icon, RowComponent, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { FONT_FAMILY, IMAGES } from 'constants/assets';
 
 const SUMMARY_ROWS = [
   { label: 'Today', amount: WORKER_EARNINGS_SUMMARY.today },
@@ -22,13 +23,13 @@ export const WorkerEarningsScreen = () => (
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scroll}
     >
-      <AppGradient style={styles.totalCard} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+      <AppGradient style={styles.totalCard}
+        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+        start={{ x: -1, y: 0 }} end={{ x: 1, y: 0.5 }}>
         <View style={styles.totalIconWrap}>
-          <Icon
-            componentName={VARIABLES.MaterialCommunityIcons}
-            iconName='cash-multiple'
-            size={40}
-            color={COLORS.APP_PRIMARY}
+          <Image
+            source={IMAGES.BAG}
+            style={styles.totalIcon}
           />
         </View>
         <View style={styles.totalInfo}>
@@ -44,14 +45,21 @@ export const WorkerEarningsScreen = () => (
             key={row.label}
             style={[styles.summaryRow, index < SUMMARY_ROWS.length - 1 && styles.summaryRowBorder]}
           >
-            <View style={styles.summaryIcon}>
+            <AppGradient
+              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+              start={{ x: -1, y: 0 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.summaryIcon}
+            >
               <Icon
                 componentName={VARIABLES.MaterialCommunityIcons}
                 iconName='wallet-outline'
-                size={FontSize.Large}
+                size={15}
                 color={COLORS.WHITE}
               />
-            </View>
+
+            </AppGradient>
+
             <Typography style={styles.summaryLabel}>{row.label}</Typography>
             <Typography style={styles.summaryAmount}>{row.amount}</Typography>
           </RowComponent>
@@ -82,39 +90,43 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   totalCard: {
-    borderRadius: 20,
+    borderRadius: 25,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    marginBottom: 8,
   },
   totalIconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 14,
+    width: 100,
+    height: 100,
+    borderRadius: 25,
     backgroundColor: COLORS.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   totalInfo: {
     flex: 1,
-    gap: 4,
+    gap: 2,
   },
   totalLabel: {
     color: COLORS.WHITE,
-    fontSize: FontSize.Small,
+    fontSize: FontSize.ExtraLarge,
     opacity: 0.9,
+    textAlign: 'center',
   },
   totalAmount: {
     color: COLORS.WHITE,
-    fontSize: 32,
+    fontSize: FontSize.Enormous,
     fontWeight: FontWeight.Bold,
     lineHeight: 40,
+    textAlign: 'center',
   },
   summaryCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
+    marginHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
     shadowColor: '#000',
@@ -139,8 +151,8 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.APP_LINE,
   },
   summaryIcon: {
-    width: 44,
-    height: 44,
+    width: 35,
+    height: 35,
     borderRadius: 22,
     backgroundColor: COLORS.APP_PRIMARY,
     alignItems: 'center',
@@ -148,13 +160,20 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     flex: 1,
-    fontSize: FontSize.MediumSmall,
+    fontSize: FontSize.Medium,
+    fontFamily: FONT_FAMILY.POPPINS.MEDIUM,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT,
   },
   summaryAmount: {
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.Bold,
-    color: COLORS.APP_PRIMARY,
+    fontSize: FontSize.Medium,
+    fontFamily: FONT_FAMILY.POPPINS.MEDIUM,
+    fontWeight: FontWeight.Medium,
+    color: '#09C50F',
+  },
+  totalIcon: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
   },
 });

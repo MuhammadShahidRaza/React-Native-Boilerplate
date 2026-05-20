@@ -25,7 +25,7 @@ import { useConversations } from 'hooks/useConversations';
 
 const Tab = createBottomTabNavigator();
 
-const WORKER_TAB_INACTIVE = 'rgba(255, 255, 255, 0.38)';
+const WORKER_TAB_INACTIVE = '#052653';
 
 /** Worker docked tab bar content height (excluding safe area). */
 const WORKER_TAB_BAR_CONTENT_HEIGHT = 64;
@@ -52,8 +52,8 @@ const getScreenConfig = (role: string): Record<string, ScreenConfig> => {
       ? {
           [SCREENS.WORKER_RIDE_HISTORY]: {
             component: WorkerRideHistoryScreen,
-            iconName: 'rotate-ccw',
-            componentName: VARIABLES.Feather,
+            iconName: 'history',
+            componentName: VARIABLES.MaterialIcons,
             label: 'History',
           },
           [SCREENS.WORKER_EARNINGS]: {
@@ -65,7 +65,7 @@ const getScreenConfig = (role: string): Record<string, ScreenConfig> => {
           [SCREENS.WALLET]: {
             component: WorkerWalletScreen,
             iconName: 'wallet-outline',
-            componentName: VARIABLES.MaterialCommunityIcons,
+            componentName: VARIABLES.Ionicons,
             label: 'Wallet',
           },
         }
@@ -82,8 +82,8 @@ const getScreenConfig = (role: string): Record<string, ScreenConfig> => {
       : {}),
     [SCREENS.MY_ACCOUNT]: {
       component: MyAccount,
-      iconName: 'user',
-      componentName: VARIABLES.Feather,
+      iconName: 'user-o',
+      componentName: VARIABLES.FontAwesome,
       label: 'Profile',
     },
   };

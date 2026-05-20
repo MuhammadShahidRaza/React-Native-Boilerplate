@@ -10,6 +10,8 @@ export const IMAGES = {
   NO_INTERNET_CONNECTION: require('assets/images/common/noInternetConnection.png'),
   NO_BOOKINGS: require('assets/images/common/no_bookings.png'),
   NO_JOBS: require('assets/images/common/no_jobs.png'),
+  BAG: require('assets/images/common/bag.png'),
+  WALLET: require('assets/images/common/wallet.png'),
 
 
 
