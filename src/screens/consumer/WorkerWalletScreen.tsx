@@ -30,7 +30,7 @@ const WALLET_BALANCE = 0;
 export const WorkerWalletScreen = () => {
   const user = useAppSelector(state => state.user.userDetails);
   const balance = useMemo(
-    () => (WALLET_BALANCE === 0 ? 0 : parseWalletBalance(user)),
+    () => (WALLET_BALANCE === 0 ? 100 : parseWalletBalance(user)),
     [user],
   );
   const [topOffVisible, setTopOffVisible] = useState(false);

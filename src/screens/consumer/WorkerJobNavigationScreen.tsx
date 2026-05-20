@@ -5,6 +5,8 @@ import type MapView from 'react-native-maps';
 import {
   AppGradient,
   Button,
+  GRADIENT_END,
+  GRADIENT_START,
   RideDriverCard,
   Typography,
   WorkerJobRouteMap,
@@ -195,18 +197,19 @@ export const WorkerJobNavigationScreen = () => {
             variant='elevatedWhite'
           />
 
-          {/* {phase === 'dropoff' ? (
+          {phase === 'dropoff' ? (
             <AppGradient
               colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-              start={{ x: -1, y: -1 }}
-              end={{ x: 1, y: -1 }}
+              start={GRADIENT_START}
+              end={GRADIENT_END}
+              fill
               style={styles.headingPill}
             >
               <Typography style={styles.headingTxt}>
                 {copy.headingToDestination(detail.dropoffShortName)}
               </Typography>
             </AppGradient>
-          ) : null} */}
+          ) : null}
 
           <Button title={primaryCta} onPress={onPrimaryPress} style={styles.cta} />
         </View>
@@ -243,13 +246,17 @@ const styles = StyleSheet.create({
   headingPill: {
     borderRadius: 30,
     paddingHorizontal: 20,
+    paddingVertical: 14,
     marginHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
   },
   headingTxt: {
     color: COLORS.WHITE,
-    // fontWeight: FontWeight.SemiBold,
+    fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Small,
+    textAlign: 'center',
   },
   cta: {
     marginHorizontal: 20,

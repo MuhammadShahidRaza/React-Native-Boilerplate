@@ -20,12 +20,7 @@ export const WorkerEarningsScreen = () => (
     </SafeAreaView>
 
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <AppGradient
-        style={styles.totalCard}
-        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-        start={{ x: -1, y: 0 }}
-        end={{ x: 1, y: 0.5 }}
-      >
+      <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.totalCard}>
         <View style={styles.totalIconWrap}>
           <Image source={IMAGES.BAG} style={styles.totalIcon} />
         </View>
@@ -42,12 +37,7 @@ export const WorkerEarningsScreen = () => (
             key={row.label}
             style={[styles.summaryRow, index < SUMMARY_ROWS.length - 1 && styles.summaryRowBorder]}
           >
-            <AppGradient
-              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-              start={{ x: -1, y: 0 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.summaryIcon}
-            >
+            <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
               <Icon
                 componentName={VARIABLES.MaterialCommunityIcons}
                 iconName='wallet-outline'
@@ -87,35 +77,36 @@ const styles = StyleSheet.create({
   },
   totalCard: {
     borderRadius: 25,
+    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    // gap: 10,
-    paddingHorizontal: 10,
+    gap: 16,
     marginBottom: 8,
+    overflow: 'hidden',
   },
   totalIconWrap: {
-    width: 80,
-    height: 80,
+    width: 100,
+    height: 100,
     borderRadius: 25,
-    marginVertical: 10,
     backgroundColor: COLORS.WHITE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   totalInfo: {
     flex: 1,
-    // gap: 5,
+    gap: 4,
   },
   totalLabel: {
     color: COLORS.WHITE,
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.Large,
     opacity: 0.9,
     textAlign: 'center',
   },
   totalAmount: {
     color: COLORS.WHITE,
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.XL,
     fontWeight: FontWeight.Bold,
+    lineHeight: 40,
     textAlign: 'center',
   },
   summaryCard: {
@@ -150,9 +141,9 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     borderRadius: 22,
-    backgroundColor: COLORS.APP_PRIMARY,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   summaryLabel: {
     flex: 1,
