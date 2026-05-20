@@ -172,11 +172,14 @@ export const CompleteProfile = ({
 
       <AppStatusModal
         visible={profileGate.detailsRequiredVisible}
-        onClose={() => profileGate.setDetailsRequiredVisible(false)}
-        onPrimaryPress={() => profileGate.setDetailsRequiredVisible(false)}
+        onClose={profileGate.dismissDetailsRequired}
+        onPrimaryPress={() => {
+          profileGate.dismissDetailsRequired();
+          navigate(SCREENS.VEHICLE_DETAILS, { isFromSettings });
+        }}
         title='Details Required'
         description='You need to submit the required details in order to continue.'
-        primaryButtonText='Go Back'
+        primaryButtonText='Add Vehicle'
         iconProps={{
           componentName: VARIABLES.MaterialCommunityIcons,
           iconName: 'file-document-outline',

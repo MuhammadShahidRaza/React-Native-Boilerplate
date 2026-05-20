@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { View, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStatusModal, Icon, Typography, RowComponent, AppGradient } from 'components/index';
 import { VARIABLES } from 'constants/common';
@@ -35,15 +35,12 @@ export const WorkerWalletScreen = () => {
   );
   const [topOffVisible, setTopOffVisible] = useState(false);
   const profileGate = useWorkerProfileGate();
+  const topOffShownRef = useRef(false);
 
   useEffect(() => {
-    if (!profileGate.isComplete) {
-      profileGate.setDetailsRequiredVisible(true);
-      return;
-    }
-    if (balance <= 0) {
-      setTopOffVisible(true);
-    }
+    if (!profileGate.isComplete || balance > 0 || topOffShownRef.current) return;
+    topOffShownRef.current = true;
+    setTopOffVisible(true);
   }, [balance, profileGate.isComplete]);
 
   return (
@@ -53,6 +50,18 @@ export const WorkerWalletScreen = () => {
       </SafeAreaView>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {!profileGate.isComplete ? (
+          <Pressable
+            style={styles.completeBanner}
+            onPress={() => navigate(SCREENS.COMPLETE_PROFILE, { isFromSettings: false })}
+          >
+            <Typography style={styles.completeBannerTitle}>Complete your profile</Typography>
+            <Typography style={styles.completeBannerText}>
+              Add vehicle details and documents before using your wallet.
+            </Typography>
+          </Pressable>
+        ) : null}
+
         <AppGradient
           colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
           start={{ x: -1, y: 0 }}
@@ -106,20 +115,6 @@ export const WorkerWalletScreen = () => {
       </ScrollView>
 
       <AppStatusModal
-        visible={profileGate.detailsRequiredVisible}
-        onClose={profileGate.closeDetailsRequired}
-        onPrimaryPress={profileGate.closeDetailsRequired}
-        title='Details Required'
-        description='You need to submit the required details in order to continue.'
-        primaryButtonText='Go Back'
-        iconProps={{
-          componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'file-document-outline',
-          size: 30,
-        }}
-      />
-
-      <AppStatusModal
         visible={topOffVisible && profileGate.isComplete}
         onClose={() => setTopOffVisible(false)}
         onPrimaryPress={() => navigate(SCREENS.CONTACT_US)}
@@ -146,6 +141,24 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT,
   },
   scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 16 },
+  completeBanner: {
+    backgroundColor: '#D5E3F6',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: BRAND_SECONDARY,
+  },
+  completeBannerTitle: {
+    fontWeight: FontWeight.Bold,
+    color: BRAND_SECONDARY,
+    fontSize: FontSize.Medium,
+    marginBottom: 4,
+  },
+  completeBannerText: {
+    color: COLORS.TEXT_SECONDARY,
+    fontSize: FontSize.Small,
+    lineHeight: 18,
+  },
   card: {
     borderRadius: 25,
     padding: 20,

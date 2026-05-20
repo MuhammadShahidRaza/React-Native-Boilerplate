@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAppSelector } from 'types/reduxTypes';
 import { isWorkerDocumentsComplete, isWorkerVehicleComplete } from 'utils/workerOnboarding';
-import { onBack } from 'navigation/index';
 
 export function useWorkerProfileGate() {
   const user = useAppSelector(state => state.user.userDetails);
@@ -20,6 +19,7 @@ export function useWorkerProfileGate() {
 
   const isComplete = vehicleComplete && documentsComplete;
 
+  /** Only call when user taps a gated action (not on screen mount). */
   const requireCompleteProfile = (onAllowed: () => void) => {
     if (isComplete) {
       onAllowed();
@@ -35,9 +35,6 @@ export function useWorkerProfileGate() {
     detailsRequiredVisible,
     setDetailsRequiredVisible,
     requireCompleteProfile,
-    closeDetailsRequired: () => {
-      setDetailsRequiredVisible(false);
-      onBack();
-    },
+    dismissDetailsRequired: () => setDetailsRequiredVisible(false),
   };
 }

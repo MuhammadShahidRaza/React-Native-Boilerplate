@@ -117,11 +117,14 @@ export const WorkerHomeScreen = () => {
 
       <AppStatusModal
         visible={profileGate.detailsRequiredVisible}
-        onClose={profileGate.closeDetailsRequired}
-        onPrimaryPress={profileGate.closeDetailsRequired}
+        onClose={profileGate.dismissDetailsRequired}
+        onPrimaryPress={() => {
+          profileGate.dismissDetailsRequired();
+          navigate(SCREENS.COMPLETE_PROFILE, { isFromSettings: false });
+        }}
         title='Details Required'
         description='You need to submit the required details in order to continue.'
-        primaryButtonText='Go Back'
+        primaryButtonText='Complete Profile'
         iconProps={{
           componentName: VARIABLES.MaterialCommunityIcons,
           iconName: 'file-document-outline',
