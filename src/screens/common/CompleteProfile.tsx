@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Icon, RowComponent, Wrapper } from 'components/common';
+import { AppStatusModal, Button, Icon, RowComponent, Wrapper } from 'components/common';
+import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
 import { VARIABLES } from 'constants/common';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
@@ -33,6 +34,13 @@ export interface CompleteProfileFormValues {
   driving_license_back?: SelectedMedia | null | string;
   business_license?: SelectedMedia | null | string;
   insurance_document?: SelectedMedia | null | string;
+  vehicle_brand?: string;
+  vehicle_model?: string;
+  vehicle_license_plate?: string;
+  vehicle_year?: string;
+  vehicle_color?: string;
+  vehicle_type?: string;
+  vehicle_make?: string;
 }
 
 export const CompleteProfile = ({
@@ -42,6 +50,15 @@ export const CompleteProfile = ({
   const isFromSettings = route.params?.isFromSettings || false;
   const user = useAppSelector(state => state.user.userDetails);
   const isPendingForApproval = Boolean(!user?.is_admin_verified && user?.is_onboarded);
+  const profileGate = useWorkerProfileGate();
+
+  const openDocuments = () => {
+    if (!profileGate.vehicleComplete) {
+      profileGate.setDetailsRequiredVisible(true);
+      return;
+    }
+    navigate(SCREENS.DOCUMENTATION_UPLOAD, { isFromSettings });
+  };
 
   const tabs = [
     {
@@ -50,7 +67,7 @@ export const CompleteProfile = ({
     },
     {
       title: 'Documents',
-      onPress: () => navigate(SCREENS.DOCUMENTATION_UPLOAD, { isFromSettings }),
+      onPress: openDocuments,
     },
     ...(isFromSettings
       ? [
@@ -151,6 +168,20 @@ export const CompleteProfile = ({
         primaryButtonText={COMMON_TEXT.BACK_TO_LOGIN}
         wantTwoButtons={false}
         iconStyle={{ componentName: VARIABLES.Entypo, iconName: 'check', color: COLORS.BACKGROUND }}
+      />
+
+      <AppStatusModal
+        visible={profileGate.detailsRequiredVisible}
+        onClose={() => profileGate.setDetailsRequiredVisible(false)}
+        onPrimaryPress={() => profileGate.setDetailsRequiredVisible(false)}
+        title='Details Required'
+        description='You need to submit the required details in order to continue.'
+        primaryButtonText='Go Back'
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'file-document-outline',
+          size: 30,
+        }}
       />
     </Wrapper>
   );

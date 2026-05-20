@@ -5,7 +5,7 @@ import { Icon, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
-import { onBack, reset } from 'navigation/index';
+import { navigate, onBack } from 'navigation/index';
 import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
 import { SCREENS } from 'constants/routes';
 
@@ -98,7 +98,7 @@ export const FoodDeliveryCartScreen = () => {
 
         <Pressable
           onPress={() => {
-            reset(SCREENS.BOTTOM_STACK);
+            navigate(SCREENS.TRACK_FOOD_ORDER);
           }}
           style={styles.placeWrap}
         >

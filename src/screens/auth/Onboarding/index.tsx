@@ -102,12 +102,17 @@ export const OnBoarding = () => {
       >
         {renderedPages.map((page, index) => (
           <View key={index} style={[styles.page, { width: fullScreenWidth }]}>
-            <Photo source={page.image} imageStyle={styles.image} resizeMode="contain" />
+            <Photo source={page.image} imageStyle={styles.image} resizeMode='contain' />
           </View>
         ))}
       </ScrollView>
 
       <View style={styles.bottomCard}>
+        <Typography style={styles.heading}>
+          {formatTitle(t(currentContent?.heading ?? ''), 3)}
+        </Typography>
+        <Typography style={styles.description}>{currentContent?.description}</Typography>
+
         <View style={styles.pagination}>
           {renderedPages.map((_, index) => (
             <TouchableOpacity
@@ -118,11 +123,6 @@ export const OnBoarding = () => {
             />
           ))}
         </View>
-
-        <Typography style={styles.heading}>
-          {formatTitle(t(currentContent?.heading ?? ''), 3)}
-        </Typography>
-        <Typography style={styles.description}>{currentContent?.description}</Typography>
 
         <Button
           title={
@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     // marginBottom: 14,
+    marginVertical: 10,
   },
   dot: {
     width: 8,
@@ -177,10 +178,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     paddingHorizontal: 35,
-    paddingVertical: 30,
+    paddingVertical: 20,
     // elevation: 3,
     minHeight: screenHeight(40),
-    gap: 20,
+    gap: 15,
     // shadowColor: COLORS.BLACK,
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.25,
@@ -188,7 +189,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     textAlign: 'center',
-    fontSize: FontSize.XL,
+    fontSize: FontSize.ExtraLarge,
     // width: screenWidth(50),
     alignSelf: 'center',
     fontWeight: FontWeight.Bold,
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
   description: {
     textAlign: 'center',
     color: COLORS.TEXT_SECONDARY,
+    marginHorizontal: 20,
   },
   skipWrap: {
     alignSelf: 'center',
