@@ -3,11 +3,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export type WorkerAvailabilityState = {
   isOnline: boolean;
   isLookingForDeliveries: boolean;
+  vehicleDetailsComplete: boolean;
+  documentsComplete: boolean;
 };
 
 const initialState: WorkerAvailabilityState = {
   isOnline: false,
   isLookingForDeliveries: false,
+  vehicleDetailsComplete: false,
+  documentsComplete: false,
 };
 
 const workerSlice = createSlice({
@@ -26,12 +30,23 @@ const workerSlice = createSlice({
         state.isOnline = true;
       }
     },
+    setVehicleDetailsComplete(state, action: PayloadAction<boolean>) {
+      state.vehicleDetailsComplete = action.payload;
+    },
+    setDocumentsComplete(state, action: PayloadAction<boolean>) {
+      state.documentsComplete = action.payload;
+    },
     resetWorkerAvailability() {
       return initialState;
     },
   },
 });
 
-export const { setWorkerOnline, setLookingForDeliveries, resetWorkerAvailability } =
-  workerSlice.actions;
+export const {
+  setWorkerOnline,
+  setLookingForDeliveries,
+  setVehicleDetailsComplete,
+  setDocumentsComplete,
+  resetWorkerAvailability,
+} = workerSlice.actions;
 export default workerSlice.reducer;

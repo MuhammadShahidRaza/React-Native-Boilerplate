@@ -1,4 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { AppStatusModal } from 'components/index';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setVehicleDetailsComplete } from 'store/slices/worker';
+import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Input, Button, Wrapper, Dropdown, GradientIcon } from 'components/index';
 import { VehicleDetailRow } from 'components/common/VehicleDetailRow';
@@ -35,6 +39,8 @@ const consumerBackIcon = {
 export const VehicleDetails = ({
   route,
 }: AppScreenProps<typeof SCREENS.VEHICLE_DETAILS>) => {
+  const dispatch = useAppDispatch();
+  const profileGate = useWorkerProfileGate();
   const isFromSettings = Boolean(route.params?.isFromSettings);
   const [isEditing, setIsEditing] = useState(!isFromSettings);
   const user = useAppSelector(state => state.user.userDetails?.details);
@@ -66,10 +72,17 @@ export const VehicleDetails = ({
         vehicle_make: values.vehicle_brand,
       },
     });
+    dispatch(setVehicleDetailsComplete(true));
     if (isFromSettings) {
       setIsEditing(false);
     }
   };
+
+  useEffect(() => {
+    if (isFromSettings && !profileGate.isComplete) {
+      profileGate.setDetailsRequiredVisible(true);
+    }
+  }, [isFromSettings, profileGate.isComplete]);
 
   const formik = useFormikForm({
     initialValues,
@@ -191,6 +204,20 @@ export const VehicleDetails = ({
           </View>
         )}
       </View>
+
+      <AppStatusModal
+        visible={profileGate.detailsRequiredVisible}
+        onClose={profileGate.closeDetailsRequired}
+        onPrimaryPress={profileGate.closeDetailsRequired}
+        title='Details Required'
+        description='You need to submit the required details in order to continue.'
+        primaryButtonText='Go Back'
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'file-document-outline',
+          size: 30,
+        }}
+      />
     </Wrapper>
   );
 };

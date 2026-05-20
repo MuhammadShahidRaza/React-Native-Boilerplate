@@ -1,5 +1,11 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Input, Button, Wrapper } from 'components/index';
+import { AppStatusModal, Input, Button, Wrapper } from 'components/index';
+import { VARIABLES } from 'constants/common';
+import { useAppDispatch } from 'types/reduxTypes';
+import { setDocumentsComplete } from 'store/slices/worker';
+import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
+import { onBack } from 'navigation/index';
 import { STYLES, hasUri, screenHeight, COLORS } from 'utils/index';
 import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
 import { ImageUpload } from 'components/common/ImageUpload';
@@ -19,10 +25,20 @@ export interface WorkerDocumentsFormValues {
 }
 
 export const WorkerDocumentsUpload = (
-  _props: AppScreenProps<typeof SCREENS.DOCUMENTATION_UPLOAD>,
+  props: AppScreenProps<typeof SCREENS.DOCUMENTATION_UPLOAD>,
 ) => {
+  const dispatch = useAppDispatch();
+  const profileGate = useWorkerProfileGate();
+  const isFromSettings = Boolean(props.route.params?.isFromSettings);
+  const [thankYouVisible, setThankYouVisible] = useState(false);
   const user = useAppSelector(state => state.user.userDetails?.details);
   const userRoot = useAppSelector(state => state.user.userDetails);
+
+  useEffect(() => {
+    if (!profileGate.vehicleComplete) {
+      profileGate.setDetailsRequiredVisible(true);
+    }
+  }, [profileGate.vehicleComplete]);
 
   const handleSubmit = async (values: WorkerDocumentsFormValues) => {
     const data = {
@@ -38,6 +54,12 @@ export const WorkerDocumentsUpload = (
       }),
     };
     await completeProfile({ data });
+    dispatch(setDocumentsComplete(true));
+    if (!isFromSettings) {
+      setThankYouVisible(true);
+    } else {
+      onBack();
+    }
   };
 
   const getImageDisplayUri = (val: SelectedMedia | null | string | undefined) =>
@@ -119,6 +141,40 @@ export const WorkerDocumentsUpload = (
           />
         </FocusProvider>
       </View>
+
+      <AppStatusModal
+        visible={profileGate.detailsRequiredVisible}
+        onClose={profileGate.closeDetailsRequired}
+        onPrimaryPress={profileGate.closeDetailsRequired}
+        title='Details Required'
+        description='You need to submit the required details in order to continue.'
+        primaryButtonText='Go Back'
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'file-document-outline',
+          size: 30,
+        }}
+      />
+
+      <AppStatusModal
+        visible={thankYouVisible}
+        onClose={() => {
+          setThankYouVisible(false);
+          onBack();
+        }}
+        onPrimaryPress={() => {
+          setThankYouVisible(false);
+          onBack();
+        }}
+        title='Thank You!'
+        description='Your account has been sent for approval.'
+        primaryButtonText='Done'
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'thumb-up-outline',
+          size: 30,
+        }}
+      />
     </Wrapper>
   );
 };
