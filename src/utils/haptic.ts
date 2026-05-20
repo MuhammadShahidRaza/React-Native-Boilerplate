@@ -8,8 +8,8 @@ import { Platform, Vibration } from 'react-native';
  */
 export const triggerHaptic = () => {
   if (Platform.OS === 'android') {
-    Vibration.vibrate(10);
+    // Vibration.vibrate(10);
   } else {
-    Vibration.vibrate();
+    // Vibration.vibrate();
   }
 };
