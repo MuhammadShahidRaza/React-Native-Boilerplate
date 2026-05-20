@@ -188,7 +188,7 @@ export const WorkerJobNavigationScreen = () => {
           rating='5.0'
           avatarSource={IMAGES.USER}
           onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
-          onMessagePress={() => openMessage('+237 6 99 99 99 99')}
+          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
           showVehicleSection={false}
           variant='elevatedWhite'
         />
