@@ -20,7 +20,6 @@ export const GradientIcon = ({
   containerStyle,
   borderRadius,
   ...iconProps
-  
 }: GradientIconProps) => {
   return (
     <AppGradient
@@ -36,7 +35,6 @@ export const GradientIcon = ({
         },
         containerStyle,
       ]}
-    
       start={{ x: -1, y: 0 }}
       end={{ x: 1, y: 0.5 }}
     >

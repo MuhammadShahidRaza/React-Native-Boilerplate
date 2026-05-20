@@ -62,12 +62,10 @@ export const WorkerWalletScreen = () => {
           </Pressable>
         ) : null}
 
-        <AppGradient
-          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-          start={{ x: -1, y: 0 }}
-          end={{ x: 1, y: 0.5 }}
-          style={styles.card}
-        >
+        <AppGradient 
+         start={{ x: -1, y: 0 }}
+         end={{ x: 1, y: 0.5 }}
+        colors={[BRAND_SECONDARY, BRAND_PRIMARY]} style={styles.card}>
           <View style={styles.cardIconWrap}>
             <Image source={IMAGES.WALLET} style={styles.cardIcon} />
           </View>
@@ -85,11 +83,9 @@ export const WorkerWalletScreen = () => {
               key={item.id}
               style={[styles.txRow, index < DUMMY_TRANSACTIONS.length - 1 && styles.txRowBorder]}
             >
-              <AppGradient
-                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-                start={{ x: -1, y: 0 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.summaryIcon}
+              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} style={styles.summaryIcon}
+               start={{ x: -1, y: 0 }}
+               end={{ x: 1, y: 0.5 }}
               >
                 <Icon
                   componentName={VARIABLES.Ionicons}

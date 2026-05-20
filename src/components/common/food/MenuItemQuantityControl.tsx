@@ -23,7 +23,8 @@ export const MenuItemQuantityControl = ({
         title='+ Add'
         onPress={onIncrement}
         style={styles.addBtnWrap}
-        gradientStyle={styles.addBtn}
+        gradientStyle={styles.addBtnGradient}
+        containerStyle={styles.addBtnContent}
         textStyle={styles.addTxt}
       />
     );
@@ -65,11 +66,14 @@ export const MenuItemQuantityControl = ({
 const styles = StyleSheet.create({
   addBtnWrap: {
     borderRadius: 20,
+    overflow: 'hidden',
   },
-  addBtn: {
-    paddingHorizontal:30,
-    paddingVertical: 5,
-    borderRadius: 10,
+  addBtnGradient: {
+    borderRadius: 20,
+  },
+  addBtnContent: {
+    paddingHorizontal: 24,
+    paddingVertical: 6,
   },
   addTxt: {
     fontSize: FontSize.MediumSmall,

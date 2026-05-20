@@ -1,7 +1,6 @@
 import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import LinearGradient from 'react-native-linear-gradient';
 import {
   Typography,
   Photo,

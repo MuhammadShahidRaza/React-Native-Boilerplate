@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View, TextInput, Image, Pressable } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { Icon, Typography, Wrapper } from 'components/index';
+import { AppGradient, Icon, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { navigate, onBack } from 'navigation/index';
-import { COLORS, APP_GRADIENT_PRIMARY } from 'utils/index';
+import { COLORS } from 'utils/index';
 import { SCREENS } from 'constants/routes';
 
 const consumerBackIcon = {
@@ -102,9 +101,9 @@ export const FoodDeliveryCartScreen = () => {
           }}
           style={styles.placeWrap}
         >
-          <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.placeBtn}>
+          <AppGradient variant='primary' fill style={styles.placeGradient}>
             <Typography style={styles.placeTxt}>Place Order - CFA 600</Typography>
-          </LinearGradient>
+          </AppGradient>
         </Pressable>
       </ScrollView>
     </Wrapper>
@@ -258,9 +257,11 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: 'hidden',
   },
-  placeBtn: {
+  placeGradient: {
+    borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   placeTxt: {
     color: COLORS.WHITE,

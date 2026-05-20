@@ -4,12 +4,11 @@ import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { StyleSheet, View, Pressable, ScrollView } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import LinearGradient from 'react-native-linear-gradient';
-import { Icon, Typography, Wrapper } from 'components/index';
+import { AppGradient, Icon, Typography, Wrapper } from 'components/index';
 import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY, screenWidth, STYLES, APP_GRADIENT_PRIMARY_LIGHT } from 'utils/index';
+import { COLORS, screenWidth } from 'utils/index';
 
 // ─── Mock model (bookings removed — static demo cards) ───────────────────────
 
@@ -234,21 +233,18 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
           return (
             <Pressable key={route.key} onPress={onPress} style={styles.pillHalf}>
               {focused ? (
-                <LinearGradient
-                  colors={[...APP_GRADIENT_PRIMARY_LIGHT]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={styles.pillGradient}
-                >
-                  <Typography translate={false} style={styles.pillTxtOn}>
-                    {label}
-                  </Typography>
-                </LinearGradient>
-              ) : (
-                <Typography translate={false} style={styles.pillTxtOff}>
-                  {label}
-                </Typography>
-              )}
+                <AppGradient
+                  variant='primaryLight'
+                  pointerEvents='none'
+                  style={StyleSheet.absoluteFill}
+                />
+              ) : null}
+              <Typography
+                translate={false}
+                style={focused ? styles.pillTxtOn : styles.pillTxtOff}
+              >
+                {label}
+              </Typography>
             </Pressable>
           );
         })}
@@ -335,14 +331,14 @@ const CategoryTabs = ({
 
 const ActivityCard = ({ item }: { item: MockActivityItem }) => (
   <View style={styles.card}>
-    <LinearGradient colors={[...APP_GRADIENT_PRIMARY]} style={styles.typeIcon}>
+    <AppGradient variant='primary' style={styles.typeIcon}>
       <Icon
         componentName={VARIABLES.Ionicons}
         iconName={ICON_FOR[item.serviceLabel]}
         size={22}
         color={COLORS.WHITE}
       />
-    </LinearGradient>
+    </AppGradient>
 
     <View style={styles.cardMid}>
       <Typography style={styles.cardService}>{item.serviceLabel}</Typography>
@@ -471,19 +467,16 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
     justifyContent: 'center',
-    minHeight: 44,
-  },
-  pillGradient: {
-    minHeight: 44,
-    borderRadius: 999,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
+    minHeight: 44,
+    position: 'relative',
   },
   pillTxtOn: {
     fontWeight: FontWeight.Bold,
     fontSize: FontSize.MediumSmall,
     color: COLORS.WHITE,
+    paddingVertical: 10,
+    zIndex: 1,
   },
   pillTxtOff: {
     fontWeight: FontWeight.SemiBold,
@@ -491,6 +484,7 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
     textAlign: 'center',
     paddingVertical: 10,
+    zIndex: 1,
   },
   pane: {
     flex: 1,

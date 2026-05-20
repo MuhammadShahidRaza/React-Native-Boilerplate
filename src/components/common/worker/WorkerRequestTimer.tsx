@@ -7,7 +7,6 @@ import { APP_GRADIENT_PRIMARY, BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'ut
 const SIZE = 100;
 const RING = 8;
 
-
 export interface WorkerRequestTimerProps {
   seconds?: number;
   onExpire?: () => void;

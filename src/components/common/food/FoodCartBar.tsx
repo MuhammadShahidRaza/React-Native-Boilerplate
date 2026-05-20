@@ -18,7 +18,7 @@ export const FoodCartBar = ({ itemCount, totalLabel, onPress }: FoodCartBarProps
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.wrap, { paddingBottom: insets.bottom + 12 }]}>
-      <AppGradient variant='primary' style={{ borderRadius: 30 }}>
+      <AppGradient variant='primary' fill style={styles.gradient}>
         <Pressable style={styles.bar} onPress={onPress}>
           <View style={styles.left}>
             <View style={styles.badge}>
@@ -45,6 +45,10 @@ const styles = StyleSheet.create({
   wrap: {
     paddingHorizontal: 20,
     paddingTop: 8,
+  },
+  gradient: {
+    borderRadius: 30,
+    overflow: 'hidden',
   },
   bar: {
     flexDirection: 'row',

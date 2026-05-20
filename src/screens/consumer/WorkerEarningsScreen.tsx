@@ -23,9 +23,7 @@ export const WorkerEarningsScreen = () => (
       showsVerticalScrollIndicator={false}
       contentContainerStyle={styles.scroll}
     >
-      <AppGradient style={styles.totalCard}
-        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-        start={{ x: -1, y: 0 }} end={{ x: 1, y: 0.5 }}>
+      <AppGradient style={styles.totalCard} colors={[BRAND_SECONDARY, BRAND_PRIMARY]} start={{ x: -1, y: 0 }} end={{ x: 1, y: 0.5 }}>
         <View style={styles.totalIconWrap}>
           <Image
             source={IMAGES.BAG}
@@ -48,8 +46,7 @@ export const WorkerEarningsScreen = () => (
             <AppGradient
               colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
               start={{ x: -1, y: 0 }}
-              end={{ x: 1, y: 0.5 }}
-              style={styles.summaryIcon}
+              end={{ x: 1, y: 0.5 }}              style={styles.summaryIcon}
             >
               <Icon
                 componentName={VARIABLES.MaterialCommunityIcons}

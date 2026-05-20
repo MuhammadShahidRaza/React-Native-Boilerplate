@@ -1,7 +1,6 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Map, Typography } from 'components/index';
+import { AppGradient, Button, Map, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight, BRAND_SECONDARY, BRAND_PRIMARY } from 'utils/index';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
@@ -39,10 +38,9 @@ export const WorkerHomeScreen = () => {
             style={[styles.toggleOption, !isOnline && styles.toggleActive]}
           >
             {!isOnline ? (
-              <LinearGradient
-              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-              start={{ x: -1, y: 0 }}
-              end={{ x: 1, y: 1 }}
+              <AppGradient
+                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                pointerEvents='none'
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -56,10 +54,9 @@ export const WorkerHomeScreen = () => {
             style={[styles.toggleOption, isOnline && styles.toggleActive]}
           >
             {isOnline ? (
-              <LinearGradient
+              <AppGradient
                 colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-                start={{ x: -1, y: 0 }}
-              end={{ x: 1, y: 1 }}
+                pointerEvents='none'
                 style={StyleSheet.absoluteFill}
               />
             ) : null}
@@ -144,12 +141,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 26,
     overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   toggleActive: {},
   toggleTxt: {
     fontSize: FontSize.Small,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT_SMALL,
+    zIndex: 1,
   },
   toggleActiveTxt: {
     color: COLORS.WHITE,

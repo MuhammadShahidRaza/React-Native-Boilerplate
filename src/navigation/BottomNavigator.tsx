@@ -169,7 +169,7 @@ export const BottomNavigator = () => {
         return { headerShown: false };
       }
 
-      const inactiveColor = isWorker ? WORKER_TAB_INACTIVE : COLORS.TRANSPARENT;
+      const inactiveColor = isWorker ? WORKER_TAB_INACTIVE : WORKER_TAB_INACTIVE;
       const activeColor = COLORS.WHITE;
       const iconSize = isWorker ? 26 : FontSize.ExtraLarge;
 
