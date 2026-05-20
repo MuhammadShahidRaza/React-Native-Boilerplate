@@ -1,15 +1,13 @@
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppStatusModal, Button, Map, Typography } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { Button, Map, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, APP_GRADIENT_PRIMARY, screenHeight, BRAND_SECONDARY, BRAND_PRIMARY } from 'utils/index';
+import { COLORS, screenHeight, BRAND_SECONDARY, BRAND_PRIMARY } from 'utils/index';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { setLookingForDeliveries, setWorkerOnline } from 'store/slices/worker';
-import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
+import { setWorkerOnline } from 'store/slices/worker';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 
 export const WorkerHomeScreen = () => {
@@ -18,20 +16,9 @@ export const WorkerHomeScreen = () => {
   const role = useAppSelector(state => state?.user?.role);
   const { isOnline } = useAppSelector(state => state.worker);
   const copy = getWorkerRoleCopy(role);
-  const profileGate = useWorkerProfileGate();
   const firstName = userDetails?.full_name?.split(' ')?.[0] ?? 'Alex';
 
   const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
-
-  const openRequests = () => {
-    profileGate.requireCompleteProfile(() => {
-      if (!isOnline) {
-        dispatch(setWorkerOnline(true));
-      }
-      dispatch(setLookingForDeliveries(true));
-      navigate(SCREENS.WORKER_REQUESTS);
-    });
-  };
 
   return (
     <View style={styles.root}>
@@ -111,26 +98,9 @@ export const WorkerHomeScreen = () => {
           title={copy.lookingButton}
           style={styles.lookingBtn}
           textStyle={styles.lookingBtnTxt}
-          onPress={openRequests}
+          onPress={() => navigate(SCREENS.WORKER_REQUESTS)}
         />
       ) : null}
-
-      <AppStatusModal
-        visible={profileGate.detailsRequiredVisible}
-        onClose={profileGate.dismissDetailsRequired}
-        onPrimaryPress={() => {
-          profileGate.dismissDetailsRequired();
-          navigate(SCREENS.COMPLETE_PROFILE, { isFromSettings: false });
-        }}
-        title='Details Required'
-        description='You need to submit the required details in order to continue.'
-        primaryButtonText='Complete Profile'
-        iconProps={{
-          componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'file-document-outline',
-          size: 30,
-        }}
-      />
     </View>
   );
 };

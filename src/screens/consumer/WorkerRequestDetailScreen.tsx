@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import {
   Button,
   Photo,
@@ -12,7 +12,7 @@ import {
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { navigate, onBack } from 'navigation/index';
+import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
@@ -28,6 +28,7 @@ const CARD_SHADOW = {
 };
 
 export const WorkerRequestDetailScreen = () => {
+  const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.WORKER_REQUEST_DETAIL>>();
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
@@ -37,6 +38,14 @@ export const WorkerRequestDetailScreen = () => {
   );
   const serviceLabel = copy.jobKind === 'delivery' ? 'Parcel' : 'Ride';
 
+  const handleBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigate(SCREENS.WORKER_REQUESTS);
+  };
+
   const accept = () => {
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
@@ -45,37 +54,32 @@ export const WorkerRequestDetailScreen = () => {
   };
 
   return (
-    <Wrapper useScrollView={false}
-    
-    headerTitle={copy.requestDetailTitle}
-    showBackButton={false}
-   
-    
-    backgroundColor={COLORS.LIGHT_GREY} darkMode={false}>
-      <View style={styles.topBar}>
-        <Pressable onPress={onBack} hitSlop={8}>
-          <Typography style={styles.backTxt}>Back</Typography>
-        </Pressable>
-      </View>
-      <View style={styles.timerWrap}>
-            <WorkerRequestTimer seconds={60} onExpire={onBack} />
-          </View>
-     
+    <Wrapper
+      useScrollView={false}
+      showBackButton={false}
+      backgroundColor={COLORS.TRANSPARENT}
+      darkMode={false}
+    >
+      <View style={styles.content} pointerEvents='box-none'>
+        <View style={styles.timerWrap} pointerEvents='none'>
+          <WorkerRequestTimer seconds={60} onExpire={handleBack} />
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-      >
-     
-        <View style={styles.sheet}>
+        <View style={styles.sheet} pointerEvents='box-none'>
+          <Pressable style={styles.backBtn} onPress={handleBack} hitSlop={12}>
+            <Typography style={styles.backTxt} pointerEvents='none'>
+              Back
+            </Typography>
+          </Pressable>
+          <View pointerEvents='auto'>
+            <Typography style={styles.screenTitle}>{copy.requestDetailTitle}</Typography>
+
+            <View style={styles.paymentBadge}>
+              <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
+            </View>
+          </View>
           
-          <Typography style={styles.screenTitle}>{copy.requestDetailTitle}</Typography>
-      
-          <View style={styles.paymentBadge}>
-        <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
-      </View>
-          <View style={styles.sheetBody}>
+          <View style={styles.sheetBody} pointerEvents='auto'>
             <View style={[styles.passengerCard, CARD_SHADOW]}>
               <Photo source={IMAGES.USER} size={52} borderRadius={26} />
               <View style={styles.passengerInfo}>
@@ -110,46 +114,47 @@ export const WorkerRequestDetailScreen = () => {
               </View>
             </View>
 
-            <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
-            <Pressable onPress={onBack} style={styles.rejectBtn}>
+            <Button title='Accept Ride' onPress={accept} style={styles.acceptBtn} />
+            <Pressable onPress={handleBack} style={styles.rejectBtn}>
               <Typography style={styles.rejectTxt}>Reject</Typography>
             </Pressable>
           </View>
         </View>
-      </ScrollView>
+      </View>
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 4,
+  content: {
+    flex: 1,
+  },
+  backBtn: {
+    position: 'absolute',
+    top: 2,
+    left: 20,
+    zIndex: 20,
+    elevation: 20,
+    paddingVertical: 8,
+    paddingRight: 16,
   },
   backTxt: {
     color: COLORS.APP_PRIMARY,
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Medium,
-    minWidth: 48,
   },
   screenTitle: {
     // flex: 1,
     textAlign: 'center',
-    fontSize: FontSize.Large,
+    fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
-    paddingTop: 16,
-    color: COLORS.APP_TEXT,
-  },
-  topBarSpacer: {
-    minWidth: 48,
+   
+    color: COLORS.BLACK,
   },
   paymentBadge: {
     alignSelf: 'center',
     backgroundColor: '#DBEAFE',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 6,
     borderRadius: 20,
     marginBottom: 8,
@@ -159,27 +164,26 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Small,
   },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: 32,
-  },
+
   sheet: {
     flex: 1,
     backgroundColor: COLORS.WHITE,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 10,
+    paddingTop: 90,
     ...CARD_SHADOW,
-    marginTop:screenHeight(28),
+    marginTop: screenHeight(16),
     paddingBottom: 100,
+    overflow: 'visible',
   },
   timerWrap: {
     position: 'absolute',
-    top: -80,
+    top: 100,
     left: 0,
     right: 0,
     alignItems: 'center',
     zIndex: 1,
+
   },
   sheetBody: {
     paddingHorizontal: 16,
@@ -189,15 +193,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 14,
+    backgroundColor: '#F5F9FF',
+    borderRadius: 20,
     padding: 14,
+    marginTop: 20,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
   },
   passengerInfo: {
     flex: 1,
     gap: 2,
+    
   },
   passengerName: {
     fontSize: FontSize.Medium,
@@ -231,6 +237,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 4,
+    marginTop: 10,
+
   },
   statDivider: {
     width: 1,
@@ -247,8 +255,9 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
   },
   acceptBtn: {
-    marginTop: 4,
-    backgroundColor: COLORS.SECONDARY,
+    marginTop: 30,
+    marginHorizontal: 20,
+    backgroundColor: '#21409A',
   },
   rejectBtn: {
     alignItems: 'center',
