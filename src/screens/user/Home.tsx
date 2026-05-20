@@ -59,6 +59,7 @@ export const Home = () => {
             <GradientIcon
               componentName={VARIABLES.Feather}
               iconName='bell'
+              onPress={() => navigate(SCREENS.NOTIFICATIONS)}
               size={FontSize.Medium}
               color={COLORS.WHITE}
             />

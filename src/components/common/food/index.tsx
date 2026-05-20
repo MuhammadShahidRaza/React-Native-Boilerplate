@@ -4,3 +4,4 @@ export * from './MenuItemQuantityControl';
 export * from './FoodCartBar';
 export * from './foodRestaurants';
 export * from './foodOrderMock';
+export * from './FoodPreparingAnimation';

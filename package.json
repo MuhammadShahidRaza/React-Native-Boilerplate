@@ -75,6 +75,7 @@
         "formik": "^2.4.9",
         "i18next": "^25.7.3",
         "libphonenumber-js": "^1.12.33",
+        "lottie-react-native": "^7.3.8",
         "react": "19.2.3",
         "react-i18next": "^16.5.1",
         "react-native": "0.85.2",
