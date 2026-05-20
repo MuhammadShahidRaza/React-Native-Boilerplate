@@ -4,6 +4,7 @@ import { SCREENS } from 'constants/routes';
 import { COMMON_TEXT } from 'constants/screens';
 import { reset } from 'navigation/Navigators';
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChildrenType, FontSize, FontWeight, StyleType, SvgNameType } from 'types/index';
 import { screenWidth, FLEX_CENTER, COLORS, screenHeight } from 'utils/index';
 
@@ -45,6 +46,7 @@ export const AuthComponent = ({
   },
 }: Props) => {
   const showBottomSection = Boolean(bottomText || bottomButtonText);
+  const insets = useSafeAreaInsets();
   return (
     <>
       <Wrapper useScrollView showBackButton={showBack}>
@@ -67,7 +69,7 @@ export const AuthComponent = ({
       </Wrapper>
 
       {showBottomSection && (
-        <RowComponent style={styles.bottomText}>
+        <RowComponent style={[styles.bottomText, { paddingBottom: insets.bottom + 10 }]}>
           <Typography style={styles.bottomTextStyle}>{bottomText}</Typography>
           <Typography style={styles.bottomButtonTextStyle} onPress={onBottomTextPress}>
             {bottomButtonText}
