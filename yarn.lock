@@ -9513,6 +9513,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lottie-react-native@npm:^7.3.8":
+  version: 7.3.8
+  resolution: "lottie-react-native@npm:7.3.8"
+  peerDependencies:
+    "@lottiefiles/dotlottie-react": ^0.13.5
+    react: "*"
+    react-native: ">=0.46"
+    react-native-windows: ">=0.63.x"
+  peerDependenciesMeta:
+    "@lottiefiles/dotlottie-react":
+      optional: true
+    react-native-windows:
+      optional: true
+  checksum: 1fd4317fd0e82bd99418274e6058f520ea71b4d4cca3a6c65c093dfb51588c40132a951b74f964d020dcda79159eb0bfba4edc1336862998d3851fa9d15d8ee0
+  languageName: node
+  linkType: hard
+
 "lower-case@npm:^2.0.2":
   version: 2.0.2
   resolution: "lower-case@npm:2.0.2"
@@ -12261,6 +12278,7 @@ __metadata:
     jest: ^30.2.0
     libphonenumber-js: ^1.12.33
     lint-staged: ^16.2.7
+    lottie-react-native: ^7.3.8
     metro-react-native-babel-preset: ^0.77.0
     patch-package: ^8.0.1
     postinstall-postinstall: ^2.1.0

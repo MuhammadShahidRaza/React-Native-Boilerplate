@@ -6,8 +6,12 @@ import { Typography, RowComponent, FlatListComponent, SkeletonWrapper } from 'co
 import { Icon } from 'components/common/Icon';
 import { COLORS } from 'utils/colors';
 import { handleNotificationNavigation } from 'utils/notifications';
+import {
+  formatNotificationTimeAgo,
+  getNotificationVisual,
+} from 'utils/notificationDisplay';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { COMMON_TEXT } from 'constants/screens';
 import { getNotifications } from 'api/functions/app/notifications';
 import { Activity } from 'types/responseTypes';
@@ -15,14 +19,44 @@ import { formatDateMonthDayYear, screenWidth } from 'utils/helpers';
 import { setNotificationUnreadCount } from 'store/slices/user';
 import { useAppDispatch } from 'types/reduxTypes';
 
+const USE_ALPHA_CARDS = ENV_CONSTANTS.IS_ALPHA_PHASE;
+const CONSUMER_BACK_ICON = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
+
+const CARD_SHADOW = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.06,
+  shadowRadius: 8,
+  elevation: 2,
+};
+
 const NotificationSkeleton = () => (
   <View style={skeletonStyles.container}>
     <SkeletonWrapper
       isLoading={true}
-      count={10}
-      renderItem={index =>
-        index === 0 ? (
-          <SkeletonPlaceholder.Item width={100} height={20} borderRadius={6} marginBottom={15} />
+      count={USE_ALPHA_CARDS ? 5 : 10}
+      renderItem={() =>
+        USE_ALPHA_CARDS ? (
+          <View style={skeletonStyles.card}>
+            <View style={skeletonStyles.skeletonRow}>
+              <SkeletonPlaceholder.Item width={45} height={45} borderRadius={10} marginRight={15} />
+              <View style={skeletonStyles.skeletonContent}>
+                <SkeletonPlaceholder.Item
+                  width={screenWidth(55)}
+                  height={16}
+                  borderRadius={6}
+                  marginBottom={8}
+                />
+                <SkeletonPlaceholder.Item
+                  width={screenWidth(75)}
+                  height={14}
+                  borderRadius={6}
+                  marginBottom={8}
+                />
+                <SkeletonPlaceholder.Item width={70} height={12} borderRadius={6} />
+              </View>
+            </View>
+          </View>
         ) : (
           <View style={skeletonStyles.skeletonRow}>
             <SkeletonPlaceholder.Item width={45} height={45} borderRadius={10} marginRight={15} />
@@ -58,6 +92,11 @@ const getDateGroupLabel = (dateStr: string): string => {
 
 const getIconForType = (type: string): string => {
   const map: Record<string, string> = {
+    'order-confirmed': 'restaurant',
+    'driver-found': 'delivery-dining',
+    welcome: 'help-outline',
+    'parcel-delivered': 'inventory-2',
+    'ride-completed': 'directions-car',
     'new-booking-available': 'event',
     'new-quotation-accepted': 'event',
     'new-quotation-received': 'request-quote',
@@ -139,18 +178,31 @@ export const NotificationListing = () => {
       return new Set([...prev, itemId]);
     });
   }, []);
-  const groups = useMemo(() => buildGroups(activities), [activities]);
-  const flatData = useMemo(() => flattenGroups(groups), [groups]);
 
-  const fetchNotifications = useCallback(async (pageNum: number, append: boolean) => {
-    const data = await getNotifications(pageNum);
-    if (!data) return;
-    setActivities(prev =>
-      append && data.activities?.length ? [...prev, ...data.activities] : (data.activities ?? []),
-    );
-    dispatch(setNotificationUnreadCount(0));
-    setHasMore((data.current_page ?? 1) < (data.last_page ?? 1));
-  }, []);
+  const groups = useMemo(() => buildGroups(activities), [activities]);
+  const flatData = useMemo((): FlatListItem[] => {
+    if (USE_ALPHA_CARDS) {
+      return [...activities]
+        .sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        )
+        .map(a => ({ type: 'item', activity: a, id: `a-${a.id}` }));
+    }
+    return flattenGroups(groups);
+  }, [activities, groups]);
+
+  const fetchNotifications = useCallback(
+    async (pageNum: number, append: boolean) => {
+      const data = await getNotifications(pageNum);
+      if (!data) return;
+      setActivities(prev =>
+        append && data.activities?.length ? [...prev, ...data.activities] : (data.activities ?? []),
+      );
+      dispatch(setNotificationUnreadCount(0));
+      setHasMore((data.current_page ?? 1) < (data.last_page ?? 1));
+    },
+    [dispatch],
+  );
 
   const loadPage = useCallback(
     async (pageNum: number, append: boolean) => {
@@ -187,6 +239,48 @@ export const NotificationListing = () => {
     loadPage(1, false);
   }, []);
 
+  const renderNotificationBody = (a: Activity, itemId: string, isExpanded: boolean) => {
+    const isTruncated = truncatedIds.has(itemId);
+    const isLongByChars = (a.body?.length ?? 0) > 100;
+    const showReadMore = (isTruncated || isLongByChars || isExpanded) && a.body;
+
+    return (
+      <>
+        <View style={styles.bodyContainer}>
+          {!isExpanded && a.body ? (
+            <Typography
+              style={[styles.notificationSubtitle, styles.measureText]}
+              onTextLayout={e => {
+                const lines = e.nativeEvent?.lines ?? [];
+                if (lines.length > 2) markTruncated(itemId);
+              }}
+            >
+              {a.body}
+            </Typography>
+          ) : null}
+          <Typography
+            style={styles.notificationSubtitle}
+            numberOfLines={isExpanded ? undefined : 2}
+            ellipsizeMode={isExpanded ? undefined : 'tail'}
+          >
+            {a.body}
+          </Typography>
+        </View>
+        {showReadMore ? (
+          <TouchableOpacity
+            onPress={() => toggleExpand(itemId)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            activeOpacity={0.7}
+          >
+            <Typography style={styles.readMore}>
+              {isExpanded ? 'Read less' : 'Read more'}
+            </Typography>
+          </TouchableOpacity>
+        ) : null}
+      </>
+    );
+  };
+
   const renderItem = ({ item, index }: { item: FlatListItem; index: number }) => {
     if (item.type === 'header') {
       return (
@@ -195,19 +289,50 @@ export const NotificationListing = () => {
         </View>
       );
     }
+
     const a = item.activity;
     const itemId = item.id;
     const isExpanded = expandedIds.has(itemId);
-    const isTruncated = truncatedIds.has(itemId);
-    const isLongByChars = (a.body?.length ?? 0) > 100;
-    const showReadMore = (isTruncated || isLongByChars || isExpanded) && a.body;
     const notificationData = {
       type: a.type,
       objectable_id: a?.objectable_id,
       booking_id: a?.objectable_id ?? null,
-      status: (a as any)?.status ?? null,
-      sub_type: (a as any)?.sub_type ?? null,
+      status: (a as Activity & { status?: number }).status ?? null,
+      sub_type: (a as Activity & { sub_type?: string }).sub_type ?? null,
     };
+
+    if (USE_ALPHA_CARDS) {
+      const visual = getNotificationVisual(a.type);
+      return (
+        <TouchableOpacity
+          onPress={() => handleNotificationNavigation(notificationData)}
+          activeOpacity={0.7}
+          style={styles.notificationCard}
+        >
+          <RowComponent style={styles.cardRow}>
+            <View style={[styles.iconContainer, { backgroundColor: visual.iconBg }]}>
+              <Icon
+                componentName={VARIABLES.MaterialIcons as 'MaterialIcons'}
+                iconName={visual.iconName}
+                size={24}
+                color={visual.iconColor}
+              />
+            </View>
+            <View style={styles.notificationContent}>
+              <Typography style={styles.notificationTitle}>{a.title}</Typography>
+              {a.body ? (
+                <Typography style={styles.notificationSubtitle} numberOfLines={3}>
+                  {a.body}
+                </Typography>
+              ) : null}
+              <Typography style={styles.timeAgo}>
+                {formatNotificationTimeAgo(a.created_at)}
+              </Typography>
+            </View>
+          </RowComponent>
+        </TouchableOpacity>
+      );
+    }
 
     return (
       <RowComponent
@@ -217,7 +342,7 @@ export const NotificationListing = () => {
       >
         <View style={styles.iconContainer}>
           <Icon
-            componentName={VARIABLES.MaterialIcons as any}
+            componentName={VARIABLES.MaterialIcons as 'MaterialIcons'}
             iconName={getIconForType(a.type)}
             size={24}
             color={COLORS.PRIMARY}
@@ -225,44 +350,18 @@ export const NotificationListing = () => {
         </View>
         <View style={styles.notificationContent}>
           <Typography style={styles.notificationTitle}>{a.title}</Typography>
-          <View style={styles.bodyContainer}>
-            {!isExpanded && a.body ? (
-              <Typography
-                style={[styles.notificationSubtitle, styles.measureText]}
-                onTextLayout={e => {
-                  const lines = e.nativeEvent?.lines ?? [];
-                  if (lines.length > 2) markTruncated(itemId);
-                }}
-              >
-                {a.body}
-              </Typography>
-            ) : null}
-            <Typography
-              style={styles.notificationSubtitle}
-              numberOfLines={isExpanded ? undefined : 2}
-              ellipsizeMode={isExpanded ? undefined : 'tail'}
-            >
-              {a.body}
-            </Typography>
-          </View>
-          {showReadMore ? (
-            <TouchableOpacity
-              onPress={() => toggleExpand(itemId)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              activeOpacity={0.7}
-            >
-              <Typography style={styles.readMore}>
-                {isExpanded ? 'Read less' : 'Read more'}
-              </Typography>
-            </TouchableOpacity>
-          ) : null}
+          {renderNotificationBody(a, itemId, isExpanded)}
         </View>
       </RowComponent>
     );
   };
 
   return (
-    <Wrapper headerTitle={COMMON_TEXT.NOTIFICATIONS}>
+    <Wrapper
+      headerTitle={COMMON_TEXT.NOTIFICATIONS}
+      backIconStyle={USE_ALPHA_CARDS ? CONSUMER_BACK_ICON : undefined}
+      backgroundColor={USE_ALPHA_CARDS ? COLORS.BACKGROUND : undefined}
+    >
       {loading ? (
         <NotificationSkeleton />
       ) : (
@@ -294,15 +393,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 30,
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: {
-    color: COLORS.TEXT_SECONDARY,
-  },
   groupHeader: {
     marginBottom: 15,
   },
@@ -313,6 +403,17 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
     color: COLORS.TEXT,
+  },
+  notificationCard: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
+    ...CARD_SHADOW,
+  },
+  cardRow: {
+    alignItems: 'flex-start',
+    gap: 15,
   },
   notificationItem: {
     alignItems: 'flex-start',
@@ -349,6 +450,11 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT_SECONDARY,
     lineHeight: 20,
   },
+  timeAgo: {
+    fontSize: FontSize.Small,
+    color: COLORS.TEXT_SECONDARY,
+    marginTop: 8,
+  },
   measureText: {
     position: 'absolute',
     opacity: 0,
@@ -366,6 +472,12 @@ const skeletonStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  card: {
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
   },
   skeletonRow: {
     flexDirection: 'row',

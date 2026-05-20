@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   GradientIcon,
   Icon,
+  type IconComponentProps,
+  FoodPreparingAnimation,
   MOCK_FOOD_ORDER,
   ParcelCourierCard,
   ParcelRouteMap,
@@ -29,6 +31,16 @@ import { CancelReasonModal } from './CancelReasonModal';
 
 const BACK_ICON = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
 
+const PHASE_ORDER: FoodOrderPhase[] = [
+  'placing_order',
+  'order_placed',
+  'order_accepted',
+  'preparing',
+  'picked_up',
+  'on_the_way',
+  'delivered',
+];
+
 const PHASE_MS: Partial<Record<FoodOrderPhase, number>> = {
   placing_order: 1800,
   order_placed: 2200,
@@ -37,6 +49,56 @@ const PHASE_MS: Partial<Record<FoodOrderPhase, number>> = {
   picked_up: 5500,
   on_the_way: 6500,
 };
+
+const OVERLAY_PHASES: FoodOrderPhase[] = ['placing_order', 'order_placed', 'order_accepted'];
+
+type PhaseStatus = {
+  key: string;
+  overlayHeading?: string;
+  icon: Pick<IconComponentProps, 'componentName' | 'iconName' | 'size'>;
+  title: string;
+  subtitle: string;
+};
+
+function FoodOrderPhaseModal({
+  visible,
+  heading,
+  title,
+  subtitle,
+  icon,
+}: {
+  visible: boolean;
+  heading?: string;
+  title: string;
+  subtitle: string;
+  icon: PhaseStatus['icon'];
+}) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType='fade'
+      statusBarTranslucent
+      presentationStyle='overFullScreen'
+    >
+      <View style={styles.phaseModalScrim}>
+        <View style={styles.overlayCard}>
+          {heading ? (
+            <Typography style={styles.overlayHeading}>{heading}</Typography>
+          ) : null}
+          <GradientIcon
+            {...icon}
+            color={COLORS.WHITE}
+            containerSize={72}
+            borderRadius={36}
+          />
+          <Typography style={styles.overlayTitle}>{title}</Typography>
+          <Typography style={styles.overlaySubtitle}>{subtitle}</Typography>
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
 export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
@@ -59,24 +121,19 @@ export const TrackFoodOrderScreen = () => {
   );
 
   const showMap = phase === 'picked_up' || phase === 'on_the_way' || phase === 'delivered';
+  const showPreparingHero = phase === 'preparing';
+  const showOverlayCard = OVERLAY_PHASES.includes(phase);
+  const showTrackingUi = !showOverlayCard;
   const activeSegment = Math.max(0, FOOD_ORDER_PHASE_INDEX[phase]);
+  const isDelivered = phase === 'delivered';
 
   useEffect(() => {
     if (phase === 'delivered') return undefined;
     const ms = PHASE_MS[phase] ?? 3000;
     const tid = setTimeout(() => {
       setPhase(curr => {
-        const order: FoodOrderPhase[] = [
-          'placing_order',
-          'order_placed',
-          'order_accepted',
-          'preparing',
-          'picked_up',
-          'on_the_way',
-          'delivered',
-        ];
-        const idx = order.indexOf(curr);
-        return order[Math.min(idx + 1, order.length - 1)];
+        const idx = PHASE_ORDER.indexOf(curr);
+        return PHASE_ORDER[Math.min(idx + 1, PHASE_ORDER.length - 1)];
       });
     }, ms);
     return () => clearTimeout(tid);
@@ -108,12 +165,12 @@ export const TrackFoodOrderScreen = () => {
     setRouteCoords(coordinates);
   }, []);
 
-  const status = useMemo(() => {
+  const status = useMemo((): PhaseStatus => {
     switch (phase) {
       case 'placing_order':
         return {
           key: 'placing',
-          overlayTitle: 'Placing Order',
+          overlayHeading: 'Placing Order',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
           title: 'Placing Order',
           subtitle: 'Please wait…',
@@ -121,7 +178,6 @@ export const TrackFoodOrderScreen = () => {
       case 'order_placed':
         return {
           key: 'placed',
-          overlayTitle: 'Placing Order',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
           title: 'Order Placed!',
           subtitle: 'Your order has been placed',
@@ -129,7 +185,7 @@ export const TrackFoodOrderScreen = () => {
       case 'order_accepted':
         return {
           key: 'accepted',
-          overlayTitle: 'Order Accepted',
+          overlayHeading: 'Order Accepted',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
           title: 'Order Accepted',
           subtitle: 'Order has been accepted by the restaurant.',
@@ -137,15 +193,14 @@ export const TrackFoodOrderScreen = () => {
       case 'preparing':
         return {
           key: 'prep',
-          overlayTitle: '',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'room-service', size: 36 },
           title: 'Preparing Order',
-          subtitle: 'Your order is being prepared. It takes upto 2 - 3 minutes to prepare the order.',
+          subtitle:
+            'Your order is being prepared. It takes upto 2 - 3 minutes to prepare the order.',
         };
       case 'picked_up':
         return {
           key: 'picked',
-          overlayTitle: '',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'package-variant', size: 36 },
           title: 'Picked Up',
           subtitle: 'Your order has been picked up',
@@ -153,7 +208,6 @@ export const TrackFoodOrderScreen = () => {
       case 'on_the_way':
         return {
           key: 'way',
-          overlayTitle: '',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
           title: 'On the way',
           subtitle: "Your order is on it's way",
@@ -161,17 +215,12 @@ export const TrackFoodOrderScreen = () => {
       default:
         return {
           key: 'done',
-          overlayTitle: '',
           icon: { componentName: VARIABLES.Entypo, iconName: 'check', size: 40 },
           title: 'Delivered',
           subtitle: 'Parcel has been delivered',
         };
     }
   }, [phase]);
-
-  const isDelivered = phase === 'delivered';
-  const showOverlayCard =
-    phase === 'placing_order' || phase === 'order_placed' || phase === 'order_accepted';
 
   return (
     <Wrapper
@@ -182,136 +231,142 @@ export const TrackFoodOrderScreen = () => {
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {showMap ? (
-        <View style={styles.mapWrap}>
-          <ParcelRouteMap
-            pickup={pickup}
-            dropoff={dropoff}
-            mapRegion={mapRegion}
-            mapRef={mapRef}
-            onDirectionsReady={onDirectionsReady}
-          >
-            {courierCoord && phase !== 'delivered' ? (
-              <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName='motorbike'
-                  size={28}
-                  color={COLORS.APP_SECONDARY}
-                />
-              </Marker>
-            ) : null}
-          </ParcelRouteMap>
-        </View>
-      ) : (
-        <View style={styles.heroPlaceholder} />
-      )}
+      <View style={styles.screen}>
+        {showMap ? (
+          <View style={styles.mapWrap}>
+            <ParcelRouteMap
+              pickup={pickup}
+              dropoff={dropoff}
+              mapRegion={mapRegion}
+              mapRef={mapRef}
+              onDirectionsReady={onDirectionsReady}
+            >
+              {courierCoord && !isDelivered ? (
+                <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
+                  <Icon
+                    componentName={VARIABLES.MaterialCommunityIcons}
+                    iconName='motorbike'
+                    size={28}
+                    color={COLORS.APP_SECONDARY}
+                  />
+                </Marker>
+              ) : null}
+            </ParcelRouteMap>
+          </View>
+        ) : showPreparingHero ? (
+          <FoodPreparingAnimation />
+        ) : (
+          <View style={styles.heroPlaceholder} />
+        )}
 
-      <View style={styles.body}>
-        {phase !== 'placing_order' && phase !== 'order_placed' && phase !== 'order_accepted' ? (
-          <>
-            <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
-            <View style={styles.etaPill}>
-              <Typography style={styles.etaTxt}>
-                {`Estimated delivery: ${MOCK_FOOD_ORDER.etaLabel}`}
-              </Typography>
-            </View>
-          </>
-        ) : null}
+        <ScrollView
+          style={styles.bodyScroll}
+          contentContainerStyle={styles.bodyScrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {showTrackingUi ? (
+            <>
+              <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
+              <View style={styles.etaPill}>
+                <Typography style={styles.etaTxt}>
+                  {`Estimated delivery: ${MOCK_FOOD_ORDER.etaLabel}`}
+                </Typography>
+              </View>
+            </>
+          ) : null}
 
-        {!showOverlayCard ? (
-          <RideAnimatedStatusBlock
-            animationKey={status.key}
-            iconProps={status.icon}
-            title={status.title}
-            subtitle={status.subtitle}
-          />
-        ) : null}
-
-        {showMap && !isDelivered ? (
-          <ParcelCourierCard
-            courierName={MOCK_FOOD_ORDER.courierName}
-            phone={MOCK_FOOD_ORDER.courierPhone}
-            avatarSource={IMAGES.USER}
-            onPhonePress={() => openPhoneNumber(MOCK_FOOD_ORDER.courierPhone)}
-            onMessagePress={() => {}}
-          />
-        ) : null}
-
-        {showMap && !isDelivered ? (
-          <RideVehicleStatsRow
-            items={[
-              { icon: 'motorbike', label: 'Vehicle Type', value: MOCK_FOOD_ORDER.vehicleType },
-              { icon: 'card-text', label: 'License Plate', value: MOCK_FOOD_ORDER.licensePlate },
-              { icon: 'water', label: 'Color', value: MOCK_FOOD_ORDER.vehicleColor },
-            ]}
-            marginHorizontal={0}
-          />
-        ) : null}
-
-        {isDelivered ? (
-          <>
+          {showTrackingUi && !isDelivered ? (
             <RideAnimatedStatusBlock
               animationKey={status.key}
               iconProps={status.icon}
               title={status.title}
               subtitle={status.subtitle}
             />
-            <View style={styles.rateBlock}>
-              <Typography style={styles.rateTitle}>Rate your ride</Typography>
-              <View style={styles.stars}>
-                {[1, 2, 3, 4, 5].map(star => (
-                  <Pressable key={star} onPress={() => setRating(star)}>
-                    <Icon
-                      componentName={VARIABLES.Ionicons}
-                      iconName={star <= rating ? 'star' : 'star-outline'}
-                      size={28}
-                      color={COLORS.APP_STAR}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </>
-        ) : null}
-      </View>
+          ) : null}
 
-      <View style={styles.footer}>
-        {isDelivered ? (
-          <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
-            <Typography style={styles.doneTxt}>Done</Typography>
-          </Pressable>
-        ) : (
-          <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
-            <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
-          </Pressable>
-        )}
-      </View>
-
-      {showOverlayCard ? (
-        <View style={styles.overlay} pointerEvents='none'>
-          <View style={styles.overlayCard}>
-            {status.overlayTitle ? (
-              <Typography style={styles.overlayHeading}>{status.overlayTitle}</Typography>
-            ) : null}
-            <GradientIcon
-              {...status.icon}
-              color={COLORS.WHITE}
-              containerSize={72}
-              borderRadius={36}
+          {showMap && !isDelivered ? (
+            <ParcelCourierCard
+              courierName={MOCK_FOOD_ORDER.courierName}
+              phone={MOCK_FOOD_ORDER.courierPhone}
+              avatarSource={IMAGES.USER}
+              onPhonePress={() => openPhoneNumber(MOCK_FOOD_ORDER.courierPhone)}
+              onMessagePress={() => {}}
             />
-            <Typography style={styles.overlayTitle}>{status.title}</Typography>
-            <Typography style={styles.overlaySubtitle}>{status.subtitle}</Typography>
-          </View>
-        </View>
-      ) : null}
+          ) : null}
 
-      <CancelReasonModal visible={cancelOpen} onClose={() => setCancelOpen(false)} />
+          {showMap && !isDelivered ? (
+            <RideVehicleStatsRow
+              items={[
+                { icon: 'motorbike', label: 'Vehicle Type', value: MOCK_FOOD_ORDER.vehicleType },
+                { icon: 'card-text', label: 'License Plate', value: MOCK_FOOD_ORDER.licensePlate },
+                { icon: 'water', label: 'Color', value: MOCK_FOOD_ORDER.vehicleColor },
+              ]}
+              marginHorizontal={0}
+            />
+          ) : null}
+
+          {isDelivered ? (
+            <>
+              <RideAnimatedStatusBlock
+                animationKey={status.key}
+                iconProps={status.icon}
+                title={status.title}
+                subtitle={status.subtitle}
+              />
+              <View style={styles.rateBlock}>
+                <Typography style={styles.rateTitle}>Rate your ride</Typography>
+                <View style={styles.stars}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <Pressable key={star} onPress={() => setRating(star)}>
+                      <Icon
+                        componentName={VARIABLES.Ionicons}
+                        iconName={star <= rating ? 'star' : 'star-outline'}
+                        size={55}
+                        color={COLORS.APP_STAR}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </>
+          ) : null}
+        </ScrollView>
+
+        <View style={styles.footer}>
+          {isDelivered ? (
+            <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
+              <Typography style={styles.doneTxt}>Done</Typography>
+            </Pressable>
+          ) : (
+            <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
+              <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      <FoodOrderPhaseModal
+        visible={showOverlayCard}
+        heading={status.overlayHeading}
+        title={status.title}
+        subtitle={status.subtitle}
+        icon={status.icon}
+      />
+
+      <CancelReasonModal
+        visible={cancelOpen}
+        onClose={() => setCancelOpen(false)}
+        onContinue={() => setCancelOpen(false)}
+      />
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   mapWrap: {
     height: screenHeight(34),
     borderBottomLeftRadius: 20,
@@ -324,10 +379,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  body: {
+  bodyScroll: {
     flex: 1,
+  },
+  bodyScrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 16,
+    paddingBottom: 8,
   },
   etaPill: {
     alignSelf: 'center',
@@ -345,10 +404,11 @@ const styles = StyleSheet.create({
   rateBlock: {
     alignItems: 'center',
     marginTop: 8,
+    marginBottom: 16,
   },
   rateTitle: {
-    fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.ExtraLarge,
     marginBottom: 12,
   },
   stars: {
@@ -358,6 +418,8 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingBottom: 24,
+    paddingTop: 8,
+    backgroundColor: COLORS.WHITE,
   },
   cancelSoft: {
     backgroundColor: '#FFEDD5',
@@ -380,12 +442,13 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.Bold,
     fontSize: FontSize.Medium,
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-    alignItems: 'center',
+  phaseModalScrim: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
   overlayCard: {
     backgroundColor: COLORS.WHITE,
@@ -396,12 +459,18 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     alignItems: 'center',
     gap: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
   },
   overlayHeading: {
     fontSize: FontSize.Medium,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.APP_TEXT_MUTED,
     marginBottom: 4,
+    textAlign: 'center',
   },
   overlayTitle: {
     fontSize: FontSize.Large,
@@ -414,5 +483,6 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
     textAlign: 'center',
     lineHeight: 20,
+    paddingHorizontal: 4,
   },
 });

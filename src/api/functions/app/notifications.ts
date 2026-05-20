@@ -1,8 +1,13 @@
 import { API_ROUTES } from 'api/routes';
+import { ENV_CONSTANTS } from 'constants/common';
+import { MOCK_NOTIFICATIONS_PAGE } from 'constants/mockNotifications';
 import { handleGetApiRequest, handlePostApiRequest } from '.';
 import { NotificationsListData } from 'types/responseTypes';
 
 export const getNotifications = async (page = 1): Promise<NotificationsListData | null> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return page === 1 ? MOCK_NOTIFICATIONS_PAGE : { ...MOCK_NOTIFICATIONS_PAGE, activities: [] };
+  }
   const response = await handleGetApiRequest<NotificationsListData>({
     url: API_ROUTES.GET_NOTIFICATIONS,
     params: { page },
