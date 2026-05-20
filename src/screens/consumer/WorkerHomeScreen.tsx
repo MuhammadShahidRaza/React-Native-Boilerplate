@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.SEARCH_BAR,
-    paddingHorizontal: 24,
+    paddingHorizontal: 25,
     paddingVertical: 25,
   },
   statItem: {

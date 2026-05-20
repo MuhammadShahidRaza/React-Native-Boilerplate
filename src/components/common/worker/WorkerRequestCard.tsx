@@ -13,7 +13,10 @@ export interface WorkerRequestCardProps {
 
 export const WorkerRequestCard = ({ request, fareLabel, onPress }: WorkerRequestCardProps) => (
   <Pressable style={styles.card} onPress={onPress}>
-    <Photo source={IMAGES.USER} size={52} borderRadius={26} />
+    <Photo source={IMAGES.USER} size={52} borderRadius={50} 
+  
+    
+    />
     <Typography style={styles.name} numberOfLines={1}>
       {request.customerName}
     </Typography>
@@ -28,8 +31,8 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 14,
+    backgroundColor:'#F5F9FF',
+    borderRadius: 30,
     padding: 14,
     marginBottom: 12,
     gap: 12,
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT,
   },
   fareCol: {
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   fareLabel: {
     fontSize: FontSize.ExtraSmall,

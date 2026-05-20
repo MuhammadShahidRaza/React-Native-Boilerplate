@@ -43,7 +43,7 @@ export const WorkerRequestsScreen = () => {
         renderItem={({ item }) => (
           <WorkerRequestCard
             request={item}
-            fareLabel={copy.fareLabel}
+            fareLabel={'Fare'}
             onPress={() =>
               navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })
             }

@@ -300,9 +300,9 @@ export const CustomBackIcon = ({
   style?: StyleProp<ViewStyle>;
 }) => (
   <GradientIcon
-    componentName={VARIABLES.Entypo}
-    iconName={'chevron-small-left'}
-    size={FontSize.ExtraLarge}
+    componentName={VARIABLES.Feather}
+    iconName={'arrow-left'}
+    size={FontSize.Small}
     color={COLORS.WHITE}
     borderRadius={12}
     containerSize={44}

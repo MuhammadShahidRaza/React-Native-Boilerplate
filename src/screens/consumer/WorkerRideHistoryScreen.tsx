@@ -14,9 +14,9 @@ export const WorkerRideHistoryScreen = () => {
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
   const historyStats = [
-    { value: WORKER_HISTORY_STATS.trips, label: copy.tripsStatLabel },
-    { value: WORKER_HISTORY_STATS.earned, label: WORKER_HISTORY_STATS.earnedLabel },
-    { value: WORKER_HISTORY_STATS.rating, label: WORKER_HISTORY_STATS.ratingLabel },
+    { value: WORKER_HISTORY_STATS.trips, label: 'Trips' },
+    { value: WORKER_HISTORY_STATS.earned, label: 'Earned' },
+    { value: WORKER_HISTORY_STATS.rating, label: 'Avg Rating' },
   ];
 
   return (

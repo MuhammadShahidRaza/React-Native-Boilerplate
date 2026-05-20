@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
   pill: {
     flex: 1,
     borderWidth: 1,
-    borderColor: COLORS.APP_PRIMARY,
+    borderColor: '#00B76C',
     borderRadius: 12,
     paddingVertical: 20,
     paddingHorizontal: 8,
@@ -47,14 +47,15 @@ const styles = StyleSheet.create({
   },
   pillGap: {},
   value: {
-    fontSize: FontSize.MediumSmall,
+    fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
-    color: COLORS.APP_TEXT,
+    color: COLORS.BLACK,
     textAlign: 'center',
   },
   label: {
-    fontSize: FontSize.ExtraSmall,
-    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Medium,
+    color: COLORS.BLACK,
+
     marginTop: 4,
     textAlign: 'center',
   },
