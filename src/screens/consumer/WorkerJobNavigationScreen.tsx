@@ -17,7 +17,7 @@ import { INITIAL_REGION } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenHeight } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, openMessage, openPhoneNumber, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
@@ -187,8 +187,8 @@ export const WorkerJobNavigationScreen = () => {
           driverName={detail.customerName}
           rating='5.0'
           avatarSource={IMAGES.USER}
-          onPhonePress={() => {}}
-          onMessagePress={() => {}}
+          onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
+          onMessagePress={() => openMessage('+237 6 99 99 99 99')}
           showVehicleSection={false}
           variant='elevatedWhite'
         />
