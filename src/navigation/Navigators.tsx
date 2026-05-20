@@ -302,10 +302,10 @@ export const CustomBackIcon = ({
   <GradientIcon
     componentName={VARIABLES.Feather}
     iconName={'arrow-left'}
-    size={FontSize.Small}
+    size={FontSize.MediumLarge}
     color={COLORS.WHITE}
     borderRadius={12}
-    containerSize={44}
+    containerSize={40}
     containerStyle={style}
     iconStyle={[
       {

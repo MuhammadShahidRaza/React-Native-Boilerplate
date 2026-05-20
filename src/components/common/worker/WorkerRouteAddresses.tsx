@@ -23,10 +23,15 @@ export const WorkerRouteAddresses = ({ pickupAddress, dropoffAddress }: WorkerRo
         />
       </View>
       <View style={styles.textCol}>
-        <Typography style={styles.label}>Pick up</Typography>
-        <Typography style={styles.address}>{pickupAddress}</Typography>
-        <Typography style={[styles.label, styles.dropLabel]}>Drop off</Typography>
-        <Typography style={styles.address}>{dropoffAddress}</Typography>
+        <View>
+          <Typography style={styles.label}>Pick up</Typography>
+          <Typography style={styles.address}>{pickupAddress}</Typography>
+        </View>
+        <View style={styles.divider} />
+        <View>
+          <Typography style={styles.label}>Drop off</Typography>
+          <Typography style={styles.address}>{dropoffAddress}</Typography>
+        </View>
       </View>
     </View>
   </View>
@@ -39,6 +44,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   row: {
     flexDirection: 'row',
@@ -72,8 +82,10 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
   },
-  dropLabel: {
-    marginTop: 14,
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.APP_LINE,
+    marginVertical: 12,
   },
   address: {
     fontSize: FontSize.Small,

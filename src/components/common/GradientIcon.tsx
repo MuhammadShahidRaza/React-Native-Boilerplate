@@ -1,7 +1,7 @@
 import { StyleProp, ViewStyle } from 'react-native';
 import { AppGradient } from './AppGradient';
 import { Icon, IconComponentProps } from './Icon';
-import { COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 
 type GradientVariant = 'primary' | 'primaryLight';
 
@@ -15,11 +15,12 @@ interface GradientIconProps extends IconComponentProps {
 
 export const GradientIcon = ({
   variant = 'primary',
-  gradientColors = [COLORS.APP_PRIMARY_DARK, COLORS.APP_PRIMARY_LIGHT],
+  gradientColors = [BRAND_SECONDARY, BRAND_PRIMARY],
   containerSize = 44,
   containerStyle,
   borderRadius,
   ...iconProps
+  
 }: GradientIconProps) => {
   return (
     <AppGradient
@@ -35,8 +36,9 @@ export const GradientIcon = ({
         },
         containerStyle,
       ]}
-      start={{ x: 0, y: 0 }} // Top-left
-      end={{ x: 1, y: 1 }} // Bottom-right
+    
+      start={{ x: -1, y: 0 }}
+      end={{ x: 1, y: 0.5 }}
     >
       <Icon {...iconProps} />
     </AppGradient>
