@@ -8,7 +8,7 @@ import {
   TextInputSubmitEditingEventData,
   TextStyle,
 } from 'react-native';
-import { COLORS, INPUT_THEME, isIOS, REGEX, safeString } from 'utils/index';
+import { COLORS, INPUT_THEME, isIOS, REGEX, safeString, splitPhoneNumberWithCode } from 'utils/index';
 import { Typography } from './Typography';
 import { StyleType } from 'types/index';
 import { useFocus } from 'hooks/useFocus';
@@ -38,12 +38,33 @@ interface PhoneInputProp extends PhoneInputProps {
   touched?: boolean;
   name: string;
   lineAfterIcon?: boolean;
-  startIcon: IconComponentProps;
+  startIcon?: IconComponentProps;
   error?: string;
   endIcon?: IconComponentProps;
   containerStyle?: StyleType;
+  secondContainerStyle?: StyleType;
+  inputContainerWithTitleStyle?: StyleType;
   titleStyle?: StyleProp<TextStyle>;
+  onBlur?: () => void;
 }
+
+/** Keep only national digits in the text field (flag area already shows +code). */
+const toNationalPhoneDigits = (raw: string, callingCode?: string) => {
+  const trimmed = safeString(raw).trim();
+  if (!trimmed) return '';
+
+  if (trimmed.startsWith('+')) {
+    const parsed = splitPhoneNumberWithCode(trimmed);
+    return safeString(parsed?.number).replace(/\D/g, '');
+  }
+
+  const codeDigits = safeString(callingCode).replace(/\D/g, '');
+  const digits = trimmed.replace(/\D/g, '');
+  if (codeDigits && digits.startsWith(codeDigits)) {
+    return digits.slice(codeDigits.length);
+  }
+  return digits;
+};
 
 export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   label,
@@ -71,17 +92,26 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   titleStyle,
   editable = true,
   containerStyle,
+  secondContainerStyle,
+  inputContainerWithTitleStyle,
+  onBlur,
   ...rest
 }) => {
   const phoneRef = useRef<PhoneInput>(null);
   const { activeInput, setActiveInput } = useFocus();
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
+  const [displayNumber, setDisplayNumber] = useState(() => toNationalPhoneDigits(value));
   const isErrorShown = touched && error;
+  const lockCountryPicker = !editable;
   const height = isTitleInLine ? (isIOS() ? 36 : 40) : INPUT_THEME.input.height;
   const isDarkMode = useColorScheme() == 'dark';
-  const handleTextChange = (text: string) => {
-    onChangeText(!allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text);
+
+  const handleNationalChange = (text: string) => {
+    const national = !allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text;
+    const digitsOnly = national.replace(/\D/g, '');
+    setDisplayNumber(digitsOnly);
+    onChangeText(digitsOnly);
   };
 
   const handleSubmitEditing = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
@@ -89,13 +119,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   };
 
   const validateNumber = (text: string) => {
-    // const isValid = phoneRef.current?.isValidNumber(text);
-    const startsWithPlusZero = text.startsWith(`+${countryCode}0`);
-    if (
-      // (touched && !isValid) ||
-      touched &&
-      startsWithPlusZero
-    ) {
+    if (touched && text.startsWith('0')) {
       setShowError(i18n.t(VALIDATION_MESSAGES.WRONG_PHONE_NUMBER));
     } else {
       setShowError('');
@@ -103,8 +127,10 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   };
 
   useEffect(() => {
-    validateNumber(value);
-  }, []);
+    const national = toNationalPhoneDigits(value, countryCode);
+    setDisplayNumber(national);
+    validateNumber(national);
+  }, [value, countryCode]);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -122,37 +148,55 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
       <RowComponent
         style={[
           styles.inputContainer,
+          isTitleInLine && styles.inputContainerInline,
           {
             borderColor:
               name === activeInput ? COLORS.PRIMARY : isErrorShown ? COLORS.RED : COLORS.BORDER,
-            borderWidth: 1,
-            borderRadius: isTitleInLine
-              ? INPUT_THEME.input.borderRadiusInline
-              : INPUT_THEME.input.borderRadius,
+            borderWidth: isTitleInLine ? 0 : 1,
+            borderBottomWidth: isTitleInLine ? 1 : undefined,
+            borderRadius: isTitleInLine ? 0 : INPUT_THEME.input.borderRadius,
           },
+          secondContainerStyle,
         ]}
       >
-        {/* {startIcon && <Icon {...startIcon} iconStyle={[styles.startIcon, startIcon.iconStyle]} />} */}
-        <Icon iconStyle={[styles.startIcon, startIcon?.iconStyle]} {...startIcon} />
-        {lineAfterIcon && <View style={styles.lineStyle} />}
+        {startIcon ? (
+          <Icon iconStyle={[styles.startIcon, startIcon.iconStyle]} {...startIcon} />
+        ) : null}
+        {lineAfterIcon && startIcon ? <View style={styles.lineStyle} /> : null}
         {label && <Typography style={styles.label}>{label}</Typography>}
-        <View style={styles.inputContainerWithTitle}>
-          {isTitleInLine && title && (
+        <View
+          style={[
+            styles.inputContainerWithTitle,
+            !startIcon && !endIcon ? styles.inputContainerFullWidth : null,
+            inputContainerWithTitleStyle,
+          ]}
+        >
+          {isTitleInLine && title ? (
             <Typography style={[styles.title, titleStyle]}>{title}</Typography>
-          )}
+          ) : null}
           <RowComponent>
             <PhoneInput
               ref={phoneRef}
-              defaultValue={value}
+              value={displayNumber}
               defaultCode={defaultCode}
+              layout='first'
+              disableArrowIcon={lockCountryPicker}
               countryPickerProps={{
                 withEmoji: true,
                 withFlag: true,
+                ...(lockCountryPicker ? { modalProps: { visible: false } } : {}),
                 ...(rest?.countryPickerProps || {}),
               }}
               placeholder={i18n.t(placeholder)}
-              containerStyle={[{ height }, styles.innerContainer]}
-              countryPickerButtonStyle={styles.countryPickerButtonStyle}
+              containerStyle={[
+                { height },
+                styles.innerContainer,
+                isTitleInLine && styles.innerContainerInline,
+              ]}
+              countryPickerButtonStyle={[
+                styles.countryPickerButtonStyle,
+                isTitleInLine && styles.countryPickerInline,
+              ]}
               textInputProps={{
                 placeholderTextColor: isDarkMode ? COLORS.ICONS : COLORS.TEXT,
                 editable: editable,
@@ -160,24 +204,33 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 maxLength: 12,
                 blurOnSubmit: blurOnSubmit,
                 onSubmitEditing: handleSubmitEditing,
-                onBlur: () => setActiveInput(''),
+                onBlur: () => {
+                  setActiveInput('');
+                  onBlur?.();
+                },
                 onFocus: () => setActiveInput(name),
                 allowFontScaling: false,
               }}
-              disabled={!editable}
+              disabled={false}
               textInputStyle={[
                 { height, fontSize: INPUT_THEME.value.fontSize },
                 styles.textInputStyle,
+                !editable && styles.textInputDisabled,
               ]}
               codeTextStyle={[styles.codeTextStyle, { fontSize: INPUT_THEME.value.fontSize }]}
-              textContainerStyle={[{ height }, styles.textContainerStyle]}
+              textContainerStyle={[
+                { height },
+                styles.textContainerStyle,
+                isTitleInLine && styles.textContainerInline,
+              ]}
               onChangeCountry={country => {
-                setCountryCode(country?.callingCode?.[0]);
-                onChangeCallingCode(safeString(country?.callingCode?.[0]));
+                const code = safeString(country?.callingCode?.[0]);
+                setCountryCode(code);
+                onChangeCallingCode(code);
                 onChangeCountryCode(country?.cca2);
               }}
-              onChangeFormattedText={(text: string) => {
-                handleTextChange(text);
+              onChangeText={(text: string) => {
+                handleNationalChange(text);
                 validateNumber(text);
               }}
               withDarkTheme={darkTheme}
@@ -195,9 +248,15 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   );
 };
 
+const PROFILE_FIELD_CONTAINER = {
+  borderWidth: 0,
+  borderBottomWidth: 1,
+  marginBottom: 20,
+} as const;
+
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 10,
+    marginBottom: 5,
   },
   inputContainer: {
     alignItems: 'center',
@@ -206,7 +265,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginBottom: 5,
   },
+  inputContainerInline: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+  },
   inputContainerWithTitle: { flex: 1 },
+  inputContainerFullWidth: { width: '100%' },
   lineStyle: {
     backgroundColor: COLORS.BORDER,
     width: 1,
@@ -247,6 +311,10 @@ const styles = StyleSheet.create({
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
     paddingLeft: 0,
   },
+  innerContainerInline: {
+    backgroundColor: 'transparent',
+    borderRadius: 0,
+  },
   codeTextStyle: {
     includeFontPadding: false,
     textAlignVertical: 'center',
@@ -260,13 +328,28 @@ const styles = StyleSheet.create({
     marginRight: 2,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
+  countryPickerInline: {
+    backgroundColor: 'transparent',
+    width: 52,
+    marginRight: 0,
+  },
   textContainerStyle: {
     flex: 1,
     paddingLeft: 0,
     paddingVertical: 0,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
+  textContainerInline: {
+    backgroundColor: 'transparent',
+  },
   textInputStyle: {
     color: COLORS.TEXT,
   },
+  textInputDisabled: {
+    color: COLORS.TEXT,
+    opacity: 1,
+  },
 });
+
+/** Matches Profile / Edit Profile inline field chrome (title above, bottom border only). */
+export const PROFILE_PHONE_INPUT_STYLE = PROFILE_FIELD_CONTAINER;

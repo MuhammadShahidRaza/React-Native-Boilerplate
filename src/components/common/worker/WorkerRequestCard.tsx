@@ -3,7 +3,7 @@ import { Photo, Typography } from 'components/index';
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
-import type { WorkerRequestRecord } from './workerMockData';
+import { formatWorkerServiceType, type WorkerRequestRecord } from './workerMockData';
 
 export interface WorkerRequestCardProps {
   request: WorkerRequestRecord;
@@ -11,15 +11,25 @@ export interface WorkerRequestCardProps {
   onPress?: () => void;
 }
 
+const AVATAR_SIZE = 56;
+
 export const WorkerRequestCard = ({ request, fareLabel, onPress }: WorkerRequestCardProps) => (
   <Pressable style={styles.card} onPress={onPress}>
-    <Photo source={IMAGES.USER} size={52} borderRadius={50} 
-  
-    
+    <Photo
+      source={IMAGES.USER_IMAGE}
+      size={AVATAR_SIZE}
+      imageStyle={{ tintColor: COLORS.SECONDARY }} // add border radius to the image
+      borderRadius={AVATAR_SIZE / 2}
+      containerStyle={styles.avatarWrap}
     />
-    <Typography style={styles.name} numberOfLines={1}>
-      {request.customerName}
-    </Typography>
+    <View style={styles.infoCol}>
+      <Typography style={styles.name} numberOfLines={1}>
+        {request.customerName}
+      </Typography>
+      <Typography style={styles.serviceType}>
+        {formatWorkerServiceType(request.serviceType)}
+      </Typography>
+    </View>
     <View style={styles.fareCol}>
       <Typography style={styles.fareLabel}>{fareLabel}</Typography>
       <Typography style={styles.fareAmount}>{request.fare}</Typography>
@@ -31,9 +41,9 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor:'#F5F9FF',
+    backgroundColor: '#F5F9FF',
     borderRadius: 30,
-    padding: 14,
+    padding: 10,
     marginBottom: 12,
     gap: 12,
     borderWidth: 1,
@@ -44,17 +54,32 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  name: {
+  avatarWrap: {
+    borderWidth: 2,
+    borderColor: COLORS.APP_LINE,
+    borderRadius: AVATAR_SIZE / 2,
+    overflow: 'hidden',
+  },
+  infoCol: {
     flex: 1,
+    gap: 2,
+  },
+  name: {
     fontSize: FontSize.Medium,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
   },
+  serviceType: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+  },
   fareCol: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
   },
   fareLabel: {
-    fontSize: FontSize.ExtraSmall,
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.Medium,
+    alignSelf: 'flex-start',
     color: COLORS.APP_TEXT_MUTED,
   },
   fareAmount: {

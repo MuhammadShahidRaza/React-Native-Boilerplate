@@ -61,6 +61,17 @@ export const normalizePhoneNumber = (
   return `+${normalizedCode}${digitsOnlyPhone}`;
 };
 
+/** National number for phone input display (Profile, Edit Profile, etc.). */
+export function getDisplayPhoneNumber(
+  user: { phone_number?: string | null; phone?: string | null; calling_code?: string | null } | null | undefined,
+) {
+  const raw = user?.phone_number ?? user?.phone ?? '';
+  if (!raw) return '';
+  const withPlus = raw.startsWith('+') ? raw : `${user?.calling_code ?? '+1'}${raw}`;
+  const parsed = splitPhoneNumberWithCode(withPlus);
+  return parsed?.number || raw.replace(/\D/g, '');
+}
+
 export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined) {
   try {
     const parsed = parsePhoneNumber(phoneNumber ?? '');

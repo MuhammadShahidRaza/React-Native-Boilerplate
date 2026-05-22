@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppGradient, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_PRIMARY, BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 
 const SIZE = 100;
 const RING = 8;
@@ -10,23 +10,39 @@ const RING = 8;
 export interface WorkerRequestTimerProps {
   seconds?: number;
   onExpire?: () => void;
+  /** When false, countdown pauses and onExpire will not fire. */
+  active?: boolean;
 }
 
-export const WorkerRequestTimer = ({ seconds = 60, onExpire }: WorkerRequestTimerProps) => {
+export const WorkerRequestTimer = ({
+  seconds = 60,
+  onExpire,
+  active = true,
+}: WorkerRequestTimerProps) => {
   const [remaining, setRemaining] = useState(seconds);
   const onExpireRef = useRef(onExpire);
+  const activeRef = useRef(active);
   onExpireRef.current = onExpire;
+  activeRef.current = active;
 
   useEffect(() => {
+    if (!active) {
+      setRemaining(seconds);
+      return;
+    }
+
     setRemaining(seconds);
     const startedAt = Date.now();
 
     const tick = () => {
+      if (!activeRef.current) return false;
       const elapsed = Math.floor((Date.now() - startedAt) / 1000);
       const left = Math.max(0, seconds - elapsed);
       setRemaining(left);
       if (left <= 0) {
-        onExpireRef.current?.();
+        if (activeRef.current) {
+          onExpireRef.current?.();
+        }
         return false;
       }
       return true;
@@ -38,7 +54,7 @@ export const WorkerRequestTimer = ({ seconds = 60, onExpire }: WorkerRequestTime
     }, 250);
 
     return () => clearInterval(id);
-  }, [seconds]);
+  }, [seconds, active]);
 
   const displayMin = String(Math.floor(remaining / 60)).padStart(2, '0');
   const displaySec = String(remaining % 60).padStart(2, '0');

@@ -6,7 +6,9 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
   Icon,
+  MapVehicleMarker,
   MOCK_PARCEL_COURIER,
+  PARCEL_COURIER_VEHICLE_STATS,
   ParcelCourierCard,
   ParcelRouteMap,
   ParcelTrackingBadge,
@@ -17,6 +19,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
+import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { ParcelTrackPhase } from 'types/parcelTrip';
 import {
@@ -31,8 +34,7 @@ import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { CancelReasonModal } from './CancelReasonModal';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
   picked_up: 0,
   in_transit: 1,
@@ -124,12 +126,7 @@ export const TrackParcelScreen = () => {
       case 'in_transit':
         return {
           animationKey: 'transit',
-          iconProps: {
-            componentName: VARIABLES.FontAwesome,
-            iconName: 'bicycle',
-            size: 36,
-            color: COLORS.WHITE,
-          },
+          imageSource: IMAGES.DELIVERY_BIKE,
           title: 'On the Way',
           subtitle: 'Your parcel is heading to the destination',
         } as const;
@@ -154,7 +151,7 @@ export const TrackParcelScreen = () => {
     <Wrapper
       headerTitle='Track Parcel'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -168,14 +165,7 @@ export const TrackParcelScreen = () => {
       >
         {courierCoord ? (
           <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.courierMarker}>
-              <Icon
-                componentName={VARIABLES.MaterialCommunityIcons}
-                iconName='bicycle'
-                size={14}
-                color={COLORS.APP_TEXT}
-              />
-            </View>
+            <MapVehicleMarker kind='bike' />
           </Marker>
         ) : null}
       </ParcelRouteMap>
@@ -187,7 +177,8 @@ export const TrackParcelScreen = () => {
 
         <RideAnimatedStatusBlock
           animationKey={status.animationKey}
-          iconProps={status.iconProps}
+          iconProps={'iconProps' in status ? status.iconProps : undefined}
+          imageSource={'imageSource' in status ? status.imageSource : undefined}
           title={status.title}
           subtitle={status.subtitle}
         />
@@ -202,7 +193,7 @@ export const TrackParcelScreen = () => {
 
         {!isDelivered ? (
           <RideVehicleStatsRow
-            items={[...MOCK_PARCEL_COURIER.vehicleStats]}
+            items={PARCEL_COURIER_VEHICLE_STATS}
             showVerticalDividers
             elevated
             marginHorizontal={0}
@@ -251,17 +242,6 @@ export const TrackParcelScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  courierMarker: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 6,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
-  },
   content: {
     paddingHorizontal: 16,
     paddingTop: 16,

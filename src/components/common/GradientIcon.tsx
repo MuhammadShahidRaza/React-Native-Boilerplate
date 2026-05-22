@@ -1,7 +1,7 @@
-import { StyleProp, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import { AppGradient } from './AppGradient';
 import { Icon, IconComponentProps } from './Icon';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY } from 'utils/index';
 
 type GradientVariant = 'primary' | 'primaryLight';
 
@@ -19,9 +19,10 @@ export const GradientIcon = ({
   containerSize = 44,
   containerStyle,
   borderRadius,
+  onPress,
   ...iconProps
 }: GradientIconProps) => {
-  return (
+  const gradient = (
     <AppGradient
       variant={variant}
       colors={gradientColors}
@@ -40,5 +41,26 @@ export const GradientIcon = ({
     >
       <Icon {...iconProps} />
     </AppGradient>
+  );
+
+  if (!onPress) {
+    return gradient;
+  }
+
+  const touchPad = Math.max(containerSize, 44);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      style={{
+        minWidth: touchPad,
+        minHeight: touchPad,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {gradient}
+    </Pressable>
   );
 };

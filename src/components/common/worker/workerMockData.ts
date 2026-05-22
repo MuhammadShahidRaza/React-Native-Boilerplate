@@ -47,11 +47,18 @@ export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
   },
 ];
 
+export type WorkerServiceType = 'parcel' | 'food';
+
 export type WorkerRequestRecord = {
   id: string;
   customerName: string;
   fare: string;
+  serviceType: WorkerServiceType;
 };
+
+export function formatWorkerServiceType(type: WorkerServiceType): string {
+  return type === 'parcel' ? 'Parcel' : 'Food';
+}
 
 export type WorkerRequestDetail = WorkerRequestRecord & {
   pickupAddress: string;
@@ -72,9 +79,9 @@ export type WorkerRequestDetail = WorkerRequestRecord & {
 };
 
 export const WORKER_MOCK_REQUESTS: WorkerRequestRecord[] = [
-  { id: '1', customerName: 'John Doe', fare: 'CFA 18.50' },
-  { id: '2', customerName: 'John Doe', fare: 'CFA 18.50' },
-  { id: '3', customerName: 'John Doe', fare: 'CFA 18.50' },
+  { id: '1', customerName: 'John Doe', fare: 'CFA 18.50', serviceType: 'parcel' },
+  { id: '2', customerName: 'John Doe', fare: 'CFA 18.50', serviceType: 'food' },
+  { id: '3', customerName: 'John Doe', fare: 'CFA 18.50', serviceType: 'food' },
 ];
 
 export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
@@ -82,6 +89,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     id: '1',
     customerName: 'John Doe',
     fare: 'CFA 18.50',
+    serviceType: 'parcel',
     pickupAddress: '67 Murray Street, NY',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',
@@ -102,6 +110,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     id: '2',
     customerName: 'John Doe',
     fare: 'CFA 18.50',
+    serviceType: 'food',
     pickupAddress: '67 Murray Street, NY',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',
@@ -122,6 +131,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     id: '3',
     customerName: 'John Doe',
     fare: 'CFA 18.50',
+    serviceType: 'food',
     pickupAddress: '67 Murray Street, NY',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',

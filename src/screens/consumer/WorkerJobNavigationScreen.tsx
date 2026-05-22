@@ -174,6 +174,7 @@ export const WorkerJobNavigationScreen = () => {
             mapRegion={mapRegion}
             mapRef={mapRef}
             vehicleCoord={live.vehicleCoord}
+            vehicleMarkerKind={copy.jobKind === 'delivery' ? 'bike' : 'car'}
             onDirectionsReady={onDirectionsReady}
           />
           <View style={styles.navOverlay} pointerEvents='box-none'>
@@ -205,8 +206,9 @@ export const WorkerJobNavigationScreen = () => {
               fill
               style={styles.headingPill}
             >
-              <Typography style={styles.headingTxt}>
-                {copy.headingToDestination(detail.dropoffShortName)}
+              <Typography style={styles.headingLabel}>Heading to</Typography>
+              <Typography style={styles.headingDestination} numberOfLines={2}>
+                {detail.dropoffShortName}
               </Typography>
             </AppGradient>
           ) : null}
@@ -246,17 +248,26 @@ const styles = StyleSheet.create({
   headingPill: {
     borderRadius: 30,
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     marginHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',
+    gap: 2,
   },
-  headingTxt: {
+  headingLabel: {
     color: COLORS.WHITE,
-    fontWeight: FontWeight.SemiBold,
+    fontWeight: FontWeight.Medium,
     fontSize: FontSize.Small,
     textAlign: 'center',
+    opacity: 0.95,
+  },
+  headingDestination: {
+    color: COLORS.WHITE,
+    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.ExtraLarge,
+    textAlign: 'center',
+    lineHeight: 28,
   },
   cta: {
     marginHorizontal: 20,

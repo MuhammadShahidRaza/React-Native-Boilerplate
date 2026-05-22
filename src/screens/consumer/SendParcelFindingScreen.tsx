@@ -1,26 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, Animated } from 'react-native';
-import type MapView from 'react-native-maps';
+import { Animated, Image, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { GradientIcon, ParcelRouteMap, Typography, Wrapper } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import {
+  AppGradient,
+  GRADIENT_END,
+  GRADIENT_START,
+  Typography,
+  Wrapper,
+} from 'components/index';
+import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
 import { replace } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const SendParcelFindingScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL_FINDING>>();
   const [cancelVisible, setCancelVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
-  const mapRef = useRef<MapView>(null);
 
-  const { pickup, dropoff, mapRegion } = useMemo(
+  const { pickup, dropoff } = useMemo(
     () => resolveParcelTripCoords(route.params),
     [route.params],
   );
@@ -58,28 +61,22 @@ export const SendParcelFindingScreen = () => {
     <Wrapper
       headerTitle='Send Parcel'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* <ParcelRouteMap
-        pickup={pickup}
-        dropoff={dropoff}
-        mapRegion={mapRegion}
-        mapRef={mapRef}
-      /> */}
-
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
-          <GradientIcon
-            componentName={VARIABLES.FontAwesome}
-            iconName='bicycle'
-            size={52}
-            color={COLORS.WHITE}
-            containerSize={120}
-            borderRadius={60}
-          />
+          <AppGradient
+            colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+            start={GRADIENT_START}
+            end={GRADIENT_END}
+            fill
+            style={styles.iconCircle}
+          >
+            <Image source={IMAGES.DELIVERY_BIKE} style={styles.bikeIcon} resizeMode='contain' />
+          </AppGradient>
         </Animated.View>
         <Typography style={styles.title}>Finding a Courier...</Typography>
         <Typography style={styles.sub}>Please wait while we match you</Typography>
@@ -101,6 +98,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
     paddingBottom: 24,
+  },
+  iconCircle: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bikeIcon: {
+    width: 56,
+    height: 56,
+    tintColor: COLORS.WHITE,
   },
   title: {
     fontSize: FontSize.XL,

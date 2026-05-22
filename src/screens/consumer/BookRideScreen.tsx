@@ -16,8 +16,7 @@ import { getAndClearPickerResult } from 'utils/pickerStore';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const BookRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.BOOK_RIDE>>();
 
@@ -66,8 +65,7 @@ export const BookRideScreen = () => {
   return (
     <Wrapper
       headerTitle='Book a Ride'
-      showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}

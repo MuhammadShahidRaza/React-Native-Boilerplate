@@ -6,6 +6,7 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   GradientIcon,
   Icon,
+  MapVehicleMarker,
   type IconComponentProps,
   FoodPreparingAnimation,
   MOCK_FOOD_ORDER,
@@ -126,6 +127,8 @@ export const TrackFoodOrderScreen = () => {
   const showTrackingUi = !showOverlayCard;
   const activeSegment = Math.max(0, FOOD_ORDER_PHASE_INDEX[phase]);
   const isDelivered = phase === 'delivered';
+  const canCancel =
+    phase !== 'picked_up' && phase !== 'on_the_way' && phase !== 'delivered';
 
   useEffect(() => {
     if (phase === 'delivered') return undefined;
@@ -178,6 +181,7 @@ export const TrackFoodOrderScreen = () => {
       case 'order_placed':
         return {
           key: 'placed',
+          overlayHeading: 'Order Placed',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
           title: 'Order Placed!',
           subtitle: 'Your order has been placed',
@@ -243,12 +247,7 @@ export const TrackFoodOrderScreen = () => {
             >
               {courierCoord && !isDelivered ? (
                 <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
-                  <Icon
-                    componentName={VARIABLES.MaterialCommunityIcons}
-                    iconName='motorbike'
-                    size={28}
-                    color={COLORS.APP_SECONDARY}
-                  />
+                  <MapVehicleMarker kind='bike' />
                 </Marker>
               ) : null}
             </ParcelRouteMap>
@@ -338,11 +337,11 @@ export const TrackFoodOrderScreen = () => {
             <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
               <Typography style={styles.doneTxt}>Done</Typography>
             </Pressable>
-          ) : (
+          ) : canCancel ? (
             <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
               <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
             </Pressable>
-          )}
+          ) : null}
         </View>
       </View>
 

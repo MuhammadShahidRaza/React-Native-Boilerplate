@@ -14,8 +14,7 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { SVG } from 'constants/assets/svg';
 import { logger } from 'utils/logger';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 const RIDE_TYPES = [
   {
     id: 'basic',
@@ -102,7 +101,7 @@ export const ChooseRideScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}

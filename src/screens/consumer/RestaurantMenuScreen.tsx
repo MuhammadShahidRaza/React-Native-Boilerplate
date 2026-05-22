@@ -18,8 +18,6 @@ import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
 type MenuItem = {
   id: string;
   title: string;
@@ -87,7 +85,7 @@ export const RestaurantMenuScreen = () => {
   // Wrapper
   // headerTitle={name}
   // showBackButton={false}
-  // backIconStyle={BACK_ICON_STYLE}
+  //
   // useScrollView={false}
   // backgroundColor={COLORS.WHITE}
   // darkMode={false}
@@ -105,7 +103,7 @@ export const RestaurantMenuScreen = () => {
           <View style={styles.hero}>
             <CustomBackIcon
               onPress={() => onBack()}
-              style={[BACK_ICON_STYLE, { position: 'absolute', top: 50, left: 16, zIndex: 1 }]}
+              style={[{ position: 'absolute', top: 50, left: 16, zIndex: 1 }]}
             />
             <Photo source={IMAGES.RESTAURANT_ITEM_3} imageStyle={styles.heroImg} />
             {/* <LinearGradient colors={['transparent', 'rgba(0,0,0,0.75)']} style={styles.heroGrad} /> */}

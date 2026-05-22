@@ -7,8 +7,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 import { IMAGES } from 'constants/assets';
 import { useAppSelector } from 'types/reduxTypes';
-import { parseWalletBalance } from 'utils/workerOnboarding';
-import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
+import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 
@@ -25,23 +24,17 @@ const DUMMY_TRANSACTIONS: Transaction[] = [
   { id: '3', name: 'Comission - John Doe', type: 'Parcel', amount: '-CFA 7.73' },
 ];
 
-const WALLET_BALANCE = 0;
-
 export const WorkerWalletScreen = () => {
   const user = useAppSelector(state => state.user.userDetails);
-  const balance = useMemo(
-    () => (WALLET_BALANCE === 0 ? 100 : parseWalletBalance(user)),
-    [user],
-  );
+  const balance = useMemo(() => parseWalletBalance(user), [user]);
   const [topOffVisible, setTopOffVisible] = useState(false);
-  const profileGate = useWorkerProfileGate();
   const topOffShownRef = useRef(false);
 
   useEffect(() => {
-    if (!profileGate.isComplete || balance > 0 || topOffShownRef.current) return;
+    if (balance > 0 || topOffShownRef.current) return;
     topOffShownRef.current = true;
     setTopOffVisible(true);
-  }, [balance, profileGate.isComplete]);
+  }, [balance]);
 
   return (
     <View style={styles.root}>
@@ -95,16 +88,16 @@ export const WorkerWalletScreen = () => {
       </ScrollView>
 
       <AppStatusModal
-        visible={topOffVisible && profileGate.isComplete}
+        visible={topOffVisible}
         onClose={() => setTopOffVisible(false)}
         onPrimaryPress={() => navigate(SCREENS.CONTACT_US)}
-        title='Top off your wallet'
-        description='Your wallet balance is currently 0. Contact the Admin to top off your wallet and continue using the Sn Lift app.'
-        primaryButtonText='Contact Admin'
+        title={WORKER_WALLET_TOP_OFF.title}
+        description={WORKER_WALLET_TOP_OFF.description}
+        primaryButtonText={WORKER_WALLET_TOP_OFF.primaryButtonText}
         iconProps={{
           componentName: VARIABLES.MaterialCommunityIcons,
-          iconName: 'close-circle-outline',
-          size: 30,
+          iconName: 'close',
+          size: 32,
         }}
       />
     </View>

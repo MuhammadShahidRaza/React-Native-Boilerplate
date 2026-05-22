@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 import {
   FilterChipRow,
   FlatListComponent,
@@ -20,8 +20,7 @@ import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS } from 'utils/index';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const OrderFoodScreen = () => {
   const [category, setCategory] = useState<FoodCategory>('All');
   const [query, setQuery] = useState('');
@@ -77,7 +76,7 @@ export const OrderFoodScreen = () => {
     <Wrapper
       headerTitle='Order Food'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -101,7 +100,16 @@ export const OrderFoodScreen = () => {
           />
         </View>
 
-        <FilterChipRow options={FOOD_CATEGORIES} value={category} onChange={setCategory} />
+        <View style={styles.filterWrap}>
+          <FilterChipRow
+            options={FOOD_CATEGORIES}
+            value={category}
+            onChange={next => {
+              Keyboard.dismiss();
+              setCategory(next);
+            }}
+          />
+        </View>
 
         <FlatListComponent
           data={filtered}
@@ -131,6 +139,10 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     marginBottom: 0,
+  },
+  filterWrap: {
+    zIndex: 2,
+    backgroundColor: COLORS.WHITE,
   },
   list: {
     flex: 1,

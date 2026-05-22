@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   Button,
   Photo,
@@ -17,7 +17,12 @@ import { SCREENS } from 'constants/routes';
 import { COLORS, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
-import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
+import {
+  formatWorkerServiceType,
+  getWorkerRequestDetail,
+} from 'components/common/worker/workerMockData';
+
+const AVATAR_SIZE = 56;
 
 const CARD_SHADOW = {
   shadowColor: '#000',
@@ -36,7 +41,16 @@ export const WorkerRequestDetailScreen = () => {
     () => getWorkerRequestDetail(route.params?.requestId ?? '1'),
     [route.params?.requestId],
   );
-  const serviceLabel = copy.jobKind === 'delivery' ? 'Parcel' : 'Ride';
+  const [timerActive, setTimerActive] = useState(true);
+  const hasAcceptedRef = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      hasAcceptedRef.current = false;
+      setTimerActive(true);
+      return () => setTimerActive(false);
+    }, []),
+  );
 
   const handleBack = () => {
     if (navigation.canGoBack()) {
@@ -46,7 +60,14 @@ export const WorkerRequestDetailScreen = () => {
     navigate(SCREENS.WORKER_REQUESTS);
   };
 
+  const handleTimerExpire = () => {
+    if (hasAcceptedRef.current) return;
+    handleBack();
+  };
+
   const accept = () => {
+    hasAcceptedRef.current = true;
+    setTimerActive(false);
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: 'pickup',
@@ -61,9 +82,11 @@ export const WorkerRequestDetailScreen = () => {
       darkMode={false}
     >
       <View style={styles.content} pointerEvents='box-none'>
-        <View style={styles.timerWrap} pointerEvents='none'>
-          <WorkerRequestTimer seconds={60} onExpire={handleBack} />
-        </View>
+        {timerActive ? (
+          <View style={styles.timerWrap} pointerEvents='none'>
+            <WorkerRequestTimer seconds={60} onExpire={handleTimerExpire} active={timerActive} />
+          </View>
+        ) : null}
 
         <View style={styles.sheet} pointerEvents='box-none'>
           <Pressable style={styles.backBtn} onPress={handleBack} hitSlop={12}>
@@ -78,13 +101,20 @@ export const WorkerRequestDetailScreen = () => {
               <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
             </View>
           </View>
-          
+
           <View style={styles.sheetBody} pointerEvents='auto'>
             <View style={[styles.passengerCard, CARD_SHADOW]}>
-              <Photo source={IMAGES.USER} size={52} borderRadius={26} />
+              <Photo
+                source={IMAGES.USER}
+                size={AVATAR_SIZE}
+                borderRadius={AVATAR_SIZE / 2}
+                containerStyle={styles.avatarWrap}
+              />
               <View style={styles.passengerInfo}>
                 <Typography style={styles.passengerName}>{detail.customerName}</Typography>
-                <Typography style={styles.serviceType}>{serviceLabel}</Typography>
+                <Typography style={styles.serviceType}>
+                  {formatWorkerServiceType(detail.serviceType)}
+                </Typography>
               </View>
               <View style={styles.fareCol}>
                 <Typography style={styles.fareLabel}>{copy.fareLabel}</Typography>
@@ -114,7 +144,7 @@ export const WorkerRequestDetailScreen = () => {
               </View>
             </View>
 
-            <Button title='Accept Ride' onPress={accept} style={styles.acceptBtn} />
+            <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
             <Pressable onPress={handleBack} style={styles.rejectBtn}>
               <Typography style={styles.rejectTxt}>Reject</Typography>
             </Pressable>
@@ -148,7 +178,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
-   
     color: COLORS.BLACK,
   },
   paymentBadge: {
@@ -157,7 +186,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 6,
     borderRadius: 20,
-    marginBottom: 8,
+    marginVertical: 8,
   },
   paymentTxt: {
     color: COLORS.APP_SECONDARY,
@@ -170,20 +199,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.WHITE,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 90,
+    paddingTop: 80,
     ...CARD_SHADOW,
-    marginTop: screenHeight(15),
+    marginTop: screenHeight(8),
     paddingBottom: 100,
     overflow: 'visible',
   },
   timerWrap: {
     position: 'absolute',
-    top: 100,
+    top: 20,
     left: 0,
     right: 0,
     alignItems: 'center',
     zIndex: 1,
-
   },
   sheetBody: {
     paddingHorizontal: 16,
@@ -200,10 +228,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
   },
+  avatarWrap: {
+    borderWidth: 2,
+    borderColor: COLORS.APP_LINE,
+    borderRadius: AVATAR_SIZE / 2,
+    overflow: 'hidden',
+  },
   passengerInfo: {
     flex: 1,
     gap: 2,
-    
   },
   passengerName: {
     fontSize: FontSize.Medium,
@@ -218,7 +251,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   fareLabel: {
-    fontSize: FontSize.ExtraSmall,
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.Medium,
     color: COLORS.APP_TEXT_MUTED,
   },
   fareAmount: {
@@ -238,7 +272,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 10,
-
   },
   statDivider: {
     width: 1,
@@ -253,7 +286,6 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: FontSize.MediumLarge,
     color: COLORS.BLACK,
-
   },
   acceptBtn: {
     marginTop: 30,

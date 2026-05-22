@@ -2,13 +2,21 @@ import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { StyleSheet, View, Pressable, ScrollView } from 'react-native';
+import { Image, StyleSheet, View, Pressable, ScrollView } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-import { AppGradient, Icon, Typography, Wrapper } from 'components/index';
+import {
+  AppGradient,
+  GRADIENT_END,
+  GRADIENT_START,
+  Icon,
+  Typography,
+  Wrapper,
+} from 'components/index';
+import { IMAGES } from 'constants/assets';
 import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, screenWidth } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenWidth } from 'utils/index';
 
 // ─── Mock model (bookings removed — static demo cards) ───────────────────────
 
@@ -234,14 +242,17 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
             <Pressable key={route.key} onPress={onPress} style={styles.pillHalf}>
               {focused ? (
                 <AppGradient
-                  variant='primaryLight'
+                  colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                  start={GRADIENT_START}
+                  end={GRADIENT_END}
+                  fill
+                  style={styles.pillGradient}
                   pointerEvents='none'
-                  style={StyleSheet.absoluteFill}
                 />
               ) : null}
               <Typography
                 translate={false}
-                style={focused ? styles.pillTxtOn : styles.pillTxtOff}
+                style={[focused ? styles.pillTxtOn : styles.pillTxtOff, styles.pillLabel]}
               >
                 {label}
               </Typography>
@@ -332,12 +343,20 @@ const CategoryTabs = ({
 const ActivityCard = ({ item }: { item: MockActivityItem }) => (
   <View style={styles.card}>
     <AppGradient variant='primary' style={styles.typeIcon}>
-      <Icon
-        componentName={VARIABLES.Ionicons}
-        iconName={ICON_FOR[item.serviceLabel]}
-        size={22}
-        color={COLORS.WHITE}
-      />
+      {item.serviceLabel === 'Parcel' ? (
+        <Image
+          source={IMAGES.PARCEL_BOX}
+          style={styles.parcelIconImg}
+          resizeMode='contain'
+        />
+      ) : (
+        <Icon
+          componentName={VARIABLES.Ionicons}
+          iconName={ICON_FOR[item.serviceLabel]}
+          size={22}
+          color={COLORS.WHITE}
+        />
+      )}
     </AppGradient>
 
     <View style={styles.cardMid}>
@@ -452,7 +471,8 @@ const styles = StyleSheet.create({
   pillWrap: {
     width: '70%',
     alignSelf: 'center',
-    paddingBottom: 4,
+    paddingBottom: 8,
+    paddingTop: 4,
   },
   pillTrack: {
     flexDirection: 'row',
@@ -461,6 +481,11 @@ const styles = StyleSheet.create({
     borderColor: COLORS.APP_LINE,
     padding: 4,
     backgroundColor: COLORS.WHITE,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
   pillHalf: {
     flex: 1,
@@ -470,6 +495,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 44,
     position: 'relative',
+  },
+  pillGradient: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: 999,
+  },
+  pillLabel: {
+    zIndex: 1,
   },
   pillTxtOn: {
     fontWeight: FontWeight.Bold,
@@ -526,7 +558,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 16,
     paddingTop: 14,
-    paddingBottom: 32,
+    paddingBottom: 110,
   },
   skCard: {
     borderRadius: 16,
@@ -557,6 +589,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  parcelIconImg: {
+    width: 26,
+    height: 26,
+    tintColor: COLORS.WHITE,
   },
   cardMid: {
     flex: 1,

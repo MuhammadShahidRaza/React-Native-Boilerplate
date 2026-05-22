@@ -54,6 +54,5 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 120,
-    marginHorizontal: 16,
   },
 });

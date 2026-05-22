@@ -37,21 +37,21 @@ export const WorkerJobCompletedScreen = () => {
       darkMode={false}
     >
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-      <AppGradient
-        colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
-        start={{ x: -1, y: -1 }}
-        end={{ x: 1, y: -1 }}
-        style={styles.successIcon}
-      >
-  <Icon
+        <AppGradient
+          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          start={{ x: -1, y: -1 }}
+          end={{ x: 1, y: -1 }}
+          style={styles.successIcon}
+        >
+          <Icon
             componentName={VARIABLES.Entypo}
             iconName='check'
             size={FontSize.Huge}
             color={COLORS.WHITE}
           />
-      </AppGradient>
-        
-        <Typography style={styles.title}>Ride Completed</Typography>
+        </AppGradient>
+
+        <Typography style={styles.title}>{copy.jobCompletedTitle}</Typography>
         <Typography style={styles.subtitle}>{copy.jobCompletedSubtitle}</Typography>
 
         <View style={styles.card}>
@@ -67,14 +67,21 @@ export const WorkerJobCompletedScreen = () => {
         <View style={styles.card}>
           <Typography style={styles.cardTitle}>Wallet Update</Typography>
           <View style={styles.walletRow}>
-            <Typography style={styles.walletPrev}>{detail.previousWallet}</Typography>
+            <View style={styles.walletCol}>
+              <Typography style={styles.walletLabel}>Previous balance</Typography>
+              <Typography style={styles.walletAmount}>{detail.previousWallet}</Typography>
+            </View>
             <Icon
-              componentName={VARIABLES.Feather}
-              iconName='arrow-right'
-              size={FontSize.Medium}
+              componentName={VARIABLES.FontAwesome}
+              iconName='long-arrow-right'
+              size={FontSize.Large}
+              iconStyle={{marginBottom: 5}}
               color={COLORS.APP_TEXT_MUTED}
             />
-            <Typography style={styles.walletNew}>{detail.newWallet}</Typography>
+            <View style={[styles.walletCol, styles.walletColEnd]}>
+              <Typography style={styles.walletLabel}>New Balance</Typography>
+              <Typography style={styles.walletAmount}>{detail.newWallet}</Typography>
+            </View>
           </View>
         </View>
 
@@ -123,7 +130,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: FontSize.Small,
-    
+
     textAlign: 'center',
     // marginTop: 8,
     color: COLORS.BLACK,
@@ -181,16 +188,23 @@ const styles = StyleSheet.create({
   },
   walletRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
-  walletPrev: {
-    fontSize: FontSize.Medium,
+  walletCol: {
+    flex: 1,
+    gap: 4,
+  },
+  walletColEnd: {
+    alignItems: 'flex-end',
+  },
+  walletLabel: {
+    fontSize: FontSize.Small,
     color: COLORS.APP_TEXT_MUTED,
   },
-  walletNew: {
-    fontSize: FontSize.Medium,
+  walletAmount: {
+    fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
   },
@@ -198,6 +212,5 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 100,
     backgroundColor: '#21409A',
-   
   },
 });

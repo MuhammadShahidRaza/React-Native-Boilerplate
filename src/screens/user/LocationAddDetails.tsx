@@ -17,8 +17,7 @@ import { INITIAL_REGION } from 'constants/common';
 import { useRoute } from '@react-navigation/native';
 import { VARIABLES } from 'constants/common';
 import { createAddress, updateAddress } from 'api/functions/app/address';
-import { replace } from 'navigation/index';
-import { SCREENS } from 'constants/routes';
+import { pop } from 'navigation/Navigators';
 import { useAppDispatch } from 'types/reduxTypes';
 import { addAddress, updateAddressInList, setAddressDefault } from 'store/slices/address';
 import type { Address } from 'types/responseTypes';
@@ -86,7 +85,8 @@ export const LocationAddDetails = () => {
           dispatch(addAddress({ ...addr, is_default: 1 }));
           dispatch(setAddressDefault(addr.id)); // new address is always set as default
         }
-        replace(SCREENS.LOCATION);
+        // Location → MapPicker → AddDetails: pop both picker + details in one step
+        pop(2);
       }
     } catch (e) {
       Alert.alert('Error', 'Failed to save address. Please try again.');

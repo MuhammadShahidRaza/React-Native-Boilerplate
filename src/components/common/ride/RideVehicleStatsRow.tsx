@@ -43,18 +43,39 @@ export const RideVehicleStatsRow = ({
   );
 };
 
-const StatItem = ({ icon, label, value }: RideVehicleStatItem) => (
+const formatVehicleTypeValue = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  if (
+    normalized === 'cycle' ||
+    normalized === 'bicycle' ||
+    normalized === 'motorbike' ||
+    normalized === 'motorcycle'
+  ) {
+    return 'Bike';
+  }
+  return value;
+};
+
+const StatItem = ({ icon, label, value }: RideVehicleStatItem) => {
+  const displayValue = label === 'Vehicle Type' ? formatVehicleTypeValue(value) : value;
+  const displayIcon =
+    label === 'Vehicle Type' && (icon === 'bicycle' || icon === 'motorbike' || icon === 'cycle')
+      ? 'bike'
+      : icon;
+
+  return (
   <View style={styles.statItem}>
     <Icon
       componentName={VARIABLES.MaterialCommunityIcons}
-      iconName={icon}
+      iconName={displayIcon}
       size={22}
       color={COLORS.APP_PRIMARY}
     />
-    <Typography style={styles.statValue}>{value}</Typography>
+    <Typography style={styles.statValue}>{displayValue}</Typography>
     <Typography style={styles.statLabel}>{label}</Typography>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   statsRow: {

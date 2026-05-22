@@ -15,6 +15,7 @@ export * from './Photo';
 export * from './ProfilePictureUpload';
 export * from './RadioButton';
 export * from './Map';
+export * from './MapVehicleMarker';
 export * from './Modal';
 export * from './OfflineBanner';
 export * from './MessageBox';

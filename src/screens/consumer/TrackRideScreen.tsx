@@ -8,6 +8,7 @@ import {
   Button,
   Icon,
   Map,
+  MapVehicleMarker,
   MOCK_RIDE_TRIP,
   RideAnimatedStatusBlock,
   RideDriverCard,
@@ -18,6 +19,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
+import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RideTrackPhase } from 'types/rideTracking';
 import {
@@ -35,8 +37,7 @@ import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { CancelReasonModal } from './CancelReasonModal';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 const PROGRESS_PHASE_INDEX: Record<RideTrackPhase, number> = {
   arriving: 0,
   arrived: 1,
@@ -212,12 +213,7 @@ export const TrackRideScreen = () => {
       default:
         return {
           animationKey: 'done',
-          iconProps: {
-            componentName: VARIABLES.Entypo,
-            iconName: 'check',
-            size: 42,
-            color: COLORS.WHITE,
-          },
+          imageSource: IMAGES.RIDE_CHECK,
           title: 'Ride Completed',
           subtitle: 'Thank you for riding with us',
         } as const;
@@ -230,7 +226,7 @@ export const TrackRideScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -277,14 +273,7 @@ export const TrackRideScreen = () => {
           </Marker>
           {carCoord ? (
             <Marker coordinate={carCoord} anchor={{ x: 0.5, y: 0.5 }}>
-              <View style={styles.carMarker}>
-                <Icon
-                  componentName={VARIABLES.MaterialCommunityIcons}
-                  iconName='car'
-                  size={14}
-                  color={COLORS.APP_TEXT}
-                />
-              </View>
+              <MapVehicleMarker kind='car' />
             </Marker>
           ) : null}
         </Map>
@@ -295,7 +284,8 @@ export const TrackRideScreen = () => {
 
         <RideAnimatedStatusBlock
           animationKey={status.animationKey}
-          iconProps={status.iconProps}
+          iconProps={'iconProps' in status ? status.iconProps : undefined}
+          imageSource={'imageSource' in status ? status.imageSource : undefined}
           title={status.title}
           subtitle={status.subtitle}
         />
@@ -377,17 +367,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.APP_PRIMARY,
     borderWidth: 2,
     borderColor: COLORS.WHITE,
-  },
-  carMarker: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 6,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
   },
   content: {
     paddingHorizontal: 16,

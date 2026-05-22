@@ -30,11 +30,6 @@ export interface VehicleDetailsFormValues {
   vehicle_type: string;
 }
 
-const consumerBackIcon = {
-  backgroundColor: COLORS.APP_PRIMARY,
-  borderRadius: 12,
-};
-
 export const VehicleDetails = ({
   route,
 }: AppScreenProps<typeof SCREENS.VEHICLE_DETAILS>) => {
@@ -96,7 +91,6 @@ export const VehicleDetails = ({
       useScrollView
       headerTitle='Vehicle Details'
       showBackButton
-      backIconStyle={consumerBackIcon}
       headerEndIcon={() =>
         isFromSettings && !isEditing ? (
           <Pressable onPress={() => setIsEditing(true)} hitSlop={8}>
@@ -107,7 +101,6 @@ export const VehicleDetails = ({
               color={COLORS.WHITE}
               borderRadius={12}
               containerSize={44}
-              containerStyle={consumerBackIcon}
             />
           </Pressable>
         ) : null

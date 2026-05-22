@@ -68,12 +68,13 @@ export const DUMMY_USER: User = {
   invitation_code: 'INVITE123',
   is_phone_verified: true,
   language: 'en',
-  phone_number: '+1234567890',
+  phone_number: '234567890',
+  phone: '234567890',
   region: 'NY',
   updatedAt: '2024-01-01T00:00:00Z',
   user_name: 'johndoe',
   website_url: 'https://example.com',
-  whatsapp_number: '+1234567890',
+  whatsapp_number: '234567890',
 };
 
 const getUserDetails = async <R extends { user: User }>() => {

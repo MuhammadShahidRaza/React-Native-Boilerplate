@@ -6,6 +6,7 @@ import {
   GradientIcon,
   Icon,
   MOCK_PARCEL_COURIER,
+  PARCEL_COURIER_VEHICLE_STATS,
   RideVehicleStatsRow,
   Typography,
   Wrapper,
@@ -17,8 +18,7 @@ import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const CourierMatchedScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.COURIER_MATCHED>>();
   const { pickup, dropoff } = useMemo(() => resolveParcelTripCoords(route.params), [route.params]);
@@ -28,7 +28,6 @@ export const CourierMatchedScreen = () => {
     <Wrapper
       headerTitle='Courier Matched'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -63,7 +62,7 @@ export const CourierMatchedScreen = () => {
             >{`${MOCK_PARCEL_COURIER.paymentMethod} Payment`}</Typography>
           </View>
           <RideVehicleStatsRow
-            items={[...MOCK_PARCEL_COURIER.vehicleStats]}
+            items={PARCEL_COURIER_VEHICLE_STATS}
             showVerticalDividers
             marginHorizontal={0}
           />

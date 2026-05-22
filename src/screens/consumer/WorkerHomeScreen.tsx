@@ -1,8 +1,11 @@
+import { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppGradient, Button, Map, Typography } from 'components/index';
+import { AppGradient, AppStatusModal, Button, Map, Typography } from 'components/index';
+import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, screenHeight, BRAND_SECONDARY, BRAND_PRIMARY } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenHeight } from 'utils/index';
+import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
@@ -15,9 +18,34 @@ export const WorkerHomeScreen = () => {
   const role = useAppSelector(state => state?.user?.role);
   const { isOnline } = useAppSelector(state => state.worker);
   const copy = getWorkerRoleCopy(role);
+  const [topOffVisible, setTopOffVisible] = useState(false);
   const firstName = userDetails?.full_name?.split(' ')?.[0] ?? 'Alex';
+  const walletBalance = useMemo(() => parseWalletBalance(userDetails), [userDetails]);
+  const walletFunded = walletBalance > 0;
 
   const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
+
+  const blockIfWalletEmpty = () => {
+    if (walletFunded) return false;
+    setTopOffVisible(true);
+    return true;
+  };
+
+  const handleGoOnline = () => {
+    if (blockIfWalletEmpty()) return;
+    dispatch(setWorkerOnline(true));
+  };
+
+  const handleLookingPress = () => {
+    if (blockIfWalletEmpty()) return;
+    navigate(SCREENS.WORKER_REQUESTS);
+  };
+
+  useEffect(() => {
+    if (walletFunded || !isOnline) return;
+    dispatch(setWorkerOnline(false));
+    setTopOffVisible(true);
+  }, [walletFunded, isOnline, dispatch]);
 
   return (
     <View style={styles.root}>
@@ -50,7 +78,7 @@ export const WorkerHomeScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => dispatch(setWorkerOnline(true))}
+            onPress={handleGoOnline}
             style={[styles.toggleOption, isOnline && styles.toggleActive]}
           >
             {isOnline ? (
@@ -95,9 +123,23 @@ export const WorkerHomeScreen = () => {
           title={copy.lookingButton}
           style={styles.lookingBtn}
           textStyle={styles.lookingBtnTxt}
-          onPress={() => navigate(SCREENS.WORKER_REQUESTS)}
+          onPress={handleLookingPress}
         />
       ) : null}
+
+      <AppStatusModal
+        visible={topOffVisible}
+        onClose={() => setTopOffVisible(false)}
+        onPrimaryPress={() => navigate(SCREENS.CONTACT_US)}
+        title={WORKER_WALLET_TOP_OFF.title}
+        description={WORKER_WALLET_TOP_OFF.description}
+        primaryButtonText={WORKER_WALLET_TOP_OFF.primaryButtonText}
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'close',
+          size: 32,
+        }}
+      />
     </View>
   );
 };

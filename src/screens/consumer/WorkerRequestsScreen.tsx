@@ -9,11 +9,6 @@ import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
 import { setLookingForDeliveries } from 'store/slices/worker';
 
-const consumerBackIcon = {
-  backgroundColor: COLORS.APP_PRIMARY,
-  borderRadius: 12,
-};
-
 export const WorkerRequestsScreen = () => {
   const dispatch = useAppDispatch();
   const role = useAppSelector(state => state.user?.role);
@@ -30,7 +25,6 @@ export const WorkerRequestsScreen = () => {
     <Wrapper
       headerTitle={copy.requestsTitle}
       showBackButton
-      backIconStyle={consumerBackIcon}
       useScrollView={false}
       backgroundColor={COLORS.BACKGROUND}
       darkMode={false}
@@ -43,7 +37,7 @@ export const WorkerRequestsScreen = () => {
         renderItem={({ item }) => (
           <WorkerRequestCard
             request={item}
-            fareLabel={'Fare'}
+            fareLabel={copy.fareLabel}
             onPress={() =>
               navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })
             }

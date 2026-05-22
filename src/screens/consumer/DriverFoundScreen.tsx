@@ -20,8 +20,7 @@ import { CancelReasonModal } from './CancelReasonModal';
 import MapViewDirections from 'react-native-maps-directions';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const DriverFoundScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
 
@@ -72,7 +71,7 @@ export const DriverFoundScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}

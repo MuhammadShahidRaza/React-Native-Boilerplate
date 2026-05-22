@@ -15,5 +15,5 @@ if (!['patch', 'minor', 'major'].includes(bump)) {
   process.exit(1);
 }
 execSync(`npm version ${bump} --no-git-tag-version`, { cwd: root, stdio: 'inherit' });
-require('./sync-ios-version.js');
+// require('./sync-ios-version.js');
 console.log(`Bumped ${bump}. Android: build AAB/APK (versionCode auto-increments on release). iOS: synced from package.json.`);

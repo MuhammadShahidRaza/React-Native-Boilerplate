@@ -23,8 +23,7 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 import { SVG } from 'constants/assets/svg';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export const FindingDriverScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.FINDING_DRIVER>>();
   const [cancelVisible, setCancelVisible] = useState(false);
@@ -93,7 +92,7 @@ export const FindingDriverScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}

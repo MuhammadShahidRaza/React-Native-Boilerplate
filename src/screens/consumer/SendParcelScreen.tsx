@@ -18,8 +18,7 @@ import { COLORS, screenHeight } from 'utils/index';
 import type { AddressDetails } from 'utils/location';
 import { sendParcelValidationSchema } from 'utils/validations';
 
-const BACK_ICON_STYLE = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
-
+ 
 export type ParcelFormValues = {
   pickup: AddressDetails | null;
   dropoff: AddressDetails | null;
@@ -61,7 +60,7 @@ export const SendParcelScreen = () => {
     <Wrapper
       headerTitle='Send Parcel'
       showBackButton
-      backIconStyle={BACK_ICON_STYLE}
+       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}

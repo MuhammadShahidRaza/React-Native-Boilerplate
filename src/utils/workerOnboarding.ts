@@ -33,12 +33,31 @@ export function isWorkerOnboardingComplete(user: User | null | undefined): boole
   return isWorkerVehicleComplete(user) && isWorkerDocumentsComplete(user);
 }
 
-export function parseWalletBalance(user: User | null | undefined): number {
-  const raw = (user as User & { wallet_balance?: number | string })?.wallet_balance;
-  if (typeof raw === 'number') return raw;
-  if (typeof raw === 'string') {
-    const n = parseFloat(raw.replace(/[^0-9.-]/g, ''));
-    return Number.isNaN(n) ? 0 : n;
-  }
-  return user?.upcoming_balance ?? 0;
+function parseBalanceValue(raw: string | number | null | undefined): number | null {
+  if (raw === undefined || raw === null || raw === '') return null;
+  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
+  const n = parseFloat(String(raw).replace(/[^0-9.-]/g, ''));
+  return Number.isNaN(n) ? null : n;
 }
+
+/** Spendable worker wallet balance (commission tokens). */
+export function parseWalletBalance(user: User | null | undefined): number {
+  if (!user) return 0;
+  const u = user as User & { wallet_balance?: number | string };
+  const fromWallet = parseBalanceValue(u.wallet_balance);
+  if (fromWallet !== null) return fromWallet;
+  const fromBalance = parseBalanceValue(u.balance);
+  if (fromBalance !== null) return fromBalance;
+  return 0;
+}
+
+export function hasWalletFunds(user: User | null | undefined): boolean {
+  return parseWalletBalance(user) > 0;
+}
+
+export const WORKER_WALLET_TOP_OFF = {
+  title: 'Top off your wallet',
+  description:
+    'Your wallet balance is currently 0. Contact the Admin to top off your wallet and continue using the Sn Lift app.',
+  primaryButtonText: 'Contact Admin',
+} as const;

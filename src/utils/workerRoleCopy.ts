@@ -44,7 +44,7 @@ export function getWorkerRoleCopy(role: string | null | undefined): WorkerRoleCo
       requestDetailTitle: 'Delivery Request',
       historyTitle: 'Delivery History',
       tripsStatLabel: 'Deliveries',
-      fareLabel: 'Fee',
+      fareLabel: 'Fare',
       acceptButton: 'Accept Delivery',
       arrivedAtPickup: 'Arrived at Pickup',
       startJob: 'Start Ride',

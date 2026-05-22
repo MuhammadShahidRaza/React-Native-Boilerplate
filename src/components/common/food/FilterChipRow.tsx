@@ -1,8 +1,8 @@
 import { ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Typography } from '../Typography';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
-import { AppGradient } from '../AppGradient';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { AppGradient, GRADIENT_END, GRADIENT_START } from '../AppGradient';
 
 export interface FilterChipRowProps<T extends string> {
   options: readonly T[];
@@ -34,12 +34,17 @@ export function FilterChipRow<T extends string>({
           >
             {active ? (
               <AppGradient
-                variant='primaryLight'
+                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                start={GRADIENT_START}
+                end={GRADIENT_END}
+                fill
+                style={styles.chipGradient}
                 pointerEvents='none'
-                style={StyleSheet.absoluteFill}
               />
             ) : null}
-            <Typography style={active ? styles.chipTxtOn : styles.chipTxt}>{option}</Typography>
+            <Typography style={[active ? styles.chipTxtOn : styles.chipTxt, styles.chipLabel]}>
+              {option}
+            </Typography>
           </Pressable>
         );
       })}
@@ -57,10 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
   },
-  contentCentered: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
+  contentCentered: {},
   chipPress: {
     marginRight: 8,
   },
@@ -73,6 +75,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     position: 'relative',
+  },
+  chipGradient: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: 50,
+  },
+  chipLabel: {
+    zIndex: 1,
   },
   chipInactive: {
     paddingHorizontal: 20,
