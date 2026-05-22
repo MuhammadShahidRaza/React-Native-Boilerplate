@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/native';
 import { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import { GradientIcon } from 'components/index';
-import { StyleProp, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
@@ -250,6 +250,12 @@ export function onBack() {
   navigationRef.current?.goBack();
 }
 
+/** Pop multiple screens (e.g. finish LocationMapPicker → LocationAddDetails flow). */
+export function pop(count = 1) {
+  if (count <= 0 || !navigationRef.isReady()) return;
+  navigationRef.current?.dispatch(StackActions.pop(count));
+}
+
 export function replace<T extends keyof RootStackParamList>(
   name: T,
   params?: RootStackParamList[T],
@@ -294,26 +300,49 @@ export const screenOptions: NativeStackNavigationOptions = {
   // - headerStatusBarHeight: 0 (to remove status bar height)
 };
 
+/** Minimum 48pt touch target + extra hitSlop for reliable back navigation */
+const BACK_TOUCH_SIZE = 48;
+const BACK_HIT_SLOP = { top: 12, bottom: 12, left: 12, right: 12 };
+
 export const CustomBackIcon = ({
   onPress,
   style,
 }: {
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
-}) => (
-  <GradientIcon
-    componentName={VARIABLES.Feather}
-    iconName={'arrow-left'}
-    size={FontSize.MediumLarge}
-    color={COLORS.WHITE}
-    borderRadius={12}
-    containerSize={40}
-    containerStyle={style}
-    iconStyle={[
-      {
-        transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
-      },
-    ]}
-    onPress={onPress || onBack}
-  />
-);
+}) => {
+  const handlePress = onPress ?? onBack;
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      hitSlop={BACK_HIT_SLOP}
+      accessibilityRole='button'
+      accessibilityLabel='Go back'
+      style={({ pressed }) => [
+        {
+          minWidth: BACK_TOUCH_SIZE,
+          minHeight: BACK_TOUCH_SIZE,
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: pressed ? 0.75 : 1,
+        },
+        style,
+      ]}
+    >
+      <GradientIcon
+        componentName={VARIABLES.Feather}
+        iconName='arrow-left'
+        size={FontSize.MediumLarge}
+        color={COLORS.WHITE}
+        borderRadius={12}
+        containerSize={40}
+        iconStyle={[
+          {
+            transform: [{ scaleX: i18n.language === LANGUAGES.ARABIC ? -1 : 1 }],
+          },
+        ]}
+      />
+    </Pressable>
+  );
+};

@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   },
   codeText: {
     fontSize: FontSize.Large,
-    color: COLORS.PRIMARY,
+    color: COLORS.TEXT,
     fontWeight: FontWeight.Bold,
   },
   timer: {

@@ -234,10 +234,13 @@ export const LocationMapPicker = () => {
         modalSecondaryContainerStyle={styles.addressSheet}
       >
         <TouchableOpacity
+          style={{
+            alignSelf: 'flex-start',
+          }}
           onPress={() => setShowAddressSheet(false)}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <CustomBackIcon/>
+          <CustomBackIcon />
         </TouchableOpacity>
         <View style={styles.addressSheetHeader}>
           <View style={styles.addressSheetInputWrapper}>

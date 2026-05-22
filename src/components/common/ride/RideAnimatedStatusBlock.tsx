@@ -1,14 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet } from 'react-native';
+import { Animated, Easing, Image, ImageSourcePropType, StyleSheet } from 'react-native';
+import { AppGradient, GRADIENT_END, GRADIENT_START } from '../AppGradient';
 import { GradientIcon } from '../GradientIcon';
 import { Typography } from '../Typography';
 import type { IconComponentProps } from '../Icon';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 
 export interface RideAnimatedStatusBlockProps {
   animationKey: string;
-  iconProps: Pick<IconComponentProps, 'componentName' | 'iconName' | 'size' | 'color'>;
+  iconProps?: Pick<IconComponentProps, 'componentName' | 'iconName' | 'size' | 'color'>;
+  imageSource?: ImageSourcePropType;
   title: string;
   subtitle: string;
 }
@@ -16,6 +18,7 @@ export interface RideAnimatedStatusBlockProps {
 export const RideAnimatedStatusBlock = ({
   animationKey,
   iconProps,
+  imageSource,
   title,
   subtitle,
 }: RideAnimatedStatusBlockProps) => {
@@ -46,13 +49,25 @@ export const RideAnimatedStatusBlock = ({
       style={[styles.statusWrap, { opacity, transform: [{ translateY }] }]}
       key={animationKey}
     >
-      <GradientIcon
-        {...iconProps}
-        color={iconProps.color ?? COLORS.WHITE}
-        size={iconProps.size ?? 36}
-        containerSize={88}
-        borderRadius={44}
-      />
+      {imageSource ? (
+        <AppGradient
+          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          start={GRADIENT_START}
+          end={GRADIENT_END}
+          fill
+          style={styles.iconCircle}
+        >
+          <Image source={imageSource} style={styles.checkImage} resizeMode='contain' />
+        </AppGradient>
+      ) : iconProps ? (
+        <GradientIcon
+          {...iconProps}
+          color={iconProps.color ?? COLORS.WHITE}
+          size={iconProps.size ?? 36}
+          containerSize={88}
+          borderRadius={44}
+        />
+      ) : null}
       <Typography style={styles.statusTitle}>{title}</Typography>
       <Typography style={styles.statusSub}>{subtitle}</Typography>
     </Animated.View>
@@ -75,5 +90,18 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MediumSmall,
     color: COLORS.APP_TEXT_SMALL,
     textAlign: 'center',
+  },
+  iconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  checkImage: {
+    width: 42,
+    height: 42,
+    tintColor: COLORS.WHITE,
   },
 });

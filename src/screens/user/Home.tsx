@@ -120,7 +120,7 @@ export const Home = () => {
 
         {/* Promo Codes */}
         <View
-          style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND, marginBottom: 70 }]}
+          style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
         >
           <View style={styles.promoHeader}>
             <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
@@ -148,7 +148,7 @@ export const Home = () => {
           ))}
         </View>
 
-        <View style={{ height: 24 }} />
+        <View style={styles.scrollFooter} />
       </ScrollView>
     </Wrapper>
   );
@@ -282,6 +282,14 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 60,
+  },
+  promoSection: {
+    marginBottom: 24,
+    paddingBottom: 8,
+  },
+  scrollFooter: {
+    height: 48,
   },
   bodySection: {
     paddingHorizontal: 16,

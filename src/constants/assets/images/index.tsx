@@ -12,6 +12,9 @@ export const IMAGES = {
   NO_JOBS: require('assets/images/common/no_jobs.png'),
   BAG: require('assets/images/common/bag.png'),
   WALLET: require('assets/images/common/wallet.png'),
+  RIDE_CHECK: require('assets/images/common/ride_check.png'),
+  PARCEL_BOX: require('assets/images/common/parcel_box.png'),
+  DELIVERY_BIKE: require('assets/images/common/delivery_bike.png'),
 
 
 

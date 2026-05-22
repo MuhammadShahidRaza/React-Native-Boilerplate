@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { Region } from 'react-native-maps';
 import type MapView from 'react-native-maps';
@@ -41,7 +41,7 @@ export const RideLocationPickerScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RIDE_LOCATION_PICKER>>();
   const navigation = useNavigation();
   const field = route.params?.field ?? 'dropoff';
-
+  const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
   useEffect(() => {
     void getLocationPermission();
   }, []);
@@ -82,6 +82,7 @@ export const RideLocationPickerScreen = () => {
 
   // Called when user taps a saved location
   const handleSaved = (item: (typeof SAVED)[number]) => {
+    setSelectedSavedId(item.id);
     const addr: AddressDetails = {
       fullAddress: item.address,
       postalCode: '',
@@ -175,22 +176,40 @@ export const RideLocationPickerScreen = () => {
         {/* Saved locations */}
         <Typography style={styles.savedTitle}>Saved Places</Typography>
         <View style={styles.savedRow}>
-          {SAVED.map(item => (
-            <View key={item.id} style={styles.savedItem}>
-              <View style={styles.savedBtn}>
-                <GradientIcon
-                  componentName={VARIABLES.Feather}
-                  iconName={item.icon}
-                  size={FontSize.Medium}
-                  color={COLORS.WHITE}
-                  containerSize={44}
-                  borderRadius={12}
-                  onPress={() => handleSaved(item)}
-                />
-              </View>
-              <Typography style={styles.savedLabel}>{item.label}</Typography>
-            </View>
-          ))}
+          {SAVED.map(item => {
+            const isSelected = selectedSavedId === item.id;
+            return (
+              <TouchableOpacity
+                onPress={() => handleSaved(item)}
+                key={item.id}
+                style={[styles.savedItem]}
+                activeOpacity={0.8}
+                disabled={isSelected}
+              >
+                <View
+                  style={[
+                    styles.savedBtn,
+                    {
+                      borderColor: isSelected ? COLORS.SECONDARY : COLORS.BACKGROUND,
+                      borderWidth: isSelected ? 3 : 3,
+                      borderRadius: 15,
+                    },
+                  ]}
+                >
+                  <GradientIcon
+                    componentName={VARIABLES.Feather}
+                    iconName={item.icon}
+                    size={FontSize.Medium}
+                    color={COLORS.WHITE}
+                    containerSize={44}
+                    borderRadius={12}
+                    onPress={() => handleSaved(item)}
+                  />
+                </View>
+                <Typography style={styles.savedLabel}>{item.label}</Typography>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Confirm CTA */}

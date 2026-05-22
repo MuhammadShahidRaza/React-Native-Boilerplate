@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from '../Icon';
 import { Photo } from '../Photo';
 import { Typography } from '../Typography';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
+import { IMAGES } from 'constants/assets';
 import { COLORS } from 'utils/index';
 import type { RestaurantItem } from './foodRestaurants';
 
@@ -14,10 +15,23 @@ export interface RestaurantCardProps {
   onToggleLike: () => void;
 }
 
-export const RestaurantCard = ({ restaurant, isLiked, onPress, onToggleLike }: RestaurantCardProps) => (
+export const RestaurantCard = ({
+  restaurant,
+  isLiked,
+  onPress,
+  onToggleLike,
+}: RestaurantCardProps) => (
   <Pressable style={styles.card} onPress={onPress}>
     <View style={styles.imgWrap}>
-      <Photo source={restaurant.image} onPress={onPress} imageStyle={styles.restImg} resizeMode='cover' />
+      <Photo
+        source={restaurant.image}
+        onPress={onPress}
+        imageStyle={styles.restImg}
+        style={{
+          backgroundColor: COLORS.BACKGROUND,
+        }}
+        resizeMode='cover'
+      />
       {restaurant.featured ? (
         <View style={styles.featured} pointerEvents='none'>
           <Typography style={styles.featuredTxt}>Featured</Typography>
@@ -63,12 +77,7 @@ export const RestaurantCard = ({ restaurant, isLiked, onPress, onToggleLike }: R
       </View>
       <Typography style={styles.cuisine}>{restaurant.cuisine}</Typography>
       <View style={styles.feeRow}>
-        <Icon
-          componentName={VARIABLES.Feather}
-          iconName='navigation'
-          size={FontSize.ExtraSmall}
-          color={COLORS.APP_TEXT_MUTED}
-        />
+        <Image source={IMAGES.DELIVERY_BIKE} style={styles.feeBikeIcon} resizeMode='contain' />
         <Typography style={styles.fee}>{`${restaurant.fee} Delivery`}</Typography>
       </View>
     </View>
@@ -81,6 +90,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
     marginBottom: 16,
+    padding: 8,
     overflow: 'hidden',
     backgroundColor: COLORS.WHITE,
   },
@@ -91,6 +101,7 @@ const styles = StyleSheet.create({
   restImg: {
     width: '100%',
     height: '100%',
+    borderRadius: 16,
   },
   featured: {
     position: 'absolute',
@@ -135,7 +146,7 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT,
   },
   body: {
-    padding: 12,
+    padding: 10,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -175,5 +186,10 @@ const styles = StyleSheet.create({
   fee: {
     color: COLORS.APP_TEXT_MUTED,
     fontSize: FontSize.Small,
+  },
+  feeBikeIcon: {
+    width: 16,
+    height: 16,
+    tintColor: COLORS.APP_TEXT_MUTED,
   },
 });

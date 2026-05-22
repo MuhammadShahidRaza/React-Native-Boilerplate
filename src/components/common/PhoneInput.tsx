@@ -240,22 +240,30 @@ const styles = StyleSheet.create({
     fontSize: INPUT_THEME.error.fontSize,
   },
   innerContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 10,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
+    paddingLeft: 0,
   },
   codeTextStyle: {
     includeFontPadding: false,
     textAlignVertical: 'center',
+    marginRight: 2,
+    paddingRight: 0,
   },
   countryPickerButtonStyle: {
     borderRadius: INPUT_THEME.input.borderRadius,
-    width: 80,
+    width: 56,
+    paddingRight: 0,
+    marginRight: 2,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   textContainerStyle: {
     flex: 1,
+    paddingLeft: 0,
+    paddingVertical: 0,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },
   textInputStyle: {

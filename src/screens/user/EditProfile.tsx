@@ -1,5 +1,12 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Input, Wrapper, ProfilePictureUpload } from 'components/index';
+import {
+  Button,
+  Input,
+  PhoneInputComponent,
+  PROFILE_PHONE_INPUT_STYLE,
+  ProfilePictureUpload,
+  Wrapper,
+} from 'components/index';
 import { COMMON_TEXT } from 'constants/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
 import { EditProfileFormTypes, FontSize, FontWeight, useAppSelector } from 'types/index';
@@ -8,6 +15,8 @@ import {
   COLORS,
   STYLES,
   safeString,
+  getDisplayPhoneNumber,
+  buildPhonePayload,
   editProfileValidationSchemaWithProfileImage,
   hasUri,
 } from 'utils/index';
@@ -24,6 +33,9 @@ export const EditProfile = () => {
   const initialValues = {
     full_name: safeString(userDetails?.full_name),
     email: safeString(userDetails?.email),
+    phone_number: getDisplayPhoneNumber(userDetails),
+    country_code: safeString(userDetails?.country_code) || 'US',
+    calling_code: safeString(userDetails?.calling_code) || '+1',
     profile_image: userDetails?.profile_image || '',
     // address: safeString(userDetails?.address),
     // latitude: userDetails?.latitude || 0,
@@ -37,7 +49,9 @@ export const EditProfile = () => {
   const handleSubmit = async (values: EditProfileFormTypes) => {
     const { profile_image, ...rest } = values;
     await updateUserDetails({
-      ...rest,
+      full_name: rest.full_name,
+      email: rest.email,
+      ...buildPhonePayload(rest),
       ...(hasUri(profile_image) ? { profile_image } : {}),
     });
   };
@@ -82,6 +96,8 @@ export const EditProfile = () => {
             onChangeText={formik.handleChange('full_name')}
             onBlur={formik.handleBlur('full_name')}
             value={formik.values.full_name}
+            isTitleInLine
+            secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
             placeholder={COMMON_TEXT.ENTER_FULL_NAME}
             error={formik.errors.full_name}
             touched={Boolean(formik.touched.full_name && formik.submitCount)}
@@ -95,10 +111,30 @@ export const EditProfile = () => {
             value={formik.values.email}
             allowSpacing={false}
             editable={false}
+            isTitleInLine
+            secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
             keyboardType={'email-address'}
             placeholder={COMMON_TEXT.ENTER_YOUR_EMAIL}
             error={formik.errors.email}
             touched={Boolean(formik.touched.email && formik.submitCount)}
+          />
+
+          <PhoneInputComponent
+            name={COMMON_TEXT.PHONE_NUMBER}
+            title={COMMON_TEXT.PHONE_NUMBER}
+            isTitleInLine
+            onChangeText={formik.handleChange('phone_number')}
+            onBlur={() => formik.setFieldTouched('phone_number', true)}
+            value={formik.values.phone_number ?? ''}
+            onChangeCountryCode={formik.handleChange('country_code')}
+            onChangeCallingCode={formik.handleChange('calling_code')}
+            defaultCode={(formik.values.country_code || 'US') as 'US'}
+            allowSpacing={false}
+            editable={false}
+            secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
+            placeholder={COMMON_TEXT.PHONE_NUMBER}
+            error={formik.errors.phone_number}
+            touched={Boolean(formik.touched.phone_number && formik.submitCount)}
           />
 
           {/* <Autocomplete

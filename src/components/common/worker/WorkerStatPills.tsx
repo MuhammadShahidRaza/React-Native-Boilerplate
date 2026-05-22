@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     borderColor: '#00B76C',
     borderRadius: 12,
     paddingVertical: 20,
-    paddingHorizontal: 8,
     
     alignItems: 'center',
     justifyContent: 'center',
@@ -47,7 +46,6 @@ const styles = StyleSheet.create({
   },
   pillGap: {},
   value: {
-    fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
     color: COLORS.BLACK,
     textAlign: 'center',

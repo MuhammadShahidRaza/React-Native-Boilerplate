@@ -8,11 +8,6 @@ import { navigate, onBack } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { SCREENS } from 'constants/routes';
 
-const consumerBackIcon = {
-  backgroundColor: COLORS.APP_PRIMARY,
-  borderRadius: 12,
-};
-
 export const FoodDeliveryCartScreen = () => {
   const [qty, setQty] = useState(1);
   const [promo, setPromo] = useState('');
@@ -21,7 +16,6 @@ export const FoodDeliveryCartScreen = () => {
     <Wrapper
       headerTitle='Cart 1'
       showBackButton
-      backIconStyle={consumerBackIcon}
       useScrollView
       darkMode={false}
     >

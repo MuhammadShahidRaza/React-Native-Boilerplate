@@ -1,4 +1,11 @@
-import { Button, Input, ProfilePictureUpload, Wrapper } from 'components/common';
+import {
+  Button,
+  Input,
+  PhoneInputComponent,
+  PROFILE_PHONE_INPUT_STYLE,
+  ProfilePictureUpload,
+  Wrapper,
+} from 'components/common';
 import { SCREENS } from 'constants/index';
 import { COMMON_TEXT } from 'constants/screens';
 import { FocusProvider } from 'hooks/useFocus';
@@ -9,7 +16,7 @@ import { useAppSelector } from 'types/reduxTypes';
 import { EditProfileFormTypes } from 'types/screenTypes';
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { safeString, screenWidth } from 'utils/helpers';
+import { getDisplayPhoneNumber, safeString, screenWidth } from 'utils/helpers';
 
 export type EditProfileFormExtended = EditProfileFormTypes & {
   country_code?: string;
@@ -18,6 +25,7 @@ export type EditProfileFormExtended = EditProfileFormTypes & {
 
 export const Profile = () => {
   const { userDetails } = useAppSelector(state => state?.user);
+  const profilePhone = getDisplayPhoneNumber(userDetails);
 
   const handleSubmit = async () => {
     navigate(SCREENS.EDIT_PROFILE);
@@ -115,40 +123,21 @@ export const Profile = () => {
             }}
           /> */}
 
-          {/* <Input
-            name={COMMON_TEXT.COUNTRY}
-            title={COMMON_TEXT.COUNTRY}
-            onChangeText={() => {}}
-            value={safeString(userDetails?.country)}
-            editable={false}
-            placeholder={COMMON_TEXT.ENTER_COUNTRY}
-            startIcon={{
-              componentName: VARIABLES.MaterialIcons,
-              iconName: 'language',
-            }}
-            endIcon={{
-              componentName: VARIABLES.MaterialIcons,
-              iconName: 'my-location',
-              size: FontSize.Large,
-            }}
-          />
           <PhoneInputComponent
-            key={userDetails?.phone_number}
+            key={`${profilePhone}-${userDetails?.country_code ?? ''}`}
             name={COMMON_TEXT.PHONE_NUMBER}
             title={COMMON_TEXT.PHONE_NUMBER}
+            isTitleInLine
             editable={false}
             onChangeText={() => {}}
-            value={safeString(splitPhoneNumberWithCode(userDetails?.phone_number)?.number)}
+            value={profilePhone}
             allowSpacing={false}
             onChangeCountryCode={() => {}}
             onChangeCallingCode={() => {}}
-            defaultCode={safeString(userDetails?.country_code) as any}
-            startIcon={{
-              componentName: VARIABLES.Feather,
-              iconName: 'phone',
-            }}
+            defaultCode={(userDetails?.country_code || 'US') as 'US'}
+            secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
             placeholder={COMMON_TEXT.PHONE_NUMBER}
-          /> */}
+          />
         </FocusProvider>
         <Button title={COMMON_TEXT.EDIT_PROFILE} onPress={handleSubmit} style={styles.button} />
         {/* <Typography
