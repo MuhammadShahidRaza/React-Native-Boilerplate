@@ -7,7 +7,7 @@ import { Icon, Wrapper, Button, Typography, Input, SvgComponent, Map } from 'com
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
-import { navigate } from 'navigation/index';
+import { resetToHomeAndScreen } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from 'navigation/Navigators';
@@ -201,7 +201,7 @@ export const ChooseRideScreen = () => {
           title='Find Driver'
           style={styles.ctaBtn}
           onPress={() =>
-            navigate(SCREENS.FINDING_DRIVER, {
+            resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
               rideType: selected,
               pickupAddress: route.params?.pickupAddress,
               dropoffAddress: route.params?.dropoffAddress,

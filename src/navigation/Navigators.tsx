@@ -276,6 +276,20 @@ export function reset<T extends keyof RootStackParamList>(name: T) {
   );
 }
 
+/** Push a flow screen with Home (tab stack) underneath — back returns to Home, not booking steps. */
+export function resetToHomeAndScreen<T extends keyof RootStackParamList>(
+  name: T,
+  params?: RootStackParamList[T],
+) {
+  if (!navigationRef.isReady()) return;
+  navigationRef.dispatch(
+    CommonActions.reset({
+      index: 1,
+      routes: [{ name: SCREENS.BOTTOM_STACK }, { name, params }],
+    }),
+  );
+}
+
 export const screenOptions: NativeStackNavigationOptions = {
   animation: 'fade',
   headerStyle: {

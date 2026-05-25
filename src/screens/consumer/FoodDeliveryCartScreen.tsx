@@ -4,7 +4,7 @@ import { AppGradient, Icon, Input, RowComponent, Typography, Wrapper } from 'com
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
-import { navigate, onBack } from 'navigation/index';
+import { resetToHomeAndScreen } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { SCREENS } from 'constants/routes';
 
@@ -100,9 +100,7 @@ export const FoodDeliveryCartScreen = () => {
         />
 
         <Pressable
-          onPress={() => {
-            navigate(SCREENS.TRACK_FOOD_ORDER);
-          }}
+          onPress={() => resetToHomeAndScreen(SCREENS.TRACK_FOOD_ORDER)}
           style={styles.placeWrap}
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>
