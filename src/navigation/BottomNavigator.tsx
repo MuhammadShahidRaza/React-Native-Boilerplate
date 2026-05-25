@@ -175,6 +175,7 @@ export const BottomNavigator = () => {
 
       return {
         headerShown: false,
+        animation: 'fade',
         tabBarStyle,
         sceneStyle: isWorker
           ? {
