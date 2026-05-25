@@ -1,7 +1,7 @@
 {
     "name": "snlift",
-    "version": "1.0.7",
-    "versionCode": 6,
+    "version": "1.0.8",
+    "versionCode": 7,
     "private": true,
     "scripts": {
         "build": "yarn version:bump:patch && cd android && ./gradlew assembleRelease && cd .. && yarn open-apk",
