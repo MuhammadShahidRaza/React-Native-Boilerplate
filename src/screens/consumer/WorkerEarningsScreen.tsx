@@ -4,7 +4,7 @@ import { AppGradient, Icon, RowComponent, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, STYLES } from 'utils/index';
 import { FONT_FAMILY, IMAGES } from 'constants/assets';
 
 const SUMMARY_ROWS = [
@@ -110,17 +110,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   summaryCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: COLORS.WHITE,
   },
   summaryTitle: {
     fontSize: FontSize.MediumLarge,

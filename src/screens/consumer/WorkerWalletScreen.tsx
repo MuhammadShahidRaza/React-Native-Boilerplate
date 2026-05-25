@@ -176,7 +176,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
-    elevation: 2,
   },
   summaryIcon: {
     width: 35,

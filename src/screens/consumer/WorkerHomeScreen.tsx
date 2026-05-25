@@ -131,7 +131,10 @@ export const WorkerHomeScreen = () => {
       <AppStatusModal
         visible={topOffVisible}
         onClose={() => setTopOffVisible(false)}
-        onPrimaryPress={() => navigate(SCREENS.CONTACT_US)}
+        onPrimaryPress={() => {
+          setTopOffVisible(false);
+          navigate(SCREENS.CONTACT_US);
+        }}
         title={WORKER_WALLET_TOP_OFF.title}
         description={WORKER_WALLET_TOP_OFF.description}
         primaryButtonText={WORKER_WALLET_TOP_OFF.primaryButtonText}
