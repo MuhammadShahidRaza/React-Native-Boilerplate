@@ -3,6 +3,7 @@ import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { COLORS, getCurrentLocation } from 'utils/index';
 import { Icon } from './Icon';
+import { MapVehicleMarker, type MapVehicleMarkerKind } from './MapVehicleMarker';
 import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { logger } from 'utils/logger';
 import { ChildrenType, voidFuntionType } from 'types/common';
@@ -49,6 +50,8 @@ interface MapProps {
   mapRef?: React.MutableRefObject<MapView | null>;
   /** Children rendered inside MapView (e.g. Polyline, Marker) */
   children?: React.ReactNode;
+  /** Custom top-down vehicle icon for the user location dot (bike / car). */
+  userLocationVehicleKind?: MapVehicleMarkerKind;
   /** Override min zoom level (default 14) */
   minZoomLevel?: number;
   /** Override max zoom level (default 20) */
@@ -86,6 +89,7 @@ export const Map: FC<MapProps> = ({
   minZoomLevel = 14,
   maxZoomLevel = 20,
   regionTracking = 'live',
+  userLocationVehicleKind,
 }) => {
   const { isDark } = useTheme();
   const resolvedMapStyle = mapStyle === 'auto' ? (isDark ? 'dark' : 'light') : mapStyle;
@@ -206,7 +210,13 @@ export const Map: FC<MapProps> = ({
               </Marker>
             ))}
           {useCustomUserLocationMarker && userLocation ? (
-            <Marker coordinate={userLocation} pinColor={COLORS.APP_PRIMARY} />
+            userLocationVehicleKind ? (
+              <Marker coordinate={userLocation} anchor={{ x: 0.5, y: 0.5 }} flat>
+                <MapVehicleMarker kind={userLocationVehicleKind} />
+              </Marker>
+            ) : (
+              <Marker coordinate={userLocation} pinColor={COLORS.APP_PRIMARY} />
+            )
           ) : null}
           {children}
         </MapView>

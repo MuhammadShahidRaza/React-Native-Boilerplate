@@ -8,7 +8,7 @@ import { COLORS, screenHeight } from 'utils/index';
 import { onBack } from 'navigation/index';
 import { setLookingForDeliveries } from 'store/slices/worker';
 import { useAppSelector } from 'types/reduxTypes';
-import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
+import { getMapVehicleMarkerKind, getWorkerRoleCopy } from 'utils/workerRoleCopy';
 
 export const WorkerLookingForDeliveriesScreen = () => {
   const dispatch = useAppDispatch();
@@ -39,7 +39,12 @@ export const WorkerLookingForDeliveriesScreen = () => {
   return (
     <View style={styles.root}>
       <View style={styles.mapWrap}>
-        <Map style={styles.map} showCurrentLocation showCurrentLocationButton={false} />
+        <Map
+          style={styles.map}
+          showCurrentLocation
+          showCurrentLocationButton={false}
+          userLocationVehicleKind={getMapVehicleMarkerKind(role)}
+        />
       </View>
 
       <SafeAreaView edges={['top']} style={styles.topBar} pointerEvents='box-none'>

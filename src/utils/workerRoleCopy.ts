@@ -2,6 +2,13 @@ import { APP_CONFIG } from 'config/app';
 
 export type WorkerJobKind = 'ride' | 'delivery';
 
+export type MapVehicleMarkerKind = 'car' | 'bike';
+
+/** Map marker: bike for courier / food delivery, car for ride drivers. */
+export function getMapVehicleMarkerKind(role: string | null | undefined): MapVehicleMarkerKind {
+  return isCourierRole(role) ? 'bike' : 'car';
+}
+
 export function getWorkerJobKind(role: string | null | undefined): WorkerJobKind {
   return role === APP_CONFIG.COURIER_ROLE ? 'delivery' : 'ride';
 }

@@ -15,8 +15,8 @@ export const IMAGES = {
   RIDE_CHECK: require('assets/images/common/ride_check.png'),
   PARCEL_BOX: require('assets/images/common/parcel_box.png'),
   DELIVERY_BIKE: require('assets/images/common/delivery_bike.png'),
-  /** Top-down scooter — map marker for courier & food delivery */
-  MAP_COURIER_SCOOTER: require('assets/images/common/map_courier_scooter.png'),
+  /** Top-down bike — map marker for courier & food delivery */
+  MAP_COURIER_BIKE: require('assets/images/common/map_courier_scooter.png'),
   /** Top-down car — map marker for ride drivers */
   MAP_DRIVER_CAR: require('assets/images/common/map_driver_car.png'),
 

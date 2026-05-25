@@ -105,8 +105,8 @@ export const OrderFoodScreen = () => {
             options={FOOD_CATEGORIES}
             value={category}
             onChange={next => {
-              Keyboard.dismiss();
               setCategory(next);
+              Keyboard.dismiss();
             }}
           />
         </View>

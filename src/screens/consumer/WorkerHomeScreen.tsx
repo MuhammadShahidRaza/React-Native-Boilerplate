@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { setWorkerOnline } from 'store/slices/worker';
-import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
+import { getMapVehicleMarkerKind, getWorkerRoleCopy } from 'utils/workerRoleCopy';
 
 export const WorkerHomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -55,6 +55,7 @@ export const WorkerHomeScreen = () => {
           showCurrentLocation
           showCurrentLocationButton={false}
           scrollEnabled
+          userLocationVehicleKind={getMapVehicleMarkerKind(role)}
         />
       </View>
 
