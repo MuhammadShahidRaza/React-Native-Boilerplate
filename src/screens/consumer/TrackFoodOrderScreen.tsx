@@ -230,7 +230,7 @@ export const TrackFoodOrderScreen = () => {
     <Wrapper
       headerTitle='Food Delivery'
       showBackButton
-      backIconStyle={BACK_ICON}
+      
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}

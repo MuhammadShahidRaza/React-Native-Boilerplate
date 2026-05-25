@@ -87,7 +87,7 @@ export const GetStarted = () => {
   };
 
   return (
-    <Wrapper useScrollView={false} useSafeArea={false} showBackButton={false}>
+    <Wrapper useScrollView={false} backgroundColor={ROLE_SCREEN_BLUE} useSafeArea={false} showBackButton={false}>
       <View style={[styles.container, { backgroundColor: ROLE_SCREEN_BLUE }]}>
         <Animated.View
           style={[
