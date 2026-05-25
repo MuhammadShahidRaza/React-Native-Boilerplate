@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Pressable, View } from 'react-native';
 import { Typography } from '../Typography';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
@@ -28,7 +28,7 @@ export function FilterChipRow<T extends string>({
           <Pressable
             key={option}
             onPress={() => onChange(option)}
-            style={[styles.chipPress, active ? styles.chipPressActive : styles.chipInactive]}
+            style={styles.chipPress}
             accessibilityRole='button'
             accessibilityState={{ selected: active }}
           >
@@ -38,13 +38,15 @@ export function FilterChipRow<T extends string>({
                 start={GRADIENT_START}
                 end={GRADIENT_END}
                 fill
-                style={styles.chipGradient}
-                pointerEvents='none'
-              />
-            ) : null}
-            <Typography style={[active ? styles.chipTxtOn : styles.chipTxt, styles.chipLabel]}>
-              {option}
-            </Typography>
+                style={styles.chipActive}
+              >
+                <Typography style={styles.chipTxtOn}>{option}</Typography>
+              </AppGradient>
+            ) : (
+              <View style={styles.chipInactive}>
+                <Typography style={styles.chipTxt}>{option}</Typography>
+              </View>
+            )}
           </Pressable>
         );
       })}
@@ -66,7 +68,7 @@ const styles = StyleSheet.create({
   chipPress: {
     marginRight: 8,
   },
-  chipPressActive: {
+  chipActive: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 50,
@@ -74,14 +76,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    position: 'relative',
-  },
-  chipGradient: {
-    ...StyleSheet.absoluteFill,
-    borderRadius: 50,
-  },
-  chipLabel: {
-    zIndex: 1,
   },
   chipInactive: {
     paddingHorizontal: 20,
