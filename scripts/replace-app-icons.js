@@ -9,6 +9,7 @@
  *   yarn replace-icons ./icon-light.png ./icon-dark.png
  *
  * Masters: kam az kam ~512×512 square PNG (1024×1024 behtar).
+ * Android adaptive foreground: 66/108 safe zone (Pixel circle mask ke liye).
  */
 
 const fs = require('fs');
@@ -40,6 +41,16 @@ const ANDROID_FOREGROUND = {
 
 const PLAYSTORE_SIZE = 512;
 
+/** Apple App Store marketing icon must not have alpha; matches SNLIFT logo blue. */
+const IOS_ICON_FLATTEN_BG = { r: 0, g: 74, b: 173 };
+
+/** Android adaptive icon: 108dp layer, 66dp diameter safe zone (Pixel / circle masks). */
+const ANDROID_ADAPTIVE_SAFE_RATIO = 66 / 108;
+
+/** Launcher fallback + Play Store — full square on brand fill. */
+const ANDROID_LAUNCHER_BG_LIGHT = IOS_ICON_FLATTEN_BG;
+const ANDROID_LAUNCHER_BG_DARK = { r: 0, g: 0, b: 0 };
+
 /** AppIcon.appiconset filenames → edge length in px */
 const IOS_FILENAME_PX = {
   'Icon-App-20x20@1x.png': 20,
@@ -69,10 +80,47 @@ function toDarkFilename(filename) {
   return String(filename).replace(/\.png$/i, '.dark.png');
 }
 
-async function resizeSquarePng(srcPath, destPath, px) {
+async function resizeSquarePng(srcPath, destPath, px, { flattenForIos = false } = {}) {
+  await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
+  let pipeline = sharp(srcPath).resize(px, px, { fit: 'cover', position: 'centre' });
+  if (flattenForIos) {
+    pipeline = pipeline.flatten({ background: IOS_ICON_FLATTEN_BG });
+  }
+  const buf = await pipeline.png().toBuffer();
+  await fs.promises.writeFile(destPath, buf);
+}
+
+/** Legacy launcher / Play Store: logo centered, no crop (unlike cover). */
+async function resizeLauncherSquare(srcPath, destPath, px, background) {
   await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
   const buf = await sharp(srcPath)
-    .resize(px, px, { fit: 'cover', position: 'centre' })
+    .resize(px, px, { fit: 'contain', background })
+    .flatten({ background })
+    .png()
+    .toBuffer();
+  await fs.promises.writeFile(destPath, buf);
+}
+
+/**
+ * Adaptive foreground layer — logo 66dp safe zone ke andar; warna Pixel par zoom / clip.
+ * Transparent padding; background XML se dikhega.
+ */
+async function resizeAdaptiveForeground(srcPath, destPath, px) {
+  await fs.promises.mkdir(path.dirname(destPath), { recursive: true });
+  const logoPx = Math.max(1, Math.round(px * ANDROID_ADAPTIVE_SAFE_RATIO));
+  const pad = Math.floor((px - logoPx) / 2);
+  const buf = await sharp(srcPath)
+    .resize(logoPx, logoPx, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .extend({
+      top: pad,
+      bottom: px - logoPx - pad,
+      left: pad,
+      right: px - logoPx - pad,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .png()
     .toBuffer();
   await fs.promises.writeFile(destPath, buf);
@@ -95,27 +143,57 @@ async function writeAndroid(lightPng, darkPng) {
 
   for (const [density, px] of Object.entries(ANDROID_LAUNCHER)) {
     const dir = path.join(resRoot, `mipmap-${density}`);
-    await resizeSquarePng(lightPng, path.join(dir, 'ic_launcher_light.png'), px);
-    await resizeSquarePng(darkPng, path.join(dir, 'ic_launcher_dark.png'), px);
-    await resizeSquarePng(lightPng, path.join(dir, 'ic_launcher_round_light.png'), px);
-    await resizeSquarePng(darkPng, path.join(dir, 'ic_launcher_round_dark.png'), px);
+    await resizeLauncherSquare(
+      lightPng,
+      path.join(dir, 'ic_launcher_light.png'),
+      px,
+      ANDROID_LAUNCHER_BG_LIGHT,
+    );
+    await resizeLauncherSquare(
+      darkPng,
+      path.join(dir, 'ic_launcher_dark.png'),
+      px,
+      ANDROID_LAUNCHER_BG_DARK,
+    );
+    await resizeLauncherSquare(
+      lightPng,
+      path.join(dir, 'ic_launcher_round_light.png'),
+      px,
+      ANDROID_LAUNCHER_BG_LIGHT,
+    );
+    await resizeLauncherSquare(
+      darkPng,
+      path.join(dir, 'ic_launcher_round_dark.png'),
+      px,
+      ANDROID_LAUNCHER_BG_DARK,
+    );
   }
 
   for (const [density, px] of Object.entries(ANDROID_FOREGROUND)) {
     const dir = path.join(resRoot, `mipmap-${density}`);
-    await resizeSquarePng(lightPng, path.join(dir, 'ic_launcher_foreground_light.png'), px);
-    await resizeSquarePng(darkPng, path.join(dir, 'ic_launcher_foreground_dark.png'), px);
+    await resizeAdaptiveForeground(
+      lightPng,
+      path.join(dir, 'ic_launcher_foreground_light.png'),
+      px,
+    );
+    await resizeAdaptiveForeground(
+      darkPng,
+      path.join(dir, 'ic_launcher_foreground_dark.png'),
+      px,
+    );
   }
 
-  await resizeSquarePng(
+  await resizeLauncherSquare(
     lightPng,
     path.join(resRoot, 'playstore-icon_light.png'),
     PLAYSTORE_SIZE,
+    ANDROID_LAUNCHER_BG_LIGHT,
   );
-  await resizeSquarePng(
+  await resizeLauncherSquare(
     darkPng,
     path.join(resRoot, 'playstore-icon_dark.png'),
     PLAYSTORE_SIZE,
+    ANDROID_LAUNCHER_BG_DARK,
   );
 }
 
@@ -188,7 +266,7 @@ async function writeIos(lightPng, darkPng) {
       const isDark = isDarkAppearanceEntry(img);
       const src = isDark ? darkPng : lightPng;
       const dest = path.join(appIconDir, fn);
-      await resizeSquarePng(src, dest, px);
+      await resizeSquarePng(src, dest, px, { flattenForIos: true });
       written.add(fn);
     }
   }
@@ -202,7 +280,7 @@ function printDone() {
       line,
       '  App icons update ho gaye',
       '',
-      '  Android: mipmap-* (launcher / round / foreground) + playstore-icon_*',
+      '  Android: mipmap-* (launcher contain + foreground safe-zone) + playstore-icon_*',
       '  iOS: AppIcon.appiconset (light + dark appearance PNGs)',
       '',
       '  Agli baar Xcode kholo / clean build:',
