@@ -23,6 +23,7 @@ import {
 } from '../../services/chat/firestoreChat';
 import { fetchDentorBookingsPage, fetchUserBookingsPage } from 'api/functions/app/home';
 import { isWorkerRole } from 'config/app';
+import type { Booking } from 'types/responseTypes';
 import { useFocusEffect } from '@react-navigation/native';
 
 interface Message {
@@ -87,11 +88,12 @@ const validateMessage = (text: string): { isValid: boolean; error: string } => {
 
 export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAGES_FIREBASE>) => {
   const { isLangRTL } = useTranslation();
-  const [activeBookingId, setActiveBookingId] = useState(null);
+  const [activeBookingId, setActiveBookingId] = useState<number | null>(null);
   const data = route.params?.data;
   const paramConversationId = data?.conversationId;
   const paramOtherUserId = data?.otherUserId ?? data?.otherUser?.id;
-  const paramBookingId = data?.bookingId != null ? String(data.bookingId) : activeBookingId;
+  const paramBookingId =
+    data?.bookingId != null ? String(data.bookingId) : activeBookingId != null ? String(activeBookingId) : undefined;
   const initialOtherUser = data?.initialOtherUser;
 
   const user = useAppSelector(s => s.user.userDetails);
@@ -108,7 +110,7 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
       const fetchData = async () => {
         const fetcher = isDentor ? fetchDentorBookingsPage : fetchUserBookingsPage;
         const res = await fetcher({ page: 1, limit: 20 });
-        const bookings = res?.data?.booking;
+        const bookings = res?.data?.booking ?? [];
         const id = getActiveBookingId(bookings);
         setActiveBookingId(id);
       };
@@ -116,12 +118,14 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
       fetchData();
     }, []),
   );
-  const getActiveBookingId = (bookings: any[]) => {
+  const getActiveBookingId = (bookings: Booking[]) => {
     const found = bookings.find(
       item =>
         item.status === 'upcoming' ||
         item.status === 'in_progress' ||
-        item.booking_assignments?.some(b => b.status === 'in_progress'),
+        item.booking_assignments?.some(
+          (assignment: { status?: string }) => assignment.status === 'in_progress',
+        ),
     );
 
     return found ? found.id : null;

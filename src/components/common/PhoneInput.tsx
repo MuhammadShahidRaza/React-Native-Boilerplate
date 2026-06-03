@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { StyleProp, useColorScheme } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Platform, StyleProp, useColorScheme } from 'react-native';
 import {
   StyleSheet,
   TextInputProps,
@@ -107,6 +107,25 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   const height = isTitleInLine ? (isIOS() ? 36 : 40) : INPUT_THEME.input.height;
   const isDarkMode = useColorScheme() == 'dark';
 
+  const countryPickerProps = useMemo(() => {
+    const fromRest = rest.countryPickerProps ?? {};
+    const fromRestModal = fromRest.modalProps ?? {};
+    return {
+      withEmoji: true,
+      withFlag: true,
+      ...fromRest,
+      ...(lockCountryPicker
+        ? { visible: false, modalProps: { visible: false, ...fromRestModal } }
+        : {
+            modalProps: {
+              animationType: 'slide' as const,
+              ...(Platform.OS === 'ios' ? { presentationStyle: 'fullScreen' as const } : {}),
+              ...fromRestModal,
+            },
+          }),
+    };
+  }, [lockCountryPicker, rest.countryPickerProps]);
+
   const handleNationalChange = (text: string) => {
     const national = !allowSpacing ? text.replace(REGEX.REMOVE_SPACES, '') : text;
     const digitsOnly = national.replace(/\D/g, '');
@@ -181,12 +200,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
               defaultCode={defaultCode}
               layout='first'
               disableArrowIcon={lockCountryPicker}
-              countryPickerProps={{
-                withEmoji: true,
-                withFlag: true,
-                ...(lockCountryPicker ? { modalProps: { visible: false } } : {}),
-                ...(rest?.countryPickerProps || {}),
-              }}
+              countryPickerProps={countryPickerProps}
               placeholder={i18n.t(placeholder)}
               containerStyle={[
                 { height },
@@ -211,7 +225,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 onFocus: () => setActiveInput(name),
                 allowFontScaling: false,
               }}
-              disabled={false}
+              disabled={lockCountryPicker}
               textInputStyle={[
                 { height, fontSize: INPUT_THEME.value.fontSize },
                 styles.textInputStyle,
@@ -323,8 +337,8 @@ const styles = StyleSheet.create({
   },
   countryPickerButtonStyle: {
     borderRadius: INPUT_THEME.input.borderRadius,
-    width: 56,
-    paddingRight: 0,
+    minWidth: 64,
+    paddingRight: 4,
     marginRight: 2,
     backgroundColor: INPUT_THEME.inputBackground.backgroundColor,
   },

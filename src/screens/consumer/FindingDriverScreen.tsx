@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, Animated, Pressable } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 import { Marker } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
@@ -7,7 +7,6 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import {
   Icon,
   Wrapper,
-  GradientIcon,
   Typography,
   Map,
   Button,
@@ -17,7 +16,8 @@ import {
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
-import { navigate, onBack, replace } from 'navigation/index';
+import { onBack, replace } from 'navigation/index';
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
@@ -31,7 +31,7 @@ export const FindingDriverScreen = () => {
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const mapRef = useRef<MapView>(null);
 
-  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
 
   const pickupCoord = useMemo(
     () => ({
@@ -80,6 +80,7 @@ export const FindingDriverScreen = () => {
         pickupLng: pickupCoord.longitude,
         dropoffLat: dropoffCoord.latitude,
         dropoffLng: dropoffCoord.longitude,
+        bookingId,
       });
     }, 3000);
     return () => {
@@ -160,14 +161,17 @@ export const FindingDriverScreen = () => {
         style={styles.cancelBtn}
         textStyle={styles.cancelTxt}
         title='Cancel'
-        // onPress={() => setCancelVisible(true)}
-        onPress={() => onBack()}
+        onPress={() => setCancelVisible(true)}
       />
 
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => setCancelVisible(false)}
+        onContinue={async reason => {
+          setCancelVisible(false);
+          const ok = await cancelSniftBooking(bookingId, reason);
+          if (ok) onBack();
+        }}
       />
     </Wrapper>
   );

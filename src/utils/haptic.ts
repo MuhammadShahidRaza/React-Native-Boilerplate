@@ -1,4 +1,4 @@
-import { Platform, Vibration } from 'react-native';
+import { Platform } from 'react-native';
 
 /**
  * Trigger a lightweight haptic tap feedback.

@@ -315,6 +315,9 @@ const makeHttpRequest = async (
     }
     const response = await axiosInstance(config);
     store.dispatch(setIsAppLoading(false));
+
+    logger.log('response?.data', response?.data);
+
     if (response?.data?.response) {
       return response?.data?.response;
     } else {
@@ -337,6 +340,8 @@ const makeHttpRequest = async (
       // Re-throw known error types
       throw error;
     } else {
+      logger.log('error', error);
+
       // handleRequestError will throw the appropriate error
       // It always throws (Promise<never>), so we await and let it propagate
       await handleRequestError(error as AxiosError<ErrorResponse>);
@@ -532,6 +537,7 @@ const postWithSingleFile = async ({
 
   const formData = new FormData();
   Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
     formData.append(key, value as string | Blob);
   });
 

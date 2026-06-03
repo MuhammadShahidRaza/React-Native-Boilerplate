@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SCREENS } from 'constants/index';
 import { useBackHandler, useUserLoginStatus } from 'hooks/index';
+import { VARIANT } from 'config/variant';
 import {
   Login,
   SignUp,
@@ -9,7 +10,6 @@ import {
   ForgotPassword,
   OnBoarding,
   GetStarted,
-  // Language,
 } from 'screens/auth';
 import { screenOptions } from './Navigators';
 import { PrivacyPolicy } from 'screens/common';
@@ -21,22 +21,15 @@ export const AuthNavigator = () => {
 
   const Stack = createNativeStackNavigator();
 
-  const screens = {
-    ...(isUserVisitedApp
+  const screens: Record<string, React.ComponentType<any>> = {
+    ...(isUserVisitedApp || !VARIANT.features.showOnboarding
       ? {}
       : {
           [SCREENS.ONBOARDING]: OnBoarding,
         }),
-    // ...(appLanguage
-    //   ? {}
-    //   : {
-    //       [SCREENS.LANGUAGE]: {
-    //         component: Language,
-    //
-    //       },
-    //     }),
-
-    [SCREENS.GET_STARTED]: GetStarted,
+    ...(VARIANT.features.showGetStarted
+      ? { [SCREENS.GET_STARTED]: GetStarted }
+      : {}),
     [SCREENS.LOGIN]: Login,
     [SCREENS.SIGN_UP]: SignUp,
     [SCREENS.FORGOT_PASSWORD]: ForgotPassword,
@@ -47,7 +40,7 @@ export const AuthNavigator = () => {
 
   return (
     <Stack.Navigator screenOptions={screenOptions}>
-      {Object.entries(screens).map(([name, component]: [string, React.ComponentType<any>]) => (
+      {Object.entries(screens).map(([name, component]) => (
         <Stack.Screen key={name} name={name} component={component} />
       ))}
       {renderCommonScreens(Stack)}

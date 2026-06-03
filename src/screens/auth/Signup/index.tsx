@@ -27,6 +27,7 @@ import { Login_SignUp, type USER_TYPE } from 'types/auth';
 import { RootState } from 'types/reduxTypes';
 import { useSelector } from 'react-redux';
 import { SelectedMedia } from 'hooks/useMediaPicker';
+import { logger } from 'utils/logger';
 
 interface SignUpFormValues {
   email: string;
@@ -49,14 +50,15 @@ export const SignUp = () => {
   const role = useSelector((state: RootState) => state.user.role);
 
   const initialValues: SignUpFormValues = {
-    email: __DEV__ ? 'shahid@mailinator.com' : '',
+    // Use a fresh email/phone in dev — user@mailinator.com is already registered on staging.
+    email: __DEV__ ? 'newuser@mailinator.com' : '',
     password: __DEV__ ? 'Passward123!' : '',
-    full_name: __DEV__ ? 'Shahid Raza' : '',
+    full_name: __DEV__ ? 'John Doe' : '',
     user_type: role,
     profile_image: null,
     // user_name: __DEV__ ? 'shahid26' : '',
     // country: __DEV__ ? 'Pakistan' : '',
-    phone_number: __DEV__ ? '3242445623' : '',
+    phone_number: __DEV__ ? '30012345678' : '',
     country_code: __DEV__ ? 'PK' : 'US',
     calling_code: __DEV__ ? '+92' : '+234',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
@@ -80,6 +82,8 @@ export const SignUp = () => {
       ...buildPhonePayload(values),
       ...deviceInfo,
     };
+
+    logger.log('data', data);
     await signUpUser({ data });
   };
 
@@ -189,10 +193,12 @@ export const SignUp = () => {
         <PhoneInputComponent
           name={COMMON_TEXT.PHONE_NUMBER}
           title={COMMON_TEXT.PHONE_NUMBER}
+          editable
           onChangeText={formik.handleChange('phone_number')}
           value={formik.values.phone_number ?? ''}
           onChangeCountryCode={formik.handleChange('country_code')}
           onChangeCallingCode={formik.handleChange('calling_code')}
+          defaultCode={(formik.values.country_code || 'US') as 'US'}
           allowSpacing={false}
           startIcon={{
             componentName: VARIABLES.Feather,

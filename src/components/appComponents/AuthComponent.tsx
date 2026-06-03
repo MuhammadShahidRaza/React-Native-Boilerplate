@@ -1,12 +1,12 @@
 import { RowComponent, SvgComponent, Typography, Wrapper } from 'components/common';
-import { SVG } from 'constants/assets';
+import { getBrandLogoAspect, getBrandLogoSvg, isSengoBrand } from 'constants/assets/brandLogo';
 import { SCREENS } from 'constants/routes';
 import { COMMON_TEXT } from 'constants/screens';
 import { reset } from 'navigation/Navigators';
 import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChildrenType, FontSize, FontWeight, StyleType, SvgNameType } from 'types/index';
-import { screenWidth, FLEX_CENTER, COLORS, screenHeight } from 'utils/index';
+import { screenWidth, screenHeight, FLEX_CENTER, COLORS } from 'utils/index';
 
 type Props = {
   children: ChildrenType;
@@ -47,12 +47,22 @@ export const AuthComponent = ({
 }: Props) => {
   const showBottomSection = Boolean(bottomText || bottomButtonText);
   const insets = useSafeAreaInsets();
+  const logoWidth = screenWidth(55);
+  const logoHeight = logoWidth * getBrandLogoAspect('light');
+  const BrandLogo = getBrandLogoSvg('light');
+
   return (
     <>
       <Wrapper useScrollView showBackButton={showBack}>
         <View style={styles.mainContainer}>
           {showLogo && (
-            <SvgComponent Svg={SVG.LOGO} containerStyle={styles.logo} fill={COLORS.APP_ICON} />
+            <SvgComponent
+              Svg={BrandLogo}
+              containerStyle={styles.logo}
+              svgWidth={logoWidth}
+              svgHeight={logoHeight}
+              {...(isSengoBrand() ? {} : { fill: COLORS.APP_ICON })}
+            />
           )}
           <View style={[styles.container, containerStyle]}>
             {heading1 && (

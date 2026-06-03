@@ -77,6 +77,12 @@ export const Settings = () => {
     ...(role === APP_CONFIG.USER_ROLE
       ? [
           {
+            title: 'Favorites',
+            iconName: 'heart',
+            iconComponent: VARIABLES.Ionicons,
+            onPress: () => navigate(SCREENS.FAVORITES),
+          },
+          {
             title: 'Address',
             iconName: 'map-marker',
             iconComponent: VARIABLES.MaterialCommunityIcons,

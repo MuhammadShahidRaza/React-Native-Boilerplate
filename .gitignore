@@ -19,6 +19,9 @@ xcuserdata
 DerivedData
 *.hmap
 *.ipa
+*.xcarchive
+ios/release.config.json
+ios/AuthKey_*.p8
 *.xcuserstate
 **/.xcode.env.local
 

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>SNLift</string>
+	<string>Sengo</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIcons</key>
@@ -28,7 +28,7 @@
 		<key>CFBundlePrimaryIcon</key>
 		<dict>
 			<key>CFBundleIconName</key>
-			<string>AppIcon</string>
+			<string>AppIconSengo</string>
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>

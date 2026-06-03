@@ -1,59 +1,92 @@
+import { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppGradient, Icon, RowComponent, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, STYLES } from 'utils/index';
+import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
 import { FONT_FAMILY, IMAGES } from 'constants/assets';
+import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
+import { useAppSelector } from 'types/reduxTypes';
 
-const SUMMARY_ROWS = [
-  { label: 'Today', amount: WORKER_EARNINGS_SUMMARY.today },
-  { label: 'This Week', amount: WORKER_EARNINGS_SUMMARY.week },
-  { label: 'This Month', amount: WORKER_EARNINGS_SUMMARY.month },
-];
+function formatCfa(amount: number | string | undefined, fallback: string): string {
+  if (amount === undefined || amount === null || amount === '') return fallback;
+  const n = typeof amount === 'number' ? amount : parseFloat(String(amount));
+  if (Number.isNaN(n)) return fallback;
+  return `CFA ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
 
-export const WorkerEarningsScreen = () => (
-  <View style={styles.root}>
-    <SafeAreaView edges={['top']} style={styles.safeTop}>
-      <Typography style={styles.header}>Earnings</Typography>
-    </SafeAreaView>
+export const WorkerEarningsScreen = () => {
+  const role = useAppSelector(state => state.user?.role);
+  const [total, setTotal] = useState<string>(WORKER_EARNINGS_SUMMARY.total);
+  const [today, setToday] = useState<string>(WORKER_EARNINGS_SUMMARY.today);
+  const [week, setWeek] = useState<string>(WORKER_EARNINGS_SUMMARY.week);
+  const [month, setMonth] = useState<string>(WORKER_EARNINGS_SUMMARY.month);
 
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-      <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.totalCard}>
-        <View style={styles.totalIconWrap}>
-          <Image source={IMAGES.BAG} style={styles.totalIcon} />
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const summary = await getWorkerWalletSummary(role);
+      if (cancelled || !summary) return;
+      setTotal(formatCfa(summary.total_earnings, WORKER_EARNINGS_SUMMARY.total));
+      setToday(formatCfa(summary.today_earnings, WORKER_EARNINGS_SUMMARY.today));
+      setWeek(formatCfa(summary.week_earnings, WORKER_EARNINGS_SUMMARY.week));
+      setMonth(formatCfa(summary.month_earnings, WORKER_EARNINGS_SUMMARY.month));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
+
+  const summaryRows = [
+    { label: 'Today', amount: today },
+    { label: 'This Week', amount: week },
+    { label: 'This Month', amount: month },
+  ];
+
+  return (
+    <View style={styles.root}>
+      <SafeAreaView edges={['top']} style={styles.safeTop}>
+        <Typography style={styles.header}>Earnings</Typography>
+      </SafeAreaView>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.totalCard}>
+          <View style={styles.totalIconWrap}>
+            <Image source={IMAGES.BAG} style={styles.totalIcon} />
+          </View>
+          <View style={styles.totalInfo}>
+            <Typography style={styles.totalLabel}>Total Earnings</Typography>
+            <Typography style={styles.totalAmount}>{total}</Typography>
+          </View>
+        </AppGradient>
+
+        <View style={styles.summaryCard}>
+          <Typography style={styles.summaryTitle}>Earning Summary</Typography>
+          {summaryRows.map((row, index) => (
+            <RowComponent
+              key={row.label}
+              style={[styles.summaryRow, index < summaryRows.length - 1 && styles.summaryRowBorder]}
+            >
+              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
+                <Icon
+                  componentName={VARIABLES.MaterialCommunityIcons}
+                  iconName='wallet-outline'
+                  size={15}
+                  color={COLORS.WHITE}
+                />
+              </AppGradient>
+
+              <Typography style={styles.summaryLabel}>{row.label}</Typography>
+              <Typography style={styles.summaryAmount}>{row.amount}</Typography>
+            </RowComponent>
+          ))}
         </View>
-        <View style={styles.totalInfo}>
-          <Typography style={styles.totalLabel}>Total Earnings</Typography>
-          <Typography style={styles.totalAmount}>{WORKER_EARNINGS_SUMMARY.total}</Typography>
-        </View>
-      </AppGradient>
-
-      <View style={styles.summaryCard}>
-        <Typography style={styles.summaryTitle}>Earning Summary</Typography>
-        {SUMMARY_ROWS.map((row, index) => (
-          <RowComponent
-            key={row.label}
-            style={[styles.summaryRow, index < SUMMARY_ROWS.length - 1 && styles.summaryRowBorder]}
-          >
-            <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
-              <Icon
-                componentName={VARIABLES.MaterialCommunityIcons}
-                iconName='wallet-outline'
-                size={15}
-                color={COLORS.WHITE}
-              />
-            </AppGradient>
-
-            <Typography style={styles.summaryLabel}>{row.label}</Typography>
-            <Typography style={styles.summaryAmount}>{row.amount}</Typography>
-          </RowComponent>
-        ))}
-      </View>
-    </ScrollView>
-  </View>
-);
+      </ScrollView>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   root: {
@@ -110,12 +143,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   summaryCard: {
+    backgroundColor: COLORS.WHITE,
     borderRadius: 16,
     padding: 16,
     marginHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
-    backgroundColor: COLORS.WHITE,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   summaryTitle: {
     fontSize: FontSize.MediumLarge,

@@ -5,7 +5,7 @@ import { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { Icon, Map, MapVehicleMarker, type MapVehicleMarkerKind } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
-import { COLORS, fitMapToDirectionCoordinates, screenHeight } from 'utils/index';
+import { COLORS, fitMapToDirectionCoordinates } from 'utils/index';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
 export interface WorkerJobRouteMapProps {

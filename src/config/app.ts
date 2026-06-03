@@ -1,10 +1,11 @@
 /**
  * App-specific config for boilerplate customization.
- * Change these values when creating a new app from this boilerplate.
+ * Display name and roles are overridden per flavor via `config/variant.ts`.
  */
+import { VARIANT } from 'config/variant';
+
 export const APP_CONFIG = {
-  /** App display name (shown in auth UI; align with native display name separately) */
-  APP_NAME: 'SN LIFT',
+  APP_NAME: VARIANT.appName,
 
   /** Customer role (maps, bookings, consumer hub) */
   USER_ROLE: 'user' as const,

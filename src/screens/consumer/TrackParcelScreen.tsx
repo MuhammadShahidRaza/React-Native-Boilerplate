@@ -33,6 +33,7 @@ import type { RootStackParamList } from 'navigation/index';
 import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { CancelReasonModal } from './CancelReasonModal';
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 
  
 const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
@@ -48,6 +49,7 @@ const PHASE_AUTO_MS: Record<Exclude<ParcelTrackPhase, 'delivered'>, number> = {
 
 export const TrackParcelScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_PARCEL>>();
+  const bookingId = route.params?.bookingId;
   const phaseParam = route.params?.phase;
   const initialPhase: ParcelTrackPhase =
     phaseParam === 'delivered'
@@ -235,7 +237,10 @@ export const TrackParcelScreen = () => {
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        onContinue={() => setCancelOpen(false)}
+        onContinue={async reason => {
+          setCancelOpen(false);
+          await cancelSniftBooking(bookingId, reason);
+        }}
       />
     </Wrapper>
   );

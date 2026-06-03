@@ -32,11 +32,15 @@ type PhoneValues = {
 };
 
 /** Returns a normalized phone payload ready to send to the API. */
-export const buildPhonePayload = (values: PhoneValues) => ({
-  phone_number: normalizePhoneNumber(values.phone_number ?? '', values.calling_code),
-  country_code: values.country_code ?? '',
-  calling_code: values.calling_code ?? '',
-});
+export const buildPhonePayload = (values: PhoneValues) => {
+  const phone = normalizePhoneNumber(values.phone_number ?? '', values.calling_code);
+  return {
+    phone,
+    phone_number: phone,
+    country_code: values.country_code ?? '',
+    calling_code: values.calling_code ?? '',
+  };
+};
 
 export const normalizePhoneNumber = (
   phone_number: string,

@@ -10,6 +10,12 @@ apply plugin: 'com.google.firebase.crashlytics'
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
+    debuggableVariants = [
+        "snliftDebug",
+        "sengoDebug",
+        "sengoWorkersDebug",
+    ]
+
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
     // root = file("../../")
@@ -69,6 +75,8 @@ react {
 def enableProguardInReleaseBuilds = true
 def rootDir = file("../../")
 def packageJsonFile = file("${rootDir}/package.json")
+def variantsManifestFile = file("${rootDir}/variants/manifest.json")
+def variantsManifest = new groovy.json.JsonSlurper().parseText(variantsManifestFile.text)
 
 // 1) App name from app.json (e.g. "snlift")
 def appJson = new groovy.json.JsonSlurper().parseText(file("${rootDir}/app.json").text)
@@ -129,18 +137,37 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.cmolds.snlift"
+    flavorDimensions "brand"
     // Skip lint during release assemble for faster builds (run lint separately when needed)
     lint {
         checkReleaseBuilds false
         abortOnError false
     }
     defaultConfig {
-        applicationId "com.cmolds.snlift"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
         versionName appVersionName
-        // manifestPlaceholders += [googleMapsApiKey: googleMapsApiKey]
+    }
+    productFlavors {
+        snlift {
+            dimension "brand"
+            applicationId variantsManifest.snlift.bundleId
+            resValue "string", "app_name", variantsManifest.snlift.appName
+            buildConfigField "String", "APP_VARIANT", '"snlift"'
+        }
+        sengo {
+            dimension "brand"
+            applicationId variantsManifest.sengo.bundleId
+            resValue "string", "app_name", variantsManifest.sengo.appName
+            buildConfigField "String", "APP_VARIANT", '"sengo"'
+        }
+        sengoWorkers {
+            dimension "brand"
+            applicationId variantsManifest.sengoWorkers.bundleId
+            resValue "string", "app_name", variantsManifest.sengoWorkers.appName
+            buildConfigField "String", "APP_VARIANT", '"sengoWorkers"'
+        }
     }
     signingConfigs {
         debug {
@@ -181,8 +208,10 @@ android {
     }
     applicationVariants.all { variant ->
         if (variant.buildType.name == "release") {
+            def flavorName = variant.productFlavors[0]?.name ?: "app"
+            def flavorLabel = variantsManifest[flavorName]?.appName ?: appName
             variant.outputs.all { output ->
-                output.outputFileName = "${appName}-${appVersionName}-${appVersionCode}.apk"
+                output.outputFileName = "${flavorLabel}-${appVersionName}-${appVersionCode}.apk"
             }
         }
     }

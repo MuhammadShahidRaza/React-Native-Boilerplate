@@ -67,6 +67,18 @@ export interface User {
   is_admin_verified?: number;
   terms_accepted_at?: string;
   balance?: string | number;
+  wallet_balance?: string | number;
+  vehicle_brand?: string | null;
+  vehicle_model?: string | null;
+  vehicle_license_plate?: string | null;
+  vehicle_color?: string | null;
+  vehicle_type?: string | null;
+  vehicle_year?: string | null;
+  driver_license_number?: string | null;
+  driver_license_validity_date?: string | null;
+  driver_license_front?: string | null;
+  driver_license_back?: string | null;
+  mot_certificate?: string | null;
   customer_stripe_id?: string | null;
   is_notify?: number;
   is_freezed?: number;
@@ -347,17 +359,19 @@ export interface Address {
   label?: string;
 }
 
-/** Address create/update payload */
+/** Address create/update payload (app); mapped to Postman `title` + `address` on send. */
 export interface AddressPayload {
+  /** Display label — sent as API `title` */
+  title?: string;
+  /** Street line — sent as API `address` */
   street: string;
   city: string;
   state: string;
   postal_code: string;
-  country: string;
+  country?: string;
   latitude: string;
   longitude: string;
   is_default: boolean;
-  /** Will be added - keep for future */
   label?: string;
 }
 

@@ -11,6 +11,7 @@ export interface Login_SignUp {
   email?: string;
   user_type: USER_TYPE;
   phone_number?: string;
+  phone?: string;
   profile_image?: object | null;
   password: string;
   country?: string;
@@ -39,15 +40,20 @@ export interface SocialLogin {
   device_token?: string;
 }
 
+/** Forgot-password flow — `POST /verify-code` (phone + otp_code only). */
 export interface VerifyOtp {
-  // email?: string;
+  phone?: string;
   phone_number?: string;
-  country_code?: string;
   calling_code?: string;
   otp_code: string;
 }
 
+/** `POST /reset-password` — phone, otp_code, password (Postman). */
 export interface ResetPassword {
+  phone?: string;
+  phone_number?: string;
+  calling_code?: string;
+  otp_code?: string;
   password: string;
-  password_confirmation: string;
+  password_confirmation?: string;
 }

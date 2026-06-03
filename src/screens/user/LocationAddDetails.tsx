@@ -60,7 +60,10 @@ export const LocationAddDetails = () => {
       const baseStreet = address.street || address.fullAddress?.split(',')[0]?.trim() || '';
       const street =
         [baseStreet, suburb, floor].filter(Boolean).join(', ') || baseStreet || suburb || 'Address';
+      const labelTitle =
+        LABELS.find(l => l.id === selectedLabel)?.label ?? selectedLabel ?? 'Home';
       const payload = {
+        title: labelTitle,
         street,
         city: address.city || '',
         state: address.state || '',

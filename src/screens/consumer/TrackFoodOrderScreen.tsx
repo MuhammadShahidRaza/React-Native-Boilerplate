@@ -29,8 +29,7 @@ import { SCREENS } from 'constants/routes';
 import { COLORS, coordinateAlongPolyline, openPhoneNumber, screenHeight } from 'utils/index';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { CancelReasonModal } from './CancelReasonModal';
-
-const BACK_ICON = { backgroundColor: COLORS.APP_PRIMARY, borderRadius: 12 };
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 
 const PHASE_ORDER: FoodOrderPhase[] = [
   'placing_order',
@@ -103,6 +102,7 @@ function FoodOrderPhaseModal({
 
 export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
+  const bookingId = route.params?.bookingId;
   const [phase, setPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'placing_order');
   const [cancelOpen, setCancelOpen] = useState(false);
   const [rating, setRating] = useState(0);
@@ -356,7 +356,10 @@ export const TrackFoodOrderScreen = () => {
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        onContinue={() => setCancelOpen(false)}
+        onContinue={async reason => {
+          setCancelOpen(false);
+          await cancelSniftBooking(bookingId, reason);
+        }}
       />
     </Wrapper>
   );

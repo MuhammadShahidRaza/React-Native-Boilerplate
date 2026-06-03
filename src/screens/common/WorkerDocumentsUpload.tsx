@@ -9,6 +9,7 @@ import { resetWorkerAvailability, setDocumentsComplete } from 'store/slices/work
 import store from 'store/store';
 import { useAppDispatch } from 'types/reduxTypes';
 import { onBack } from 'navigation/index';
+import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
 import { STYLES, hasUri, screenHeight, COLORS, removeKeychainItem } from 'utils/index';
 import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
 import { ImageUpload } from 'components/common/ImageUpload';
@@ -42,8 +43,8 @@ export const WorkerDocumentsUpload = (
     dispatch(resetWorkerAvailability());
     await removeKeychainItem(VARIABLES.USER_TOKEN);
     props.navigation.reset({
-      index: 1,
-      routes: [{ name: SCREENS.GET_STARTED }, { name: SCREENS.LOGIN }],
+      index: getAuthStackLoginIndex(),
+      routes: getAuthStackRoutes(),
     });
   };
 

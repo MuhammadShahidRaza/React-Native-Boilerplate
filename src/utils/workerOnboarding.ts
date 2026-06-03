@@ -43,9 +43,14 @@ function parseBalanceValue(raw: string | number | null | undefined): number | nu
 /** Spendable worker wallet balance (commission tokens). */
 export function parseWalletBalance(user: User | null | undefined): number {
   if (!user) return 0;
-  const u = user as User & { wallet_balance?: number | string };
+  const u = user as User & {
+    wallet_balance?: number | string;
+    total_cfa_balance?: number | string;
+  };
   const fromWallet = parseBalanceValue(u.wallet_balance);
   if (fromWallet !== null) return fromWallet;
+  const fromTotalCfa = parseBalanceValue(u.total_cfa_balance);
+  if (fromTotalCfa !== null) return fromTotalCfa;
   const fromBalance = parseBalanceValue(u.balance);
   if (fromBalance !== null) return fromBalance;
   return 0;

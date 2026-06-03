@@ -8,8 +8,6 @@ import { useAppSelector } from 'types/reduxTypes';
 import { LogoutModal } from 'components/common/LogoutModal';
 import { useState } from 'react';
 import { handleAccountLogout } from './Settings';
-import CustomSwitch from 'components/common/SwitchButton';
-import { updateUserDetails } from 'api/functions/app/user';
 import { APP_CONFIG, isWorkerRole } from 'config/app';
 
 export const MyAccount = () => {
@@ -17,16 +15,6 @@ export const MyAccount = () => {
   const role = useAppSelector(state => state?.user?.role);
 
   const [isLogoutModalVisible, setisLogoutModalVisible] = useState(false);
-  const [isProfilePaused, setIsProfilePaused] = useState(userDetails?.is_freezed == 1);
-  const handlePauseProfile = async (value: boolean) => {
-    setIsProfilePaused(value);
-    await updateUserDetails(
-      {
-        is_freezed: value ? 1 : 0,
-      },
-      false,
-    );
-  };
 
   const tabs = [
     ...(isWorkerRole(role)

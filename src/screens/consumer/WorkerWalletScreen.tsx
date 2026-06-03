@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Image, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStatusModal, Icon, Typography, RowComponent, AppGradient } from 'components/index';
 import { VARIABLES } from 'constants/common';
@@ -10,6 +10,12 @@ import { useAppSelector } from 'types/reduxTypes';
 import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
+import {
+  getWorkerWalletSummary,
+  getWorkerWalletTransactions,
+  mapTransactionsToUi,
+  parseWalletSummaryBalance,
+} from 'api/functions/snlift/wallet';
 
 type Transaction = {
   id: string;
@@ -26,9 +32,33 @@ const DUMMY_TRANSACTIONS: Transaction[] = [
 
 export const WorkerWalletScreen = () => {
   const user = useAppSelector(state => state.user.userDetails);
-  const balance = useMemo(() => parseWalletBalance(user), [user]);
+  const role = useAppSelector(state => state.user?.role);
+  const [apiBalance, setApiBalance] = useState<number | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>(DUMMY_TRANSACTIONS);
+  const balance = useMemo(
+    () => (apiBalance !== null ? apiBalance : parseWalletBalance(user)),
+    [apiBalance, user],
+  );
   const [topOffVisible, setTopOffVisible] = useState(false);
   const topOffShownRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const summary = await getWorkerWalletSummary(role);
+      const txRes = await getWorkerWalletTransactions(role);
+      if (cancelled) return;
+      const balance = parseWalletSummaryBalance(summary);
+      if (balance !== null) setApiBalance(balance);
+      const txUi = mapTransactionsToUi(txRes);
+      if (txUi.length > 0) {
+        setTransactions(txUi);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
 
   useEffect(() => {
     if (balance > 0 || topOffShownRef.current) return;
@@ -58,10 +88,10 @@ export const WorkerWalletScreen = () => {
 
         <View style={styles.summaryCard}>
           <Typography style={styles.summaryTitle}>Recent Transaction</Typography>
-          {DUMMY_TRANSACTIONS.map((item, index) => (
+          {transactions.map((item, index) => (
             <RowComponent
               key={item.id}
-              style={[styles.txRow, index < DUMMY_TRANSACTIONS.length - 1 && styles.txRowBorder]}
+              style={[styles.txRow, index < transactions.length - 1 && styles.txRowBorder]}
             >
               <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
                 <Icon

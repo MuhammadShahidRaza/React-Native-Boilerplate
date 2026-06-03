@@ -17,6 +17,7 @@ import { navigate, replace, type RootStackParamList } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { useMemo, useRef, useState } from 'react';
 import { CancelReasonModal } from './CancelReasonModal';
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import MapViewDirections from 'react-native-maps-directions';
 import { RouteProp, useRoute } from '@react-navigation/native';
 
@@ -27,7 +28,7 @@ export const DriverFoundScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.DRIVER_FOUND>>();
   const mapRef = useRef<MapView>(null);
 
-  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
 
   const pickupCoord = useMemo(
     () => ({
@@ -63,8 +64,9 @@ export const DriverFoundScreen = () => {
         pickupLng: pickupCoord.longitude,
         dropoffLat: dropoffCoord.latitude,
         dropoffLng: dropoffCoord.longitude,
+        bookingId,
       }),
-    [pickupCoord, dropoffCoord],
+    [pickupCoord, dropoffCoord, bookingId],
   );
 
   return (
@@ -158,9 +160,10 @@ export const DriverFoundScreen = () => {
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => {
+        onContinue={async reason => {
           setCancelVisible(false);
-          replace(SCREENS.BOOK_RIDE);
+          const ok = await cancelSniftBooking(bookingId, reason);
+          if (ok) replace(SCREENS.BOOK_RIDE);
         }}
       />
     </Wrapper>

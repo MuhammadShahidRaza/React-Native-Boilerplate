@@ -1,3 +1,4 @@
+export * from './useVariantBootstrap';
 export * from './useAddressList';
 export * from './useUserById';
 export * from './useConversations';

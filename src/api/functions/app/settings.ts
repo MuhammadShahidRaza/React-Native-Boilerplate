@@ -15,8 +15,12 @@ import { ENV_CONSTANTS } from 'constants/common';
 import store from 'store/store';
 import { logger } from 'utils/logger';
 import { setUserDetails } from 'store/slices/user';
+import { normalizeSniftUser } from 'api/normalizers/snlift';
+import { getContentBySlug } from 'api/functions/snlift/content';
 
 const logout = async (data: { udid: string }) => {
+  const { removeUserDevice } = await import('api/functions/snlift/user');
+  await removeUserDevice({ udid: data.udid }).catch(() => undefined);
   const response = await handlePostApiRequest({
     url: API_ROUTES.LOGOUT,
     data,
@@ -61,7 +65,9 @@ const completeProfile = async ({ data }: { data: CompleteProfileFormValues }) =>
   });
 
   if (user) {
-    store.dispatch(setUserDetails(user));
+    store.dispatch(
+      setUserDetails(normalizeSniftUser(user as Partial<User> & Record<string, unknown>)),
+    );
   }
   return user;
 };
@@ -73,7 +79,31 @@ const completeProfile = async ({ data }: { data: CompleteProfileFormValues }) =>
 // }
 // };
 
+const CONTENT_SLUG_BY_PAGE: Partial<Record<StaticPageType, string>> = {
+  [COMMON_TEXT.PRIVACY_POLICY]: 'privacy-policy',
+  [COMMON_TEXT.TERMS_AND_CONDITIONS]: 'terms-and-conditions',
+  [COMMON_TEXT.ABOUT_US]: 'about-us',
+  'Cancellation Policy': 'cancellation-policy',
+};
+
 const getStaticPage = async (pageType: StaticPageType): Promise<StaticPage | undefined> => {
+  if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    const slug = CONTENT_SLUG_BY_PAGE[pageType];
+    if (slug) {
+      const page = await getContentBySlug(slug);
+      if (page?.description) {
+        return {
+          id: page.id ?? 0,
+          name: page.name,
+          slug: page.slug,
+          description: page.description,
+          createdAt: '',
+          updatedAt: '',
+        };
+      }
+    }
+  }
+
   let url: string;
   switch (pageType) {
     case COMMON_TEXT.PRIVACY_POLICY:

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1061285627466:android:bdb41010bfeb871142c8b3",
+        "mobilesdk_app_id": "1:1061285627466:android:REPLACE_SENGOWORKERS_ANDROID_APP_ID",
         "android_client_info": {
-          "package_name": "com.cmolds.snlift"
+          "package_name": "com.cmolds.sengoworkers"
         }
       },
       "oauth_client": [],

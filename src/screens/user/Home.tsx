@@ -1,12 +1,13 @@
-import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View, Pressable, ActivityIndicator } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSelector } from 'react-redux';
 import {
   Typography,
   Photo,
   RowComponent,
   SvgComponent,
-  GradientButton,
   AppGradient,
   GradientIcon,
   Button,
@@ -18,16 +19,37 @@ import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES, SVG } from 'constants/assets';
 import { COLORS, screenWidth, STYLES } from 'utils/index';
-
-// Hero gradient – teal palette (consumer branding, same as original design)
-
-const promoCodes = [
-  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
-  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
-  { code: 'FIRST50', desc: 'CFA 50 off on first ride.' },
-];
+import {
+  getHomeData,
+  homePromosForDisplay,
+  type SnliftHomeBanner,
+  type HomePromoDisplay,
+} from 'api/functions/snlift/home';
+import type { RootState } from 'types/reduxTypes';
 
 export const Home = () => {
+  const user = useSelector((state: RootState) => state.user.userDetails);
+  const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
+  const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadHome = useCallback(async () => {
+    setLoading(true);
+    const data = await getHomeData();
+    if (data) {
+      setBanners(data.banners);
+      setPromoCodes(homePromosForDisplay(data.promo_codes));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadHome();
+  }, [loadHome]);
+
+  const primaryBanner = banners[0];
+  const displayName = user?.full_name?.split(' ')?.[0] || user?.first_name || 'there';
+
   return (
     <Wrapper
       showBackButton={false}
@@ -36,11 +58,9 @@ export const Home = () => {
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      {/* ── Hero section ── */}
       <AppGradient style={styles.hero} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
-            {/* Location pill — gradient square icon + stacked label/text */}
             <RowComponent style={styles.locPillWrap}>
               <GradientIcon
                 componentName={VARIABLES.EvilIcons}
@@ -55,7 +75,6 @@ export const Home = () => {
                 </Typography>
               </View>
             </RowComponent>
-            {/* Bell — gradient square icon */}
             <GradientIcon
               componentName={VARIABLES.Feather}
               iconName='bell'
@@ -65,33 +84,46 @@ export const Home = () => {
             />
           </View>
           <View style={{ paddingHorizontal: 20 }}>
-            <Typography style={styles.greet}>Hello, Sarah!</Typography>
+            <Typography style={styles.greet} translate={false}>
+              {('Hello, ' + displayName + '!') as string}
+            </Typography>
             <Typography style={styles.sub}>Where would you like to go today?</Typography>
 
-            <Pressable style={styles.banner}>
-              <Photo source={IMAGES.HOME} imageStyle={styles.bannerImg} />
-              <View style={styles.bannerText}>
-                <Typography style={styles.bannerTitle}>First Ride Free!</Typography>
-                <Typography style={styles.bannerSub}>Use Code First 50 for Rs. 50 off</Typography>
-                <Button
-                  title='Book Now'
-                  onPress={() => navigate(SCREENS.BOOK_RIDE)}
-                  style={styles.bookNow}
-                  textStyle={styles.bookNowText}
+            {loading && !primaryBanner ? (
+              <ActivityIndicator color={COLORS.WHITE} style={styles.bannerLoader} />
+            ) : (
+              <Pressable style={styles.banner} onPress={() => navigate(SCREENS.BOOK_RIDE)}>
+                <Photo
+                  source={
+                    primaryBanner?.image ? { uri: primaryBanner.image } : IMAGES.HOME
+                  }
+                  imageStyle={styles.bannerImg}
                 />
-              </View>
-            </Pressable>
+                <View style={styles.bannerText}>
+                  <Typography style={styles.bannerTitle}>
+                    {primaryBanner?.title ?? 'Book a Ride'}
+                  </Typography>
+                  <Typography style={styles.bannerSub}>
+                    {primaryBanner?.sub_title ?? 'Get started with SNLift'}
+                  </Typography>
+                  <Button
+                    title='Book Now'
+                    onPress={() => navigate(SCREENS.BOOK_RIDE)}
+                    style={styles.bookNow}
+                    textStyle={styles.bookNowText}
+                  />
+                </View>
+              </Pressable>
+            )}
           </View>
         </SafeAreaView>
       </AppGradient>
 
-      {/* ── Scrollable body – theme-aware background ── */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* "What do you need?" */}
         <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
           <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
             What do you need?
@@ -118,7 +150,6 @@ export const Home = () => {
           </View>
         </View>
 
-        {/* Promo Codes */}
         <View
           style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
         >
@@ -126,26 +157,31 @@ export const Home = () => {
             <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
               Promo Codes
             </Typography>
-            {/* <Typography style={styles.seeAll}>See All</Typography> */}
           </View>
-          {promoCodes.map((p, i) => (
-            <View key={i} style={[styles.promoCard]}>
-              <SvgComponent
-                Svg={SVG.COUPON}
-                svgWidth={40}
-                svgHeight={40}
-                containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
-              />
-              <View style={styles.promoBody}>
-                <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
-                  {p.code}
-                </Typography>
-                <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
-                  {p.desc}
-                </Typography>
+          {loading && promoCodes.length === 0 ? (
+            <ActivityIndicator color={COLORS.APP_PRIMARY} />
+          ) : promoCodes.length === 0 ? (
+            <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
+          ) : (
+            promoCodes.map(p => (
+              <View key={p.id} style={[styles.promoCard]}>
+                <SvgComponent
+                  Svg={SVG.COUPON}
+                  svgWidth={40}
+                  svgHeight={40}
+                  containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
+                />
+                <View style={styles.promoBody}>
+                  <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
+                    {p.code}
+                  </Typography>
+                  <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
+                    {p.desc}
+                  </Typography>
+                </View>
               </View>
-            </View>
-          ))}
+            ))
+          )}
         </View>
 
         <View style={styles.scrollFooter} />
@@ -154,7 +190,6 @@ export const Home = () => {
   );
 };
 
-// ── Service Card ──────────────────────────────────────────────────────────────
 const ServiceCard = ({
   label,
   subLabel,
@@ -207,13 +242,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  locIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   locLabel: {
     color: COLORS.WHITE,
     fontSize: FontSize.Small,
@@ -222,13 +250,6 @@ const styles = StyleSheet.create({
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.SemiBold,
-  },
-  bellBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   greet: {
     color: COLORS.WHITE,
@@ -240,6 +261,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Small,
     marginTop: 4,
     marginBottom: 16,
+  },
+  bannerLoader: {
+    height: 180,
+    marginBottom: 10,
   },
   banner: {
     height: 180,
@@ -315,14 +340,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderWidth: 1,
   },
-  serviceIconWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
   serviceLabel: {
     fontSize: FontSize.MediumSmall,
     fontWeight: FontWeight.Bold,
@@ -340,11 +357,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  seeAll: {
-    color: COLORS.APP_PRIMARY,
-    fontWeight: FontWeight.Bold,
-    fontSize: FontSize.Small,
-  },
   promoCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -355,13 +367,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: COLORS.SURFACE,
     borderColor: COLORS.BORDER,
-  },
-  promoIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   promoBody: {
     flex: 1,

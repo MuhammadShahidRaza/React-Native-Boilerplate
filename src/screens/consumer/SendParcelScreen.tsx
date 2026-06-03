@@ -15,6 +15,11 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS, screenHeight } from 'utils/index';
+import {
+  createParcelBooking,
+  extractBookingFromResponse,
+} from 'api/functions/snlift/bookings';
+import { showToast } from 'utils/toast';
 import type { AddressDetails } from 'utils/location';
 import { sendParcelValidationSchema } from 'utils/validations';
 
@@ -43,12 +48,37 @@ export const SendParcelScreen = () => {
   const formik = useFormikForm<ParcelFormValues>({
     initialValues,
     validationSchema: sendParcelValidationSchema,
-    onSubmit: values => {
+    onSubmit: async values => {
+      const distanceKm = Math.max(
+        0.5,
+        Math.round(
+          (Math.abs(values.pickup!.latitude - values.dropoff!.latitude) +
+            Math.abs(values.pickup!.longitude - values.dropoff!.longitude)) *
+            111 *
+            10,
+        ) / 10,
+      );
+      const res = await createParcelBooking({
+        booking_type: 'parcel',
+        pickup_address: values.pickup!.fullAddress ?? 'Pickup',
+        dropoff_address: values.dropoff!.fullAddress ?? 'Drop-off',
+        pickup_latitude: values.pickup!.latitude,
+        pickup_longitude: values.pickup!.longitude,
+        dropoff_latitude: values.dropoff!.latitude,
+        dropoff_longitude: values.dropoff!.longitude,
+        distance_km: distanceKm,
+      });
+      const booking = extractBookingFromResponse(res);
+      if (!booking?.id) {
+        showToast({ message: 'Could not create parcel booking. Try again.' });
+        return;
+      }
       navigate(SCREENS.SEND_PARCEL_FINDING, {
         pickupLat: values.pickup!.latitude,
         pickupLng: values.pickup!.longitude,
         dropoffLat: values.dropoff!.latitude,
         dropoffLng: values.dropoff!.longitude,
+        bookingId: booking.id,
       });
     },
   });

@@ -9,12 +9,14 @@ index 1111111..2222222 100644
  import PropTypes from 'prop-types';
  import { useTheme } from './CountryTheme';
  const styles = StyleSheet.create({
-@@ -12,14 +12,14 @@ const styles = StyleSheet.create({
-     imageStyle: {
-         height: 25,
-         width: 25,
-         resizeMode: 'contain'
-+    },
+@@ -9,42 +9,26 @@ const styles = StyleSheet.create({
+         alignItems: 'center',
+         justifyContent: 'center'
+     },
+-    imageStyle: {
+-        height: 25,
+-        width: 25,
+-        resizeMode: 'contain'
 +    closeText: {
 +        fontSize: 26,
 +        lineHeight: 26,
@@ -29,7 +31,6 @@ index 1111111..2222222 100644
      const { onBackgroundTextColor } = useTheme();
      return (React.createElement(View, { style: [styles.container, props.style] },
          React.createElement(TouchableNativeFeedback, { background: Platform.Version < 21
-@@ -27,12 +27,7 @@ const CloseButtonAndroid = (props) => {
                  ? TouchableNativeFeedback.SelectableBackground()
                  : TouchableNativeFeedback.SelectableBackgroundBorderless(), onPress: props.onPress },
              React.createElement(View, null,
@@ -37,7 +38,7 @@ index 1111111..2222222 100644
 -                        styles.imageStyle,
 -                        props.imageStyle,
 -                        { tintColor: onBackgroundTextColor }
--                    ] }))));
+-                    ] })))));
 +                React.createElement(Text, { style: [styles.closeText, { color: onBackgroundTextColor }] }, "\u00D7")))));
  };
  const CloseButtonIOS = (props) => {
@@ -55,3 +56,30 @@ index 1111111..2222222 100644
 -                ] }))));
 +            React.createElement(Text, { style: [styles.closeText, { color: onBackgroundTextColor }] }, "\u00D7"))));
  };
+ const propTypes = {
+     onPress: PropTypes.func,
+diff --git a/node_modules/react-native-country-picker-modal/lib/CountryModal.js b/node_modules/react-native-country-picker-modal/lib/CountryModal.js
+index 3333333..4444444 100644
+--- a/node_modules/react-native-country-picker-modal/lib/CountryModal.js
++++ b/node_modules/react-native-country-picker-modal/lib/CountryModal.js
+@@ -1,5 +1,6 @@
+ import * as React from 'react';
+-import { SafeAreaView, StyleSheet, Platform } from 'react-native';
++import { StyleSheet, Platform } from 'react-native';
++import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+ import { AnimatedModal } from './AnimatedModal';
+ import { Modal } from './Modal';
+ import { useTheme } from './CountryTheme';
+@@ -9,10 +10,11 @@ const styles = StyleSheet.create({
+         flex: 1,
+     },
+ });
++const wrapWithSafeArea = (backgroundColor, children) => (React.createElement(SafeAreaProvider, null, React.createElement(SafeAreaView, { style: [styles.container, { backgroundColor }], edges: ['top', 'bottom'] }, children)));
+ export const CountryModal = ({ children, withModal, disableNativeModal, ...props }) => {
+     const { backgroundColor } = useTheme();
+     const { teleport } = React.useContext(CountryModalContext);
+-    const content = (React.createElement(SafeAreaView, { style: [styles.container, { backgroundColor }] }, children));
++    const content = wrapWithSafeArea(backgroundColor, children);
+     React.useEffect(() => {
+         if (disableNativeModal) {
+             teleport(React.createElement(AnimatedModal, Object.assign({}, props), content));

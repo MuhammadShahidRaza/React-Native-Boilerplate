@@ -36,6 +36,7 @@ import type { RootStackParamList } from 'navigation/index';
 import { navigate, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { CancelReasonModal } from './CancelReasonModal';
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 
  
 const PROGRESS_PHASE_INDEX: Record<RideTrackPhase, number> = {
@@ -59,7 +60,8 @@ const PHASE_AUTO_MS: Record<Exclude<RideTrackPhase, 'completed'>, number> = {
 
 export const TrackRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_RIDE>>();
-  const { pickupLat, pickupLng, dropoffLat, dropoffLng, phase: phaseParam } = route.params ?? {};
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng, phase: phaseParam, bookingId } =
+    route.params ?? {};
   const tripKey = `${pickupLat}-${pickupLng}-${dropoffLat}-${dropoffLng}`;
   const tripKeyRef = useRef(tripKey);
 
@@ -343,9 +345,10 @@ export const TrackRideScreen = () => {
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => {
+        onContinue={async reason => {
           setCancelVisible(false);
-          navigate(SCREENS.BOOK_RIDE);
+          const ok = await cancelSniftBooking(bookingId, reason);
+          if (ok) navigate(SCREENS.BOOK_RIDE);
         }}
       />
     </Wrapper>

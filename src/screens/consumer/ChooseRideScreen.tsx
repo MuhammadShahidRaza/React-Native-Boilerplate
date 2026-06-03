@@ -8,6 +8,8 @@ import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { resetToHomeAndScreen } from 'navigation/index';
+import { createRideBooking } from 'api/functions/snlift/bookings';
+import { showToast } from 'utils/toast';
 import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from 'navigation/Navigators';
@@ -95,6 +97,43 @@ export const ChooseRideScreen = () => {
     longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
     latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
     longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+  };
+
+  const estimateDistanceKm = () => {
+    const dLat = Math.abs(pickupCoord.latitude - dropoffCoord.latitude);
+    const dLng = Math.abs(pickupCoord.longitude - dropoffCoord.longitude);
+    return Math.max(0.5, Math.round((dLat + dLng) * 111 * 10) / 10);
+  };
+
+  const handleFindDriver = async () => {
+    const payload = {
+      booking_type: 'ride' as const,
+      ride_category: selected,
+      pickup_address: route.params?.pickupAddress ?? 'Pickup',
+      dropoff_address: route.params?.dropoffAddress ?? 'Drop-off',
+      pickup_latitude: pickupCoord.latitude,
+      pickup_longitude: pickupCoord.longitude,
+      dropoff_latitude: dropoffCoord.latitude,
+      dropoff_longitude: dropoffCoord.longitude,
+      distance_km: estimateDistanceKm(),
+      promo_code: promo.trim(),
+    };
+    const res = await createRideBooking(payload);
+    const booking = res && 'booking' in res ? res.booking : res;
+    if (!booking?.id) {
+      showToast({ message: 'Could not create ride booking. Try again.' });
+      return;
+    }
+    resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
+      rideType: selected,
+      pickupAddress: payload.pickup_address,
+      dropoffAddress: payload.dropoff_address,
+      pickupLat: pickupCoord.latitude,
+      pickupLng: pickupCoord.longitude,
+      dropoffLat: dropoffCoord.latitude,
+      dropoffLng: dropoffCoord.longitude,
+      bookingId: booking.id,
+    });
   };
 
   return (
@@ -197,21 +236,7 @@ export const ChooseRideScreen = () => {
           </View>
         </View>
 
-        <Button
-          title='Find Driver'
-          style={styles.ctaBtn}
-          onPress={() =>
-            resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
-              rideType: selected,
-              pickupAddress: route.params?.pickupAddress,
-              dropoffAddress: route.params?.dropoffAddress,
-              pickupLat: pickupCoord.latitude,
-              pickupLng: pickupCoord.longitude,
-              dropoffLat: dropoffCoord.latitude,
-              dropoffLng: dropoffCoord.longitude,
-            })
-          }
-        />
+        <Button title='Find Driver' style={styles.ctaBtn} onPress={handleFindDriver} />
       </View>
     </Wrapper>
   );

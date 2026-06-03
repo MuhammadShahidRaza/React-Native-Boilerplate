@@ -1,4 +1,5 @@
 export * from './FilterChipRow';
+export * from './RestaurantBrowseList';
 export * from './RestaurantCard';
 export * from './MenuItemQuantityControl';
 export * from './FoodCartBar';

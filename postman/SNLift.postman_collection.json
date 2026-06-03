@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "SNLift API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Register / login payloads aligned with the mobile app. Import with SNLift.postman_environment.json."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://demo-cmolds1.com/projects/snlift_be_2026/public/api"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (form-data — Postman minimal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "full_name", "value": "{{full_name}}", "type": "text" },
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" },
+                { "key": "phone", "value": "{{phone}}", "type": "text" },
+                { "key": "user_type", "value": "{{user_type}}", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/register"
+          }
+        },
+        {
+          "name": "Register (form-data — mobile app parity)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "full_name", "value": "{{full_name}}", "type": "text" },
+                { "key": "email", "value": "{{email}}", "type": "text" },
+                { "key": "password", "value": "{{password}}", "type": "text" },
+                { "key": "phone_number", "value": "{{phone_number}}", "type": "text" },
+                { "key": "calling_code", "value": "{{calling_code}}", "type": "text" },
+                { "key": "country_code", "value": "{{country_code}}", "type": "text" },
+                { "key": "user_type", "value": "{{user_type}}", "type": "text" },
+                { "key": "app_version", "value": "{{app_version}}", "type": "text" },
+                { "key": "device_brand", "value": "{{device_brand}}", "type": "text" },
+                { "key": "device_os", "value": "{{device_os}}", "type": "text" },
+                { "key": "device_token", "value": "{{device_token}}", "type": "text" },
+                { "key": "device_type", "value": "{{device_type}}", "type": "text" },
+                { "key": "udid", "value": "{{udid}}", "type": "text" }
+              ]
+            },
+            "url": "{{base_url}}/register"
+          }
+        },
+        {
+          "name": "Login (JSON — mobile app parity)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const token = pm.response.json()?.response?.data?.token;",
+                  "if (token) {",
+                  "  pm.environment.set('auth_token', token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{phone_number}}\",\n  \"password\": \"{{password}}\",\n  \"user_type\": \"{{user_type}}\",\n  \"app_version\": \"{{app_version}}\",\n  \"calling_code\": \"{{calling_code}}\",\n  \"country_code\": \"{{country_code}}\",\n  \"device_brand\": \"{{device_brand}}\",\n  \"device_os\": \"{{device_os}}\",\n  \"device_token\": \"{{device_token}}\",\n  \"device_type\": \"{{device_type}}\",\n  \"udid\": \"{{udid}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/login"
+          }
+        },
+        {
+          "name": "Verify OTP (signup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{phone_number}}\",\n  \"otp_code\": \"{{otp_code}}\",\n  \"user_type\": \"{{user_type}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/verify-otp"
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{phone_number}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/resend-otp"
+          }
+        }
+      ]
+    }
+  ]
+}

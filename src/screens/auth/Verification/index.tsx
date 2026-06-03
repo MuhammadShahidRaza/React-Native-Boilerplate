@@ -6,11 +6,13 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { COMMON_TEXT } from 'constants/screens';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS } from 'constants/routes';
-import { resendEmailCode, verifyEmailCode, verifyOtpCode } from 'api/functions/auth';
+import { resendSignupOtp, verifySignupOtp, verifyOtpCode } from 'api/functions/auth';
+import { showToast } from 'utils/toast';
 import { AuthComponent } from 'components/appComponents';
 import { useSelector } from 'react-redux';
 import { RootState } from 'types/reduxTypes';
 import { useMultipleAsyncButtons, useResetStackOnBack } from 'hooks/index';
+import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
 
 const CODE_LENGTH = 4;
 const TIMER_SECONDS = 59;
@@ -20,7 +22,6 @@ export const Verification = ({
   navigation,
 }: AppScreenProps<typeof SCREENS.VERIFICATION>) => {
   const isFromForgot = route.params?.isFromForgot;
-  const email = route.params?.email;
   const phone_number = route.params?.phone_number;
   const country_code = route.params?.country_code;
   const calling_code = route.params?.calling_code;
@@ -31,8 +32,8 @@ export const Verification = ({
   const role = useSelector((state: RootState) => state.user.role);
 
   useResetStackOnBack(navigation, {
-    index: 1,
-    routes: [{ name: SCREENS.GET_STARTED }, { name: SCREENS.LOGIN }],
+    index: getAuthStackLoginIndex(),
+    routes: getAuthStackRoutes(),
   });
 
   useEffect(() => {
@@ -58,18 +59,22 @@ export const Verification = ({
     if (isFromForgot) {
       await verifyOtpCode({
         data: {
-          email,
           phone_number,
-          country_code,
           calling_code,
           otp_code: code,
         },
       });
     } else {
-      await verifyEmailCode({
+      if (!phone_number && !route.params?.phone_number) {
+        showToast({ message: 'Phone number is required for verification', isError: true });
+        return;
+      }
+      await verifySignupOtp({
         data: {
-          otp: code,
+          otp_code: code,
           user_type: role,
+          phone_number,
+          calling_code,
         },
       });
     }
@@ -81,8 +86,10 @@ export const Verification = ({
       setIsResendEnabled(false);
       setCode('');
       inputRef.current?.focus();
-      if (email) {
-        await resendEmailCode({ data: { email } });
+      if (phone_number) {
+        await resendSignupOtp({ data: { phone_number, calling_code } });
+      } else {
+        showToast({ message: 'Phone number is required to resend code', isError: true });
       }
     }
   });

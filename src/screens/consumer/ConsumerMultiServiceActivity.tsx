@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -17,22 +17,18 @@ import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenWidth } from 'utils/index';
+import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
+import {
+  isActiveBookingStatus,
+  mapBookingToActivityItem,
+  type ConsumerActivityItem,
+} from 'api/mappers/snliftBooking';
 
 // ─── Mock model (bookings removed — static demo cards) ───────────────────────
 
 type ServiceCat = 'All' | 'Rides' | 'Food' | 'Parcel';
 
-type MockActivityItem = {
-  id: string;
-  serviceLabel: 'Ride' | 'Food' | 'Parcel';
-  isoDate: string;
-  price: string;
-  status: string;
-  pickupTitle: string;
-  pickupAddr: string;
-  dropTitle: string;
-  dropAddr: string;
-};
+type MockActivityItem = ConsumerActivityItem;
 
 const ADDR = {
   home: '67 Murray Street, NY',
@@ -425,11 +421,43 @@ function ActivityPane({ source }: { source: MockActivityItem[] }) {
 }
 
 function ActivePane() {
-  return <ActivityPane source={MOCK_ACTIVE} />;
+  const [items, setItems] = useState<MockActivityItem[]>(MOCK_ACTIVE);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await listBookings();
+      const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
+      if (!cancelled && active.length > 0) {
+        setItems(active.map(mapBookingToActivityItem));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return <ActivityPane source={items} />;
 }
 
 function HistoryPane() {
-  return <ActivityPane source={MOCK_HISTORY} />;
+  const [items, setItems] = useState<MockActivityItem[]>(MOCK_HISTORY);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await listBookings();
+      const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
+      if (!cancelled && history.length > 0) {
+        setItems(history.map(mapBookingToActivityItem));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return <ActivityPane source={items} />;
 }
 
 // ─── Navigator ───────────────────────────────────────────────────────────────

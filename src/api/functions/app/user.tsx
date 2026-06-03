@@ -7,6 +7,7 @@ import { ChangePasswordFormTypes, EditProfileFormTypes } from 'types/screenTypes
 import { onBack } from 'navigation/index';
 import { showToast } from 'utils/toast';
 import { ENV_CONSTANTS } from 'constants/common';
+import { normalizeSniftUser } from 'api/normalizers/snlift';
 // import crashlytics from '@react-native-firebase/crashlytics';
 
 /** Dummy user for alpha/dev phase only. Used when IS_ALPHA_PHASE=true in .env. Remove or set IS_ALPHA_PHASE=false for production. */
@@ -85,8 +86,12 @@ const getUserDetails = async <R extends { user: User }>() => {
   }
 
   const user = await handleGetApiRequest<R>({ url: API_ROUTES.GET_PROFILE, addToPending: true });
-  if (user) {
-    store.dispatch(setUserDetails(user?.user));
+  if (user?.user) {
+    store.dispatch(
+      setUserDetails(
+        normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>),
+      ),
+    );
     // crashlytics().setUserId(String(user.user.id)),
   }
 };
@@ -121,8 +126,12 @@ const updateUserDetails = async <R extends { user: User }>(
     url: API_ROUTES.UPDATE_PROFILE,
     data,
   });
-  if (user) {
-    store.dispatch(setUserDetails(user.user));
+  if (user?.user) {
+    store.dispatch(
+      setUserDetails(
+        normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>),
+      ),
+    );
     if (wantBack ?? true) {
       onBack();
     }

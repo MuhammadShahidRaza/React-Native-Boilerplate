@@ -44,11 +44,13 @@ const handleGetApiRequest = async <R extends object>({
   params,
   config = {},
   addToPending = false,
+  showError = true,
 }: {
   url: string;
   params?: Record<string, string | number>;
   config?: Record<string, unknown>;
   addToPending?: boolean;
+  showError?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await get({
@@ -58,7 +60,7 @@ const handleGetApiRequest = async <R extends object>({
     });
     return parseApiResponse<R>(response);
   } catch (error) {
-    handleApiError(error);
+    if (showError) handleApiError(error);
   }
   return;
 };
@@ -142,10 +144,13 @@ const handleDeleteApiRequest = async <R extends object, A extends object>({
   url,
   data,
   showLoader,
+  showError = true,
 }: {
   url: string;
   data: A;
   showLoader?: boolean;
+  /** When true, don't show toast on error */
+  showError?: boolean;  
 }): Promise<R | undefined> => {
   try {
     const response = await remove({
@@ -155,7 +160,9 @@ const handleDeleteApiRequest = async <R extends object, A extends object>({
     });
     return parseApiResponse<R>(response);
   } catch (error) {
-    handleApiError(error);
+    if (!showError) {
+      handleApiError(error);
+    }
   }
   return;
 };

@@ -7,6 +7,7 @@ import { Button, Input, AuthComponent } from 'components/index';
 import { resetUserPassword } from 'api/functions/auth';
 import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { useState } from 'react';
+import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
 import { onBack } from 'navigation/index';
 
 interface ResetPasswordFormValues {
@@ -32,7 +33,9 @@ export const ResetPassword = ({
   const handleSubmit = async (values: ResetPasswordFormValues) => {
     const payload = {
       password: values?.new_password,
-      ...data,
+      phone: data?.phone,
+      phone_number: data?.phone_number ?? data?.phone,
+      otp_code: data?.otp_code,
     };
 
     if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
@@ -56,8 +59,8 @@ export const ResetPassword = ({
   const { loading, onPress } = useAsyncButton(formik);
 
   useResetStackOnBack(navigation, {
-    index: 1,
-    routes: [{ name: SCREENS.GET_STARTED }, { name: SCREENS.LOGIN }],
+    index: getAuthStackLoginIndex(),
+    routes: getAuthStackRoutes(),
   });
 
   return (

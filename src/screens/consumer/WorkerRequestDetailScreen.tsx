@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
@@ -20,7 +20,15 @@ import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import {
   formatWorkerServiceType,
   getWorkerRequestDetail,
+  type WorkerRequestDetail,
 } from 'components/common/worker/workerMockData';
+import {
+  acceptBooking,
+  extractBookingFromResponse,
+  getBookingById,
+} from 'api/functions/snlift/bookings';
+import { mapBookingToWorkerRequestDetail } from 'api/mappers/snliftBooking';
+import { showToast } from 'utils/toast';
 
 const AVATAR_SIZE = 56;
 
@@ -37,10 +45,24 @@ export const WorkerRequestDetailScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.WORKER_REQUEST_DETAIL>>();
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
-  const detail = useMemo(
-    () => getWorkerRequestDetail(route.params?.requestId ?? '1'),
-    [route.params?.requestId],
+  const requestId = route.params?.requestId ?? '1';
+  const [detail, setDetail] = useState<WorkerRequestDetail>(() =>
+    getWorkerRequestDetail(requestId),
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await getBookingById(requestId);
+      const booking = extractBookingFromResponse(res);
+      if (!cancelled && booking) {
+        setDetail(mapBookingToWorkerRequestDetail(booking));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [requestId]);
   const [timerActive, setTimerActive] = useState(true);
   const hasAcceptedRef = useRef(false);
 
@@ -65,7 +87,12 @@ export const WorkerRequestDetailScreen = () => {
     handleBack();
   };
 
-  const accept = () => {
+  const accept = async () => {
+    const res = await acceptBooking(requestId);
+    if (!res) {
+      showToast({ message: 'Could not accept this request. Try again.' });
+      return;
+    }
     hasAcceptedRef.current = true;
     setTimerActive(false);
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {

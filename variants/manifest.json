@@ -1,0 +1,68 @@
+{
+  "snlift": {
+    "id": "snlift",
+    "appName": "SN Lift",
+    "bundleId": "com.cmolds.snlift",
+    "displayNameIos": "SN Lift",
+    "theme": {
+      "primary": "#00B76C",
+      "secondary": "#004AAD",
+      "primaryDark": "#009058",
+      "primaryLight": "#33C88E"
+    },
+    "features": {
+      "showGetStarted": true,
+      "showOnboarding": true,
+      "getStartedRoles": ["user", "courier", "driver"],
+      "defaultRole": null,
+      "consumerOnly": false,
+      "workerOnly": false
+    },
+    "isAlphaPhase": false,
+    "getStartedDescriptionKey": "AUTH.GET_STARTED_DESCRIPTION_SNLIFT"
+  },
+  "sengo": {
+    "id": "sengo",
+    "appName": "Sengo",
+    "bundleId": "com.cmolds.sengo",
+    "displayNameIos": "Sengo",
+    "theme": {
+      "primary": "#F5B800",
+      "secondary": "#C99400",
+      "primaryDark": "#D4A000",
+      "primaryLight": "#FFD54F"
+    },
+    "features": {
+      "showGetStarted": false,
+      "showOnboarding": true,
+      "getStartedRoles": [],
+      "defaultRole": "user",
+      "consumerOnly": true,
+      "workerOnly": false
+    },
+    "isAlphaPhase": true,
+    "getStartedDescriptionKey": "AUTH.GET_STARTED_DESCRIPTION_SENGO"
+  },
+  "sengoWorkers": {
+    "id": "sengoWorkers",
+    "appName": "Sengo Workers",
+    "bundleId": "com.cmolds.sengoworkers",
+    "displayNameIos": "Sengo Workers",
+    "theme": {
+      "primary": "#F5B800",
+      "secondary": "#C99400",
+      "primaryDark": "#D4A000",
+      "primaryLight": "#FFD54F"
+    },
+    "features": {
+      "showGetStarted": true,
+      "showOnboarding": true,
+      "getStartedRoles": ["courier", "driver"],
+      "defaultRole": null,
+      "consumerOnly": false,
+      "workerOnly": true
+    },
+    "isAlphaPhase": true,
+    "getStartedDescriptionKey": "AUTH.GET_STARTED_DESCRIPTION_SENGO_WORKERS"
+  }
+}

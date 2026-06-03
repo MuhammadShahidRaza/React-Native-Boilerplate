@@ -13,6 +13,7 @@ import { COMMON_TEXT } from 'constants/index';
 import { AppScreenProps } from 'types/navigation';
 import { SelectedMedia } from 'hooks/useMediaPicker';
 import { useResetStackOnBack } from 'hooks/useResetStackOnBack';
+import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
 import { useAppSelector } from 'types/reduxTypes';
 
 export interface CompleteProfileFormValues {
@@ -83,8 +84,8 @@ export const CompleteProfile = ({
 
   if (!isFromSettings) {
     useResetStackOnBack(navigation, {
-      index: 1,
-      routes: [{ name: SCREENS.GET_STARTED }, { name: SCREENS.LOGIN }],
+      index: getAuthStackLoginIndex(),
+      routes: getAuthStackRoutes(),
     });
   }
 

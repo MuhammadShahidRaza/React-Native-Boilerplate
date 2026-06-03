@@ -22,11 +22,16 @@ export function resolveParcelTripCoords(params?: ParcelTripCoords | null) {
   return { pickup, dropoff, mapRegion };
 }
 
-export function parcelCoordsNavParams(pickup: MapCoord, dropoff: MapCoord): ParcelTripCoords {
+export function parcelCoordsNavParams(
+  pickup: MapCoord,
+  dropoff: MapCoord,
+  bookingId?: number,
+): ParcelTripCoords {
   return {
     pickupLat: pickup.latitude,
     pickupLng: pickup.longitude,
     dropoffLat: dropoff.latitude,
     dropoffLng: dropoff.longitude,
+    ...(bookingId != null ? { bookingId } : {}),
   };
 }

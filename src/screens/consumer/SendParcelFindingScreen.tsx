@@ -11,7 +11,8 @@ import {
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
-import { replace } from 'navigation/index';
+import { onBack, replace } from 'navigation/index';
+import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
@@ -28,9 +29,11 @@ export const SendParcelFindingScreen = () => {
     [route.params],
   );
 
+  const bookingId = route.params?.bookingId;
+
   const navCoords = useMemo(
-    () => parcelCoordsNavParams(pickup, dropoff),
-    [pickup, dropoff],
+    () => parcelCoordsNavParams(pickup, dropoff, bookingId),
+    [pickup, dropoff, bookingId],
   );
 
   useEffect(() => {
@@ -85,7 +88,11 @@ export const SendParcelFindingScreen = () => {
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
-        onContinue={() => setCancelVisible(false)}
+        onContinue={async reason => {
+          setCancelVisible(false);
+          const ok = await cancelSniftBooking(bookingId, reason);
+          if (ok) onBack();
+        }}
       />
     </Wrapper>
   );

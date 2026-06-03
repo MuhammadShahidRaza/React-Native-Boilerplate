@@ -1,14 +1,12 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
 import {
   FoodCartBar,
   Icon,
   MenuItemQuantityControl,
   Photo,
   Typography,
-  Wrapper,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -16,7 +14,7 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { CustomBackIcon, navigate, onBack } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
-import { COLORS, screenHeight, screenWidth } from 'utils/index';
+import { COLORS, screenHeight } from 'utils/index';
 
 type MenuItem = {
   id: string;

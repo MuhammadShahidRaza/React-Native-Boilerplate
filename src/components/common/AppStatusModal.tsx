@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { ModalComponent } from './Modal';
-import { AppGradient, Button, GradientIcon, Typography } from 'components/index';
+import { Button, GradientIcon, Typography } from 'components/index';
 import type { IconComponentProps } from './Icon';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';

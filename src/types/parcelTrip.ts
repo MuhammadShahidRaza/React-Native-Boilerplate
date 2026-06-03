@@ -5,4 +5,5 @@ export type ParcelTripCoords = {
   pickupLng?: number;
   dropoffLat?: number;
   dropoffLng?: number;
+  bookingId?: number;
 };

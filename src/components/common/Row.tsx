@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { CommonProps } from 'types/index';
 import { FLEX_BETWEEN } from 'utils/index';
 import { useTranslation } from 'hooks/index';
@@ -15,22 +15,32 @@ export const RowComponent = ({
   onPress,
   hitSlop,
   isRightLeftJustify = false,
+  activeOpacity = 0.5,
   ...restProps
 }: Props) => {
   const { isLangRTL } = useTranslation();
+  const rowStyle: StyleProp<ViewStyle> = [
+    styles.row,
+    { flexDirection: isLangRTL ? 'row-reverse' : 'row' },
+    isRightLeftJustify
+      ? { justifyContent: isLangRTL ? 'flex-start' : 'flex-end' }
+      : undefined,
+    style,
+  ];
+
+  if (!onPress) {
+    return (
+      <View style={rowStyle} {...restProps}>
+        {children}
+      </View>
+    );
+  }
+
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={onPress ? false : true}
-      activeOpacity={onPress ? 0.5 : 1}
-      style={[
-        styles.row,
-        { flexDirection: isLangRTL ? 'row-reverse' : 'row' },
-        isRightLeftJustify && {
-          justifyContent: isLangRTL ? 'flex-start' : 'flex-end',
-        },
-        style,
-      ]}
+      activeOpacity={activeOpacity}
+      style={rowStyle}
       hitSlop={hitSlop}
       {...restProps}
     >

@@ -63,7 +63,7 @@ export const Location = () => {
     loadingMore,
     selectedId,
     setSelectedId,
-    loadMore,
+    loadMore: _loadMore,
     refetch,
   } = useAddressList();
   const { currentAddress, loading: loadingLocation, loadCurrentLocation } = useCurrentLocation();

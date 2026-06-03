@@ -13,7 +13,12 @@ import { COMMON_TEXT, ONBOARDING_TEXT } from 'constants/screens';
 import { FontSize, FontWeight } from 'types/index';
 import { VARIABLES } from 'constants/common';
 import { useTranslation } from 'hooks/index';
-import { IMAGES } from 'constants/assets';
+import {
+  getVariant,
+  getVariantOnboardingImages,
+  getVariantOnboardingPageCount,
+  isSengoBrand,
+} from 'constants/assets';
 import { useAppDispatch } from 'types/reduxTypes';
 import { setIsUserVisitedApp } from 'store/slices/appSettings';
 
@@ -38,23 +43,27 @@ export const OnBoarding = () => {
     return () => clearTimeout(timeout);
   }, [isLangRTL, scrollViewRef]);
 
-  const pages = [
+  const onboardingImages = getVariantOnboardingImages();
+  const variant = getVariant();
+  const pageCount = getVariantOnboardingPageCount();
+  const allPages = [
     {
-      image: IMAGES.ONBOARDING_ONE,
+      image: onboardingImages.one,
       heading: ONBOARDING_TEXT.HEADING_1,
       description: ONBOARDING_TEXT.DESCRIPTION_1,
     },
     {
-      image: IMAGES.ONBOARDING_TWO,
+      image: onboardingImages.two,
       heading: ONBOARDING_TEXT.HEADING_2,
       description: ONBOARDING_TEXT.DESCRIPTION_2,
     },
     {
-      image: IMAGES.ONBOARDING_THREE,
+      image: onboardingImages.three,
       heading: ONBOARDING_TEXT.HEADING_3,
       description: ONBOARDING_TEXT.DESCRIPTION_3,
     },
   ];
+  const pages = allPages.slice(0, pageCount);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -70,14 +79,16 @@ export const OnBoarding = () => {
     }
   };
   useEffect(() => {
+    if (pages.length <= 1) return undefined;
+
     const interval = setInterval(() => {
-      if (currentPage < 2) {
+      if (currentPage < pages.length - 1) {
         scrollToPage(currentPage + 1);
       }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [currentPage]);
+  }, [currentPage, pages.length]);
 
   const handleNext = () => {
     if (currentPage < pages.length - 1) {
@@ -107,32 +118,66 @@ export const OnBoarding = () => {
         ))}
       </ScrollView>
 
-      <View style={styles.bottomCard}>
-        <Typography style={styles.heading}>
+      <View
+        style={[
+          styles.bottomCard,
+          {
+            backgroundColor: isSengoBrand() ? COLORS.SECONDARY : COLORS.SURFACE,
+            borderTopLeftRadius: isSengoBrand() ? 60 : 25,
+            borderTopRightRadius: isSengoBrand() ? 60 : 25,
+            gap: isSengoBrand() ? 25 : 15,
+            paddingVertical: isSengoBrand() ? 60 : 20,
+          },
+        ]}
+      >
+        <Typography
+          style={[
+            styles.heading,
+            {
+              color: isSengoBrand() ? COLORS.WHITE : COLORS.TEXT,
+            },
+          ]}
+        >
           {formatTitle(t(currentContent?.heading ?? ''), 3)}
         </Typography>
-        <Typography style={styles.description}>{currentContent?.description}</Typography>
+        <Typography
+          style={[
+            styles.description,
+            {
+              color: isSengoBrand() ? COLORS.WHITE : COLORS.TEXT,
+            },
+          ]}
+        >
+          {currentContent?.description}
+        </Typography>
 
-        <View style={styles.pagination}>
-          {renderedPages.map((_, index) => (
-            <TouchableOpacity
-              hitSlop={10}
-              key={index}
-              style={[styles.dot, index === currentPage ? styles.activeDot : null]}
-              onPress={() => scrollToPage(index)}
-            />
-          ))}
-        </View>
+        {pages.length > 1 && (
+          <View style={styles.pagination}>
+            {renderedPages.map((_, index) => (
+              <TouchableOpacity
+                hitSlop={10}
+                key={index}
+                style={[styles.dot, index === currentPage ? styles.activeDot : null]}
+                onPress={() => scrollToPage(index)}
+              />
+            ))}
+          </View>
+        )}
 
         <Button
+          style={{
+            backgroundColor: isSengoBrand() ? COLORS.BLACK : COLORS.BUTTON_BACKGROUND,
+          }}
           title={
             currentPage === renderedPages.length - 1 ? COMMON_TEXT.GET_STARTED : COMMON_TEXT.NEXT
           }
           onPress={handleNext}
         />
-        <TouchableOpacity onPress={handleSkip} hitSlop={12} style={styles.skipWrap}>
-          <Typography style={styles.skipText}>{t(COMMON_TEXT.SKIP)}</Typography>
-        </TouchableOpacity>
+        {variant !== 'sengo' && (
+          <TouchableOpacity onPress={handleSkip} hitSlop={12} style={styles.skipWrap}>
+            <Typography style={styles.skipText}>{t(COMMON_TEXT.SKIP)}</Typography>
+          </TouchableOpacity>
+        )}
       </View>
     </Wrapper>
   );
@@ -174,14 +219,10 @@ const styles = StyleSheet.create({
     // left: 0,
     // right: 0,
     // bottom: 0,
-    backgroundColor: COLORS.SURFACE,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
+
     paddingHorizontal: 35,
-    paddingVertical: 20,
     // elevation: 3,
     minHeight: screenHeight(40),
-    gap: 15,
     // shadowColor: COLORS.BLACK,
     // shadowOffset: { width: 0, height: 2 },
     // shadowOpacity: 0.25,

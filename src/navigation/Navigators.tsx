@@ -163,12 +163,14 @@ export type RootStackParamList = {
     pickupLng?: number;
     dropoffLat?: number;
     dropoffLng?: number;
+    bookingId?: number;
   } | undefined;
   [SCREENS.DRIVER_FOUND]: {
     pickupLat?: number;
     pickupLng?: number;
     dropoffLat?: number;
     dropoffLng?: number;
+    bookingId?: number;
   } | undefined;
   [SCREENS.TRACK_RIDE]:
     | {
@@ -177,21 +179,17 @@ export type RootStackParamList = {
         pickupLng?: number;
         dropoffLat?: number;
         dropoffLng?: number;
+        bookingId?: number;
       }
     | undefined;
   [SCREENS.SEND_PARCEL]: undefined;
-  [SCREENS.SEND_PARCEL_FINDING]: {
-    pickupLat?: number;
-    pickupLng?: number;
-    dropoffLat?: number;
-    dropoffLng?: number;
-  } | undefined;
+  [SCREENS.SEND_PARCEL_FINDING]: ParcelTripCoords | undefined;
   [SCREENS.COURIER_MATCHED]: ParcelTripCoords | undefined;
   [SCREENS.TRACK_PARCEL]: (ParcelTripCoords & { phase?: ParcelTrackPhase }) | undefined;
   [SCREENS.ORDER_FOOD]: undefined;
   [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
-  [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase } | undefined;
+  [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase; bookingId?: number } | undefined;
   [SCREENS.WORKER_RIDE_HISTORY]: undefined;
   [SCREENS.WORKER_EARNINGS]: undefined;
   [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: undefined;
@@ -216,19 +214,16 @@ export type RootStackParamList = {
   [SCREENS.SIGN_UP]: undefined;
   [SCREENS.FORGOT_PASSWORD]: undefined;
   [SCREENS.RESET_PASSWORD]: {
-    data:
+    data?:
       | {
-          email?: string;
+          phone?: string;
           phone_number?: string;
-          country_code?: string;
           calling_code?: string;
           otp_code?: string;
-        }
-      | undefined;
+        };
   };
   [SCREENS.VERIFICATION]: {
     isFromForgot?: boolean;
-    email?: string;
     phone_number?: string;
     country_code?: string;
     calling_code?: string;

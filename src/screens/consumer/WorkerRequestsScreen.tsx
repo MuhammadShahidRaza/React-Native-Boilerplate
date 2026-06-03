@@ -1,18 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { Wrapper, WorkerRequestCard } from 'components/index';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { WORKER_MOCK_REQUESTS } from 'components/common/worker/workerMockData';
+import {
+  WORKER_MOCK_REQUESTS,
+  type WorkerRequestRecord,
+} from 'components/common/worker/workerMockData';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
 import { setLookingForDeliveries } from 'store/slices/worker';
+import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
+import { mapBookingToWorkerRequest } from 'api/mappers/snliftBooking';
 
 export const WorkerRequestsScreen = () => {
   const dispatch = useAppDispatch();
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
+  const [requests, setRequests] = useState<WorkerRequestRecord[]>(WORKER_MOCK_REQUESTS);
 
   useEffect(() => {
     dispatch(setLookingForDeliveries(true));
@@ -20,6 +26,20 @@ export const WorkerRequestsScreen = () => {
       dispatch(setLookingForDeliveries(false));
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const res = await listBookings({ scope: 'available' });
+      const bookings = extractBookingsList(res);
+      if (!cancelled && bookings.length > 0) {
+        setRequests(bookings.map(mapBookingToWorkerRequest));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <Wrapper
@@ -30,7 +50,7 @@ export const WorkerRequestsScreen = () => {
       darkMode={false}
     >
       <FlatList
-        data={WORKER_MOCK_REQUESTS}
+        data={requests}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}

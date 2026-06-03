@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1061285627466",
+    "project_id": "snlift-c01dc",
+    "storage_bucket": "snlift-c01dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1061285627466:android:REPLACE_SENGO_ANDROID_APP_ID",
+        "android_client_info": {
+          "package_name": "com.cmolds.sengo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCckxbCMnuMQ5aGoVgwAC7hBB-B6i3a3I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

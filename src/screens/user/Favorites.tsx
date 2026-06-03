@@ -1,16 +1,16 @@
-import { FlatListComponent, Wrapper, Header } from 'components/index';
-import { STYLES } from 'utils/index';
+import { Wrapper } from 'components/index';
+import { RestaurantBrowseList } from 'components/common/food/RestaurantBrowseList';
+import { COLORS } from 'utils/index';
 
-export const Favorites = () => {
-  return (
-    <Wrapper>
-      <Header title='Favorites' />
-      <FlatListComponent
-        scrollEnabled={true}
-        data={[]}
-        contentContainerStyle={{ paddingBottom: 100, ...STYLES.CONTAINER }}
-        renderItem={({}: { item: any }) => <></>}
-      />
-    </Wrapper>
-  );
-};
+/** Settings → Favorites — same restaurant list UI as Order Food, filtered to hearted items. */
+export const Favorites = () => (
+  <Wrapper
+    headerTitle='Favorites'
+    showBackButton
+    useScrollView={false}
+    backgroundColor={COLORS.WHITE}
+    darkMode={false}
+  >
+    <RestaurantBrowseList favoritesOnly />
+  </Wrapper>
+);

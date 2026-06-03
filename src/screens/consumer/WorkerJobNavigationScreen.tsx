@@ -23,7 +23,6 @@ import {
   BRAND_PRIMARY,
   BRAND_SECONDARY,
   COLORS,
-  openMessage,
   openPhoneNumber,
   screenHeight,
 } from 'utils/index';

@@ -47,7 +47,7 @@ export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
   },
 ];
 
-export type WorkerServiceType = 'parcel' | 'food';
+export type WorkerServiceType = 'parcel' | 'food' | 'ride';
 
 export type WorkerRequestRecord = {
   id: string;
@@ -57,7 +57,9 @@ export type WorkerRequestRecord = {
 };
 
 export function formatWorkerServiceType(type: WorkerServiceType): string {
-  return type === 'parcel' ? 'Parcel' : 'Food';
+  if (type === 'ride') return 'Ride';
+  if (type === 'parcel') return 'Parcel';
+  return 'Food';
 }
 
 export type WorkerRequestDetail = WorkerRequestRecord & {

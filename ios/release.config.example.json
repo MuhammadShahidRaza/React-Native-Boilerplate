@@ -1,0 +1,12 @@
+{
+  "workspace": "ios/snlift.xcworkspace",
+  "scheme": "snlift",
+  "configuration": "Release",
+  "teamId": "3ZG53CCNMB",
+  "bundleId": "com.cmolds.snlift",
+  "exportOptionsPlist": "ios/ExportOptions.plist",
+  "outputDir": "build/ios",
+  "ascApiKeyId": "YOUR_KEY_ID",
+  "ascApiIssuerId": "YOUR_ISSUER_UUID",
+  "ascApiKeyPath": "ios/AuthKey_YOUR_KEY_ID.p8"
+}

@@ -16,4 +16,5 @@ declare module '@env' {
   export const MAP_API_KEY: string;
   export const SOCKET_BASE_URL: string;
   export const IS_ALPHA_PHASE: string;
+  export const APP_VARIANT: string;
 }

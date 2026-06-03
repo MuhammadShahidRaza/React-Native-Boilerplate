@@ -1,12 +1,13 @@
-/**
- * Brand tokens — single source of truth for primary green, secondary blue,
- * consumer hub accents, theme `LIGHT_COLORS` / `DARK_COLORS`, and gradients.
- */
-export const BRAND_PRIMARY = '#00B76C';
-export const BRAND_SECONDARY = '#004AAD';
+import { VARIANT } from 'config/variant';
 
-const BRAND_PRIMARY_DARK = '#009058';
-const BRAND_PRIMARY_LIGHT = '#33C88E';
+/**
+ * Brand tokens — per-flavor theme from `variants/manifest.json`.
+ */
+export const BRAND_PRIMARY = VARIANT.theme.primary;
+export const BRAND_SECONDARY = VARIANT.theme.secondary;
+
+const BRAND_PRIMARY_DARK = VARIANT.theme.primaryDark;
+const BRAND_PRIMARY_LIGHT = VARIANT.theme.primaryLight;
 
 // Base colors that never change with light/dark theme toggle
 const BASE_COLORS = {

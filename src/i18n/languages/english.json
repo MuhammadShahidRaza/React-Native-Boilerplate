@@ -254,6 +254,9 @@
     "SIGN_UP_DESCRIPTION": "Create your account to get started.",
     "GET_STARTED_HEADING": "Choose your role",
     "GET_STARTED_DESCRIPTION": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
+    "GET_STARTED_DESCRIPTION_SNLIFT": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
+    "GET_STARTED_DESCRIPTION_SENGO": "Book rides and deliveries with Sengo. Sign in to get started.",
+    "GET_STARTED_DESCRIPTION_SENGO_WORKERS": "Sengo for drivers and couriers. Choose how you earn—drive passengers or deliver parcels—then sign in.",
     "GET_STARTED_CONTINUE": "Continue"
   },
   "CHAT": {

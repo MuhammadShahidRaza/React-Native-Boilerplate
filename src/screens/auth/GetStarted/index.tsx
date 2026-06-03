@@ -1,21 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import { Wrapper, Typography, SvgComponent, Button, Icon } from 'components/common';
-import { screenHeight, screenWidth, COLORS, isIOS, BRAND_PRIMARY } from 'utils/index';
+import { screenHeight, screenWidth, COLORS, isIOS, BRAND_PRIMARY, BRAND_SECONDARY } from 'utils/index';
 import { FontSize, FontWeight } from 'types/index';
+import { getBrandLogoAspect, getBrandLogoSvg, isSengoBrand } from 'constants/assets/brandLogo';
 import { SCREENS, SVG } from 'constants/index';
 import type { SvgProps } from 'react-native-svg';
 import { navigate } from 'navigation/index';
 import { useDispatch } from 'react-redux';
 import { setRole } from 'store/slices/user';
 import { APP_CONFIG } from 'config/app';
+import { VARIANT } from 'config/variant';
 import type { USER_TYPE } from 'types/auth';
 import { useTranslation } from 'hooks/index';
 import { AUTH_TEXT } from 'constants/screens';
 import { VARIABLES } from 'constants/common';
 
-/** Role picker screen background — matches brand secondary (XD). */
-const ROLE_SCREEN_BLUE = '#004AAD';
+/** Role picker screen background — matches brand secondary. */
+const ROLE_SCREEN_BG = BRAND_SECONDARY;
 
 type RoleTile = {
   role: USER_TYPE;
@@ -23,7 +25,7 @@ type RoleTile = {
   Svg: React.FC<SvgProps>;
 };
 
-const ROLE_TILES: RoleTile[] = [
+const ALL_ROLE_TILES: RoleTile[] = [
   { role: APP_CONFIG.USER_ROLE, label: APP_CONFIG.USER_ROLE_LABEL, Svg: SVG.ROLE_MAN },
   {
     role: APP_CONFIG.COURIER_ROLE,
@@ -33,8 +35,13 @@ const ROLE_TILES: RoleTile[] = [
   { role: APP_CONFIG.DRIVER_ROLE, label: APP_CONFIG.DRIVER_ROLE_LABEL, Svg: SVG.ROLE_DRIVER },
 ];
 
-const WORDMARK_WIDTH = screenWidth(78);
-const WORDMARK_HEIGHT = (WORDMARK_WIDTH * 69.794) / 219.578;
+const ROLE_TILES = ALL_ROLE_TILES.filter(tile =>
+  VARIANT.features.getStartedRoles.includes(tile.role),
+);
+
+const WORDMARK_WIDTH = screenWidth(isSengoBrand() ? 72 : 78);
+const WORDMARK_HEIGHT = WORDMARK_WIDTH * getBrandLogoAspect('light');
+const BrandLogo = getBrandLogoSvg('light');
 
 export const GetStarted = () => {
   const dispatch = useDispatch();
@@ -87,8 +94,8 @@ export const GetStarted = () => {
   };
 
   return (
-    <Wrapper useScrollView={false} backgroundColor={ROLE_SCREEN_BLUE} useSafeArea={false} showBackButton={false}>
-      <View style={[styles.container, { backgroundColor: ROLE_SCREEN_BLUE }]}>
+    <Wrapper useScrollView={false} backgroundColor={ROLE_SCREEN_BG} useSafeArea={false} showBackButton={false}>
+      <View style={[styles.container, { backgroundColor: ROLE_SCREEN_BG }]}>
         <Animated.View
           style={[
             styles.logoSection,
@@ -99,10 +106,10 @@ export const GetStarted = () => {
           ]}
         >
           <SvgComponent
-            Svg={SVG.LOGO}
+            Svg={BrandLogo}
             svgWidth={WORDMARK_WIDTH}
             svgHeight={WORDMARK_HEIGHT}
-            fill={COLORS.WHITE}
+            {...(isSengoBrand() ? {} : { fill: COLORS.WHITE })}
           />
         </Animated.View>
 
@@ -118,7 +125,7 @@ export const GetStarted = () => {
           <View style={styles.textSection}>
             <Typography style={styles.mainTitle}>{t(AUTH_TEXT.GET_STARTED_HEADING)}</Typography>
             <Typography style={styles.description}>
-              {t(AUTH_TEXT.GET_STARTED_DESCRIPTION)}
+              {t(VARIANT.getStartedDescriptionKey)}
             </Typography>
           </View>
 

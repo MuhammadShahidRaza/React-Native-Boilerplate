@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS, SVG } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
 import {
   loginValidationSchema,
   COLORS,
@@ -16,18 +16,14 @@ import {
   Input,
   AuthComponent,
   RowComponent,
-  Checkbox,
-  SocialButton,
   PhoneInputComponent,
 } from 'components/index';
 import { navigate } from 'navigation/index';
-import { loginUser, loginUserThroughSocial } from 'api/functions/auth';
+import { loginUser } from 'api/functions/auth';
 import { Login_SignUp, type USER_TYPE } from 'types/auth';
 import { RootState } from 'types/reduxTypes';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
-import { GoogleSignIn, AppleSignIn } from 'utils/helpers/socialLogins';
-
 interface LoginFormValues {
   email: string;
   password: string;

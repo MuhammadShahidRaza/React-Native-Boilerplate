@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View, TextInput, Image, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, View, Image, Pressable } from 'react-native';
 import { AppGradient, Icon, Input, RowComponent, Typography, Wrapper } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -7,6 +7,8 @@ import { IMAGES } from 'constants/assets';
 import { resetToHomeAndScreen } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { SCREENS } from 'constants/routes';
+import { createFoodBooking } from 'api/functions/snlift/bookings';
+import { showToast } from 'utils/toast';
 
 export const FoodDeliveryCartScreen = () => {
   const [qty, setQty] = useState(1);
@@ -100,7 +102,22 @@ export const FoodDeliveryCartScreen = () => {
         />
 
         <Pressable
-          onPress={() => resetToHomeAndScreen(SCREENS.TRACK_FOOD_ORDER)}
+          onPress={async () => {
+            const res = await createFoodBooking({
+              booking_type: 'food',
+              restaurant_id: 1,
+              delivery_address: note.trim() || 'Delivery address',
+              distance_km: 4.2,
+              items: [{ menu_item_id: 1, quantity: qty }],
+              promo_code: promo.trim(),
+            });
+            const booking = res && 'booking' in res ? res.booking : res;
+            if (!booking?.id) {
+              showToast({ message: 'Could not place food order. Try again.' });
+              return;
+            }
+            resetToHomeAndScreen(SCREENS.TRACK_FOOD_ORDER, { bookingId: booking.id });
+          }}
           style={styles.placeWrap}
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>

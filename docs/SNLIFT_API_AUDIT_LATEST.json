@@ -1,0 +1,241 @@
+{
+  "ok": [
+    {
+      "name": "GET /info",
+      "status": 200,
+      "msg": ""
+    },
+    {
+      "name": "POST /existing-user-check",
+      "status": 200,
+      "msg": "Response retrieved successfully"
+    },
+    {
+      "name": "POST /register",
+      "status": 201,
+      "msg": "Account created successfully. Please verify your email"
+    },
+    {
+      "name": "POST /resend-otp",
+      "status": 200,
+      "msg": "OTP has been resent successfully"
+    },
+    {
+      "name": "POST /verify-otp",
+      "status": 200,
+      "msg": "Email verified successfully"
+    },
+    {
+      "name": "POST /login (user)",
+      "status": 200,
+      "msg": "user@mailinator.com"
+    },
+    {
+      "name": "POST /social-login",
+      "status": 422,
+      "msg": "The provider ID field is required"
+    },
+    {
+      "name": "POST /forgot-password (email only)",
+      "status": 422,
+      "msg": "The phone number field is required"
+    },
+    {
+      "name": "POST /forgot-password (phone)",
+      "status": 200,
+      "msg": "Password reset PIN has been sent to your email"
+    },
+    {
+      "name": "POST /verify-code",
+      "status": 422,
+      "msg": "The OTP Code field is required"
+    },
+    {
+      "name": "POST /reset-password",
+      "status": 422,
+      "msg": "The OTP Code field is required"
+    },
+    {
+      "name": "GET /content",
+      "status": 200,
+      "msg": "Content retrieved successfully"
+    },
+    {
+      "name": "GET /content/about-us",
+      "status": 200,
+      "msg": "Content retrieved successfully"
+    },
+    {
+      "name": "GET /user/user",
+      "status": 200,
+      "msg": "User found"
+    },
+    {
+      "name": "PATCH /user/update",
+      "status": 200,
+      "msg": "Profile updated successfully"
+    },
+    {
+      "name": "PATCH /user/onboarding",
+      "status": 200,
+      "msg": "Onboarding completed successfully"
+    },
+    {
+      "name": "GET /user/wallet-summary",
+      "status": 200,
+      "msg": "Wallet summary retrieved successfully"
+    },
+    {
+      "name": "POST /user/device",
+      "status": 200,
+      "msg": "Device added successfully"
+    },
+    {
+      "name": "DELETE /user/device",
+      "status": 200,
+      "msg": "Device deleted successfully"
+    },
+    {
+      "name": "POST /contact/create",
+      "status": 201,
+      "msg": "Support ticket created successfully"
+    },
+    {
+      "name": "GET /notification",
+      "status": 200,
+      "msg": "Activities retrieved successfully"
+    },
+    {
+      "name": "GET /bookings",
+      "status": 200,
+      "msg": "Bookings retrieved successfully"
+    },
+    {
+      "name": "GET /home",
+      "status": 200,
+      "msg": "messages.home_data_retrieved_successfully"
+    },
+    {
+      "name": "GET /wallet",
+      "status": 200,
+      "msg": "Wallet summary retrieved successfully"
+    },
+    {
+      "name": "GET /address",
+      "status": 200,
+      "msg": "Addresses retrieved successfully"
+    },
+    {
+      "name": "GET /userbooking/list",
+      "status": 410,
+      "msg": "This endpoint is deprecated. Please use the unified booking APIs."
+    },
+    {
+      "name": "GET /dentorbooking/list",
+      "status": 410,
+      "msg": "This endpoint is deprecated. Please use the unified booking APIs."
+    },
+    {
+      "name": "GET /conversation/list",
+      "status": 501,
+      "msg": "This endpoint is not implemented in the current API."
+    },
+    {
+      "name": "GET /message/list",
+      "status": 501,
+      "msg": "This endpoint is not implemented in the current API."
+    },
+    {
+      "name": "GET /restaurants (app, not in Postman)",
+      "status": 200,
+      "msg": "Restaurants retrieved successfully"
+    },
+    {
+      "name": "GET /user/home (old app route)",
+      "status": 404,
+      "msg": "The route api/user/home could not be found."
+    }
+  ],
+  "fail": [
+    {
+      "name": "POST /user/update-password",
+      "status": 422,
+      "msg": "The password field and current password must be different."
+    },
+    {
+      "name": "POST /bookings (ride)",
+      "status": 500,
+      "msg": "SQLSTATE[42S22]: Column not found: 1054 Unknown column 'is_active' in 'WHERE' (Connection: mysql, Host: 127.0.0.1, Port:"
+    },
+    {
+      "name": "POST /bookings (food)",
+      "status": 500,
+      "msg": "SQLSTATE[42S22]: Column not found: 1054 Unknown column 'is_active' in 'WHERE' (Connection: mysql, Host: 127.0.0.1, Port:"
+    },
+    {
+      "name": "POST /ratings/create",
+      "status": 422,
+      "msg": "The module field is required"
+    },
+    {
+      "name": "POST /review/create",
+      "status": 422,
+      "msg": "The module field is required"
+    },
+    {
+      "name": "POST /wallet/stripe-connect/link",
+      "status": 501,
+      "msg": "This endpoint is not implemented in the current API."
+    },
+    {
+      "name": "POST /address/create",
+      "status": 422,
+      "msg": "The latitude must be a string"
+    },
+    {
+      "name": "POST /address (alias)",
+      "status": 422,
+      "msg": "The latitude must be a string"
+    }
+  ],
+  "skip": [
+    {
+      "name": "booking detail/tracking/cancel",
+      "reason": "no booking id from create"
+    },
+    {
+      "name": "driver routes",
+      "reason": "driver login failed"
+    },
+    {
+      "name": "courier routes",
+      "reason": "courier login failed"
+    }
+  ],
+  "keyIssues": [
+    {
+      "label": "promo_codes[0] for Home.tsx desc line",
+      "missing": [
+        "description",
+        "desc"
+      ],
+      "present": [
+        "id",
+        "restaurant_id",
+        "code",
+        "discount_type",
+        "discount_value",
+        "max_discount",
+        "min_order_amount",
+        "starts_at",
+        "ends_at",
+        "usage_limit",
+        "used_count",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "note": "Build desc from discount_type + discount_value in app"
+    }
+  ]
+}

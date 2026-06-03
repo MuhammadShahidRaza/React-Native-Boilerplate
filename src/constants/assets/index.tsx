@@ -1,6 +1,8 @@
 export * from './fonts';
 // export * from "./icons";
 export * from './images';
+export * from './variantImages';
+export * from './brandLogo';
 export * from './svg';
 // export * from "./videos";
 
