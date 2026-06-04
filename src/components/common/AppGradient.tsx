@@ -5,15 +5,15 @@ import {
   APP_GRADIENT_OFFER,
   APP_GRADIENT_PRIMARY,
   APP_GRADIENT_PRIMARY_LIGHT,
+  GRADIENT_END,
+  GRADIENT_START,
 } from 'utils/index';
 import type { LinearGradientProps } from 'react-native-linear-gradient';
 import type { ReactNode } from 'react';
 
 type GradientVariant = 'primary' | 'primaryLight' | 'icon' | 'offer';
 
-/** iOS requires 0–1 vectors; negative values break rendering. */
-export const GRADIENT_START = { x: 0, y: 0.5 } as const;
-export const GRADIENT_END = { x: 1, y: 0.5 } as const;
+export { GRADIENT_START, GRADIENT_END };
 
 interface AppGradientProps extends Omit<LinearGradientProps, 'colors'> {
   variant?: GradientVariant;

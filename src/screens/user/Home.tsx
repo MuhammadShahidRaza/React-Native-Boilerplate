@@ -20,7 +20,7 @@ import { SCREENS } from 'constants/routes';
 import { IMAGES, SVG } from 'constants/assets';
 import { isSengoBrand } from 'constants/assets/brandLogo';
 import { getServiceIcon } from 'constants/assets/serviceIcons';
-import { COLORS, screenWidth, STYLES } from 'utils/index';
+import { COLORS, GRADIENT_END, GRADIENT_START, screenWidth, STYLES } from 'utils/index';
 import {
   getHomeData,
   homeHotOffersForDisplay,
@@ -73,8 +73,8 @@ export const Home = () => {
       <AppGradient
         style={styles.hero}
         variant='primary'
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        start={IS_SENGO ? GRADIENT_START : { x: 0, y: 0 }}
+        end={IS_SENGO ? GRADIENT_END : { x: 0, y: 1 }}
       >
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
@@ -235,12 +235,7 @@ const HotOfferCard = ({ offer }: { offer: SnliftHomeHotOffer }) => (
     style={styles.hotOfferCard}
     onPress={() => navigate(SCREENS.ORDER_FOOD)}
   >
-    <AppGradient
-      variant='offer'
-      style={StyleSheet.absoluteFill}
-      start={{ x: 0, y: 0.5 }}
-      end={{ x: 1, y: 0.5 }}
-    />
+    <AppGradient variant='offer' style={StyleSheet.absoluteFill} />
     <View style={styles.hotOfferRow}>
       <View style={styles.hotOfferLogoBox}>
         {offer.image ? (

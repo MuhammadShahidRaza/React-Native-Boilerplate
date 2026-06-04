@@ -173,7 +173,7 @@ export const OnBoarding = () => {
           }
           onPress={handleNext}
         />
-        {variant !== 'sengo' && (
+        {variant !== 'sengo' && variant !== 'sengoWorkers' && (
           <TouchableOpacity onPress={handleSkip} hitSlop={12} style={styles.skipWrap}>
             <Typography style={styles.skipText}>{t(COMMON_TEXT.SKIP)}</Typography>
           </TouchableOpacity>

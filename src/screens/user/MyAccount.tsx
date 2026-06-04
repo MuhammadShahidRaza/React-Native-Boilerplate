@@ -1,6 +1,7 @@
 import { View, StyleSheet, ImageBackground } from 'react-native';
 import { Button, Icon, MessageBox, RowComponent, Typography, Wrapper } from 'components/common';
-import { COMMON_TEXT, VARIABLES, SCREENS, IMAGES } from 'constants/index';
+import { COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
+import { getVariantMyAccountBackground } from 'constants/assets/variantImages';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { STYLES, COLORS, screenWidth, screenHeight } from 'utils/index';
 import { navigate } from 'navigation/Navigators';
@@ -83,7 +84,7 @@ export const MyAccount = () => {
   return (
     <Wrapper showBackButton={false} useSafeArea={false} darkMode={false}>
       <ImageBackground
-        source={IMAGES.MY_ACCOUNT_BACKGROUND}
+        source={getVariantMyAccountBackground()}
         resizeMode='cover'
         style={styles.backgroundImage}
       >

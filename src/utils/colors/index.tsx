@@ -108,34 +108,44 @@ const SNLIFT_GRADIENT_OFFER = [
 const SNLIFT_GRADIENT_HORIZONTAL = [BRAND_SECONDARY, BRAND_PRIMARY] as const;
 const SNLIFT_GRADIENT_ICON = [BRAND_PRIMARY_DARK, BRAND_PRIMARY_LIGHT] as const;
 
-/** Default `AppGradient` variant — Sengo gold only; SN Lift keeps teal. */
+/**
+ * Sengo Figma linear gradient (315°): dark gold → light gold.
+ * @see design Rectangle / Appearance panel
+ */
+export const SENGO_GRADIENT_COLORS = ['#C59324', '#E5B54F'] as const;
+
+/** 315° diagonal — dark gold top-left, light gold bottom-right. */
+export const SENGO_GRADIENT_START = { x: 0, y: 0 } as const;
+export const SENGO_GRADIENT_END = { x: 1, y: 1 } as const;
+
+const SENGO_GRADIENT = [...SENGO_GRADIENT_COLORS] as const;
+
+/** Default gradient line — Sengo 315° diagonal; SN Lift left → right. */
+export const GRADIENT_START = IS_SENGO_FLAVOR ? SENGO_GRADIENT_START : { x: 0, y: 0.5 };
+export const GRADIENT_END = IS_SENGO_FLAVOR ? SENGO_GRADIENT_END : { x: 1, y: 0.5 };
+
+/** Default `AppGradient` variant — Sengo Figma gold; SN Lift keeps teal. */
 export const APP_GRADIENT_PRIMARY = (
-  IS_SENGO_FLAVOR
-    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
-    : [...SNLIFT_GRADIENT_PRIMARY]
+  IS_SENGO_FLAVOR ? [...SENGO_GRADIENT] : [...SNLIFT_GRADIENT_PRIMARY]
 ) as readonly [string, string];
 
-export const APP_GRADIENT_PRIMARY_LIGHT = [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY] as const;
+export const APP_GRADIENT_PRIMARY_LIGHT = (
+  IS_SENGO_FLAVOR ? [...SENGO_GRADIENT] : [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
+) as readonly [string, string];
 
 /** Hot-offer cards (Sengo home). SN Lift offer styling unchanged. */
 export const APP_GRADIENT_OFFER = (
-  IS_SENGO_FLAVOR
-    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
-    : [...SNLIFT_GRADIENT_OFFER]
+  IS_SENGO_FLAVOR ? [...SENGO_GRADIENT] : [...SNLIFT_GRADIENT_OFFER]
 ) as readonly string[];
 
-/** Horizontal pills / chips / timers — Sengo light gold; SN Lift blue → green. */
+/** Pills, chips, timers, cards — same Sengo gold gradient. */
 export const APP_GRADIENT_HORIZONTAL = (
-  IS_SENGO_FLAVOR
-    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
-    : [...SNLIFT_GRADIENT_HORIZONTAL]
+  IS_SENGO_FLAVOR ? [...SENGO_GRADIENT] : [...SNLIFT_GRADIENT_HORIZONTAL]
 ) as readonly [string, string];
 
 /** Icon pill backgrounds — Sengo gold; SN Lift unchanged. */
 export const APP_GRADIENT_ICON = (
-  IS_SENGO_FLAVOR
-    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
-    : [...SNLIFT_GRADIENT_ICON]
+  IS_SENGO_FLAVOR ? [...SENGO_GRADIENT] : [...SNLIFT_GRADIENT_ICON]
 ) as readonly [string, string];
 
 // Light theme colors (merged into COLORS when not dark)

@@ -47,7 +47,6 @@ xcodebuild \
   -scheme "${SCHEME}" \
   -configuration Debug \
   -sdk iphoneos \
-  -jobs 1 \
   -allowProvisioningUpdates \
   COMPILER_INDEX_STORE_ENABLE=NO \
   build 2>&1 | tee "${LOG}"

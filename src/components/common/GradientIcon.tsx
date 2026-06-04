@@ -1,7 +1,10 @@
 import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import { AppGradient } from './AppGradient';
 import { Icon, IconComponentProps } from './Icon';
-import { APP_GRADIENT_HORIZONTAL } from 'utils/index';
+import { isSengoBrand } from 'constants/assets/brandLogo';
+import { APP_GRADIENT_HORIZONTAL, GRADIENT_END, GRADIENT_START } from 'utils/index';
+
+const IS_SENGO_GRADIENT = isSengoBrand();
 
 type GradientVariant = 'primary' | 'primaryLight';
 
@@ -36,8 +39,8 @@ export const GradientIcon = ({
         },
         containerStyle,
       ]}
-      start={{ x: -1, y: 0 }}
-      end={{ x: 1, y: 0.5 }}
+      start={IS_SENGO_GRADIENT ? GRADIENT_START : { x: -1, y: 0 }}
+      end={IS_SENGO_GRADIENT ? GRADIENT_END : { x: 1, y: 0.5 }}
     >
       <Icon {...iconProps} />
     </AppGradient>

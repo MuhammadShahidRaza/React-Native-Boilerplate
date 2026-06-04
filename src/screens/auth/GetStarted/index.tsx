@@ -10,7 +10,8 @@ import { navigate } from 'navigation/index';
 import { useDispatch } from 'react-redux';
 import { setRole } from 'store/slices/user';
 import { APP_CONFIG } from 'config/app';
-import { VARIANT } from 'config/variant';
+import { VARIANT, VARIANT_ID } from 'config/variant';
+import { SengoWorkersGetStarted } from './SengoWorkersGetStarted';
 import type { USER_TYPE } from 'types/auth';
 import { useTranslation } from 'hooks/index';
 import { AUTH_TEXT } from 'constants/screens';
@@ -43,7 +44,7 @@ const WORDMARK_WIDTH = screenWidth(isSengoBrand() ? 72 : 78);
 const WORDMARK_HEIGHT = WORDMARK_WIDTH * getBrandLogoAspect('light');
 const BrandLogo = getBrandLogoSvg('light');
 
-export const GetStarted = () => {
+const DefaultGetStarted = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<USER_TYPE | null>(null);
@@ -173,6 +174,9 @@ export const GetStarted = () => {
     </Wrapper>
   );
 };
+
+export const GetStarted = () =>
+  VARIANT_ID === 'sengoWorkers' ? <SengoWorkersGetStarted /> : <DefaultGetStarted />;
 
 const styles = StyleSheet.create({
   container: {

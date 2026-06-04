@@ -5,6 +5,8 @@ import { IMAGES } from './images';
 export const SENGO_IMAGES = {
   CLOUD: require('assets/images/variants/sengo/cloud.png'),
   ONBOARDING: require('assets/images/variants/sengo/onboarding.png'),
+  ONBOARDING_WORKERS: require('assets/images/variants/sengo/onboarding-workers.png'),
+  MY_ACCOUNT_HEADER: require('assets/images/variants/sengo/my-account-header.png'),
 } as const;
 
 export const SENGO_VIDEOS = {
@@ -23,17 +25,34 @@ const SENGO_ONBOARDING = {
   three: SENGO_IMAGES.ONBOARDING,
 } as const;
 
+const SENGO_WORKERS_ONBOARDING = {
+  one: SENGO_IMAGES.ONBOARDING_WORKERS,
+  // two: SENGO_IMAGES.ONBOARDING_WORKERS,
+  // three: SENGO_IMAGES.ONBOARDING_WORKERS,
+} as const;
+
 /** Onboarding slide images for the active app flavor. */
 export function getVariantOnboardingImages() {
+  if (VARIANT_ID === 'sengoWorkers') {
+    return SENGO_WORKERS_ONBOARDING;
+  }
   if (VARIANT_ID === 'sengo') {
     return SENGO_ONBOARDING;
   }
   return SNLIFT_ONBOARDING;
 }
 
-/** Sengo consumer app uses a single onboarding slide. */
+/** Sengo flavors use a single onboarding slide. */
 export function getVariantOnboardingPageCount(): number {
-  return VARIANT_ID === 'sengo' ? 1 : 3;
+  return VARIANT_ID === 'sengo' || VARIANT_ID === 'sengoWorkers' ? 1 : 3;
+}
+
+/** My Account header background for the active flavor. */
+export function getVariantMyAccountBackground() {
+  if (VARIANT_ID === 'sengo' || VARIANT_ID === 'sengoWorkers') {
+    return SENGO_IMAGES.MY_ACCOUNT_HEADER;
+  }
+  return IMAGES.MY_ACCOUNT_BACKGROUND;
 }
 
 export function getVariant() {
