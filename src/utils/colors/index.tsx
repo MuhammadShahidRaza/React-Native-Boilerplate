@@ -1,4 +1,6 @@
-import { VARIANT } from 'config/variant';
+import { VARIANT, VARIANT_ID } from 'config/variant';
+
+const IS_SENGO_FLAVOR = VARIANT_ID === 'sengo' || VARIANT_ID === 'sengoWorkers';
 
 /**
  * Brand tokens — per-flavor theme from `variants/manifest.json`.
@@ -96,17 +98,50 @@ const BASE_COLORS = {
   APP_TEXT_SMALL: '#1E1E1E',
 };
 
-/** Primary brand gradients for `LinearGradient` (all roles) */
-export const APP_GRADIENT_PRIMARY = [
-  '#008589',
-  '#005ea1',
+/** SN Lift — unchanged legacy gradients (do not modify for Sengo). */
+const SNLIFT_GRADIENT_PRIMARY = ['#008589', '#005ea1'] as const;
+const SNLIFT_GRADIENT_OFFER = [
+  BRAND_PRIMARY_LIGHT,
+  BRAND_PRIMARY,
+  BRAND_SECONDARY,
 ] as const;
-export const APP_GRADIENT_PRIMARY_LIGHT = [BRAND_PRIMARY, BRAND_PRIMARY_LIGHT] as const;
+const SNLIFT_GRADIENT_HORIZONTAL = [BRAND_SECONDARY, BRAND_PRIMARY] as const;
+const SNLIFT_GRADIENT_ICON = [BRAND_PRIMARY_DARK, BRAND_PRIMARY_LIGHT] as const;
+
+/** Default `AppGradient` variant — Sengo gold only; SN Lift keeps teal. */
+export const APP_GRADIENT_PRIMARY = (
+  IS_SENGO_FLAVOR
+    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
+    : [...SNLIFT_GRADIENT_PRIMARY]
+) as readonly [string, string];
+
+export const APP_GRADIENT_PRIMARY_LIGHT = [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY] as const;
+
+/** Hot-offer cards (Sengo home). SN Lift offer styling unchanged. */
+export const APP_GRADIENT_OFFER = (
+  IS_SENGO_FLAVOR
+    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
+    : [...SNLIFT_GRADIENT_OFFER]
+) as readonly string[];
+
+/** Horizontal pills / chips / timers — Sengo light gold; SN Lift blue → green. */
+export const APP_GRADIENT_HORIZONTAL = (
+  IS_SENGO_FLAVOR
+    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
+    : [...SNLIFT_GRADIENT_HORIZONTAL]
+) as readonly [string, string];
+
+/** Icon pill backgrounds — Sengo gold; SN Lift unchanged. */
+export const APP_GRADIENT_ICON = (
+  IS_SENGO_FLAVOR
+    ? [BRAND_PRIMARY_LIGHT, BRAND_PRIMARY]
+    : [...SNLIFT_GRADIENT_ICON]
+) as readonly [string, string];
 
 // Light theme colors (merged into COLORS when not dark)
 const LIGHT_COLORS = {
   PRIMARY: BRAND_PRIMARY,
-  BUTTON_BACKGROUND: BRAND_SECONDARY,
+  BUTTON_BACKGROUND: IS_SENGO_FLAVOR ? BRAND_PRIMARY : BRAND_SECONDARY,
   BACKGROUND: '#FFFFFF',
   SURFACE: '#FFFFFF',
   CARD: '#FFFFFF',
@@ -129,7 +164,7 @@ const LIGHT_COLORS = {
 // Dark theme colors
 const DARK_COLORS = {
   PRIMARY: BRAND_PRIMARY,
-  BUTTON_BACKGROUND: BRAND_SECONDARY,
+  BUTTON_BACKGROUND: IS_SENGO_FLAVOR ? BRAND_PRIMARY : BRAND_SECONDARY,
   BACKGROUND: '#FFFFFF',
   SURFACE: '#FFFFFF',
   CARD: '#FFFFFF',

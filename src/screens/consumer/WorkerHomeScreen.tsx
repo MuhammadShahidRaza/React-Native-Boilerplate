@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppGradient, AppStatusModal, Button, Map, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenHeight } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, BRAND_PRIMARY, COLORS, screenHeight } from 'utils/index';
 import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
@@ -68,7 +68,7 @@ export const WorkerHomeScreen = () => {
           >
             {!isOnline ? (
               <AppGradient
-                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                colors={[...APP_GRADIENT_HORIZONTAL]}
                 pointerEvents='none'
                 style={StyleSheet.absoluteFill}
               />
@@ -84,7 +84,7 @@ export const WorkerHomeScreen = () => {
           >
             {isOnline ? (
               <AppGradient
-                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                colors={[...APP_GRADIENT_HORIZONTAL]}
                 pointerEvents='none'
                 style={StyleSheet.absoluteFill}
               />

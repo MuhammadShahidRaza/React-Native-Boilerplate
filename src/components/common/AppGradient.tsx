@@ -1,10 +1,15 @@
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { APP_GRADIENT_PRIMARY, APP_GRADIENT_PRIMARY_LIGHT, COLORS } from 'utils/index';
+import {
+  APP_GRADIENT_ICON,
+  APP_GRADIENT_OFFER,
+  APP_GRADIENT_PRIMARY,
+  APP_GRADIENT_PRIMARY_LIGHT,
+} from 'utils/index';
 import type { LinearGradientProps } from 'react-native-linear-gradient';
 import type { ReactNode } from 'react';
 
-type GradientVariant = 'primary' | 'primaryLight' | 'icon';
+type GradientVariant = 'primary' | 'primaryLight' | 'icon' | 'offer';
 
 /** iOS requires 0–1 vectors; negative values break rendering. */
 export const GRADIENT_START = { x: 0, y: 0.5 } as const;
@@ -22,7 +27,8 @@ interface AppGradientProps extends Omit<LinearGradientProps, 'colors'> {
 const VARIANTS: Record<GradientVariant, string[]> = {
   primary: [...APP_GRADIENT_PRIMARY],
   primaryLight: [...APP_GRADIENT_PRIMARY_LIGHT],
-  icon: [COLORS.APP_PRIMARY_DARK, COLORS.APP_PRIMARY_LIGHT],
+  icon: [...APP_GRADIENT_ICON],
+  offer: [...APP_GRADIENT_OFFER],
 };
 
 export const AppGradient: React.FC<AppGradientProps> = ({

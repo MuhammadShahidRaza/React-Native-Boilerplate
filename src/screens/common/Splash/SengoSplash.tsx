@@ -1,108 +1,83 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, Image, StyleSheet, View } from 'react-native';
+import Video from 'react-native-video';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgComponent } from 'components/common';
 import { getBrandLogoAspect, getBrandLogoSvg } from 'constants/assets/brandLogo';
-import { SENGO_IMAGES } from 'constants/assets/variantImages';
-import { COLORS, screenWidth } from 'utils/index';
+import { SENGO_IMAGES, SENGO_VIDEOS } from 'constants/assets/variantImages';
+import { COLORS, screenHeight, screenWidth } from 'utils/index';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const LOGO_W = SCREEN_W * 0.72;
 const LOGO_H = LOGO_W * getBrandLogoAspect('light');
-const CLOUD_W = screenWidth(42);
-const CLOUD_H = screenWidth(20);
+const CLOUD_W = screenWidth(58);
+const CLOUD_H = screenWidth(55);
+const CLOUD_EDGE_INSET = screenWidth(-20);
+const VIDEO_W = screenWidth(100);
+const VIDEO_H = VIDEO_W * (9 / 16);
 const LogoSvg = getBrandLogoSvg('light');
 
-/** Sengo splash: clouds meet at top center, split L/R, then logo fade in/out. */
+/** Left cloud: off-screen left → right edge. */
+const CLOUD_FROM_LEFT_START = -CLOUD_W + CLOUD_EDGE_INSET;
+const CLOUD_FROM_LEFT_END = SCREEN_W - CLOUD_W - CLOUD_EDGE_INSET;
+/** Right cloud: off-screen right → left edge. */
+const CLOUD_FROM_RIGHT_START = SCREEN_W - CLOUD_EDGE_INSET;
+const CLOUD_FROM_RIGHT_END = CLOUD_EDGE_INSET;
+
+const SPLASH_MOTION_MS = 2600;
+const LOGO_FADE_MS = 500;
+const LOGO_SCALE_START = 1.48;
+const LOGO_SCALE_END = 1;
+
+/** Sengo splash: clouds cross (L→R, R→L); logo center; video at bottom. */
 export const SengoSplash = () => {
-  const cloudCenterOpacity = useRef(new Animated.Value(1)).current;
-  const cloudLeftOpacity = useRef(new Animated.Value(1)).current;
-  const cloudRightOpacity = useRef(new Animated.Value(1)).current;
-  const cloudLeftX = useRef(new Animated.Value(0)).current;
-  const cloudRightX = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const cloudLeftX = useRef(new Animated.Value(CLOUD_FROM_LEFT_START)).current;
+  const cloudRightX = useRef(new Animated.Value(CLOUD_FROM_RIGHT_START)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(LOGO_SCALE_START)).current;
 
   useEffect(() => {
-    const splitDistance = SCREEN_W * 0.38;
-
-    Animated.sequence([
-      Animated.delay(350),
-      Animated.parallel([
-        Animated.timing(cloudLeftX, {
-          toValue: -splitDistance,
-          duration: 850,
-          easing: Easing.inOut(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cloudRightX, {
-          toValue: splitDistance,
-          duration: 850,
-          easing: Easing.inOut(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(cloudCenterOpacity, {
-          toValue: 0,
-          duration: 500,
-          delay: 400,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.timing(cloudLeftOpacity, {
-        toValue: 0,
-        duration: 300,
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: LOGO_FADE_MS,
+        easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-      Animated.timing(cloudRightOpacity, {
-        toValue: 0,
-        duration: 300,
+      Animated.timing(logoScale, {
+        toValue: LOGO_SCALE_END,
+        duration: SPLASH_MOTION_MS,
+        easing: Easing.inOut(Easing.cubic),
         useNativeDriver: true,
       }),
-      Animated.sequence([
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 650,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoOpacity, {
-          toValue: 0.35,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
+      Animated.timing(cloudLeftX, {
+        toValue: CLOUD_FROM_LEFT_END,
+        duration: SPLASH_MOTION_MS,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(cloudRightX, {
+        toValue: CLOUD_FROM_RIGHT_END,
+        duration: SPLASH_MOTION_MS,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
     ]).start();
-  }, [cloudCenterOpacity, cloudLeftOpacity, cloudRightOpacity, cloudLeftX, cloudRightX, logoOpacity]);
+  }, [cloudLeftX, cloudRightX, logoOpacity, logoScale]);
+
+  const startVideo = () => {
+    setVideoPlaying(true);
+  };
 
   return (
     <View style={styles.root}>
-      <View style={styles.cloudStage}>
-        <Animated.View
-          style={[
-            styles.cloudPair,
-            {
-              opacity: Animated.multiply(cloudCenterOpacity, cloudLeftOpacity),
-              transform: [{ translateX: cloudLeftX }],
-            },
-          ]}
-        >
+      <View style={styles.cloudStage} pointerEvents='none'>
+        <Animated.View style={[styles.cloudSlot, { transform: [{ translateX: cloudLeftX }] }]}>
           <Image source={SENGO_IMAGES.CLOUD} style={styles.cloudImg} resizeMode='contain' />
         </Animated.View>
-        <Animated.View
-          style={[
-            styles.cloudPair,
-            styles.cloudRightSlot,
-            {
-              opacity: Animated.multiply(cloudCenterOpacity, cloudRightOpacity),
-              transform: [{ translateX: cloudRightX }],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.cloudSlot, { transform: [{ translateX: cloudRightX }] }]}>
           <Image
             source={SENGO_IMAGES.CLOUD}
             style={[styles.cloudImg, styles.cloudMirrored]}
@@ -111,12 +86,38 @@ export const SengoSplash = () => {
         </Animated.View>
       </View>
 
-      <Animated.View
-        style={[styles.logoWrap, { opacity: logoOpacity }]}
-        pointerEvents='none'
-      >
-        <SvgComponent Svg={LogoSvg} svgWidth={LOGO_W} svgHeight={LOGO_H} />
-      </Animated.View>
+      <View style={styles.logoArea}>
+        <Animated.View
+          style={[
+            styles.logoWrap,
+            {
+              opacity: logoOpacity,
+              transform: [{ scale: logoScale }],
+            },
+          ]}
+          pointerEvents='none'
+        >
+          <SvgComponent Svg={LogoSvg} svgWidth={LOGO_W} svgHeight={LOGO_H} />
+        </Animated.View>
+      </View>
+
+      <View style={[styles.videoBottom, { paddingBottom: insets.bottom }]}>
+        <Video
+          source={SENGO_VIDEOS.SPLASH_DELIVERY}
+          style={styles.video}
+          resizeMode='cover'
+          repeat
+          muted
+          paused={!videoPlaying}
+          controls={false}
+          playInBackground={false}
+          playWhenInactive={false}
+          ignoreSilentSwitch='ignore'
+          mixWithOthers='mix'
+          onLoad={startVideo}
+          onReadyForDisplay={startVideo}
+        />
+      </View>
     </View>
   );
 };
@@ -125,25 +126,23 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: COLORS.WHITE,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   cloudStage: {
     position: 'absolute',
-    top: '10%',
+    top: '8%',
     left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    height: CLOUD_H + 8,
+    width: SCREEN_W,
+    height: CLOUD_H,
+    zIndex: 3,
+    overflow: 'visible',
   },
-  cloudPair: {
+  cloudSlot: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: CLOUD_W,
     height: CLOUD_H,
-    marginHorizontal: -CLOUD_W * 0.12,
   },
-  cloudRightSlot: {},
   cloudImg: {
     width: CLOUD_W,
     height: CLOUD_H,
@@ -151,9 +150,29 @@ const styles = StyleSheet.create({
   cloudMirrored: {
     transform: [{ scaleX: -1 }],
   },
+  logoArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: screenHeight(8),
+    paddingBottom: VIDEO_H + screenHeight(4),
+  },
   logoWrap: {
-    zIndex: 2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  videoBottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: SCREEN_W,
+    height: VIDEO_H,
+    backgroundColor: COLORS.WHITE,
+  },
+  video: {
+    width: VIDEO_W,
+    height: VIDEO_H,
+    alignSelf: 'center',
   },
 });

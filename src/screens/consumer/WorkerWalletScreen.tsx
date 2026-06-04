@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStatusModal, Icon, Typography, RowComponent, AppGradient } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 import { IMAGES } from 'constants/assets';
 import { useAppSelector } from 'types/reduxTypes';
 import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
@@ -75,7 +75,7 @@ export const WorkerWalletScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         
 
-        <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.card}>
+        <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.card}>
           <View style={styles.cardIconWrap}>
             <Image source={IMAGES.WALLET} style={styles.cardIcon} />
           </View>
@@ -93,7 +93,7 @@ export const WorkerWalletScreen = () => {
               key={item.id}
               style={[styles.txRow, index < transactions.length - 1 && styles.txRowBorder]}
             >
-              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
+              <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.summaryIcon}>
                 <Icon
                   componentName={VARIABLES.Ionicons}
                   iconName='wallet-outline'

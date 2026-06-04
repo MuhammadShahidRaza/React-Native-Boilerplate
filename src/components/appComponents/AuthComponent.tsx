@@ -47,7 +47,7 @@ export const AuthComponent = ({
 }: Props) => {
   const showBottomSection = Boolean(bottomText || bottomButtonText);
   const insets = useSafeAreaInsets();
-  const logoWidth = screenWidth(55);
+  const logoWidth = screenWidth(isSengoBrand() ? 45 : 55);
   const logoHeight = logoWidth * getBrandLogoAspect('light');
   const BrandLogo = getBrandLogoSvg('light');
 

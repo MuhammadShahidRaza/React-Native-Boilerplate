@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Pressable, View } from 'react-native';
 import { Typography } from '../Typography';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 import { AppGradient, GRADIENT_END, GRADIENT_START } from '../AppGradient';
 
 export interface FilterChipRowProps<T extends string> {
@@ -34,7 +34,7 @@ export function FilterChipRow<T extends string>({
           >
             {active ? (
               <AppGradient
-                colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                colors={[...APP_GRADIENT_HORIZONTAL]}
                 start={GRADIENT_START}
                 end={GRADIENT_END}
                 fill

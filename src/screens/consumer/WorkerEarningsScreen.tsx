@@ -5,7 +5,7 @@ import { AppGradient, Icon, RowComponent, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 import { FONT_FAMILY, IMAGES } from 'constants/assets';
 import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
 import { useAppSelector } from 'types/reduxTypes';
@@ -52,7 +52,7 @@ export const WorkerEarningsScreen = () => {
       </SafeAreaView>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.totalCard}>
+        <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.totalCard}>
           <View style={styles.totalIconWrap}>
             <Image source={IMAGES.BAG} style={styles.totalIcon} />
           </View>
@@ -69,7 +69,7 @@ export const WorkerEarningsScreen = () => {
               key={row.label}
               style={[styles.summaryRow, index < summaryRows.length - 1 && styles.summaryRowBorder]}
             >
-              <AppGradient colors={[BRAND_SECONDARY, BRAND_PRIMARY]} fill style={styles.summaryIcon}>
+              <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.summaryIcon}>
                 <Icon
                   componentName={VARIABLES.MaterialCommunityIcons}
                   iconName='wallet-outline'

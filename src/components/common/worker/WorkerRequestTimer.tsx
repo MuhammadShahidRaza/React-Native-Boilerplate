@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppGradient, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 
 const SIZE = 100;
 const RING = 8;
@@ -64,7 +64,7 @@ export const WorkerRequestTimer = ({
     <View style={styles.wrap}>
       <View style={styles.ring}>
         <AppGradient
-          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          colors={[...APP_GRADIENT_HORIZONTAL]}
           start={{ x: -1, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.circle}

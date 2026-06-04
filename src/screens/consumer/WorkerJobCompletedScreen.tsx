@@ -7,7 +7,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
@@ -38,7 +38,7 @@ export const WorkerJobCompletedScreen = () => {
     >
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <AppGradient
-          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          colors={[...APP_GRADIENT_HORIZONTAL]}
           start={{ x: -1, y: -1 }}
           end={{ x: 1, y: -1 }}
           style={styles.successIcon}

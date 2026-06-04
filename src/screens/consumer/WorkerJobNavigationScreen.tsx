@@ -20,8 +20,8 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import {
+  APP_GRADIENT_HORIZONTAL,
   BRAND_PRIMARY,
-  BRAND_SECONDARY,
   COLORS,
   openPhoneNumber,
   screenHeight,
@@ -199,7 +199,7 @@ export const WorkerJobNavigationScreen = () => {
 
           {phase === 'dropoff' ? (
             <AppGradient
-              colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+              colors={[...APP_GRADIENT_HORIZONTAL]}
               start={GRADIENT_START}
               end={GRADIENT_END}
               fill

@@ -16,7 +16,7 @@ import { IMAGES } from 'constants/assets';
 import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, screenWidth } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, BRAND_PRIMARY, COLORS, screenWidth } from 'utils/index';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import {
   isActiveBookingStatus,
@@ -238,7 +238,7 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
             <Pressable key={route.key} onPress={onPress} style={styles.pillHalf}>
               {focused ? (
                 <AppGradient
-                  colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+                  colors={[...APP_GRADIENT_HORIZONTAL]}
                   start={GRADIENT_START}
                   end={GRADIENT_END}
                   fill

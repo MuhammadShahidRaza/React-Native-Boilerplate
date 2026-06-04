@@ -21,10 +21,24 @@ export type SnliftHomePromo = {
   ends_at?: string;
 };
 
+export type SnliftHomeHotOffer = {
+  id: number;
+  title: string;
+  sub_title: string;
+  image: string;
+};
+
 export type SnliftHomeData = {
   banners: SnliftHomeBanner[];
   promo_codes: SnliftHomePromo[];
+  hot_offers: SnliftHomeHotOffer[];
 };
+
+/** Shown on Sengo home when API returns no hot offers or promos. */
+export const SENGO_HOT_OFFERS_FALLBACK: SnliftHomeHotOffer[] = [
+  { id: 1, title: 'Up to 25% OFF', sub_title: 'Package Discount', image: '' },
+  { id: 2, title: 'Up to 25% OFF', sub_title: 'Package Discount', image: '' },
+];
 
 function formatPromoDescription(promo: SnliftHomePromo): string {
   const value = promo.discount_value;
@@ -41,6 +55,7 @@ export function normalizeHomeData(raw: unknown): SnliftHomeData {
     raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   const bannersRaw = Array.isArray(root.banners) ? root.banners : [];
   const promosRaw = Array.isArray(root.promo_codes) ? root.promo_codes : [];
+  const hotOffersRaw = Array.isArray(root.hot_offers) ? root.hot_offers : [];
 
   const banners = bannersRaw.map((item, index) => {
     const b = (item ?? {}) as Record<string, unknown>;
@@ -68,7 +83,36 @@ export function normalizeHomeData(raw: unknown): SnliftHomeData {
     return promo;
   });
 
-  return { banners, promo_codes };
+  const hot_offers = hotOffersRaw.map((item, index) => {
+    const o = (item ?? {}) as Record<string, unknown>;
+    return {
+      id: Number(o.id) || index + 1,
+      title: pickString(o, ['title', 'offer_title', 'headline'], 'Up to 25% OFF'),
+      sub_title: pickString(o, ['sub_title', 'subtitle', 'description'], 'Package Discount'),
+      image: pickString(o, ['image', 'logo', 'brand_image', 'media'], ''),
+    };
+  });
+
+  return { banners, promo_codes, hot_offers };
+}
+
+export function homeHotOffersForDisplay(
+  hotOffers: SnliftHomeHotOffer[],
+  promos: SnliftHomePromo[],
+): SnliftHomeHotOffer[] {
+  if (hotOffers.length > 0) return hotOffers;
+  if (promos.length > 0) {
+    return promos.map(p => ({
+      id: p.id,
+      title:
+        p.discount_type === 'percent'
+          ? `Up to ${Math.round(p.discount_value)}% OFF`
+          : `CFA ${p.discount_value} OFF`,
+      sub_title: formatPromoDescription(p).replace(/\.$/, '') || 'Package Discount',
+      image: '',
+    }));
+  }
+  return SENGO_HOT_OFFERS_FALLBACK;
 }
 
 export type HomePromoDisplay = SnliftHomePromo & { desc: string };

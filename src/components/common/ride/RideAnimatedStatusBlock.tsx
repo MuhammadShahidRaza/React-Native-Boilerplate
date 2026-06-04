@@ -5,7 +5,7 @@ import { GradientIcon } from '../GradientIcon';
 import { Typography } from '../Typography';
 import type { IconComponentProps } from '../Icon';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
 
 export interface RideAnimatedStatusBlockProps {
   animationKey: string;
@@ -51,7 +51,7 @@ export const RideAnimatedStatusBlock = ({
     >
       {imageSource ? (
         <AppGradient
-          colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+          colors={[...APP_GRADIENT_HORIZONTAL]}
           start={GRADIENT_START}
           end={GRADIENT_END}
           fill

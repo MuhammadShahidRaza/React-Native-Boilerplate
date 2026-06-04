@@ -7,6 +7,10 @@ export const SENGO_IMAGES = {
   ONBOARDING: require('assets/images/variants/sengo/onboarding.png'),
 } as const;
 
+export const SENGO_VIDEOS = {
+  SPLASH_DELIVERY: require('assets/videos/sengo/splash-delivery.mp4'),
+} as const;
+
 const SNLIFT_ONBOARDING = {
   one: IMAGES.ONBOARDING_ONE,
   two: IMAGES.ONBOARDING_TWO,

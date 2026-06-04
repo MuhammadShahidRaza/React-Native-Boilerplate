@@ -10,7 +10,7 @@ import {
 } from 'components/index';
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { BRAND_PRIMARY, BRAND_SECONDARY, COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
 import { onBack, replace } from 'navigation/index';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
@@ -72,7 +72,7 @@ export const SendParcelFindingScreen = () => {
       <View style={styles.center}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <AppGradient
-            colors={[BRAND_SECONDARY, BRAND_PRIMARY]}
+            colors={[...APP_GRADIENT_HORIZONTAL]}
             start={GRADIENT_START}
             end={GRADIENT_END}
             fill

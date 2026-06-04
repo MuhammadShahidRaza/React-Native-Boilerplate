@@ -18,19 +18,26 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES, SVG } from 'constants/assets';
+import { isSengoBrand } from 'constants/assets/brandLogo';
+import { getServiceIcon } from 'constants/assets/serviceIcons';
 import { COLORS, screenWidth, STYLES } from 'utils/index';
 import {
   getHomeData,
+  homeHotOffersForDisplay,
   homePromosForDisplay,
   type SnliftHomeBanner,
+  type SnliftHomeHotOffer,
   type HomePromoDisplay,
 } from 'api/functions/snlift/home';
 import type { RootState } from 'types/reduxTypes';
+
+const IS_SENGO = isSengoBrand();
 
 export const Home = () => {
   const user = useSelector((state: RootState) => state.user.userDetails);
   const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
   const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
+  const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadHome = useCallback(async () => {
@@ -39,6 +46,11 @@ export const Home = () => {
     if (data) {
       setBanners(data.banners);
       setPromoCodes(homePromosForDisplay(data.promo_codes));
+      setHotOffers(
+        IS_SENGO
+          ? homeHotOffersForDisplay(data.hot_offers, data.promo_codes)
+          : data.hot_offers,
+      );
     }
     setLoading(false);
   }, []);
@@ -58,7 +70,12 @@ export const Home = () => {
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
-      <AppGradient style={styles.hero} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
+      <AppGradient
+        style={styles.hero}
+        variant='primary'
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      >
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
             <RowComponent style={styles.locPillWrap}>
@@ -104,7 +121,8 @@ export const Home = () => {
                     {primaryBanner?.title ?? 'Book a Ride'}
                   </Typography>
                   <Typography style={styles.bannerSub}>
-                    {primaryBanner?.sub_title ?? 'Get started with SNLift'}
+                    {primaryBanner?.sub_title ??
+                      (IS_SENGO ? 'Get started with Sengo' : 'Get started with SNLift')}
                   </Typography>
                   <Button
                     title='Book Now'
@@ -132,63 +150,115 @@ export const Home = () => {
             <ServiceCard
               label='Book a Ride'
               subLabel={'Get Anywhere\nSafely'}
-              SvgIcon={SVG.BOOK_RIDE}
+              SvgIcon={getServiceIcon('bookRide')}
               onPress={() => navigate(SCREENS.BOOK_RIDE)}
             />
             <ServiceCard
               label='Send Parcel'
               subLabel={'Fast\nDelivery'}
-              SvgIcon={SVG.SEND_PARCEL}
+              SvgIcon={getServiceIcon('sendParcel')}
               onPress={() => navigate(SCREENS.SEND_PARCEL)}
             />
             <ServiceCard
               label='Order Food'
               subLabel={'From Top\nRestaurant'}
-              SvgIcon={SVG.ORDER_FOOD}
+              SvgIcon={getServiceIcon('orderFood')}
               onPress={() => navigate(SCREENS.ORDER_FOOD)}
             />
           </View>
         </View>
 
-        <View
-          style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
-        >
-          <View style={styles.promoHeader}>
-            <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
-              Promo Codes
-            </Typography>
+        {IS_SENGO ? (
+          <View
+            style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
+          >
+            <View style={styles.promoHeader}>
+              <Typography style={[styles.sectionTitle, { color: COLORS.TEXT, marginBottom: 0 }]}>
+                Hot Offers
+              </Typography>
+              <Typography style={styles.seeAll} onPress={() => navigate(SCREENS.ORDER_FOOD)}>
+                See All
+              </Typography>
+            </View>
+            {loading && hotOffers.length === 0 ? (
+              <ActivityIndicator color={COLORS.APP_PRIMARY} />
+            ) : (
+              hotOffers.map(offer => (
+                <HotOfferCard key={offer.id} offer={offer} />
+              ))
+            )}
           </View>
-          {loading && promoCodes.length === 0 ? (
-            <ActivityIndicator color={COLORS.APP_PRIMARY} />
-          ) : promoCodes.length === 0 ? (
-            <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
-          ) : (
-            promoCodes.map(p => (
-              <View key={p.id} style={[styles.promoCard]}>
-                <SvgComponent
-                  Svg={SVG.COUPON}
-                  svgWidth={40}
-                  svgHeight={40}
-                  containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
-                />
-                <View style={styles.promoBody}>
-                  <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
-                    {p.code}
-                  </Typography>
-                  <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
-                    {p.desc}
-                  </Typography>
+        ) : (
+          <View
+            style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
+          >
+            <View style={styles.promoHeader}>
+              <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+                Promo Codes
+              </Typography>
+            </View>
+            {loading && promoCodes.length === 0 ? (
+              <ActivityIndicator color={COLORS.APP_PRIMARY} />
+            ) : promoCodes.length === 0 ? (
+              <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
+            ) : (
+              promoCodes.map(p => (
+                <View key={p.id} style={[styles.promoCard]}>
+                  <SvgComponent
+                    Svg={SVG.COUPON}
+                    svgWidth={40}
+                    svgHeight={40}
+                    containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
+                  />
+                  <View style={styles.promoBody}>
+                    <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
+                      {p.code}
+                    </Typography>
+                    <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
+                      {p.desc}
+                    </Typography>
+                  </View>
                 </View>
-              </View>
-            ))
-          )}
-        </View>
+              ))
+            )}
+          </View>
+        )}
 
         <View style={styles.scrollFooter} />
       </ScrollView>
     </Wrapper>
   );
 };
+
+const HotOfferCard = ({ offer }: { offer: SnliftHomeHotOffer }) => (
+  <Pressable
+    style={styles.hotOfferCard}
+    onPress={() => navigate(SCREENS.ORDER_FOOD)}
+  >
+    <AppGradient
+      variant='offer'
+      style={StyleSheet.absoluteFill}
+      start={{ x: 0, y: 0.5 }}
+      end={{ x: 1, y: 0.5 }}
+    />
+    <View style={styles.hotOfferRow}>
+      <View style={styles.hotOfferLogoBox}>
+        {offer.image ? (
+          <Photo source={{ uri: offer.image }} imageStyle={styles.hotOfferLogoImg} />
+        ) : (
+          <SvgComponent Svg={SVG.ORDER_FOOD} svgWidth={44} svgHeight={44} />
+        )}
+      </View>
+      <View style={styles.hotOfferBody}>
+        <Typography style={styles.hotOfferTitle}>{offer.title}</Typography>
+        <Typography style={styles.hotOfferSub}>{offer.sub_title}</Typography>
+        <View style={styles.buyNowPill}>
+          <Typography style={styles.buyNowPillText}>Buy Now</Typography>
+        </View>
+      </View>
+    </View>
+  </Pressable>
+);
 
 const ServiceCard = ({
   label,
@@ -378,5 +448,62 @@ const styles = StyleSheet.create({
   promoDesc: {
     fontSize: FontSize.Small,
     marginTop: 2,
+  },
+  seeAll: {
+    color: COLORS.APP_PRIMARY,
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.SemiBold,
+  },
+  hotOfferCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+    minHeight: 120,
+  },
+  hotOfferRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap: 14,
+  },
+  hotOfferLogoBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 14,
+    backgroundColor: COLORS.WHITE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  hotOfferLogoImg: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+  },
+  hotOfferBody: {
+    flex: 1,
+    gap: 4,
+  },
+  hotOfferTitle: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.MediumLarge,
+    fontWeight: FontWeight.Bold,
+  },
+  hotOfferSub: {
+    color: 'rgba(255,255,255,0.92)',
+    fontSize: FontSize.Small,
+  },
+  buyNowPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.WHITE,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginTop: 6,
+  },
+  buyNowPillText: {
+    color: COLORS.APP_SECONDARY,
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
   },
 });
