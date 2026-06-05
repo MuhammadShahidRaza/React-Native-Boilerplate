@@ -8,6 +8,39 @@ import {
 } from '../app';
 import type { SnliftBooking, SnliftBookingsListResponse } from 'types/snliftApi';
 
+export type EstimateBookingPayload = {
+  booking_type: 'ride' | 'parcel' | 'food';
+  ride_category?: string;
+  pickup_latitude?: number;
+  pickup_longitude?: number;
+  dropoff_latitude?: number;
+  dropoff_longitude?: number;
+  restaurant_id?: number;
+  delivery_latitude?: number;
+  delivery_longitude?: number;
+  items?: { menu_item_id: number; quantity: number }[];
+  promo_code?: string;
+};
+
+export type EstimateBookingResult = {
+  sub_total?: number | string;
+  delivery_fee?: number | string;
+  discount_amount?: number | string;
+  total_amount?: number | string;
+  estimated_amount?: number | string;
+  distance_km?: number | string;
+  promo_code?: string;
+  [key: string]: unknown;
+};
+
+export async function estimateBooking(data: EstimateBookingPayload) {
+  return handlePostApiRequest<EstimateBookingResult, EstimateBookingPayload>({
+    url: API_ROUTES.BOOKINGS_ESTIMATE,
+    data,
+    showLoader: false,
+  });
+}
+
 export type CreateRideBookingPayload = {
   booking_type: 'ride';
   ride_category: string;
@@ -25,6 +58,8 @@ export type CreateFoodBookingPayload = {
   booking_type: 'food';
   restaurant_id: number;
   delivery_address: string;
+  delivery_latitude?: number;
+  delivery_longitude?: number;
   distance_km: number;
   items: { menu_item_id: number; quantity: number }[];
   promo_code?: string;
@@ -39,6 +74,7 @@ export type CreateParcelBookingPayload = {
   dropoff_latitude: number;
   dropoff_longitude: number;
   distance_km: number;
+  item_description?: string;
   promo_code?: string;
 };
 

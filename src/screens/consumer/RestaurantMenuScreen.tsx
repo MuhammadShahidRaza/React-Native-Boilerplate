@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import {
@@ -15,6 +15,7 @@ import { CustomBackIcon, navigate, onBack } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
 import { COLORS, screenHeight } from 'utils/index';
+import { getRestaurantMenu } from 'api/functions/snlift/restaurants';
 
 type MenuItem = {
   id: string;
@@ -25,29 +26,51 @@ type MenuItem = {
   popular: boolean;
 };
 
-const ITEMS: MenuItem[] = [
-  {
-    id: '1',
-    title: 'Double Smash Burger',
-    desc: 'Two smashed patties with cheddar cheese and lettuce',
-    price: 330,
-    priceLabel: 'CFA 330',
-    popular: true,
-  },
-  {
-    id: '2',
-    title: 'Loaded Fries',
-    desc: 'Crispy fries with cheese sauce and jalapenos and lettuce',
-    price: 330,
-    priceLabel: 'CFA 330',
-    popular: false,
-  },
-];
+// const FALLBACK_ITEMS: MenuItem[] = [
+//   {
+//     id: '1',
+//     title: 'Double Smash Burger',
+//     desc: 'Two smashed patties with cheddar cheese and lettuce',
+//     price: 330,
+//     priceLabel: 'CFA 330',
+//     popular: true,
+//   },
+//   {
+//     id: '2',
+//     title: 'Loaded Fries',
+//     desc: 'Crispy fries with cheese sauce and jalapenos and lettuce',
+//     price: 330,
+//     priceLabel: 'CFA 330',
+//     popular: false,
+//   },
+// ];
 
 export const RestaurantMenuScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RESTAURANT_MENU>>();
   const name = route.params?.name ?? 'Restaurant';
+  const restaurantId = route?.params?.restaurantId;
   const [qtys, setQtys] = useState<Record<string, number>>({});
+  const [items, setItems] = useState<MenuItem[]>([]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    getRestaurantMenu(restaurantId).then(apiItems => {
+      if (!apiItems || apiItems.length === 0) return;
+      const mapped: MenuItem[] = apiItems.map(m => {
+        const priceNum = parseFloat(String(m.price ?? 0));
+        const price = Number.isNaN(priceNum) ? 0 : priceNum;
+        return {
+          id: String(m.id),
+          title: m.name ?? m.title ?? 'Item',
+          desc: m.description ?? '',
+          price,
+          priceLabel: price > 0 ? `CFA ${price}` : 'CFA 0',
+          popular: Boolean(m.is_popular),
+        };
+      });
+      setItems(mapped);
+    });
+  }, [restaurantId]);
 
   const increment = (id: string) => {
     setQtys(q => ({ ...q, [id]: (q[id] ?? 0) + 1 }));
@@ -68,7 +91,7 @@ export const RestaurantMenuScreen = () => {
   const { cartCount, cartTotal } = useMemo(() => {
     let count = 0;
     let total = 0;
-    ITEMS.forEach(item => {
+    items.length > 0 && items?.forEach(item => {
       const qty = qtys[item.id] ?? 0;
       if (qty > 0) {
         count += qty;
@@ -76,7 +99,7 @@ export const RestaurantMenuScreen = () => {
       }
     });
     return { cartCount: count, cartTotal: total };
-  }, [qtys]);
+  }, [qtys, items]);
 
   const cartTotalLabel = `CFA ${cartTotal.toLocaleString()}`;
 
@@ -130,7 +153,7 @@ export const RestaurantMenuScreen = () => {
             </View>
           </View>
 
-          {ITEMS.map(item => {
+          {items.length > 0 && items?.map(item => {
             const qty = qtys[item.id] ?? 0;
             return (
               <View key={item.id} style={styles.itemCard}>

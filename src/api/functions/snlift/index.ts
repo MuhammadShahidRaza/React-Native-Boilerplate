@@ -1,4 +1,5 @@
 export * from './authExtras';
+export * from './banners';
 export * from './bookings';
 export * from './home';
 export * from './content';

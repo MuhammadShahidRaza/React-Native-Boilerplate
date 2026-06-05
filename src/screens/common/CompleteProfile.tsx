@@ -30,6 +30,8 @@ export interface CompleteProfileFormValues {
   area?: string;
   zip_code?: string;
   driving_license_number?: string;
+  driver_license_number?: string;
+  driver_license_validity_date?: string;
   social_security_number?: string;
   driving_license_front?: SelectedMedia | null | string;
   driving_license_back?: SelectedMedia | null | string;

@@ -5,6 +5,33 @@ import type { SnliftRestaurant } from 'types/snliftApi';
 import { IMAGES } from 'constants/assets';
 import type { RestaurantItem, FoodTag } from 'components/common/food/foodRestaurants';
 
+export type SnliftMenuItem = {
+  id: number;
+  name?: string;
+  title?: string;
+  description?: string;
+  price?: number | string;
+  image?: string | null;
+  is_available?: number | boolean;
+  is_popular?: number | boolean;
+  category?: string;
+};
+
+export async function getRestaurantMenu(
+  restaurantId: number | string,
+  params?: { page?: number },
+) {
+  const raw = await handleGetApiRequest<
+    SnliftMenuItem[] | { menu: SnliftMenuItem[]; data: SnliftMenuItem[] }
+  >({
+    url: API_ROUTES.RESTAURANT_MENU(restaurantId),
+    params: params as Record<string, number> | undefined,
+    showError: false,
+  });
+  if (!raw) return [];
+  return extractApiList<SnliftMenuItem>(raw, ['menu', 'data', 'items']);
+}
+
 export async function listRestaurants() {
   return handleGetApiRequest<SnliftRestaurant[] | { restaurants: SnliftRestaurant[] }>({
     url: API_ROUTES.RESTAURANTS,

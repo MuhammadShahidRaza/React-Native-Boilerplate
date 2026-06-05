@@ -13,6 +13,7 @@ import { contactUsValidationSchema } from 'utils/validations';
 export interface ContactUsFormValues {
   name: string;
   email: string;
+  phone?: string;
   subject: string;
   message: string;
 }
@@ -23,6 +24,7 @@ export const ContactUs = () => {
   const initialValues: ContactUsFormValues = {
     name: userDetails?.full_name ?? '',
     email: userDetails?.email ?? '',
+    phone: userDetails?.phone ?? userDetails?.phone_number ?? '',
     subject: __DEV__ ? 'testing' : '',
     message: __DEV__
       ? 'My account has been blocked by the admin. I apologize for any inconvenience caused and kindly request to have it reopened.'
