@@ -36,11 +36,19 @@ function findAssetByPrefix(prefix) {
   return path.join(CURSOR_ASSETS, matches[0].f);
 }
 
-async function pngToEmbeddedSvg(pngPath, svgPath) {
-  const meta = await sharp(pngPath).metadata();
-  const b64 = fs.readFileSync(pngPath).toString('base64');
-  const w = meta.width ?? 1;
-  const h = meta.height ?? 1;
+/** Embed PNG in SVG; optional scale (e.g. 3) for sharper RN wordmarks on retina. */
+async function pngToEmbeddedSvg(pngPath, svgPath, scale = 1) {
+  let pipeline = sharp(pngPath);
+  const meta = await pipeline.metadata();
+  const baseW = meta.width ?? 1;
+  const baseH = meta.height ?? 1;
+  const w = Math.round(baseW * scale);
+  const h = Math.round(baseH * scale);
+  if (scale !== 1) {
+    pipeline = pipeline.resize(w, h, { kernel: sharp.kernel.lanczos3 });
+  }
+  const pngBuf = await pipeline.png().toBuffer();
+  const b64 = pngBuf.toString('base64');
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
   <image width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet" xlink:href="data:image/png;base64,${b64}"/>
@@ -67,7 +75,7 @@ async function main() {
   await copyFile(logoDark, path.join(OUT.images, 'onboarding.png'));
   await copyFile(cloud, path.join(OUT.images, 'cloud.png'));
 
-  await pngToEmbeddedSvg(logoLight, path.join(OUT.svg, 'logoLight.svg'));
+  await pngToEmbeddedSvg(logoLight, path.join(OUT.svg, 'logoLight.svg'), 3);
   await pngToEmbeddedSvg(logoDark, path.join(OUT.svg, 'logoDark.svg'));
   await pngToEmbeddedSvg(cloud, path.join(OUT.svg, 'cloud.svg'));
 

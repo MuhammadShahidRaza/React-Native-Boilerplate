@@ -376,7 +376,7 @@
 				DEVELOPMENT_TEAM = 3ZG53CCNMB;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = snlift/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Sengo";
+				INFOPLIST_KEY_CFBundleDisplayName = "Sengo Workers";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -389,7 +389,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.sengo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.sengoworkers;
 				PRODUCT_NAME = snlift;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -417,7 +417,7 @@
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 3ZG53CCNMB;
 				INFOPLIST_FILE = snlift/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Sengo";
+				INFOPLIST_KEY_CFBundleDisplayName = "Sengo Workers";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -430,7 +430,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.sengo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.sengoworkers;
 				PRODUCT_NAME = snlift;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Wrapper, Typography, SvgComponent } from 'components/common';
-import { screenHeight, screenWidth, COLORS, STYLES } from 'utils/index';
+import { Wrapper, Typography, SvgComponent, Button, Icon } from 'components/common';
+import { screenHeight, screenWidth, COLORS, STYLES, BRAND_PRIMARY } from 'utils/index';
 import { FontSize, FontWeight } from 'types/index';
 import { getBrandLogoAspect, getBrandLogoSvg } from 'constants/assets/brandLogo';
-import { SCREENS, SVG } from 'constants/index';
+import { SCREENS, SVG, VARIABLES } from 'constants/index';
 import type { SvgProps } from 'react-native-svg';
 import { navigate } from 'navigation/index';
 import { useDispatch } from 'react-redux';
@@ -34,19 +34,20 @@ const WORKER_ROLE_TILES: WorkerRoleTile[] = [
   },
 ];
 
-const WORDMARK_WIDTH = screenWidth(58);
+/** Match Sengo splash / consumer Get Started — large SVG wordmark. */
+const WORDMARK_WIDTH = screenWidth(55);
 const WORDMARK_HEIGHT = WORDMARK_WIDTH * getBrandLogoAspect('light');
 const BrandLogo = getBrandLogoSvg('light');
 
-/** Sengo Workers — white role picker (Figma). */
+/** Sengo Workers — white role picker (Figma): select role, then Continue. */
 export const SengoWorkersGetStarted = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<USER_TYPE | null>(null);
 
-  const pickRole = (role: USER_TYPE) => {
-    setSelectedRole(role);
-    dispatch(setRole(role));
+  const goToLogin = () => {
+    if (selectedRole == null) return;
+    dispatch(setRole(selectedRole));
     navigate(SCREENS.LOGIN);
   };
 
@@ -80,17 +81,37 @@ export const SengoWorkersGetStarted = () => {
             return (
               <Pressable
                 key={tile.role}
-                style={[styles.rolePill, selected && styles.rolePillSelected]}
-                onPress={() => pickRole(tile.role)}
+                style={[styles.roleCard, selected && styles.roleCardSelected]}
+                onPress={() => setSelectedRole(tile.role)}
               >
                 <View style={styles.iconCircle}>
                   <SvgComponent Svg={tile.Svg} svgWidth={40} svgHeight={44} />
                 </View>
-                <Typography style={styles.roleLabel}>{tile.label}</Typography>
+                <Typography style={[styles.roleLabel, selected && styles.roleLabelSelected]}>
+                  {tile.label}
+                </Typography>
+                {selected ? (
+                  <Icon
+                    componentName={VARIABLES.Ionicons}
+                    iconName="checkmark-circle"
+                    size={26}
+                    color={BRAND_PRIMARY}
+                  />
+                ) : null}
               </Pressable>
             );
           })}
         </View>
+
+        <View style={styles.spacer} />
+
+        {selectedRole != null ? (
+          <Button
+            title={t(AUTH_TEXT.GET_STARTED_CONTINUE)}
+            style={styles.continueButton}
+            onPress={goToLogin}
+          />
+        ) : null}
       </View>
     </Wrapper>
   );
@@ -101,16 +122,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 28,
     paddingTop: screenHeight(4),
-    paddingBottom: screenHeight(6),
+    paddingBottom: screenHeight(4),
   },
   logoSection: {
     alignItems: 'center',
-    marginTop: screenHeight(6),
-    marginBottom: screenHeight(4),
+    marginTop: screenHeight(5),
+    marginBottom: screenHeight(3),
   },
   textSection: {
     alignItems: 'center',
-    marginBottom: screenHeight(4),
+    marginBottom: screenHeight(3),
     paddingHorizontal: 4,
   },
   mainTitle: {
@@ -129,21 +150,19 @@ const styles = StyleSheet.create({
   },
   roleList: {
     gap: 16,
-    marginTop: screenHeight(2),
   },
-  rolePill: {
+  roleCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.WHITE,
-    borderRadius: 999,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.LIGHT_GREY,
     paddingVertical: 14,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     ...STYLES.SHADOW,
   },
-  rolePillSelected: {
-    borderColor: COLORS.PRIMARY,
+  roleCardSelected: {
+    borderColor: BRAND_PRIMARY,
     borderWidth: 2,
   },
   iconCircle: {
@@ -154,7 +173,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.LIGHT_GREY,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
     backgroundColor: COLORS.WHITE,
   },
   roleLabel: {
@@ -162,5 +181,17 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Medium,
     fontWeight: FontWeight.Medium,
     color: COLORS.MEDIUM_GREY,
+  },
+  roleLabelSelected: {
+    color: BRAND_PRIMARY,
+    fontWeight: FontWeight.SemiBold,
+  },
+  spacer: {
+    flex: 1,
+    minHeight: 16,
+  },
+  continueButton: {
+    backgroundColor: COLORS.PRIMARY,
+    marginBottom: screenHeight(2),
   },
 });

@@ -7,7 +7,7 @@ import { VARIANT_ID } from 'config/variant';
 
 export type BrandLogoTone = 'light' | 'dark';
 
-/** logo-light.png (350×343) */
+/** logoLight.svg viewBox (1050×1029 @3× from logo-light.png). */
 const SENGO_LOGO_LIGHT_ASPECT = 343 / 350;
 /** logo-dark.png (1024×1024) */
 const SENGO_LOGO_DARK_ASPECT = 1;
@@ -32,3 +32,4 @@ export function getBrandLogoAspect(tone: BrandLogoTone = 'light'): number {
   if (!isSengoBrand()) return SNLIFT_LOGO_ASPECT;
   return tone === 'dark' ? SENGO_LOGO_DARK_ASPECT : SENGO_LOGO_LIGHT_ASPECT;
 }
+
