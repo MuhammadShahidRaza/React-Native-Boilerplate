@@ -5,24 +5,6 @@
    <BuildAction
       parallelizeBuildables = "NO"
       buildImplicitDependencies = "YES">
-      <PreActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Sync SN Lift Variant"
-               scriptText = "cd &quot;${PROJECT_DIR}/..&quot;&#10;sh scripts/sync-ios-variant-xcode.sh snlift&#10;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-                     BuildableName = "snlift.app"
-                     BlueprintName = "snlift"
-                     ReferencedContainer = "container:snlift.xcodeproj">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PreActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"

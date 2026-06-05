@@ -38,6 +38,7 @@
 		3CA5BA4062EF4920A6D03AB3 /* PoppinsBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PoppinsBold.ttf; path = ../src/assets/fonts/PoppinsBold.ttf; sourceTree = "<group>"; };
 		4D7391172FE9473BAECD52F0 /* GorditaRegular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaRegular.otf; path = ../src/assets/fonts/GorditaRegular.otf; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-snlift.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-snlift.release.xcconfig"; path = "Target Support Files/Pods-snlift/Pods-snlift.release.xcconfig"; sourceTree = "<group>"; };
+		5A75D4406DDD1A9CAB50CC66 /* Pods-snlift.debug-sengo.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-snlift.debug-sengo.xcconfig"; path = "Target Support Files/Pods-snlift/Pods-snlift.debug-sengo.xcconfig"; sourceTree = "<group>"; };
 		6BCF4984E6F640F2A6AA31C8 /* PoppinsMedium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PoppinsMedium.ttf; path = ../src/assets/fonts/PoppinsMedium.ttf; sourceTree = "<group>"; };
 		6CD6D49F82166B8F2E665AC1 /* Pods_snlift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_snlift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		72F61FC59BE94CA5925957C6 /* PoppinsLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PoppinsLight.ttf; path = ../src/assets/fonts/PoppinsLight.ttf; sourceTree = "<group>"; };
@@ -48,9 +49,12 @@
 		AA94A2312E297271005B5B6E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		AB28400179A549E19EEDCF64 /* GorditaBlack.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBlack.otf; path = ../src/assets/fonts/GorditaBlack.otf; sourceTree = "<group>"; };
 		C66725B10A4E437292A1BE44 /* PoppinsBlack.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PoppinsBlack.ttf; path = ../src/assets/fonts/PoppinsBlack.ttf; sourceTree = "<group>"; };
+		E57E99847518D3303641F602 /* Pods-snlift.debug-sengoworkers.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-snlift.debug-sengoworkers.xcconfig"; path = "Target Support Files/Pods-snlift/Pods-snlift.debug-sengoworkers.xcconfig"; sourceTree = "<group>"; };
 		EC49D890B4704A70BAD0E502 /* GorditaBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = GorditaBold.otf; path = ../src/assets/fonts/GorditaBold.otf; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		EFB509876046E96349322236 /* Pods-snlift.release-sengoworkers.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-snlift.release-sengoworkers.xcconfig"; path = "Target Support Files/Pods-snlift/Pods-snlift.release-sengoworkers.xcconfig"; sourceTree = "<group>"; };
 		F1B39C6C3FA74310865C1EDE /* PoppinsSemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = PoppinsSemiBold.ttf; path = ../src/assets/fonts/PoppinsSemiBold.ttf; sourceTree = "<group>"; };
+		FB97DCF9A0DE6E2FCBB5E7EB /* Pods-snlift.release-sengo.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-snlift.release-sengo.xcconfig"; path = "Target Support Files/Pods-snlift/Pods-snlift.release-sengo.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,10 @@
 			children = (
 				3B4392A12AC88292D35C810B /* Pods-snlift.debug.xcconfig */,
 				5709B34CF0A7D63546082F79 /* Pods-snlift.release.xcconfig */,
+				5A75D4406DDD1A9CAB50CC66 /* Pods-snlift.debug-sengo.xcconfig */,
+				FB97DCF9A0DE6E2FCBB5E7EB /* Pods-snlift.release-sengo.xcconfig */,
+				E57E99847518D3303641F602 /* Pods-snlift.debug-sengoworkers.xcconfig */,
+				EFB509876046E96349322236 /* Pods-snlift.release-sengoworkers.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -307,7 +315,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\nVARIANT=\"${APP_VARIANT:-${APP_ENV:-}}\"\nif [ -z \"$VARIANT\" ]; then\n  case \"${PRODUCT_BUNDLE_IDENTIFIER}\" in\n    com.cmolds.sengo) VARIANT=\"sengo\" ;;\n    com.cmolds.sengoworkers) VARIANT=\"sengoWorkers\" ;;\n    *) VARIANT=\"snlift\" ;;\n  esac\nfi\nSRC=\"${PROJECT_DIR}/firebase/${VARIANT}/GoogleService-Info.plist\"\nDEST=\"${PROJECT_DIR}/GoogleService-Info.plist\"\nif [ ! -f \"$SRC\" ]; then\n  echo \"error: Missing $SRC\" >&2\n  echo \"Add GoogleService-Info.plist from Firebase for flavor: ${VARIANT}\" >&2\n  exit 1\nfi\ncp \"$SRC\" \"$DEST\"\necho \"Firebase: copied ${VARIANT} GoogleService-Info.plist\"\n";
+			shellScript = "set -e\nVARIANT=\"${APP_VARIANT:-${APP_ENV:-}}\"\nif [ -z \"$VARIANT\" ]; then\n  case \"${PRODUCT_BUNDLE_IDENTIFIER}\" in\n    com.cmolds.sengo|com.cmolds.sengo-dev) VARIANT=\"sengo\" ;;\n    com.cmolds.sengoworkers|com.cmolds.sengoworkers-dev) VARIANT=\"sengoWorkers\" ;;\n    *) VARIANT=\"snlift\" ;;\n  esac\nfi\nSRC=\"${PROJECT_DIR}/firebase/${VARIANT}/GoogleService-Info.plist\"\nDEST=\"${PROJECT_DIR}/GoogleService-Info.plist\"\nif [ ! -f \"$SRC\" ]; then\n  echo \"error: Missing $SRC\" >&2\n  echo \"Add GoogleService-Info.plist from Firebase for flavor: ${VARIANT}\" >&2\n  exit 1\nfi\ncp \"$SRC\" \"$DEST\"\necho \"Firebase: copied ${VARIANT} GoogleService-Info.plist\"\n";
 		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -366,6 +374,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-snlift.debug.xcconfig */;
 			buildSettings = {
+				APP_ENV = snlift;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -389,7 +398,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.snlift;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.snlift-dev";
 				PRODUCT_NAME = snlift;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -407,6 +416,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-snlift.release.xcconfig */;
 			buildSettings = {
+				APP_ENV = snlift;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -430,7 +440,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.cmolds.snlift;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.snlift-dev";
 				PRODUCT_NAME = snlift;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -668,6 +678,304 @@
 			};
 			name = Release;
 		};
+		CC11AA00BB22CC33DD44EE01 /* Debug-sengo */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5A75D4406DDD1A9CAB50CC66 /* Pods-snlift.debug-sengo.xcconfig */;
+			buildSettings = {
+				APP_ENV = sengo;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconSengo;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = snlift/snlift.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 3ZG53CCNMB;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = snlift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sengo;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.sengo-dev";
+				PRODUCT_NAME = snlift;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-sengo";
+		};
+		CC11AA00BB22CC33DD44EE02 /* Release-sengo */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FB97DCF9A0DE6E2FCBB5E7EB /* Pods-snlift.release-sengo.xcconfig */;
+			buildSettings = {
+				APP_ENV = sengo;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconSengo;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = snlift/snlift.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 3ZG53CCNMB;
+				INFOPLIST_FILE = snlift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Sengo;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.sengo-dev";
+				PRODUCT_NAME = snlift;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-sengo";
+		};
+		CC11AA00BB22CC33DD44EE03 /* Debug-sengoWorkers */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E57E99847518D3303641F602 /* Pods-snlift.debug-sengoworkers.xcconfig */;
+			buildSettings = {
+				APP_ENV = sengoWorkers;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconSengo;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = snlift/snlift.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 3ZG53CCNMB;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = snlift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sengo Workers";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.sengoworkers-dev";
+				PRODUCT_NAME = snlift;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-sengoWorkers";
+		};
+		CC11AA00BB22CC33DD44EE04 /* Release-sengoWorkers */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EFB509876046E96349322236 /* Pods-snlift.release-sengoworkers.xcconfig */;
+			buildSettings = {
+				APP_ENV = sengoWorkers;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconSengo;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = snlift/snlift.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = 3ZG53CCNMB;
+				INFOPLIST_FILE = snlift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Sengo Workers";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.travel";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cmolds.sengoworkers-dev";
+				PRODUCT_NAME = snlift;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-sengoWorkers";
+		};
+		DD11AA00BB22CC33DD44EE01 /* Debug-sengo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ENV = sengo;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-featureflags/React_featureflags.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-renderercss/React_renderercss.framework/Headers",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				USE_HERMES = true;
+			};
+			name = "Debug-sengo";
+		};
+		DD11AA00BB22CC33DD44EE02 /* Release-sengo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ENV = sengo;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-featureflags/React_featureflags.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-renderercss/React_renderercss.framework/Headers",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				USE_HERMES = true;
+			};
+			name = "Release-sengo";
+		};
+		DD11AA00BB22CC33DD44EE03 /* Debug-sengoWorkers */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ENV = sengoWorkers;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-featureflags/React_featureflags.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-renderercss/React_renderercss.framework/Headers",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				USE_HERMES = true;
+			};
+			name = "Debug-sengoWorkers";
+		};
+		DD11AA00BB22CC33DD44EE04 /* Release-sengoWorkers */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APP_ENV = sengoWorkers;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon/ReactCommon.framework/Headers/react/nativemodule/core",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-runtimeexecutor/React_runtimeexecutor.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/ReactCommon-Samples/ReactCommon_Samples.framework/Headers/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-Fabric/React_Fabric.framework/Headers/react/renderer/components/view/platform/cxx",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-NativeModulesApple/React_NativeModulesApple.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-graphics/React_graphics.framework/Headers/react/renderer/graphics/platform/ios",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-featureflags/React_featureflags.framework/Headers",
+					"${PODS_CONFIGURATION_BUILD_DIR}/React-renderercss/React_renderercss.framework/Headers",
+				);
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(inherited)",
+					"-DRCT_REMOVE_LEGACY_ARCH=1",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				USE_HERMES = true;
+			};
+			name = "Release-sengoWorkers";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -676,6 +984,10 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+				CC11AA00BB22CC33DD44EE01 /* Debug-sengo */,
+				CC11AA00BB22CC33DD44EE02 /* Release-sengo */,
+				CC11AA00BB22CC33DD44EE03 /* Debug-sengoWorkers */,
+				CC11AA00BB22CC33DD44EE04 /* Release-sengoWorkers */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -685,6 +997,10 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+				DD11AA00BB22CC33DD44EE01 /* Debug-sengo */,
+				DD11AA00BB22CC33DD44EE02 /* Release-sengo */,
+				DD11AA00BB22CC33DD44EE03 /* Debug-sengoWorkers */,
+				DD11AA00BB22CC33DD44EE04 /* Release-sengoWorkers */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

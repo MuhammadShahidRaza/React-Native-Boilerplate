@@ -27,8 +27,8 @@ const SENGO_ONBOARDING = {
 
 const SENGO_WORKERS_ONBOARDING = {
   one: SENGO_IMAGES.ONBOARDING_WORKERS,
-  // two: SENGO_IMAGES.ONBOARDING_WORKERS,
-  // three: SENGO_IMAGES.ONBOARDING_WORKERS,
+  two: SENGO_IMAGES.ONBOARDING_WORKERS,
+  three: SENGO_IMAGES.ONBOARDING_WORKERS,
 } as const;
 
 /** Onboarding slide images for the active app flavor. */
