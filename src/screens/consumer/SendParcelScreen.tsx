@@ -67,6 +67,7 @@ export const SendParcelScreen = () => {
         dropoff_latitude: values.dropoff!.latitude,
         dropoff_longitude: values.dropoff!.longitude,
         distance_km: distanceKm,
+        ...(values.pkg.trim() ? { item_description: values.pkg.trim() } : {}),
       });
       const booking = extractBookingFromResponse(res);
       if (!booking?.id) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getAddressList } from 'api/functions/app/address';
 import { setAddressList, appendAddressList } from 'store/slices/address';
@@ -39,16 +39,23 @@ export function useAddressList() {
     if (!loadingMore && hasMore) fetchAddresses(currentPage + 1, true);
   }, [loadingMore, hasMore, currentPage, fetchAddresses]);
 
-  /** Single source: Redux. Fetch when empty; sync selectedId from addressList when it has data */
+  // Fetch once on mount. If Redux is already populated (revisiting screen), skip the call.
+  const addressListRef = useRef(addressList);
   useEffect(() => {
-    if (addressList.length > 0) {
+    if (addressListRef.current.length > 0) {
       setLoadingAddresses(false);
-      const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
-      setSelectedId(defaultAddr?.id ?? null);
       return;
     }
     fetchAddresses(1, false);
-  }, [addressList, fetchAddresses]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync selectedId whenever the Redux list changes (after fetch or CRUD)
+  useEffect(() => {
+    if (addressList.length === 0) return;
+    const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
+    setSelectedId(defaultAddr?.id ?? null);
+  }, [addressList]);
 
   const refetch = useCallback(() => fetchAddresses(1, false), [fetchAddresses]);
 

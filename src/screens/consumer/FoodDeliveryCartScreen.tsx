@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View, Image, Pressable } from 'react-native';
-import { AppGradient, Icon, Input, RowComponent, Typography, Wrapper } from 'components/index';
+import {
+  AppGradient,
+  Icon,
+  Input,
+  RowComponent,
+  Typography,
+  Wrapper,
+} from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
@@ -15,12 +22,7 @@ export const FoodDeliveryCartScreen = () => {
   const [promo, setPromo] = useState('');
   const [note, setNote] = useState('');
   return (
-    <Wrapper
-      headerTitle='Cart 1'
-      showBackButton
-      useScrollView
-      darkMode={false}
-    >
+    <Wrapper headerTitle='Cart 1' showBackButton useScrollView darkMode={false}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Typography style={styles.section}>Burger Lab</Typography>
         <View style={styles.itemCard}>
@@ -89,6 +91,14 @@ export const FoodDeliveryCartScreen = () => {
           </View>
         </View>
 
+        {/* <Typography style={styles.section}>Delivery Address</Typography>
+        <Autocomplete
+          placeholder='Enter Delivery Address'
+          value={deliveryAddress?.fullAddress ?? ''}
+          setReverseGeocodedAddress={addr => setDeliveryAddress(addr)}
+          showCurrentLocationButton
+        /> */}
+
         <Typography style={styles.section}>Delivery Note (Optional)</Typography>
         <Input
           value={note}
@@ -103,13 +113,16 @@ export const FoodDeliveryCartScreen = () => {
 
         <Pressable
           onPress={async () => {
+            const promoTrimmed = promo.trim();
             const res = await createFoodBooking({
               booking_type: 'food',
               restaurant_id: 1,
-              delivery_address: note.trim() || 'Delivery address',
+              delivery_address: 'Delivery address',
+              delivery_latitude: 0,
+              delivery_longitude: 0,
               distance_km: 4.2,
               items: [{ menu_item_id: 1, quantity: qty }],
-              promo_code: promo.trim(),
+              ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
             });
             const booking = res && 'booking' in res ? res.booking : res;
             if (!booking?.id) {

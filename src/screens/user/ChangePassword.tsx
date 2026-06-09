@@ -18,9 +18,9 @@ interface ChangePasswordFormValues {
 
 export const ChangePassword = () => {
   const initialValues: ChangePasswordFormValues = {
-    current_password: '',
-    new_password: '',
-    confirm_password: '',
+    current_password: __DEV__ ? 'Passward123!' : '',
+    new_password: __DEV__ ? 'Passward123!' : '',
+    confirm_password: __DEV__ ? 'Passward123!' : '',
     showConfirmPassword: false,
     showNewPassword: false,
     showCurrentPassword: false,

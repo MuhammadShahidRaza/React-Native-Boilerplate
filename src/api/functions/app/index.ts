@@ -27,6 +27,7 @@ const parseApiResponse = <R>(response: {
   messages?: string[];
   code?: number;
 }): R => {
+  logger.log('parseApiResponse', response);
   const data = response?.data;
   if (!isDataEmpty(data)) return data as R;
   return { message: response?.messages?.[0], code: response?.code } as R;
@@ -86,10 +87,11 @@ const handlePostApiRequest = async <R extends object, A extends object>({
       config,
       showLoader,
     });
+    logger.log('parseApiResponse', response);
     return parseApiResponse<R>(response);
   } catch (error) {
     logger.log(error);
-    if (!showError) {
+    if (showError) {
       handleApiError(error);
     }
   }
@@ -150,7 +152,7 @@ const handleDeleteApiRequest = async <R extends object, A extends object>({
   data: A;
   showLoader?: boolean;
   /** When true, don't show toast on error */
-  showError?: boolean;  
+  showError?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await remove({
@@ -160,7 +162,7 @@ const handleDeleteApiRequest = async <R extends object, A extends object>({
     });
     return parseApiResponse<R>(response);
   } catch (error) {
-    if (!showError) {
+    if (showError) {
       handleApiError(error);
     }
   }

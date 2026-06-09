@@ -106,6 +106,7 @@ export const ChooseRideScreen = () => {
   };
 
   const handleFindDriver = async () => {
+    const promoTrimmed = promo.trim();
     const payload = {
       booking_type: 'ride' as const,
       ride_category: selected,
@@ -116,7 +117,7 @@ export const ChooseRideScreen = () => {
       dropoff_latitude: dropoffCoord.latitude,
       dropoff_longitude: dropoffCoord.longitude,
       distance_km: estimateDistanceKm(),
-      promo_code: promo.trim(),
+      ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
     };
     const res = await createRideBooking(payload);
     const booking = res && 'booking' in res ? res.booking : res;

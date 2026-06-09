@@ -30,7 +30,7 @@ export const WorkerRequestsScreen = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await listBookings({ scope: 'available' });
+      const res = await listBookings({ scope: 'available' }, role);
       const bookings = extractBookingsList(res);
       if (!cancelled && bookings.length > 0) {
         setRequests(bookings.map(mapBookingToWorkerRequest));

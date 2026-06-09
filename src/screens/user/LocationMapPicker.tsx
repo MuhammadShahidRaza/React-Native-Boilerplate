@@ -210,7 +210,7 @@ export const LocationMapPicker = () => {
               color={COLORS.WHITE}
             />
             <Typography style={styles.infoText}>
-              Your car will be delivered to the pinned location. You can edit your written address
+              Your order will be delivered to the pinned location. You can edit your written address
               on the next page.
             </Typography>
           </View>
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   infoBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#4FC3F7',
+    backgroundColor: COLORS.SECONDARY,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,

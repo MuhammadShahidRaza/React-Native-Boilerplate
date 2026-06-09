@@ -8,6 +8,39 @@ import {
 } from '../app';
 import type { SnliftBooking, SnliftBookingsListResponse } from 'types/snliftApi';
 
+export type BookingRole = 'driver' | 'courier' | 'user' | string | null | undefined;
+
+function bookingUrls(role: BookingRole) {
+  if (role === 'courier') {
+    return {
+      list: API_ROUTES.COURIER_BOOKINGS,
+      byId: API_ROUTES.COURIER_BOOKING_BY_ID,
+      accept: API_ROUTES.COURIER_BOOKING_ACCEPT,
+      status: API_ROUTES.COURIER_BOOKING_STATUS,
+      cancel: API_ROUTES.COURIER_BOOKING_CANCEL,
+      tracking: API_ROUTES.COURIER_BOOKING_TRACKING,
+    };
+  }
+  if (role === 'driver') {
+    return {
+      list: API_ROUTES.DRIVER_BOOKINGS,
+      byId: API_ROUTES.DRIVER_BOOKING_BY_ID,
+      accept: API_ROUTES.DRIVER_BOOKING_ACCEPT,
+      status: API_ROUTES.DRIVER_BOOKING_STATUS,
+      cancel: API_ROUTES.DRIVER_BOOKING_CANCEL,
+      tracking: API_ROUTES.DRIVER_BOOKING_TRACKING,
+    };
+  }
+  return {
+    list: API_ROUTES.USER_BOOKINGS,
+    byId: API_ROUTES.USER_BOOKING_BY_ID,
+    accept: null as null,
+    status: null as null,
+    cancel: API_ROUTES.USER_BOOKING_CANCEL,
+    tracking: API_ROUTES.USER_BOOKING_TRACKING,
+  };
+}
+
 export type EstimateBookingPayload = {
   booking_type: 'ride' | 'parcel' | 'food';
   ride_category?: string;
@@ -35,7 +68,7 @@ export type EstimateBookingResult = {
 
 export async function estimateBooking(data: EstimateBookingPayload) {
   return handlePostApiRequest<EstimateBookingResult, EstimateBookingPayload>({
-    url: API_ROUTES.BOOKINGS_ESTIMATE,
+    url: API_ROUTES.USER_BOOKINGS_ESTIMATE,
     data,
     showLoader: false,
   });
@@ -91,22 +124,20 @@ export function extractBookingFromResponse(
   return null;
 }
 
-export async function listBookings(params?: {
-  scope?: string;
-  booking_type?: string;
-  status?: string;
-  page?: number;
-}) {
+export async function listBookings(
+  params?: { scope?: string; booking_type?: string; status?: string; page?: number },
+  role?: BookingRole,
+) {
   return handleGetApiRequest<SnliftBookingsListResponse>({
-    url: API_ROUTES.BOOKINGS,
+    url: bookingUrls(role).list,
     params: params as Record<string, string | number> | undefined,
     addToPending: true,
   });
 }
 
-export async function getBookingById(id: number | string) {
+export async function getBookingById(id: number | string, role?: BookingRole) {
   return handleGetApiRequest<{ booking: SnliftBooking } | SnliftBooking>({
-    url: API_ROUTES.BOOKING_BY_ID(id),
+    url: bookingUrls(role).byId(id),
   });
 }
 
@@ -124,9 +155,11 @@ export type SnliftBookingTracking = {
   poll_after_seconds: number;
 };
 
-export async function getBookingTracking(id: number | string) {
-  const raw = await handleGetApiRequest<{ tracking: SnliftBookingTracking } | SnliftBookingTracking>({
-    url: API_ROUTES.BOOKING_TRACKING(id),
+export async function getBookingTracking(id: number | string, role?: BookingRole) {
+  const raw = await handleGetApiRequest<
+    { tracking: SnliftBookingTracking } | SnliftBookingTracking
+  >({
+    url: bookingUrls(role).tracking(id),
   });
   if (!raw) return null;
   if ('tracking' in raw && raw.tracking) return raw.tracking;
@@ -135,7 +168,7 @@ export async function getBookingTracking(id: number | string) {
 
 export async function createRideBooking(data: CreateRideBookingPayload) {
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateRideBookingPayload>({
-    url: API_ROUTES.BOOKINGS,
+    url: API_ROUTES.USER_BOOKINGS,
     data,
     showLoader: true,
   });
@@ -143,7 +176,7 @@ export async function createRideBooking(data: CreateRideBookingPayload) {
 
 export async function createFoodBooking(data: CreateFoodBookingPayload) {
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateFoodBookingPayload>({
-    url: API_ROUTES.BOOKINGS,
+    url: API_ROUTES.USER_BOOKINGS,
     data,
     showLoader: true,
   });
@@ -151,43 +184,53 @@ export async function createFoodBooking(data: CreateFoodBookingPayload) {
 
 export async function createParcelBooking(data: CreateParcelBookingPayload) {
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateParcelBookingPayload>({
-    url: API_ROUTES.BOOKINGS,
+    url: API_ROUTES.USER_BOOKINGS,
     data,
     showLoader: true,
   });
 }
 
-export async function acceptBooking(id: number | string) {
+export async function acceptBooking(id: number | string, role: BookingRole) {
+  const urls = bookingUrls(role);
+  if (!urls.accept) return null;
   return handlePostApiRequest<{ booking: SnliftBooking }, Record<string, never>>({
-    url: API_ROUTES.BOOKING_ACCEPT(id),
+    url: urls.accept(id),
     data: {},
   });
 }
 
-export async function updateBookingStatus(id: number | string, status: string) {
+export async function updateBookingStatus(
+  id: number | string,
+  status: string,
+  role: BookingRole,
+) {
+  const urls = bookingUrls(role);
+  if (!urls.status) return null;
   return handlePatchApiRequest<{ booking: SnliftBooking }, { status: string }>({
-    url: API_ROUTES.BOOKING_STATUS(id),
+    url: urls.status(id),
     data: { status },
   });
 }
 
-export async function cancelBooking(id: number | string, cancellation_reason: string) {
+export async function cancelBooking(
+  id: number | string,
+  cancellation_reason: string,
+  role?: BookingRole,
+) {
   return handlePostApiRequest<{ booking: SnliftBooking }, { cancellation_reason: string }>({
-    url: API_ROUTES.BOOKING_CANCEL(id),
+    url: bookingUrls(role).cancel(id),
     data: { cancellation_reason },
   });
 }
 
 export async function deleteBooking(id: number | string) {
   return handleDeleteApiRequest<{ message?: string }, Record<string, never>>({
-    url: API_ROUTES.BOOKING_BY_ID(id),
+    url: API_ROUTES.USER_BOOKING_BY_ID(id),
     data: {},
   });
 }
 
 export function extractBookingsList(res: SnliftBookingsListResponse | undefined): SnliftBooking[] {
   const list = extractApiList<SnliftBooking>(res, ['bookings', 'data', 'items']);
-  return list.map(b =>
-    normalizeSniftBooking(b as SnliftBooking & Record<string, unknown>),
-  );
+  return list.map(b => normalizeSniftBooking(b as SnliftBooking & Record<string, unknown>));
 }

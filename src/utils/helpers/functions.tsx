@@ -36,7 +36,6 @@ export const buildPhonePayload = (values: PhoneValues) => {
   const phone = normalizePhoneNumber(values.phone_number ?? '', values.calling_code);
   return {
     phone,
-    phone_number: phone,
     country_code: values.country_code ?? '',
     calling_code: values.calling_code ?? '',
   };

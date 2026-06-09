@@ -153,13 +153,29 @@ export const API_ROUTES = {
   EXISTING_USER_CHECK: 'existing-user-check',
   CONTENT_ALL: 'content',
   CONTENT_BY_SLUG: (slug: string) => `content/${slug}`,
-  BOOKINGS: 'bookings',
-  BOOKINGS_ESTIMATE: 'bookings/estimate',
-  BOOKING_BY_ID: (id: number | string) => `bookings/${id}`,
-  BOOKING_ACCEPT: (id: number | string) => `bookings/${id}/accept`,
-  BOOKING_STATUS: (id: number | string) => `bookings/${id}/status`,
-  BOOKING_CANCEL: (id: number | string) => `bookings/${id}/cancel`,
-  BOOKING_TRACKING: (id: number | string) => `bookings/${id}/tracking`,
+
+  // User booking routes
+  USER_BOOKINGS: 'user/bookings',
+  USER_BOOKINGS_ESTIMATE: 'user/bookings/estimate',
+  USER_BOOKING_BY_ID: (id: number | string) => `user/bookings/${id}`,
+  USER_BOOKING_CANCEL: (id: number | string) => `user/bookings/${id}/cancel`,
+  USER_BOOKING_TRACKING: (id: number | string) => `user/bookings/${id}/tracking`,
+
+  // Driver booking routes
+  DRIVER_BOOKINGS: 'driver/bookings',
+  DRIVER_BOOKING_BY_ID: (id: number | string) => `driver/bookings/${id}`,
+  DRIVER_BOOKING_ACCEPT: (id: number | string) => `driver/bookings/${id}/accept`,
+  DRIVER_BOOKING_STATUS: (id: number | string) => `driver/bookings/${id}/status`,
+  DRIVER_BOOKING_CANCEL: (id: number | string) => `driver/bookings/${id}/cancel`,
+  DRIVER_BOOKING_TRACKING: (id: number | string) => `driver/bookings/${id}/tracking`,
+
+  // Courier booking routes
+  COURIER_BOOKINGS: 'courier/bookings',
+  COURIER_BOOKING_BY_ID: (id: number | string) => `courier/bookings/${id}`,
+  COURIER_BOOKING_ACCEPT: (id: number | string) => `courier/bookings/${id}/accept`,
+  COURIER_BOOKING_STATUS: (id: number | string) => `courier/bookings/${id}/status`,
+  COURIER_BOOKING_CANCEL: (id: number | string) => `courier/bookings/${id}/cancel`,
+  COURIER_BOOKING_TRACKING: (id: number | string) => `courier/bookings/${id}/tracking`,
   BANNERS: 'banners',
   BANNER_BY_ID: (id: number | string) => `banners/${id}`,
   RESTAURANTS: 'restaurants',

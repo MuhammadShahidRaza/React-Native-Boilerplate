@@ -88,7 +88,9 @@ const createAddress = async (data: AddressPayload): Promise<Address | undefined>
       data: body,
     });
   }
-  return response ? normalizeAddressItem(response) : undefined;
+  // API wraps the created address under an "address" key: { address: { id, title, ... } }
+  const raw = ((response as any)?.address as Record<string, unknown>) ?? response;
+  return raw ? normalizeAddressItem(raw) : undefined;
 };
 
 /** Update address by id */
@@ -104,7 +106,8 @@ const updateAddress = async (
       is_default: data.is_default ?? false,
     }),
   });
-  return response ? normalizeAddressItem(response) : undefined;
+  const raw = ((response as any)?.address as Record<string, unknown>) ?? response;
+  return raw ? normalizeAddressItem(raw) : undefined;
 };
 
 /** Delete address by id */

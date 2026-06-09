@@ -53,7 +53,7 @@ export const WorkerRequestDetailScreen = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await getBookingById(requestId);
+      const res = await getBookingById(requestId, role);
       const booking = extractBookingFromResponse(res);
       if (!cancelled && booking) {
         setDetail(mapBookingToWorkerRequestDetail(booking));
@@ -88,7 +88,7 @@ export const WorkerRequestDetailScreen = () => {
   };
 
   const accept = async () => {
-    const res = await acceptBooking(requestId);
+    const res = await acceptBooking(requestId, role);
     if (!res) {
       showToast({ message: 'Could not accept this request. Try again.' });
       return;
