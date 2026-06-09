@@ -130,9 +130,6 @@ export const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
             source={displayImage}
             resizeMode='cover'
             size={imageSize}
-            imageStyle={{
-              tintColor: COLORS.SECONDARY,
-            }}
             borderRadius={borderRadius}
           />
         </View>

@@ -1,7 +1,6 @@
 import {
   Button,
   Input,
-  PhoneInputComponent,
   PROFILE_PHONE_INPUT_STYLE,
   ProfilePictureUpload,
   Wrapper,
@@ -16,7 +15,7 @@ import { useAppSelector } from 'types/reduxTypes';
 import { EditProfileFormTypes } from 'types/screenTypes';
 import { COLORS } from 'utils/colors';
 import { FLEX_CENTER, STYLES } from 'utils/commonStyles';
-import { getDisplayPhoneNumber, safeString, screenWidth } from 'utils/helpers';
+import { countryFlagEmoji, getPhoneInputData, safeString, screenWidth } from 'utils/helpers';
 
 export type EditProfileFormExtended = EditProfileFormTypes & {
   country_code?: string;
@@ -25,7 +24,10 @@ export type EditProfileFormExtended = EditProfileFormTypes & {
 
 export const Profile = () => {
   const { userDetails } = useAppSelector(state => state?.user);
-  const profilePhone = getDisplayPhoneNumber(userDetails);
+  const { nationalNumber, isoCountryCode, callingCode } = getPhoneInputData(userDetails);
+  const phoneDisplay = nationalNumber
+    ? `${countryFlagEmoji(isoCountryCode)}  ${callingCode}  ${nationalNumber}`
+    : '';
 
   const handleSubmit = async () => {
     navigate(SCREENS.EDIT_PROFILE);
@@ -123,18 +125,14 @@ export const Profile = () => {
             }}
           /> */}
 
-          <PhoneInputComponent
-            key={`${profilePhone}-${userDetails?.country_code ?? ''}`}
+          <Input
             name={COMMON_TEXT.PHONE_NUMBER}
             title={COMMON_TEXT.PHONE_NUMBER}
             isTitleInLine
             editable={false}
             onChangeText={() => {}}
-            value={profilePhone}
+            value={phoneDisplay}
             allowSpacing={false}
-            onChangeCountryCode={() => {}}
-            onChangeCallingCode={() => {}}
-            defaultCode={(userDetails?.country_code || 'US') as 'US'}
             secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
             placeholder={COMMON_TEXT.PHONE_NUMBER}
           />

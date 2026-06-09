@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View, Pressable, ActivityIndicator } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,32 +28,54 @@ import {
   type SnliftHomeBanner,
   type SnliftHomeHotOffer,
   type HomePromoDisplay,
+  type SnliftHomeData,
 } from 'api/functions/snlift/home';
 import type { RootState } from 'types/reduxTypes';
+import { getCurrentLocation } from 'utils/location';
+import { updateUserLocation } from 'api/functions/app/user';
+import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
 
 const IS_SENGO = isSengoBrand();
 
 export const Home = () => {
   const user = useSelector((state: RootState) => state.user.userDetails);
+  const locationUpdatedRef = useRef(false);
+
+  // Update user location once on mount — REST API + Firestore
+  useEffect(() => {
+    if (locationUpdatedRef.current || !user?.id) return;
+    locationUpdatedRef.current = true;
+    (async () => {
+      const pos = await getCurrentLocation();
+      if (!pos) return;
+      const { latitude, longitude } = pos.coords;
+      updateUserLocation(latitude, longitude);
+      updateWorkerFirestoreLocation(user.id, latitude, longitude, 'user');
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const applyHomeData = useCallback((data: SnliftHomeData) => {
+    setBanners(data.banners);
+    setPromoCodes(homePromosForDisplay(data.promo_codes));
+    setHotOffers(
+      IS_SENGO ? homeHotOffersForDisplay(data.hot_offers, data.promo_codes) : data.hot_offers,
+    );
+  }, []);
+
   const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
   const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
   const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadHome = useCallback(async () => {
-    setLoading(true);
+    // getHomeData returns cached data instantly if within TTL — no flicker
     const data = await getHomeData();
     if (data) {
-      setBanners(data.banners);
-      setPromoCodes(homePromosForDisplay(data.promo_codes));
-      setHotOffers(
-        IS_SENGO
-          ? homeHotOffersForDisplay(data.hot_offers, data.promo_codes)
-          : data.hot_offers,
-      );
+      applyHomeData(data);
     }
     setLoading(false);
-  }, []);
+  }, [applyHomeData]);
 
   useEffect(() => {
     loadHome();
@@ -111,9 +133,7 @@ export const Home = () => {
             ) : (
               <Pressable style={styles.banner} onPress={() => navigate(SCREENS.BOOK_RIDE)}>
                 <Photo
-                  source={
-                    primaryBanner?.image ? { uri: primaryBanner.image } : IMAGES.HOME
-                  }
+                  source={primaryBanner?.image ? { uri: primaryBanner.image } : IMAGES.HOME}
                   imageStyle={styles.bannerImg}
                 />
                 <View style={styles.bannerText}>
@@ -170,7 +190,11 @@ export const Home = () => {
 
         {IS_SENGO ? (
           <View
-            style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
+            style={[
+              styles.bodySection,
+              styles.promoSection,
+              { backgroundColor: COLORS.BACKGROUND },
+            ]}
           >
             <View style={styles.promoHeader}>
               <Typography style={[styles.sectionTitle, { color: COLORS.TEXT, marginBottom: 0 }]}>
@@ -180,17 +204,19 @@ export const Home = () => {
                 See All
               </Typography>
             </View>
-            {loading && hotOffers.length === 0 ? (
+            {loading && hotOffers?.length === 0 ? (
               <ActivityIndicator color={COLORS.APP_PRIMARY} />
             ) : (
-              hotOffers.map(offer => (
-                <HotOfferCard key={offer.id} offer={offer} />
-              ))
+              hotOffers?.length > 0 && hotOffers?.map(offer => <HotOfferCard key={offer.id} offer={offer} />)
             )}
           </View>
         ) : (
           <View
-            style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
+            style={[
+              styles.bodySection,
+              styles.promoSection,
+              { backgroundColor: COLORS.BACKGROUND },
+            ]}
           >
             <View style={styles.promoHeader}>
               <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
@@ -231,10 +257,7 @@ export const Home = () => {
 };
 
 const HotOfferCard = ({ offer }: { offer: SnliftHomeHotOffer }) => (
-  <Pressable
-    style={styles.hotOfferCard}
-    onPress={() => navigate(SCREENS.ORDER_FOOD)}
-  >
+  <Pressable style={styles.hotOfferCard} onPress={() => navigate(SCREENS.ORDER_FOOD)}>
     <AppGradient variant='offer' style={StyleSheet.absoluteFill} />
     <View style={styles.hotOfferRow}>
       <View style={styles.hotOfferLogoBox}>
@@ -334,13 +357,14 @@ const styles = StyleSheet.create({
   banner: {
     height: 180,
     marginBottom: 10,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: COLORS.APP_MAP_BG,
   },
   bannerImg: {
     width: '100%',
     height: '100%',
+    backgroundColor: COLORS.SECONDARY,
   },
   bannerText: {
     position: 'absolute',

@@ -23,7 +23,7 @@ export const API_ROUTES = {
   LOGOUT_ALL: 'logout/all',
   EMAIL_UNSUBSCRIBE: 'email/unsubscribe',
   UPDATE_PROFILE: 'user/update',
-  UPLOAD_PROFILE_PICTURE: 'user/profile/picture/upload',
+  UPDATE_USER_LOCATION: 'user/update',
   DELETE_PROFILE_PICTURE: 'user/profile/picture/delete',
   UPDATE_CONTACT_INFO: 'user/profile/contact',
   UPDATE_ADDRESS: 'user/profile/address',

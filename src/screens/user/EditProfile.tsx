@@ -2,21 +2,20 @@ import { StyleSheet, View } from 'react-native';
 import {
   Button,
   Input,
-  PhoneInputComponent,
   PROFILE_PHONE_INPUT_STYLE,
   ProfilePictureUpload,
   Wrapper,
 } from 'components/index';
 import { COMMON_TEXT } from 'constants/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
-import { EditProfileFormTypes, FontSize, FontWeight, useAppSelector } from 'types/index';
+import { FontSize, FontWeight, useAppSelector } from 'types/index';
 import {
   screenWidth,
   COLORS,
   STYLES,
   safeString,
-  getDisplayPhoneNumber,
-  buildPhonePayload,
+  countryFlagEmoji,
+  getPhoneInputData,
   editProfileValidationSchemaWithProfileImage,
   hasUri,
 } from 'utils/index';
@@ -28,35 +27,26 @@ export const EditProfile = () => {
   const { userDetails } = useAppSelector(state => state?.user);
   const role = useAppSelector(state => state?.user?.role);
   const isDentor = isWorkerRole(role);
-  // console.log({ userDetails });
+
+  const { nationalNumber, isoCountryCode, callingCode } = getPhoneInputData(userDetails);
+  const phoneDisplay = nationalNumber
+    ? `${countryFlagEmoji(isoCountryCode)}  ${callingCode}  ${nationalNumber}`
+    : '';
 
   const initialValues = {
     full_name: safeString(userDetails?.full_name),
     email: safeString(userDetails?.email),
-    phone_number: getDisplayPhoneNumber(userDetails),
-    country_code: safeString(userDetails?.country_code) || 'US',
-    calling_code: safeString(userDetails?.calling_code) || '+1',
     profile_image: userDetails?.profile_image || '',
-    // address: safeString(userDetails?.address),
-    // latitude: userDetails?.latitude || 0,
-    // longitude: userDetails?.longitude || 0,
-    // city: safeString(userDetails?.city),
-    // state: safeString(userDetails?.state),
-    // country: safeString(userDetails?.country),
-    // zip_code: safeString(userDetails?.zip_code),
   };
 
-  const handleSubmit = async (values: EditProfileFormTypes) => {
+  const handleSubmit = async (values: typeof initialValues) => {
     const { profile_image, ...rest } = values;
     await updateUserDetails({
       full_name: rest.full_name,
       email: rest.email,
-      ...buildPhonePayload(rest),
       ...(hasUri(profile_image) ? { profile_image } : {}),
     });
   };
-
-  // Create conditional validation schema - profile_image required only for dentors
 
   const formik = useFormikForm({
     initialValues,
@@ -119,22 +109,16 @@ export const EditProfile = () => {
             touched={Boolean(formik.touched.email && formik.submitCount)}
           />
 
-          <PhoneInputComponent
+          <Input
             name={COMMON_TEXT.PHONE_NUMBER}
             title={COMMON_TEXT.PHONE_NUMBER}
             isTitleInLine
-            onChangeText={formik.handleChange('phone_number')}
-            onBlur={() => formik.setFieldTouched('phone_number', true)}
-            value={formik.values.phone_number ?? ''}
-            onChangeCountryCode={formik.handleChange('country_code')}
-            onChangeCallingCode={formik.handleChange('calling_code')}
-            defaultCode={(formik.values.country_code || 'US') as 'US'}
-            allowSpacing={false}
             editable={false}
+            onChangeText={() => {}}
+            value={phoneDisplay}
+            allowSpacing={false}
             secondContainerStyle={PROFILE_PHONE_INPUT_STYLE}
             placeholder={COMMON_TEXT.PHONE_NUMBER}
-            error={formik.errors.phone_number}
-            touched={Boolean(formik.touched.phone_number && formik.submitCount)}
           />
 
           {/* <Autocomplete

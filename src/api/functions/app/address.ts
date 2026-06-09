@@ -9,13 +9,17 @@ import {
 import { Address, AddressListData, AddressPayload } from 'types/responseTypes';
 
 /** Postman: POST /address/create — `title`, `address`, string lat/long. */
-function toApiAddressBody(data: Partial<AddressPayload> & { street: string }): Record<string, unknown> {
+function toApiAddressBody(
+  data: Partial<AddressPayload> & { street: string },
+): Record<string, unknown> {
   const body: Record<string, unknown> = {
     title: data.title ?? data.label ?? 'Home',
     address: data.street,
+    street: data.street,
     city: data.city ?? '',
     state: data.state ?? '',
     postal_code: data.postal_code ?? '',
+    country: data.country ?? '',
     latitude: String(data.latitude ?? ''),
     longitude: String(data.longitude ?? ''),
   };
@@ -24,9 +28,7 @@ function toApiAddressBody(data: Partial<AddressPayload> & { street: string }): R
 }
 
 function normalizeAddressItem(raw: Record<string, unknown>): Address {
-  const street =
-    String(raw.address ?? raw.street ?? '').trim() ||
-    String(raw.title ?? '').trim();
+  const street = String(raw.address ?? raw.street ?? '').trim() || String(raw.title ?? '').trim();
   return {
     id: Number(raw.id) || 0,
     user_id: Number(raw.user_id) || 0,
@@ -49,9 +51,11 @@ function normalizeAddressItem(raw: Record<string, unknown>): Address {
 function normalizeAddressListResponse(raw: unknown, page = 1): AddressListData | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
   const r = raw as AddressListData & Record<string, unknown>;
-  const addresses = extractApiList<Record<string, unknown>>(raw, ['addresses', 'data', 'items']).map(
-    normalizeAddressItem,
-  );
+  const addresses = extractApiList<Record<string, unknown>>(raw, [
+    'addresses',
+    'data',
+    'items',
+  ]).map(normalizeAddressItem);
   return {
     ...r,
     addresses,

@@ -22,7 +22,7 @@ const isDataEmpty = (data: unknown): boolean =>
   (Array.isArray(data) && data.length === 0) ||
   (typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0);
 
-const parseApiResponse = <R>(response: {
+export const parseApiResponse = <R>(response: {
   data?: unknown;
   messages?: string[];
   code?: number;
@@ -33,7 +33,7 @@ const parseApiResponse = <R>(response: {
   return { message: response?.messages?.[0], code: response?.code } as R;
 };
 
-const handleApiError = (error: unknown): void => {
+export const handleApiError = (error: unknown): void => {
   logger.log(error);
   const errorMessage =
     (error instanceof Error && error.message) || i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);

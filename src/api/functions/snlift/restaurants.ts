@@ -32,10 +32,11 @@ export async function getRestaurantMenu(
   return extractApiList<SnliftMenuItem>(raw, ['menu', 'data', 'items']);
 }
 
-export async function listRestaurants() {
+export async function listRestaurants(params?: { latitude?: number; longitude?: number }) {
   return handleGetApiRequest<SnliftRestaurant[] | { restaurants: SnliftRestaurant[] }>({
     url: API_ROUTES.RESTAURANTS,
     showError: false,
+    params: params as Record<string, number> | undefined,
   });
 }
 

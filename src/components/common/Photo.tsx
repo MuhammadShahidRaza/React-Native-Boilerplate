@@ -52,7 +52,9 @@ export const Photo: React.FC<PhotoProps> = ({
   const imageSource = source
     ? typeof source === 'string'
       ? { uri: source, cache: 'force-cache' }
-      : source
+      : typeof source === 'object' && 'uri' in (source as object)
+        ? { ...(source as object), cache: 'force-cache' }
+        : source
     : IMAGES.USER_IMAGE;
 
   const handlePress = () => {

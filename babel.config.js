@@ -37,6 +37,7 @@ module.exports = {
           assets: "./src/assets",
           i18n: "./src/i18n",
           api: "./src/api",
+          services: "./src/services",
         },
       },
     ],

@@ -55,13 +55,28 @@ export type EstimateBookingPayload = {
   promo_code?: string;
 };
 
+export type EstimateCategoryResult = {
+  ride_category: string;
+  base_fare: number;
+  price_per_km: number;
+  estimated_amount: number;
+  discount_amount: number;
+  total_amount: number;
+  promo_code: string | null;
+  promo_valid: boolean | null;
+  promo_applied: boolean;
+};
+
 export type EstimateBookingResult = {
+  booking_type?: string;
+  distance_km?: number | string;
+  categories?: EstimateCategoryResult[];
+  // For food/parcel estimates (no categories):
   sub_total?: number | string;
   delivery_fee?: number | string;
   discount_amount?: number | string;
   total_amount?: number | string;
   estimated_amount?: number | string;
-  distance_km?: number | string;
   promo_code?: string;
   [key: string]: unknown;
 };

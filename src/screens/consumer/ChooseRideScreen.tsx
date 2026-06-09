@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View, Pressable, ActivityIndicator } from 'react-native';
 import { Marker } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
@@ -8,7 +8,8 @@ import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { resetToHomeAndScreen } from 'navigation/index';
-import { createRideBooking } from 'api/functions/snlift/bookings';
+import { createRideBooking, estimateBooking } from 'api/functions/snlift/bookings';
+import type { EstimateCategoryResult } from 'api/functions/snlift/bookings';
 import { showToast } from 'utils/toast';
 import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
@@ -19,38 +20,41 @@ import { logger } from 'utils/logger';
  
 const RIDE_TYPES = [
   {
-    id: 'basic',
-    label: 'Basic',
+    id: 'standard',
+    label: 'Standard',
     desc: 'Affordable Everyday Rides',
-    price: 'CFA 330',
-    eta: '5-8 min',
     colors: '#004AADB3',
     background: 'rgba(0, 74, 173, 0.2)',
   },
   {
-    id: 'ac_comfort',
-    label: 'AC Comfort',
+    id: 'comfort',
+    label: 'Comfort',
     desc: 'Cool & Comfortable Rides',
-    price: 'CFA 330',
-    eta: '5-8 min',
     colors: '#00B76CB3',
-    background: 'rgba(0, 183, 108, 0.2)', 
+    background: 'rgba(0, 183, 108, 0.2)',
   },
   {
-    id: 'premium',
-    label: 'Premium',
+    id: 'business',
+    label: 'Business',
     desc: 'Luxury',
-    price: 'CFA 330',
-    eta: '5-8 min',
     colors: '#1E1E1EB3',
     background: 'rgba(30, 30, 30, 0.2)',
   },
 ];
 
+const fmtPrice = (cat: EstimateCategoryResult | null | undefined): string | null => {
+  if (!cat) return null;
+  return `CFA ${Math.round(cat.total_amount)}`;
+};
+
 export const ChooseRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.CHOOSE_RIDE>>();
-  const [selected, setSelected] = useState('basic');
+  const [selected, setSelected] = useState('standard');
   const [promo, setPromo] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [estimates, setEstimates] = useState<Record<string, EstimateCategoryResult>>({});
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
+  const [estimateLoading, setEstimateLoading] = useState(false);
   const [currentLocationFallback, setCurrentLocationFallback] = useState<{
     latitude: number;
     longitude: number;
@@ -105,6 +109,48 @@ export const ChooseRideScreen = () => {
     return Math.max(0.5, Math.round((dLat + dLng) * 111 * 10) / 10);
   };
 
+  const fetchEstimates = async (promoCode?: string) => {
+    setEstimateLoading(true);
+    try {
+      const result = await estimateBooking({
+        booking_type: 'ride',
+        pickup_latitude: pickupCoord.latitude,
+        pickup_longitude: pickupCoord.longitude,
+        dropoff_latitude: dropoffCoord.latitude,
+        dropoff_longitude: dropoffCoord.longitude,
+        ...(promoCode ? { promo_code: promoCode } : {}),
+      });
+      if (result?.distance_km != null) {
+        setDistanceKm(Number(result.distance_km));
+      }
+      if (result?.categories?.length) {
+        const map: Record<string, EstimateCategoryResult> = {};
+        result.categories.forEach(cat => { map[cat.ride_category] = cat; });
+        setEstimates(map);
+      }
+    } catch (e) {
+      logger.error('estimateBooking failed', e);
+    } finally {
+      setEstimateLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEstimates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickupCoord.latitude, pickupCoord.longitude, dropoffCoord.latitude, dropoffCoord.longitude]);
+
+  const handleApplyPromo = async () => {
+    const promoTrimmed = promo.trim();
+    if (!promoTrimmed) return;
+    setPromoLoading(true);
+    try {
+      await fetchEstimates(promoTrimmed);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
   const handleFindDriver = async () => {
     const promoTrimmed = promo.trim();
     const payload = {
@@ -116,7 +162,7 @@ export const ChooseRideScreen = () => {
       pickup_longitude: pickupCoord.longitude,
       dropoff_latitude: dropoffCoord.latitude,
       dropoff_longitude: dropoffCoord.longitude,
-      distance_km: estimateDistanceKm(),
+      distance_km: distanceKm ?? estimateDistanceKm(),
       ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
     };
     const res = await createRideBooking(payload);
@@ -191,11 +237,16 @@ export const ChooseRideScreen = () => {
       <View style={styles.content}>
         <Typography style={styles.sectionTitle}>Choose Ride Type</Typography>
         <Typography translate={false} style={styles.distanceTxt}>
-          Estimated Distance: 12 km
+          {estimateLoading
+            ? 'Calculating distance...'
+            : distanceKm != null
+              ? `Estimated Distance: ${distanceKm.toFixed(1)} km`
+              : `Estimated Distance: ${estimateDistanceKm()} km`}
         </Typography>
 
         {RIDE_TYPES.map(ride => {
           const isSel = selected === ride.id;
+          const cat = estimates[ride.id];
           return (
             <Pressable
               key={ride.id}
@@ -210,8 +261,14 @@ export const ChooseRideScreen = () => {
                 <Typography style={styles.rideDesc}>{ride.desc}</Typography>
               </View>
               <View style={styles.rideRight}>
-                <Typography style={styles.ridePrice}>{ride.price}</Typography>
-                <Typography style={styles.rideEta}>{ride.eta}</Typography>
+                {estimateLoading
+                  ? <ActivityIndicator size='small' color={ride.colors} />
+                  : <Typography style={styles.ridePrice}>{fmtPrice(cat) ?? '—'}</Typography>}
+                {cat?.promo_applied && (
+                  <Typography style={[styles.rideEta, styles.discountText]}>
+                    {`- CFA ${Math.round(cat.discount_amount)}`}
+                  </Typography>
+                )}
               </View>
             </Pressable>
           );
@@ -222,20 +279,43 @@ export const ChooseRideScreen = () => {
           <View style={styles.promoInput}>
             <Input containerStyle={styles.promoInput} name='promo' placeholder='Enter Code' value={promo} onChangeText={setPromo} />
           </View>
-          <Button title='Apply' style={styles.promoBtn} onPress={() => {}} />
+          <Button title='Apply' style={styles.promoBtn} loading={promoLoading} onPress={handleApplyPromo} />
         </View>
 
-        <View style={styles.fareCard}>
-          <View style={styles.fareRow}>
-            <Typography style={styles.fareLabel}>Base Fare</Typography>
-            <Typography style={styles.fareValue}>CFA 330</Typography>
-          </View>
-          <View style={styles.fareDivider} />
-          <View style={styles.fareRow}>
-            <Typography style={styles.fareTotalLabel}>Total (Cash)</Typography>
-            <Typography style={styles.fareTotalValue}>CFA 330</Typography>
-          </View>
-        </View>
+        {(() => {
+          const cat = estimates[selected];
+          const baseFare = cat ? `CFA ${Math.round(cat.estimated_amount)}` : '—';
+          const discount = cat?.discount_amount ?? 0;
+          const total = cat ? `CFA ${Math.round(cat.total_amount)}` : '—';
+          return (
+            <View style={styles.fareCard}>
+              <View style={styles.fareRow}>
+                <Typography style={styles.fareLabel}>Estimated Fare</Typography>
+                <Typography style={styles.fareValue}>
+                  {estimateLoading ? '...' : baseFare}
+                </Typography>
+              </View>
+              {discount > 0 && (
+                <>
+                  <View style={styles.fareDivider} />
+                  <View style={styles.fareRow}>
+                    <Typography style={styles.fareLabel}>Discount</Typography>
+                    <Typography style={[styles.fareValue, styles.discountText]}>
+                      {`- CFA ${Math.round(discount)}`}
+                    </Typography>
+                  </View>
+                </>
+              )}
+              <View style={styles.fareDivider} />
+              <View style={styles.fareRow}>
+                <Typography style={styles.fareTotalLabel}>Total (Cash)</Typography>
+                <Typography style={styles.fareTotalValue}>
+                  {estimateLoading ? '...' : total}
+                </Typography>
+              </View>
+            </View>
+          );
+        })()}
 
         <Button title='Find Driver' style={styles.ctaBtn} onPress={handleFindDriver} />
       </View>
@@ -370,4 +450,5 @@ const styles = StyleSheet.create({
     color: COLORS.APP_PRIMARY,
   },
   ctaBtn: { marginTop: 20 },
+  discountText: { color: '#22a06b' },
 });

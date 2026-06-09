@@ -18,7 +18,7 @@ export const WorkerRequestCard = ({ request, fareLabel, onPress }: WorkerRequest
     <Photo
       source={IMAGES.USER_IMAGE}
       size={AVATAR_SIZE}
-      imageStyle={{ tintColor: COLORS.SECONDARY , borderRadius: 50, borderWidth: 2, borderColor: COLORS.APP_LINE}} // add border radius to the image
+      imageStyle={{ borderRadius: 50, borderWidth: 2, borderColor: COLORS.APP_LINE }} // add border radius to the image
       containerStyle={styles.avatarWrap}
     />
     <View style={styles.infoCol}>

@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { Region } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import { Map } from 'components/common/Map';
 import { Autocomplete, Button, GradientIcon, Icon, Typography, Wrapper } from 'components/index';
-import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight } from 'utils/index';
 import { reverseGeocode, getLocationPermission, type AddressDetails } from 'utils/location';
@@ -13,28 +13,51 @@ import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { logger } from 'utils/logger';
 import { setPickerResult } from 'utils/pickerStore';
+import { useAppSelector } from 'types/reduxTypes';
 
-// ── Saved quick-picks ─────────────────────────────────────────────────────────
+type SavedPlaceItem = {
+  id: string;
+  label: string;
+  address: string;
+  icon: string;
+  lat: number;
+  lng: number;
+};
+
+const LABEL_ICON: Record<string, string> = {
+  home: 'home',
+  work: 'briefcase',
+  partner: 'heart',
+};
 
 const SAVED = [
   {
     id: 'home',
     label: 'Home',
-    address: '67 Murray Street, NY',
+    full_address: '67 Murray Street, NY',
+    street: '67 Murray Street',
+    city: 'New York',
+    state: 'NY',
+    country: 'USA',
+    postal_code: '10001',
     icon: 'home',
-    lat: INITIAL_REGION.latitude + 0.005,
-    lng: INITIAL_REGION.longitude - 0.003,
+    latitude: INITIAL_REGION.latitude + 0.005,
+    longitude: INITIAL_REGION.longitude - 0.003,
   },
   {
     id: 'work',
     label: 'Work',
-    address: '67 Murray Street, NY',
+    full_address: '67 Murray Street, NY',
+    street: '67 Murray Street',
+    city: 'New York',
+    state: 'NY',
+    country: 'USA',
+    postal_code: '10001',
     icon: 'briefcase',
-    lat: INITIAL_REGION.latitude - 0.008,
-    lng: INITIAL_REGION.longitude + 0.006,
+    latitude: INITIAL_REGION.latitude - 0.008,
+    longitude: INITIAL_REGION.longitude + 0.006,
   },
 ];
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export const RideLocationPickerScreen = () => {
@@ -42,6 +65,26 @@ export const RideLocationPickerScreen = () => {
   const navigation = useNavigation();
   const field = route.params?.field ?? 'dropoff';
   const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
+
+  const addressList = ENV_CONSTANTS.IS_ALPHA_PHASE
+    ? SAVED
+    : useAppSelector(state => state.address.addressList);
+  const savedPlaces = useMemo<SavedPlaceItem[]>(() => {
+    const filtered = addressList
+      .filter(a => {
+        const lbl = (a.label ?? '').toLowerCase();
+        return lbl === 'home' || lbl === 'work' || lbl === 'partner';
+      })
+      .map(a => ({
+        id: String(a.id),
+        label: a.label ?? 'Saved',
+        address: a?.street || a?.full_address || '',
+        icon: LABEL_ICON[(a.label ?? '').toLowerCase()] ?? 'map-pin',
+        lat: Number(a.latitude),
+        lng: Number(a.longitude),
+      }));
+    return filtered;
+  }, [addressList]);
   useEffect(() => {
     void getLocationPermission();
   }, []);
@@ -81,7 +124,7 @@ export const RideLocationPickerScreen = () => {
   }, []);
 
   // Called when user taps a saved location
-  const handleSaved = (item: (typeof SAVED)[number]) => {
+  const handleSaved = (item: SavedPlaceItem) => {
     setSelectedSavedId(item.id);
     const addr: AddressDetails = {
       fullAddress: item.address,
@@ -109,13 +152,7 @@ export const RideLocationPickerScreen = () => {
   const title = field === 'pickup' ? 'Set Pickup Location' : 'Set Drop-Off Location';
 
   return (
-    <Wrapper
-      headerTitle={title}
-      showBackButton
-      backIconStyle={styles.backIcon}
-      useScrollView={false}
-      darkMode={false}
-    >
+    <Wrapper headerTitle={title} showBackButton useScrollView={false} darkMode={false}>
       {/* ── Autocomplete (floats over the map) ──────────────────────────── */}
       <View style={styles.autocompleteWrap}>
         <Autocomplete
@@ -174,43 +211,45 @@ export const RideLocationPickerScreen = () => {
         </View>
 
         {/* Saved locations */}
-        <Typography style={styles.savedTitle}>Saved Places</Typography>
-        <View style={styles.savedRow}>
-          {SAVED.map(item => {
-            const isSelected = selectedSavedId === item.id;
-            return (
-              <TouchableOpacity
-                onPress={() => handleSaved(item)}
-                key={item.id}
-                style={[styles.savedItem]}
-                activeOpacity={0.8}
-                disabled={isSelected}
-              >
-                <View
-                  style={[
-                    styles.savedBtn,
-                    {
-                      borderColor: isSelected ? COLORS.SECONDARY : COLORS.BACKGROUND,
-                      borderWidth: isSelected ? 3 : 3,
-                      borderRadius: 15,
-                    },
-                  ]}
+        {savedPlaces?.length > 0 && <Typography style={styles.savedTitle}>Saved Places</Typography>}
+        {savedPlaces?.length > 0 && (
+          <View style={styles.savedRow}>
+            {savedPlaces.map(item => {
+              const isSelected = selectedSavedId === item.id;
+              return (
+                <TouchableOpacity
+                  onPress={() => handleSaved(item)}
+                  key={item.id}
+                  style={[styles.savedItem]}
+                  activeOpacity={0.8}
+                  disabled={isSelected}
                 >
-                  <GradientIcon
-                    componentName={VARIABLES.Feather}
-                    iconName={item.icon}
-                    size={FontSize.Medium}
-                    color={COLORS.WHITE}
-                    containerSize={44}
-                    borderRadius={12}
-                    onPress={() => handleSaved(item)}
-                  />
-                </View>
-                <Typography style={styles.savedLabel}>{item.label}</Typography>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <View
+                    style={[
+                      styles.savedBtn,
+                      {
+                        borderColor: isSelected ? COLORS.SECONDARY : COLORS.BACKGROUND,
+                        borderWidth: isSelected ? 3 : 3,
+                        borderRadius: 15,
+                      },
+                    ]}
+                  >
+                    <GradientIcon
+                      componentName={VARIABLES.Feather}
+                      iconName={item.icon}
+                      size={FontSize.Medium}
+                      color={COLORS.WHITE}
+                      containerSize={44}
+                      borderRadius={12}
+                      onPress={() => handleSaved(item)}
+                    />
+                  </View>
+                  <Typography style={styles.savedLabel}>{item.label}</Typography>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         {/* Confirm CTA */}
         <Button

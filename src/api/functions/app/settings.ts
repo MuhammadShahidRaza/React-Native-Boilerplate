@@ -19,8 +19,8 @@ import { normalizeSniftUser } from 'api/normalizers/snlift';
 import { getContentBySlug } from 'api/functions/snlift/content';
 
 const logout = async (data: { udid: string }) => {
-  const { removeUserDevice } = await import('api/functions/snlift/user');
-  await removeUserDevice({ udid: data.udid }).catch(() => undefined);
+  // const { removeUserDevice } = await import('api/functions/snlift/user');
+  // await removeUserDevice({ udid: data.udid }).catch(() => undefined);
   const response = await handlePostApiRequest({
     url: API_ROUTES.LOGOUT,
     data,

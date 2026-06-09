@@ -239,7 +239,6 @@ const styles = StyleSheet.create({
     height: 80,
     borderColor: COLORS.PRIMARY,
     borderWidth: 1,
-    tintColor: COLORS.SECONDARY,
     width: 80,
   },
   messageContainer: {

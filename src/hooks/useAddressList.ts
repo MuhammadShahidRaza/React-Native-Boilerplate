@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getAddressList } from 'api/functions/app/address';
 import { setAddressList, appendAddressList } from 'store/slices/address';
@@ -39,13 +39,8 @@ export function useAddressList() {
     if (!loadingMore && hasMore) fetchAddresses(currentPage + 1, true);
   }, [loadingMore, hasMore, currentPage, fetchAddresses]);
 
-  // Fetch once on mount. If Redux is already populated (revisiting screen), skip the call.
-  const addressListRef = useRef(addressList);
+  // Always fetch fresh on mount so stale Redux data gets replaced.
   useEffect(() => {
-    if (addressListRef.current.length > 0) {
-      setLoadingAddresses(false);
-      return;
-    }
     fetchAddresses(1, false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -335,17 +335,17 @@ export const editProfileValidationSchema = createObjectShape({
   //   minLength: 3,
   //   maxLength: 25,
   // }),
-  phone_number: phoneNumberSchema,
-  country_code: createStringValidationSchema({
-    name: 'Country code',
-    minLength: 2,
-    maxLength: 3,
-  }),
-  calling_code: createStringValidationSchema({
-    name: 'Calling code',
-    minLength: 1,
-    maxLength: 5,
-  }),
+  // phone_number: phoneNumberSchema,
+  // country_code: createStringValidationSchema({
+  //   name: 'Country code',
+  //   minLength: 2,
+  //   maxLength: 3,
+  // }),
+  // calling_code: createStringValidationSchema({
+  //   name: 'Calling code',
+  //   minLength: 1,
+  //   maxLength: 5,
+  // }),
   email: emailSchema,
 });
 

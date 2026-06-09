@@ -1,5 +1,5 @@
 import { API_ROUTES } from 'api/routes';
-import { handleFormDataPatchRequest, handleGetApiRequest, handlePostApiRequest } from '.';
+import { handleFormDataPatchRequest, handleGetApiRequest, handlePatchApiRequest, handlePostApiRequest } from '.';
 import store from 'store/store';
 import { MessageResponse, User } from 'types/responseTypes';
 import { setUserDetails } from 'store/slices/user';
@@ -151,4 +151,13 @@ const getUserById = async (userId: number): Promise<User | null> => {
   }
 };
 
-export { getUserDetails, updateUserDetails, updatePassword, getUserById };
+/** Silent location-only PATCH — no toast, no navigation, no Redux update. */
+const updateUserLocation = async (latitude: number, longitude: number): Promise<void> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) return;
+  await handlePatchApiRequest<{ user: User }, { latitude: string; longitude: string }>({
+    url: API_ROUTES.UPDATE_USER_LOCATION,
+    data: { latitude: String(latitude), longitude: String(longitude) },
+  });
+};
+
+export { getUserDetails, updateUserDetails, updatePassword, getUserById, updateUserLocation };

@@ -66,13 +66,62 @@ export const normalizePhoneNumber = (
 
 /** National number for phone input display (Profile, Edit Profile, etc.). */
 export function getDisplayPhoneNumber(
-  user: { phone_number?: string | null; phone?: string | null; calling_code?: string | null } | null | undefined,
+  user:
+    | { phone_number?: string | null; phone?: string | null; calling_code?: string | null }
+    | null
+    | undefined,
 ) {
   const raw = user?.phone_number ?? user?.phone ?? '';
   if (!raw) return '';
   const withPlus = raw.startsWith('+') ? raw : `${user?.calling_code ?? '+1'}${raw}`;
   const parsed = splitPhoneNumberWithCode(withPlus);
   return parsed?.number || raw.replace(/\D/g, '');
+}
+
+/** Unicode flag emoji from ISO 3166-1 alpha-2 code (e.g. 'US' → '🇺🇸'). */
+export function countryFlagEmoji(isoCode: string): string {
+  return isoCode.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt(0)));
+}
+
+/**
+ * Parses user phone fields into display-ready parts.
+ * Derives ISO country code + calling code from E.164 when `country_code` is absent.
+ */
+export function getPhoneInputData(
+  user:
+    | {
+        phone_number?: string | null;
+        phone?: string | null;
+        calling_code?: string | null;
+        country_code?: string | null;
+      }
+    | null
+    | undefined,
+): { nationalNumber: string; isoCountryCode: string; callingCode: string } {
+  const raw = user?.phone_number ?? user?.phone ?? '';
+  const withPlus = raw ? (raw.startsWith('+') ? raw : `${user?.calling_code ?? '+1'}${raw}`) : '';
+
+  try {
+    if (withPlus) {
+      const parsed = parsePhoneNumber(withPlus);
+      if (parsed) {
+        return {
+          nationalNumber: parsed.nationalNumber ?? raw.replace(/\D/g, ''),
+          isoCountryCode: (parsed.country as string) ?? user?.country_code ?? 'US',
+          callingCode: `+${parsed.countryCallingCode ?? '1'}`,
+        };
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  const fallbackIso = user?.country_code ?? 'US';
+  return {
+    nationalNumber: raw.replace(/\D/g, ''),
+    isoCountryCode: fallbackIso,
+    callingCode: user?.calling_code ?? '',
+  };
 }
 
 export function splitPhoneNumberWithCode(phoneNumber: string | null | undefined) {

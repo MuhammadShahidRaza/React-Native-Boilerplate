@@ -1,8 +1,6 @@
 import { API_ROUTES } from 'api/routes';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { SCREENS } from 'constants/routes';
-import { COMMON_TEXT } from 'constants/screens';
-import i18n from 'i18n/index';
 import { navigate } from 'navigation/Navigators';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
 import { resetWorkerAvailability } from 'store/slices/worker';
@@ -19,7 +17,8 @@ import { resetToAuthEntry } from 'config/authFlow';
 import { normalizeSniftUser } from 'api/normalizers/snlift';
 import { registerUserDevice, type RegisterDevicePayload } from 'api/functions/snlift/user';
 import { normalizePhoneNumber } from 'utils/helpers/functions';
-
+import { handleApiError, parseApiResponse } from './app';
+import { logger } from 'utils/logger';
 /** E.164-ish phone for `resend-otp` / `verify-otp` (API expects `phone`, not email). */
 function phoneForOtpApi(data: {
   phone?: string;
@@ -38,11 +37,13 @@ const handleApiRequest = async <R extends object, A extends object>({
   data,
   wantToken,
   showLoader,
+  showError = true,
 }: {
   url: string;
   data: A;
   wantToken?: boolean;
   showLoader?: boolean;
+  showError?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await post({
@@ -51,18 +52,9 @@ const handleApiRequest = async <R extends object, A extends object>({
       includeToken: wantToken ? true : false,
       showLoader,
     });
-    return (
-      response?.data ?? {
-        message: response?.messages?.[0],
-        code: response?.code,
-      }
-    );
+    return parseApiResponse<R>(response);
   } catch (error) {
-    const errorMessage =
-      (error instanceof Error && error.message) || i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);
-    showToast({
-      message: errorMessage,
-    });
+    if (showError) handleApiError(error);
   }
   return;
 };
@@ -71,11 +63,13 @@ const handleApiRequestFormData = async <R extends object, A extends object>({
   data,
   wantToken,
   showLoader,
+  showError = true,
 }: {
   url: string;
   data: A;
   wantToken?: boolean;
   showLoader?: boolean;
+  showError?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await postWithSingleFile({
@@ -84,18 +78,9 @@ const handleApiRequestFormData = async <R extends object, A extends object>({
       includeToken: wantToken ? true : false,
       showLoader,
     });
-    return (
-      response?.data ?? {
-        message: response?.messages?.[0],
-        code: response?.code,
-      }
-    );
+    return parseApiResponse<R>(response);
   } catch (error) {
-    const errorMessage =
-      (error instanceof Error && error.message) || i18n.t(COMMON_TEXT.SOMETHING_WENT_WRONG);
-    showToast({
-      message: errorMessage,
-    });
+    if (showError) handleApiError(error);
   }
   return;
 };
@@ -336,7 +321,11 @@ const resendSignupOtp = async <
   }
 };
 
-const verifyOtpCode = async <R extends MessageResponse, A extends VerifyOtp>({ data }: { data: A }) => {
+const verifyOtpCode = async <R extends MessageResponse, A extends VerifyOtp>({
+  data,
+}: {
+  data: A;
+}) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     navigate(SCREENS.RESET_PASSWORD, { data });
     return;
@@ -375,14 +364,6 @@ const signUpUser = async <R extends User, A extends Login_SignUp>({ data }: { da
     const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
     if (normalized?.token) {
       await setKeychainItem(VARIABLES.USER_TOKEN, normalized.token);
-    }
-    showToast({
-      message: 'Account created successfully. Please verify your phone.',
-      isError: false,
-    });
-    const phone = phoneForOtpApi(data);
-    if (phone) {
-      await resendSignupOtp({ data });
     }
     navigate(SCREENS.VERIFICATION, {
       phone_number: data?.phone_number ?? data?.phone,

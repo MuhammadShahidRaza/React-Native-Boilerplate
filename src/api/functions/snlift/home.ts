@@ -121,11 +121,23 @@ export function homePromosForDisplay(promos: SnliftHomePromo[]): HomePromoDispla
   return promos.map(p => ({ ...p, desc: formatPromoDescription(p) }));
 }
 
-export async function getHomeData(): Promise<SnliftHomeData | null> {
+// Module-level cache — persists for the app session so navigating back doesn't re-fetch.
+let _homeDataCache: SnliftHomeData | null = null;
+let _homeDataFetchedAt = 0;
+const HOME_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
+
+export async function getHomeData(forceRefresh = false): Promise<SnliftHomeData | null> {
+  const now = Date.now();
+  if (!forceRefresh && _homeDataCache && now - _homeDataFetchedAt < HOME_CACHE_TTL_MS) {
+    return _homeDataCache;
+  }
   const raw = await handleGetApiRequest<SnliftHomeData>({
     url: API_ROUTES.HOME,
     addToPending: true,
   });
-  if (!raw) return null;
-  return normalizeHomeData(raw);
+  if (!raw) return _homeDataCache;
+  const data = normalizeHomeData(raw);
+  _homeDataCache = data;
+  _homeDataFetchedAt = now;
+  return data;
 }

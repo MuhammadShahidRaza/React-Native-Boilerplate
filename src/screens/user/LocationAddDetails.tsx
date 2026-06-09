@@ -62,9 +62,15 @@ export const LocationAddDetails = () => {
         [baseStreet, suburb, floor].filter(Boolean).join(', ') || baseStreet || suburb || 'Address';
       const labelTitle =
         LABELS.find(l => l.id === selectedLabel)?.label ?? selectedLabel ?? 'Home';
+      const baseFullAddress =
+        address.fullAddress ||
+        [address.street, address.city, address.state, address.country].filter(Boolean).join(', ');
+      const extras = [floor, suburb].filter(Boolean).join(', ');
+      const fullAddress = extras ? `${extras}, ${baseFullAddress}` : baseFullAddress;
       const payload = {
         title: labelTitle,
-        street,
+        // street,
+        street: fullAddress,
         city: address.city || '',
         state: address.state || '',
         postal_code: address.postalCode || '',

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import {
+  Button,
   FilterChipRow,
   FlatListComponent,
   FOOD_CATEGORIES,
@@ -19,6 +20,10 @@ import { SCREENS } from 'constants/routes';
 import { COLORS } from 'utils/index';
 import { useFavoriteRestaurants } from 'hooks/useFavoriteRestaurants';
 import { useRestaurantCatalog } from 'hooks/useRestaurantCatalog';
+import { getCurrentLocation } from 'utils/location';
+import { updateUserLocation } from 'api/functions/app/user';
+import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import { setUserDetails } from 'store/slices/user';
 
 type RestaurantBrowseListProps = {
   /** When true, only restaurants the user has hearted are shown. */
@@ -28,8 +33,22 @@ type RestaurantBrowseListProps = {
 export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowseListProps) => {
   const [category, setCategory] = useState<FoodCategory>('All');
   const [query, setQuery] = useState('');
-  const { restaurants } = useRestaurantCatalog();
+  const [locating, setLocating] = useState(false);
+  const { restaurants, locationMissing } = useRestaurantCatalog();
   const { likedIds, toggleLike } = useFavoriteRestaurants();
+  const dispatch = useAppDispatch();
+  const userDetails = useAppSelector(state => state.user.userDetails);
+
+  const handleAllowLocation = async () => {
+    setLocating(true);
+    const pos = await getCurrentLocation();
+    if (pos && userDetails) {
+      const { latitude, longitude } = pos.coords;
+      updateUserLocation(latitude, longitude);
+      dispatch(setUserDetails({ ...userDetails, latitude, longitude }));
+    }
+    setLocating(false);
+  };
 
   const sourceList = useMemo(() => {
     if (!favoritesOnly) return restaurants;
@@ -78,6 +97,29 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
     ),
     [favoritesOnly],
   );
+
+  if (locationMissing) {
+    return (
+      <View style={styles.locationGate}>
+        <Icon
+          componentName={VARIABLES.MaterialCommunityIcons}
+          iconName='map-marker-off'
+          size={52}
+          color={COLORS.APP_TEXT_MUTED}
+        />
+        <Typography style={styles.locationGateTitle}>Location Required</Typography>
+        <Typography style={styles.locationGateSub}>
+          We need your location to show nearby restaurants
+        </Typography>
+        <Button
+          title='Allow Location'
+          onPress={handleAllowLocation}
+          loading={locating}
+          style={styles.locationGateBtn}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -155,6 +197,31 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingBottom: 32,
+  },
+  locationGate: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 10,
+  },
+  locationGateTitle: {
+    fontSize: FontSize.Large,
+    fontWeight: FontWeight.Bold,
+    color: COLORS.APP_TEXT,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  locationGateSub: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  locationGateBtn: {
+    marginTop: 8,
+    paddingHorizontal: 32,
+    alignSelf: 'center',
   },
   empty: {
     alignItems: 'center',
