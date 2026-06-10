@@ -51,6 +51,7 @@ export interface SnliftBooking {
   price?: number | string;
   commission_amount?: number | string;
   status?: SnliftBookingStatus;
+  created_at?: string | null;
   cancellation_reason?: string | null;
   completed_at?: string | null;
   items?: { menu_item_id?: number; quantity?: number }[];

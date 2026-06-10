@@ -150,9 +150,22 @@ export async function listBookings(
   });
 }
 
-export async function getBookingById(id: number | string, role?: BookingRole) {
+type BookingRequestOptions = {
+  showLoader?: boolean;
+  showError?: boolean;
+  addToPending?: boolean;
+};
+
+export async function getBookingById(
+  id: number | string,
+  role?: BookingRole,
+  options?: BookingRequestOptions,
+) {
   return handleGetApiRequest<{ booking: SnliftBooking } | SnliftBooking>({
     url: bookingUrls(role).byId(id),
+    showLoader: options?.showLoader ?? true,
+    showError: options?.showError ?? true,
+    addToPending: options?.addToPending ?? false,
   });
 }
 
@@ -170,11 +183,18 @@ export type SnliftBookingTracking = {
   poll_after_seconds: number;
 };
 
-export async function getBookingTracking(id: number | string, role?: BookingRole) {
+export async function getBookingTracking(
+  id: number | string,
+  role?: BookingRole,
+  options?: BookingRequestOptions,
+) {
   const raw = await handleGetApiRequest<
     { tracking: SnliftBookingTracking } | SnliftBookingTracking
   >({
     url: bookingUrls(role).tracking(id),
+    showLoader: options?.showLoader ?? true,
+    showError: options?.showError ?? true,
+    addToPending: options?.addToPending ?? false,
   });
   if (!raw) return null;
   if ('tracking' in raw && raw.tracking) return raw.tracking;

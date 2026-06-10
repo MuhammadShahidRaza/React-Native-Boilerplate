@@ -1,5 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View, Pressable, ActivityIndicator } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Pressable,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -34,12 +41,34 @@ import type { RootState } from 'types/reduxTypes';
 import { getCurrentLocation } from 'utils/location';
 import { updateUserLocation } from 'api/functions/app/user';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
+import { useCurrentLocation } from 'hooks/useCurrentLocation';
+import { useAddressList } from 'hooks/useAddressList';
+import type { Address, User } from 'types/responseTypes';
 
 const IS_SENGO = isSengoBrand();
+
+const formatSavedAddress = (addr: Address): string =>
+  addr.full_address?.trim() ||
+  [addr.city, addr.state, addr.country].filter(Boolean).join(', ') ||
+  addr.street?.trim() ||
+  '';
+
+const formatProfileLocation = (profile: User | null | undefined): string => {
+  const addr = profile?.address;
+  if (typeof addr === 'string' && addr.trim()) return addr.trim();
+  if (addr && typeof addr === 'object') {
+    const fromObject =
+      addr.full_address?.trim() || [addr.city, addr.state, addr.country].filter(Boolean).join(', ');
+    if (fromObject) return fromObject;
+  }
+  return [profile?.city, profile?.state, profile?.country].filter(Boolean).join(', ');
+};
 
 export const Home = () => {
   const user = useSelector((state: RootState) => state.user.userDetails);
   const locationUpdatedRef = useRef(false);
+  const { addressList } = useAddressList();
+  const { currentAddress, loading: locationLoading, loadCurrentLocation } = useCurrentLocation();
 
   // Update user location once on mount — REST API + Firestore
   useEffect(() => {
@@ -54,6 +83,15 @@ export const Home = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  useEffect(() => {
+    const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
+    const savedLocation = defaultAddr ? formatSavedAddress(defaultAddr) : '';
+    const profileLocation = formatProfileLocation(user);
+    if (!savedLocation && !profileLocation && !currentAddress?.fullAddress) {
+      loadCurrentLocation();
+    }
+  }, [addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
 
   const applyHomeData = useCallback((data: SnliftHomeData) => {
     setBanners(data.banners);
@@ -82,7 +120,28 @@ export const Home = () => {
   }, [loadHome]);
 
   const primaryBanner = banners[0];
-  const displayName = user?.full_name?.split(' ')?.[0] || user?.first_name || 'there';
+
+  const displayName = useMemo(() => {
+    const fullName = user?.full_name?.trim();
+    if (fullName) return fullName.split(/\s+/)[0];
+    const firstName = user?.first_name?.trim();
+    if (firstName) return firstName;
+    return 'Guest';
+  }, [user?.full_name, user?.first_name]);
+
+  const displayLocation = useMemo(() => {
+    const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
+    const fromAddressList = defaultAddr ? formatSavedAddress(defaultAddr) : '';
+    const fromProfile = formatProfileLocation(user);
+    const fromGps = currentAddress?.fullAddress?.trim() ?? '';
+
+    return (
+      fromAddressList ||
+      fromProfile ||
+      fromGps ||
+      (locationLoading ? 'Locating...' : 'Location unavailable')
+    );
+  }, [addressList, user, currentAddress?.fullAddress, locationLoading]);
 
   return (
     <Wrapper
@@ -107,12 +166,15 @@ export const Home = () => {
                 size={FontSize.ExtraLarge}
                 color={COLORS.WHITE}
               />
-              <View style={{ marginLeft: 10 }}>
+              <TouchableOpacity
+                onPress={() => navigate(SCREENS.LOCATION)}
+                style={{ marginLeft: 10 }}
+              >
                 <Typography style={styles.locLabel}>Location</Typography>
-                <Typography style={styles.locText} numberOfLines={1}>
-                  New York, United States
+                <Typography style={styles.locText} numberOfLines={1} translate={false}>
+                  {displayLocation}
                 </Typography>
-              </View>
+              </TouchableOpacity>
             </RowComponent>
             <GradientIcon
               componentName={VARIABLES.Feather}
@@ -207,7 +269,8 @@ export const Home = () => {
             {loading && hotOffers?.length === 0 ? (
               <ActivityIndicator color={COLORS.APP_PRIMARY} />
             ) : (
-              hotOffers?.length > 0 && hotOffers?.map(offer => <HotOfferCard key={offer.id} offer={offer} />)
+              hotOffers?.length > 0 &&
+              hotOffers?.map(offer => <HotOfferCard key={offer.id} offer={offer} />)
             )}
           </View>
         ) : (
@@ -337,6 +400,7 @@ const styles = StyleSheet.create({
   locText: {
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
+    width: '60%',
     fontWeight: FontWeight.SemiBold,
   },
   greet: {

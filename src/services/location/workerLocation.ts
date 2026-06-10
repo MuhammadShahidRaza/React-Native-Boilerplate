@@ -1,7 +1,7 @@
 import { getFirestore, doc, setDoc, serverTimestamp } from '@react-native-firebase/firestore';
 import { logger } from 'utils/logger';
 
-const WORKERS_COLLECTION = 'workers';
+const WORKERS_COLLECTION = __DEV__ ? `workers_dev` : 'workers';
 
 /**
  * Write / merge worker location into Firestore at workers/{userId}.

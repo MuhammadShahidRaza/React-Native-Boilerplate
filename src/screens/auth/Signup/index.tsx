@@ -51,8 +51,7 @@ export const SignUp = () => {
 
   const initialValues: SignUpFormValues = {
     // Use a fresh email/phone in dev — user@mailinator.com is already registered on staging.
-    email: __DEV__ ? 'user@mailinator.com' : '',
-    password: __DEV__ ? 'Passward123!' : '',
+    email: __DEV__ ? 'shahid@mailinator.com' : '',
     full_name: __DEV__ ? 'John Doe' : '',
     user_type: role,
     profile_image: null,
@@ -61,7 +60,9 @@ export const SignUp = () => {
     phone_number: __DEV__ ? '3242445623' : '',
     country_code: __DEV__ ? 'PK' : 'US',
     calling_code: __DEV__ ? '+92' : '+234',
+    password: __DEV__ ? 'Passward123!' : '',
     confirmPassword: __DEV__ ? 'Passward123!' : '',
+
     showPassword: false,
     agreeToTerms: false,
     showConfirmPassword: false,

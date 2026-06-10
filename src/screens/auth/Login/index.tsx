@@ -41,10 +41,10 @@ export const Login = () => {
     // email: __DEV__ ? 'shahid@mailinator.com' : '',
     // password: __DEV__ ? 'Passward123!' : '',
     email: '',
-    password: '',
-    phone_number: '',
-    country_code: '',
-    calling_code: '',
+    phone_number: __DEV__ ? '3242445623' : '',
+    country_code: __DEV__ ? 'PK' : 'US',
+    calling_code: __DEV__ ? '+92' : '+234',
+    password: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
     rememberMe: false,
     user_type: role,
@@ -53,7 +53,7 @@ export const Login = () => {
   const handleSubmit = async (values: LoginFormValues) => {
     const deviceInfo = await deviceDetails();
     const data: Login_SignUp = {
-      email: values?.email,
+      // email: values?.email,
       password: values?.password,
       user_type: values?.user_type,
       ...buildPhonePayload(values),

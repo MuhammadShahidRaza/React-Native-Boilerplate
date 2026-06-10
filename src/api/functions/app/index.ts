@@ -43,6 +43,7 @@ export const handleApiError = (error: unknown): void => {
 const handleGetApiRequest = async <R extends object>({
   url,
   params,
+  showLoader = true,
   config = {},
   addToPending = false,
   showError = true,
@@ -52,10 +53,12 @@ const handleGetApiRequest = async <R extends object>({
   config?: Record<string, unknown>;
   addToPending?: boolean;
   showError?: boolean;
+  showLoader?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await get({
       url,
+      showLoader: showLoader,
       config: { ...config, ...(params ? { params } : {}) },
       addToPending: addToPending,
     });

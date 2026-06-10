@@ -150,6 +150,7 @@ export const API_ROUTES = {
   CONVERSATION_MESSAGES: (id: string | number) => `message/${id}`,
 
   // SNLift unified booking API (Postman collection)
+  GET_APP_SETTINGS: 'settings',
   EXISTING_USER_CHECK: 'existing-user-check',
   CONTENT_ALL: 'content',
   CONTENT_BY_SLUG: (slug: string) => `content/${slug}`,

@@ -13,12 +13,14 @@ export type SnliftHomeBanner = {
 export type SnliftHomePromo = {
   id: number;
   code: string;
+  description?: string;
   discount_type: 'percent' | 'fixed' | string;
   discount_value: number;
   max_discount?: number | null;
   min_order_amount?: number;
   starts_at?: string;
   ends_at?: string;
+  status?: number;
 };
 
 export type SnliftHomeHotOffer = {
@@ -50,38 +52,64 @@ function formatPromoDescription(promo: SnliftHomePromo): string {
   return `CFA ${value} off.`;
 }
 
+function normalizeBannerItem(
+  item: Record<string, unknown>,
+  index: number,
+): SnliftHomeBanner | null {
+  const status = Number(item.status);
+  if (item.status != null && status === 0) return null;
+
+  return {
+    id: Number(item.id) || index + 1,
+    title: pickString(item, ['title'], 'Offer'),
+    sub_title: pickString(item, ['sub_title', 'subtitle', 'description'], ''),
+    image: pickString(item, ['image', 'media', 'banner'], ''),
+    status: status || 1,
+  };
+}
+
+function normalizeBanners(bannersRaw: unknown): SnliftHomeBanner[] {
+  if (Array.isArray(bannersRaw)) {
+    return bannersRaw
+      .map((item, index) => normalizeBannerItem((item ?? {}) as Record<string, unknown>, index))
+      .filter((banner): banner is SnliftHomeBanner => banner != null);
+  }
+  if (bannersRaw && typeof bannersRaw === 'object') {
+    const banner = normalizeBannerItem(bannersRaw as Record<string, unknown>, 0);
+    return banner ? [banner] : [];
+  }
+  return [];
+}
+
 export function normalizeHomeData(raw: unknown): SnliftHomeData {
   const root =
     raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
-  const bannersRaw = Array.isArray(root.banners) ? root.banners : [];
   const promosRaw = Array.isArray(root.promo_codes) ? root.promo_codes : [];
   const hotOffersRaw = Array.isArray(root.hot_offers) ? root.hot_offers : [];
 
-  const banners = bannersRaw.map((item, index) => {
-    const b = (item ?? {}) as Record<string, unknown>;
-    return {
-      id: Number(b.id) || index + 1,
-      title: pickString(b, ['title'], 'Offer'),
-      sub_title: pickString(b, ['sub_title', 'subtitle', 'description'], ''),
-      image: pickString(b, ['image', 'media', 'banner'], ''),
-      status: Number(b.status) || 1,
-    };
-  });
+  const banners = normalizeBanners(root.banners);
 
-  const promo_codes = promosRaw.map((item, index) => {
-    const p = (item ?? {}) as Record<string, unknown>;
-    const promo: SnliftHomePromo = {
-      id: Number(p.id) || index + 1,
-      code: pickString(p, ['code'], ''),
-      discount_type: pickString(p, ['discount_type'], 'percent'),
-      discount_value: Number(p.discount_value) || 0,
-      max_discount: p.max_discount != null ? Number(p.max_discount) : null,
-      min_order_amount: Number(p.min_order_amount) || 0,
-      starts_at: pickString(p, ['starts_at']),
-      ends_at: pickString(p, ['ends_at']),
-    };
-    return promo;
-  });
+  const promo_codes = promosRaw
+    .map((item, index) => {
+      const p = (item ?? {}) as Record<string, unknown>;
+      const status = Number(p.status);
+      if (p.status != null && status === 0) return null;
+
+      const promo: SnliftHomePromo = {
+        id: Number(p.id) || index + 1,
+        code: pickString(p, ['code'], ''),
+        description: pickString(p, ['description', 'desc']),
+        discount_type: pickString(p, ['discount_type'], 'percent'),
+        discount_value: Number(p.discount_value) || 0,
+        max_discount: p.max_discount != null ? Number(p.max_discount) : null,
+        min_order_amount: Number(p.min_order_amount) || 0,
+        starts_at: pickString(p, ['starts_at']),
+        ends_at: pickString(p, ['ends_at']),
+        status: status || 1,
+      };
+      return promo;
+    })
+    .filter((promo): promo is SnliftHomePromo => promo != null);
 
   const hot_offers = hotOffersRaw.map((item, index) => {
     const o = (item ?? {}) as Record<string, unknown>;
@@ -108,7 +136,10 @@ export function homeHotOffersForDisplay(
         p.discount_type === 'percent'
           ? `Up to ${Math.round(p.discount_value)}% OFF`
           : `CFA ${p.discount_value} OFF`,
-      sub_title: formatPromoDescription(p).replace(/\.$/, '') || 'Package Discount',
+      sub_title:
+        p.description?.trim() ||
+        formatPromoDescription(p).replace(/\.$/, '') ||
+        'Package Discount',
       image: '',
     }));
   }
@@ -118,7 +149,10 @@ export function homeHotOffersForDisplay(
 export type HomePromoDisplay = SnliftHomePromo & { desc: string };
 
 export function homePromosForDisplay(promos: SnliftHomePromo[]): HomePromoDisplay[] {
-  return promos.map(p => ({ ...p, desc: formatPromoDescription(p) }));
+  return promos.map(p => ({
+    ...p,
+    desc: p.description?.trim() || formatPromoDescription(p),
+  }));
 }
 
 // Module-level cache — persists for the app session so navigating back doesn't re-fetch.

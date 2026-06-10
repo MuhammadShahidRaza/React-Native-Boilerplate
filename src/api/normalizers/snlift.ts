@@ -315,6 +315,7 @@ export function normalizeSniftBooking(raw: SnliftBooking & Record<string, unknow
     delivery_address:
       pickString(raw, ['delivery_address', 'dropoff_address', 'address']) || raw.delivery_address,
     status: pickString(raw, ['status', 'booking_status', 'state']) || raw.status,
+    created_at: pickString(raw, ['created_at', 'createdAt']) || raw.created_at,
     customer: {
       ...raw.customer,
       full_name: pickString(customerRaw, ['full_name', 'name', 'title']),
