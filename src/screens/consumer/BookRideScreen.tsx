@@ -16,7 +16,6 @@ import { getAndClearPickerResult } from 'utils/pickerStore';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
- 
 export const BookRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.BOOK_RIDE>>();
 
@@ -65,7 +64,6 @@ export const BookRideScreen = () => {
   return (
     <Wrapper
       headerTitle='Book a Ride'
-       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -182,7 +180,7 @@ export const BookRideScreen = () => {
           </View>
         </View>
 
-        <Button title="Let's Go" style={styles.ctaBtn} onPress={handleLetsGo} disabled={!dropoff} />
+        <Button title="Let's Go"   style={styles.ctaBtn} onPress={handleLetsGo} disabled={!dropoff} />
       </View>
     </Wrapper>
   );

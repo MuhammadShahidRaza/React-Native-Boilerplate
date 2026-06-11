@@ -9,6 +9,8 @@ import type { SnliftBooking, SnliftBookingStatus } from 'types/snliftApi';
 
 export type ConsumerActivityItem = {
   id: string;
+  bookingType: SnliftBooking['booking_type'];
+  rawStatus: string;
   serviceLabel: 'Ride' | 'Food' | 'Parcel';
   isoDate: string;
   price: string;
@@ -66,6 +68,10 @@ function formatDate(d: string | null | undefined): string {
   return dt.toLocaleDateString('en-GB').replace(/\//g, '-');
 }
 
+export function getBookingStatusLabel(status: SnliftBookingStatus | undefined): string {
+  return statusLabel(status);
+}
+
 export function mapBookingToActivityItem(booking: SnliftBooking): ConsumerActivityItem {
   const b = normalizeSniftBooking(booking as SnliftBooking & Record<string, unknown>);
   const serviceLabel =
@@ -74,8 +80,10 @@ export function mapBookingToActivityItem(booking: SnliftBooking): ConsumerActivi
   const dropAddr = b.dropoff_address ?? b.delivery_address ?? 'Drop-off';
   return {
     id: String(b.id),
+    bookingType: b.booking_type ?? 'ride',
+    rawStatus: (b.status ?? 'pending').toLowerCase(),
     serviceLabel,
-    isoDate: b.completed_at ?? new Date().toISOString(),
+    isoDate: b.created_at ?? b.completed_at ?? new Date().toISOString(),
     price: parseAmount(b.total_amount ?? b.estimated_amount ?? b.fare),
     status: statusLabel(b.status),
     pickupTitle: serviceLabel === 'Food' ? (b.restaurant?.name ?? 'Restaurant') : 'Pickup',

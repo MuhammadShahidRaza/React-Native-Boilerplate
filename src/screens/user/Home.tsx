@@ -10,6 +10,7 @@ import {
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
+import { useIsFocused } from '@react-navigation/native';
 import {
   Typography,
   Photo,
@@ -42,7 +43,7 @@ import { getCurrentLocation } from 'utils/location';
 import { updateUserLocation } from 'api/functions/app/user';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
-import { useAddressList } from 'hooks/useAddressList';
+import { getAppSettings } from 'api/functions/snlift/settings';
 import type { Address, User } from 'types/responseTypes';
 
 const IS_SENGO = isSengoBrand();
@@ -65,14 +66,15 @@ const formatProfileLocation = (profile: User | null | undefined): string => {
 };
 
 export const Home = () => {
+  const isFocused = useIsFocused();
   const user = useSelector((state: RootState) => state.user.userDetails);
+  const addressList = useSelector((state: RootState) => state.address.addressList);
   const locationUpdatedRef = useRef(false);
-  const { addressList } = useAddressList();
   const { currentAddress, loading: locationLoading, loadCurrentLocation } = useCurrentLocation();
 
-  // Update user location once on mount — REST API + Firestore
+  // Update user location once when Home tab is visible — REST API + Firestore
   useEffect(() => {
-    if (locationUpdatedRef.current || !user?.id) return;
+    if (!isFocused || locationUpdatedRef.current || !user?.id) return;
     locationUpdatedRef.current = true;
     (async () => {
       const pos = await getCurrentLocation();
@@ -82,16 +84,22 @@ export const Home = () => {
       updateWorkerFirestoreLocation(user.id, latitude, longitude, 'user');
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [isFocused, user?.id]);
 
   useEffect(() => {
+    if (!isFocused) return;
+    getAppSettings();
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (!isFocused) return;
     const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
     const savedLocation = defaultAddr ? formatSavedAddress(defaultAddr) : '';
     const profileLocation = formatProfileLocation(user);
     if (!savedLocation && !profileLocation && !currentAddress?.fullAddress) {
       loadCurrentLocation();
     }
-  }, [addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
+  }, [isFocused, addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
 
   const applyHomeData = useCallback((data: SnliftHomeData) => {
     setBanners(data.banners);
@@ -116,8 +124,9 @@ export const Home = () => {
   }, [applyHomeData]);
 
   useEffect(() => {
+    if (!isFocused) return;
     loadHome();
-  }, [loadHome]);
+  }, [isFocused, loadHome]);
 
   const primaryBanner = banners[0];
 

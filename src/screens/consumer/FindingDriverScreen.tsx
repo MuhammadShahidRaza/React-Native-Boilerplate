@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, Animated } from 'react-native';
 import { Marker } from 'react-native-maps';
 import type MapView from 'react-native-maps';
@@ -12,26 +12,36 @@ import {
   Button,
   SvgComponent,
   AppGradient,
+  WorkerRequestTimer,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
-import { onBack, replace } from 'navigation/index';
-import { cancelSniftBooking } from 'utils/snliftBookingActions';
+import { navigate, onBack, replace } from 'navigation/index';
+import { cancelSniftBooking, deleteSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
+import { JobTimerExpiredModal } from './JobTimerExpiredModal';
 import { SVG } from 'constants/assets/svg';
+import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
+import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 
- 
 export const FindingDriverScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.FINDING_DRIVER>>();
   const [cancelVisible, setCancelVisible] = useState(false);
+  const [expiredVisible, setExpiredVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const mapRef = useRef<MapView>(null);
-
+  const timerHandledRef = useRef(false);
   const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
+  const createdAt = useMemo(
+    () => route.params?.createdAt ?? new Date().toISOString(),
+    [route.params?.createdAt],
+  );
+  const timerDurationSeconds = route.params?.timerDurationSeconds;
+  const { expiresAt, ready } = useJobDisplayTimer(createdAt, timerDurationSeconds);
 
   const pickupCoord = useMemo(
     () => ({
@@ -73,27 +83,50 @@ export const FindingDriverScreen = () => {
       ]),
     );
     pulse.start();
-    const timer = setTimeout(() => {
-      pulse.stop();
-      replace(SCREENS.DRIVER_FOUND, {
-        pickupLat: pickupCoord.latitude,
-        pickupLng: pickupCoord.longitude,
-        dropoffLat: dropoffCoord.latitude,
-        dropoffLng: dropoffCoord.longitude,
-        bookingId,
-      });
-    }, 3000);
-    return () => {
-      pulse.stop();
-      clearTimeout(timer);
-    };
+    return () => pulse.stop();
   }, [pulseAnim, pulseOpacity]);
+
+  const goToDriverFound = useCallback(() => {
+    replace(SCREENS.DRIVER_FOUND, {
+      pickupLat: pickupCoord.latitude,
+      pickupLng: pickupCoord.longitude,
+      dropoffLat: dropoffCoord.latitude,
+      dropoffLng: dropoffCoord.longitude,
+      bookingId,
+    });
+  }, [pickupCoord, dropoffCoord, bookingId]);
+
+  useBookingAcceptPoll(bookingId, goToDriverFound);
+
+  const handleTimerExpire = () => {
+    if (timerHandledRef.current) return;
+    timerHandledRef.current = true;
+    setExpiredVisible(true);
+  };
+
+  const handleSearchAgain = async () => {
+    setExpiredVisible(false);
+    const ok = await deleteSniftBooking(bookingId);
+    if (ok) {
+      // await cancelSniftBooking(bookingId, 'Driver search timeout — searching again');
+      navigate(SCREENS.CHOOSE_RIDE, {
+        pickupAddress: route.params?.pickupAddress,
+        dropoffAddress: route.params?.dropoffAddress,
+        pickupLat,
+        pickupLng,
+        dropoffLat,
+        dropoffLng,
+      });
+    }
+  };
+
+  const timerSubtitle =
+    ready && expiresAt ? 'Time remaining is shown above' : 'Please wait while we match you';
 
   return (
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-       
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -140,6 +173,15 @@ export const FindingDriverScreen = () => {
       </View>
 
       <View style={styles.center}>
+        {ready && expiresAt ? (
+          <View style={styles.timerWrap}>
+            <WorkerRequestTimer
+              expiresAt={expiresAt}
+              onExpire={handleTimerExpire}
+              active={!expiredVisible}
+            />
+          </View>
+        ) : null}
         <AppGradient
           variant='icon'
           style={{
@@ -155,13 +197,25 @@ export const FindingDriverScreen = () => {
           </Animated.View>
         </AppGradient>
         <Typography style={styles.title}>Finding Your Driver...</Typography>
-        <Typography style={styles.sub}>This Usually Takes 30 Seconds</Typography>
+        <Typography style={styles.sub}>{timerSubtitle}</Typography>
       </View>
       <Button
         style={styles.cancelBtn}
         textStyle={styles.cancelTxt}
         title='Cancel'
         onPress={() => setCancelVisible(true)}
+      />
+
+      <JobTimerExpiredModal
+        visible={expiredVisible}
+        title='No Driver Found'
+        description='We could not find a driver in time. Search again or cancel this booking.'
+        onSearchAgain={handleSearchAgain}
+        onCancel={async () => {
+          setExpiredVisible(false);
+          const ok = await deleteSniftBooking(bookingId);
+          if (ok) replace(SCREENS.BOTTOM_STACK);
+        }}
       />
 
       <CancelReasonModal
@@ -198,7 +252,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
-    paddingBottom: 24,
+    paddingBottom: 50,
+  },
+  timerWrap: {
+    bottom: 50,
   },
   title: {
     fontSize: FontSize.ExtraExtraLarge,

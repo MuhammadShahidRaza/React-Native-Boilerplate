@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppGradient, AppStatusModal, Button, Map, Typography } from 'components/index';
+import { AppGradient, AppStatusModal, Button, GradientIcon, Map, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, BRAND_PRIMARY, COLORS, screenHeight } from 'utils/index';
@@ -11,6 +11,9 @@ import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { setWorkerOnline } from 'store/slices/worker';
 import { getMapVehicleMarkerKind, getWorkerRoleCopy } from 'utils/workerRoleCopy';
+import { getCurrentLocation } from 'utils/location';
+import { updateUserLocation } from 'api/functions/app/user';
+import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
 
 export const WorkerHomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -19,11 +22,31 @@ export const WorkerHomeScreen = () => {
   const { isOnline } = useAppSelector(state => state.worker);
   const copy = getWorkerRoleCopy(role);
   const [topOffVisible, setTopOffVisible] = useState(false);
+  const [locationLabel, setLocationLabel] = useState('Locating...');
+  const locationUpdatedRef = useRef(false);
   const firstName = userDetails?.full_name?.split(' ')?.[0] ?? 'Alex';
   const walletBalance = useMemo(() => parseWalletBalance(userDetails), [userDetails]);
   const walletFunded = walletBalance > 0;
 
   const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
+
+  // Update location on mount (once) via REST API + Firestore
+  useEffect(() => {
+    if (locationUpdatedRef.current || !userDetails?.id) return;
+    locationUpdatedRef.current = true;
+    (async () => {
+      const pos = await getCurrentLocation();
+      if (!pos) {
+        setLocationLabel('Location unavailable');
+        return;
+      }
+      const { latitude, longitude } = pos.coords;
+      setLocationLabel(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+      updateUserLocation(latitude, longitude);
+      updateWorkerFirestoreLocation(userDetails.id, latitude, longitude, role);
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userDetails?.id]);
 
   const blockIfWalletEmpty = () => {
     if (walletFunded) return false;
@@ -60,6 +83,31 @@ export const WorkerHomeScreen = () => {
       </View>
 
       <SafeAreaView edges={['top']} style={styles.overlayTop} pointerEvents='box-none'>
+        {/* Top bar: location label + notification bell */}
+        <View style={styles.topBar} pointerEvents='box-none'>
+          <View style={styles.locPill} pointerEvents='none'>
+            <GradientIcon
+              componentName={VARIABLES.EvilIcons}
+              iconName='location'
+              size={FontSize.ExtraLarge}
+              color={COLORS.WHITE}
+            />
+            <View style={styles.locTexts}>
+              <Typography style={styles.locLabel}>Location</Typography>
+              <Typography style={styles.locValue} numberOfLines={1}>
+                {locationLabel}
+              </Typography>
+            </View>
+          </View>
+          <GradientIcon
+            componentName={VARIABLES.Feather}
+            iconName='bell'
+            size={FontSize.Medium}
+            color={COLORS.WHITE}
+            onPress={() => navigate(SCREENS.NOTIFICATIONS)}
+          />
+        </View>
+
         <View style={styles.togglePill}>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -169,6 +217,34 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    marginBottom: 8,
+  },
+  locPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  locTexts: {
+    flex: 1,
+  },
+  locLabel: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.ExtraSmall,
+    opacity: 0.85,
+  },
+  locValue: {
+    color: COLORS.WHITE,
+    fontSize: FontSize.MediumSmall,
+    fontWeight: FontWeight.SemiBold,
   },
   togglePill: {
     flexDirection: 'row',

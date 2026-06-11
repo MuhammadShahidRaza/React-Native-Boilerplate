@@ -27,8 +27,9 @@ import {
   extractBookingFromResponse,
   getBookingById,
 } from 'api/functions/snlift/bookings';
-import { mapBookingToWorkerRequestDetail } from 'api/mappers/snliftBooking';
+import { mapBookingToWorkerRequestDetail, getBookingStatusLabel } from 'api/mappers/snliftBooking';
 import { showToast } from 'utils/toast';
+import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 
 const AVATAR_SIZE = 56;
 
@@ -49,6 +50,9 @@ export const WorkerRequestDetailScreen = () => {
   const [detail, setDetail] = useState<WorkerRequestDetail>(() =>
     getWorkerRequestDetail(requestId),
   );
+  const [bookingCreatedAt, setBookingCreatedAt] = useState<string | undefined>();
+  const [bookingStatus, setBookingStatus] = useState<string>('pending');
+  const { expiresAt, ready } = useJobDisplayTimer(bookingCreatedAt);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,12 +61,14 @@ export const WorkerRequestDetailScreen = () => {
       const booking = extractBookingFromResponse(res);
       if (!cancelled && booking) {
         setDetail(mapBookingToWorkerRequestDetail(booking));
+        if (booking.created_at) setBookingCreatedAt(booking.created_at);
+        setBookingStatus((booking.status ?? 'pending').toLowerCase());
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [requestId]);
+  }, [requestId, role]);
   const [timerActive, setTimerActive] = useState(true);
   const hasAcceptedRef = useRef(false);
 
@@ -84,6 +90,7 @@ export const WorkerRequestDetailScreen = () => {
 
   const handleTimerExpire = () => {
     if (hasAcceptedRef.current) return;
+    showToast({ message: 'This request has expired.' });
     handleBack();
   };
 
@@ -95,9 +102,21 @@ export const WorkerRequestDetailScreen = () => {
     }
     hasAcceptedRef.current = true;
     setTimerActive(false);
+    setBookingStatus('accepted');
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: 'pickup',
+    });
+  };
+
+  const isPending = bookingStatus === 'pending';
+  const isActiveJob = bookingStatus === 'accepted' || bookingStatus === 'in_transit';
+  const isTerminal = bookingStatus === 'completed' || bookingStatus === 'cancelled';
+
+  const goToJob = () => {
+    navigate(SCREENS.WORKER_JOB_NAVIGATION, {
+      requestId: detail.id,
+      phase: bookingStatus === 'in_transit' ? 'dropoff' : 'pickup',
     });
   };
 
@@ -109,9 +128,13 @@ export const WorkerRequestDetailScreen = () => {
       darkMode={false}
     >
       <View style={styles.content} pointerEvents='box-none'>
-        {timerActive ? (
+        {isPending && timerActive && ready && expiresAt ? (
           <View style={styles.timerWrap} pointerEvents='none'>
-            <WorkerRequestTimer seconds={60} onExpire={handleTimerExpire} active={timerActive} />
+            <WorkerRequestTimer
+              expiresAt={expiresAt}
+              onExpire={handleTimerExpire}
+              active={timerActive}
+            />
           </View>
         ) : null}
 
@@ -126,6 +149,11 @@ export const WorkerRequestDetailScreen = () => {
 
             <View style={styles.paymentBadge}>
               <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
+            </View>
+            <View style={styles.statusBadge}>
+              <Typography style={styles.statusBadgeTxt}>
+                {getBookingStatusLabel(bookingStatus)}
+              </Typography>
             </View>
           </View>
 
@@ -171,10 +199,26 @@ export const WorkerRequestDetailScreen = () => {
               </View>
             </View>
 
-            <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
-            <Pressable onPress={handleBack} style={styles.rejectBtn}>
-              <Typography style={styles.rejectTxt}>Reject</Typography>
-            </Pressable>
+            {isPending ? (
+              <>
+                <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
+                <Pressable onPress={handleBack} style={styles.rejectBtn}>
+                  <Typography style={styles.rejectTxt}>Reject</Typography>
+                </Pressable>
+              </>
+            ) : null}
+
+            {isActiveJob ? (
+              <Button title='Continue Job' onPress={goToJob} style={styles.acceptBtn} />
+            ) : null}
+
+            {isTerminal ? (
+              <Typography style={styles.terminalNote}>
+                {bookingStatus === 'completed'
+                  ? 'This job has been completed.'
+                  : 'This request is no longer available.'}
+              </Typography>
+            ) : null}
           </View>
         </View>
       </View>
@@ -217,6 +261,19 @@ const styles = StyleSheet.create({
   },
   paymentTxt: {
     color: COLORS.APP_SECONDARY,
+    fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.Small,
+  },
+  statusBadge: {
+    alignSelf: 'center',
+    backgroundColor: COLORS.APP_SURFACE,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 4,
+  },
+  statusBadgeTxt: {
+    color: COLORS.APP_PRIMARY,
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Small,
   },
@@ -327,5 +384,12 @@ const styles = StyleSheet.create({
     color: COLORS.ERROR,
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Medium,
+  },
+  terminalNote: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
+    marginTop: 24,
+    paddingHorizontal: 16,
   },
 });

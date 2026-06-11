@@ -19,6 +19,8 @@ import {
   createParcelBooking,
   extractBookingFromResponse,
 } from 'api/functions/snlift/bookings';
+import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
+import { resolveTimerCreatedAt } from 'utils/jobDisplayTimer';
 import { showToast } from 'utils/toast';
 import type { AddressDetails } from 'utils/location';
 import { sendParcelValidationSchema } from 'utils/validations';
@@ -58,28 +60,35 @@ export const SendParcelScreen = () => {
             10,
         ) / 10,
       );
-      const res = await createParcelBooking({
-        booking_type: 'parcel',
-        pickup_address: values.pickup!.fullAddress ?? 'Pickup',
-        dropoff_address: values.dropoff!.fullAddress ?? 'Drop-off',
-        pickup_latitude: values.pickup!.latitude,
-        pickup_longitude: values.pickup!.longitude,
-        dropoff_latitude: values.dropoff!.latitude,
-        dropoff_longitude: values.dropoff!.longitude,
-        distance_km: distanceKm,
-        ...(values.pkg.trim() ? { item_description: values.pkg.trim() } : {}),
-      });
+      const searchStartedAt = new Date().toISOString();
+      const [res, timerDurationSeconds] = await Promise.all([
+        createParcelBooking({
+          booking_type: 'parcel',
+          pickup_address: values.pickup!.fullAddress ?? 'Pickup',
+          dropoff_address: values.dropoff!.fullAddress ?? 'Drop-off',
+          pickup_latitude: values.pickup!.latitude,
+          pickup_longitude: values.pickup!.longitude,
+          dropoff_latitude: values.dropoff!.latitude,
+          dropoff_longitude: values.dropoff!.longitude,
+          distance_km: distanceKm,
+          ...(values.pkg.trim() ? { item_description: values.pkg.trim() } : {}),
+        }),
+        getJobDisplayTimerSeconds(),
+      ]);
       const booking = extractBookingFromResponse(res);
       if (!booking?.id) {
         showToast({ message: 'Could not create parcel booking. Try again.' });
         return;
       }
+      const createdAt = resolveTimerCreatedAt(booking.created_at, searchStartedAt);
       navigate(SCREENS.SEND_PARCEL_FINDING, {
         pickupLat: values.pickup!.latitude,
         pickupLng: values.pickup!.longitude,
         dropoffLat: values.dropoff!.latitude,
         dropoffLng: values.dropoff!.longitude,
         bookingId: booking.id,
+        createdAt,
+        timerDurationSeconds,
       });
     },
   });

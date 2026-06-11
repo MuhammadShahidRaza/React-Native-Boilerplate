@@ -22,7 +22,9 @@ interface RequestOptions {
   config?: AxiosRequestConfig;
   includeToken?: boolean;
   showLoader?: boolean;
-  addToPending?: boolean; // If true, add request to pending queue when offline
+  addToPending?: boolean;
+  /** Skip console error logging (background polling). */
+  silentErrors?: boolean;
   onUploadProgress?: (percent: number) => void;
 }
 
@@ -246,8 +248,13 @@ const handleNetworkError = async (error: AxiosError): Promise<never> => {
 /**
  * Handles HTTP response errors with proper error extraction and authentication checks
  */
-const handleRequestError = async (error: AxiosError<ErrorResponse>): Promise<never> => {
-  logger.error('handleRequestError', error);
+const handleRequestError = async (
+  error: AxiosError<ErrorResponse>,
+  silent = false,
+): Promise<never> => {
+  if (!silent) {
+    logger.error('handleRequestError', error);
+  }
   if (!axios.isAxiosError(error)) {
     throw error;
   }
@@ -282,9 +289,12 @@ const makeHttpRequest = async (
   includeToken = true,
   showLoader = true,
   addToPending = false,
+  silentErrors = false,
 ): Promise<any> => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) return;
-  logger.log('makeHttpRequest', config);
+  if (!silentErrors) {
+    logger.log('makeHttpRequest', config);
+  }
   // Check network connection before making the request
   const netState = await NetInfo.fetch();
   if (!netState.isConnected) {
@@ -316,7 +326,9 @@ const makeHttpRequest = async (
     const response = await axiosInstance(config);
     store.dispatch(setIsAppLoading(false));
 
-    logger.log('response?.data', response?.data);
+    if (!silentErrors) {
+      logger.log('response?.data', response?.data);
+    }
 
     if (response?.data?.response) {
       return response?.data?.response;
@@ -326,6 +338,10 @@ const makeHttpRequest = async (
   } catch (error) {
     // Always set loading to false first
     store.dispatch(setIsAppLoading(false));
+
+    if (!silentErrors) {
+      logger.log('error', error);
+    }
 
     if (error instanceof AxiosError && error?.response?.data?.error?.type === 'card_error') {
       throw new HttpError(
@@ -340,11 +356,7 @@ const makeHttpRequest = async (
       // Re-throw known error types
       throw error;
     } else {
-      logger.log('error', error);
-
-      // handleRequestError will throw the appropriate error
-      // It always throws (Promise<never>), so we await and let it propagate
-      await handleRequestError(error as AxiosError<ErrorResponse>);
+      await handleRequestError(error as AxiosError<ErrorResponse>, silentErrors);
       // This line is unreachable, but TypeScript needs it
       throw error;
     }
@@ -357,8 +369,15 @@ const get = async ({
   includeToken = true,
   showLoader = true,
   addToPending = false,
+  silentErrors = false,
 }: RequestOptions) => {
-  return makeHttpRequest({ method: 'GET', url, ...config }, includeToken, showLoader, addToPending);
+  return makeHttpRequest(
+    { method: 'GET', url, ...config },
+    includeToken,
+    showLoader,
+    addToPending,
+    silentErrors,
+  );
 };
 
 const post = async ({

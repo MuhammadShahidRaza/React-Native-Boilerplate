@@ -47,6 +47,7 @@ const handleGetApiRequest = async <R extends object>({
   config = {},
   addToPending = false,
   showError = true,
+  silentErrors = false,
 }: {
   url: string;
   params?: Record<string, string | number>;
@@ -54,6 +55,7 @@ const handleGetApiRequest = async <R extends object>({
   addToPending?: boolean;
   showError?: boolean;
   showLoader?: boolean;
+  silentErrors?: boolean;
 }): Promise<R | undefined> => {
   try {
     const response = await get({
@@ -61,6 +63,7 @@ const handleGetApiRequest = async <R extends object>({
       showLoader: showLoader,
       config: { ...config, ...(params ? { params } : {}) },
       addToPending: addToPending,
+      silentErrors,
     });
     return parseApiResponse<R>(response);
   } catch (error) {

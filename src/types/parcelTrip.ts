@@ -6,4 +6,6 @@ export type ParcelTripCoords = {
   dropoffLat?: number;
   dropoffLng?: number;
   bookingId?: number;
+  createdAt?: string;
+  timerDurationSeconds?: number;
 };

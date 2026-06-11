@@ -51,6 +51,7 @@ export {
   RestaurantMenuScreen,
   FoodDeliveryCartScreen,
   TrackFoodOrderScreen,
+  ConsumerBookingDetailScreen,
   WorkerWalletScreen,
   WorkerHomeScreen,
   WorkerRideHistoryScreen,

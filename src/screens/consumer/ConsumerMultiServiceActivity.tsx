@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -16,196 +16,32 @@ import { IMAGES } from 'constants/assets';
 import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, BRAND_PRIMARY, COLORS, screenWidth } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, screenWidth } from 'utils/index';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import {
   isActiveBookingStatus,
   mapBookingToActivityItem,
   type ConsumerActivityItem,
 } from 'api/mappers/snliftBooking';
-
-// ─── Mock model (bookings removed — static demo cards) ───────────────────────
+import { pushRootScreen } from 'navigation/Navigators';
+import { SCREENS } from 'constants/routes';
 
 type ServiceCat = 'All' | 'Rides' | 'Food' | 'Parcel';
 
-type MockActivityItem = ConsumerActivityItem;
+type ActivityItem = ConsumerActivityItem;
 
-const ADDR = {
-  home: '67 Murray Street, NY',
-  park: '85 W Broadway, NY',
-  cafe: '200 Varick Street, NY',
-};
-
-const MOCK_ACTIVE_BASE: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[] = [
-  {
-    serviceLabel: 'Ride',
-    price: '610',
-    pickupTitle: 'Home',
-    pickupAddr: ADDR.home,
-    dropTitle: 'Little Park',
-    dropAddr: ADDR.park,
-  },
-  {
-    serviceLabel: 'Ride',
-    price: '585',
-    pickupTitle: 'Home',
-    pickupAddr: ADDR.home,
-    dropTitle: 'Downtown Hub',
-    dropAddr: ADDR.cafe,
-  },
-  {
-    serviceLabel: 'Ride',
-    price: '642',
-    pickupTitle: 'Midtown West',
-    pickupAddr: ADDR.cafe,
-    dropTitle: 'Little Park',
-    dropAddr: ADDR.park,
-  },
-  {
-    serviceLabel: 'Food',
-    price: '980',
-    pickupTitle: 'Kitchen A',
-    pickupAddr: ADDR.home,
-    dropTitle: 'You',
-    dropAddr: ADDR.park,
-  },
-  {
-    serviceLabel: 'Food',
-    price: '720',
-    pickupTitle: 'Kitchen B',
-    pickupAddr: ADDR.cafe,
-    dropTitle: 'You',
-    dropAddr: ADDR.home,
-  },
-  {
-    serviceLabel: 'Food',
-    price: '810',
-    pickupTitle: 'Sushi Spot',
-    pickupAddr: ADDR.park,
-    dropTitle: 'You',
-    dropAddr: ADDR.home,
-  },
-  {
-    serviceLabel: 'Parcel',
-    price: '450',
-    pickupTitle: 'Sender',
-    pickupAddr: ADDR.home,
-    dropTitle: 'Receiver',
-    dropAddr: ADDR.park,
-  },
-  {
-    serviceLabel: 'Parcel',
-    price: '520',
-    pickupTitle: 'Sender',
-    pickupAddr: ADDR.cafe,
-    dropTitle: 'Receiver',
-    dropAddr: ADDR.home,
-  },
-  {
-    serviceLabel: 'Parcel',
-    price: '390',
-    pickupTitle: 'Sender',
-    pickupAddr: ADDR.park,
-    dropTitle: 'Receiver',
-    dropAddr: ADDR.cafe,
-  },
-  // fourth group of three (Ride / Food / Parcel again)
-  {
-    serviceLabel: 'Ride',
-    price: '600',
-    pickupTitle: 'Uptown',
-    pickupAddr: ADDR.park,
-    dropTitle: 'Soho',
-    dropAddr: ADDR.home,
-  },
-  {
-    serviceLabel: 'Food',
-    price: '695',
-    pickupTitle: 'Burger Lab',
-    pickupAddr: ADDR.home,
-    dropTitle: 'You',
-    dropAddr: ADDR.cafe,
-  },
-  {
-    serviceLabel: 'Parcel',
-    price: '478',
-    pickupTitle: 'Sender',
-    pickupAddr: ADDR.home,
-    dropTitle: 'Receiver',
-    dropAddr: ADDR.park,
-  },
-];
-
-const MOCK_HISTORY_BASE: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[] =
-  MOCK_ACTIVE_BASE.map((row, i) => ({
-    ...row,
-    price: String(Number(row.price) + 40 + i),
-  }));
-
-const buildMockList = (
-  seed: Omit<MockActivityItem, 'id' | 'isoDate' | 'status'>[],
-  dates: string[],
-  statuses: string[],
-): MockActivityItem[] =>
-  seed.map((row, i) => ({
-    ...row,
-    id: `mock-${dates[0]?.slice(0, 10)}-${i}`,
-    isoDate: dates[i % dates.length] ?? dates[0],
-    status: statuses[i % statuses.length] ?? statuses[0],
-  }));
-
-const MOCK_ACTIVE = buildMockList(
-  MOCK_ACTIVE_BASE,
-  [
-    '2026-04-09T20:09:00',
-    '2026-04-10T09:22:00',
-    '2026-04-10T11:08:00',
-    '2026-04-10T13:41:00',
-    '2026-04-11T07:55:00',
-    '2026-04-11T16:02:00',
-    '2026-04-12T10:12:00',
-    '2026-04-12T14:30:00',
-    '2026-04-13T09:09:00',
-    '2026-04-13T18:20:00',
-    '2026-04-14T12:00:00',
-    '2026-04-14T15:45:00',
-  ],
-  ['Arriving', 'In Progress', 'Prepared', 'Picked Up', 'On The Way'],
-);
-
-const MOCK_HISTORY = buildMockList(
-  MOCK_HISTORY_BASE,
-  [
-    '2026-02-03T08:41:00',
-    '2026-02-07T21:06:00',
-    '2026-02-09T09:52:00',
-    '2026-02-14T17:09:00',
-    '2026-02-21T06:58:00',
-    '2026-03-03T21:51:00',
-    '2026-03-06T06:54:00',
-    '2026-03-06T07:53:00',
-    '2026-03-06T07:53:00',
-    '2026-03-06T07:53:00',
-    '2026-03-06T07:53:00',
-    '2026-03-06T07:53:00',
-  ],
-  ['Delivered', 'Completed', 'Completed', 'Cancelled'],
-);
-
-const CAT_FILTER: Record<ServiceCat, ((s: MockActivityItem) => boolean) | null> = {
+const CAT_FILTER: Record<ServiceCat, ((s: ActivityItem) => boolean) | null> = {
   All: null,
   Rides: s => s.serviceLabel === 'Ride',
   Food: s => s.serviceLabel === 'Food',
   Parcel: s => s.serviceLabel === 'Parcel',
 };
 
-const ICON_FOR: Record<MockActivityItem['serviceLabel'], string> = {
+const ICON_FOR: Record<ActivityItem['serviceLabel'], string> = {
   Ride: 'car-sport-outline',
   Food: 'restaurant-outline',
   Parcel: 'cube-outline',
 };
-
-// ─── Formatting ───────────────────────────────────────────────────────────────
 
 const formatDateTimeLine = (raw: string) => {
   const d = new Date(raw);
@@ -222,8 +58,6 @@ const formatDateTimeLine = (raw: string) => {
   return `${datePart} at ${timePart}`;
 };
 
-// ─── Top pill tab bar (Active / History) ─────────────────────────────────────
-
 function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
   return (
     <View style={styles.pillWrap}>
@@ -231,11 +65,12 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
         {state.routes.map((route, index) => {
           const focused = state.index === index;
           const label = route.name;
-          const onPress = () => {
-            navigation.navigate(route.name);
-          };
           return (
-            <Pressable key={route.key} onPress={onPress} style={styles.pillHalf}>
+            <Pressable
+              key={route.key}
+              onPress={() => navigation.navigate(route.name)}
+              style={styles.pillHalf}
+            >
               {focused ? (
                 <AppGradient
                   colors={[...APP_GRADIENT_HORIZONTAL]}
@@ -259,8 +94,6 @@ function ActivityPillTabBar({ state, navigation }: MaterialTopTabBarProps) {
     </View>
   );
 }
-
-// ─── Skeleton (activity card silhouette) ───────────────────────────────────────
 
 const activitySkeletonItem = () => (
   <View style={styles.skCard}>
@@ -309,8 +142,6 @@ const activitySkeletonItem = () => (
   </View>
 );
 
-// ─── Cards & category tabs ─────────────────────────────────────────────────────
-
 const CategoryTabs = ({
   value,
   onChange,
@@ -336,15 +167,11 @@ const CategoryTabs = ({
   </View>
 );
 
-const ActivityCard = ({ item }: { item: MockActivityItem }) => (
-  <View style={styles.card}>
+const ActivityCard = ({ item, onPress }: { item: ActivityItem; onPress?: () => void }) => (
+  <Pressable style={styles.card} onPress={onPress}>
     <AppGradient variant='primary' style={styles.typeIcon}>
       {item.serviceLabel === 'Parcel' ? (
-        <Image
-          source={IMAGES.PARCEL_BOX}
-          style={styles.parcelIconImg}
-          resizeMode='contain'
-        />
+        <Image source={IMAGES.PARCEL_BOX} style={styles.parcelIconImg} resizeMode='contain' />
       ) : (
         <Icon
           componentName={VARIABLES.Ionicons}
@@ -383,22 +210,19 @@ const ActivityCard = ({ item }: { item: MockActivityItem }) => (
       <Typography style={styles.price}>{`CFA ${item.price}`}</Typography>
       <Typography style={styles.status}>{item.status}</Typography>
     </View>
-  </View>
+  </Pressable>
 );
 
-// ─── List pane ─────────────────────────────────────────────────────────────────
-
-function ActivityPane({ source }: { source: MockActivityItem[] }) {
+function ActivityPane({
+  source,
+  loading,
+  emptyMessage,
+}: {
+  source: ActivityItem[];
+  loading: boolean;
+  emptyMessage: string;
+}) {
   const [cat, setCat] = useState<ServiceCat>('All');
-  const [loading, setLoading] = useState(true);
-
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
-      const t = setTimeout(() => setLoading(false), 620);
-      return () => clearTimeout(t);
-    }, []),
-  );
 
   const filtered = useMemo(() => {
     const fn = CAT_FILTER[cat];
@@ -410,57 +234,96 @@ function ActivityPane({ source }: { source: MockActivityItem[] }) {
       <CategoryTabs value={cat} onChange={setCat} />
 
       <SkeletonWrapper isLoading={loading} count={4} renderItem={activitySkeletonItem}>
-        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-          {filtered.map(it => (
-            <ActivityCard key={it.id} item={it} />
-          ))}
-        </ScrollView>
+        {filtered.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Icon
+              componentName={VARIABLES.Feather}
+              iconName='inbox'
+              size={40}
+              color={COLORS.APP_TEXT_MUTED}
+            />
+            <Typography style={styles.emptyText}>{emptyMessage}</Typography>
+          </View>
+        ) : (
+          <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+            {filtered.map(it => (
+              <ActivityCard
+                key={it.id}
+                item={it}
+                onPress={() => {
+                  const id = Number(it.id);
+                  if (!Number.isNaN(id)) {
+                    pushRootScreen(SCREENS.CONSUMER_BOOKING_DETAIL, { bookingId: id });
+                  }
+                }}
+              />
+            ))}
+          </ScrollView>
+        )}
       </SkeletonWrapper>
     </View>
   );
 }
 
 function ActivePane() {
-  const [items, setItems] = useState<MockActivityItem[]>(MOCK_ACTIVE);
+  const [items, setItems] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await listBookings();
-      const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
-      if (!cancelled && active.length > 0) {
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      setLoading(true);
+      (async () => {
+        const res = await listBookings();
+        if (cancelled) return;
+        const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
         setItems(active.map(mapBookingToActivityItem));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+        setLoading(false);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []),
+  );
 
-  return <ActivityPane source={items} />;
+  return (
+    <ActivityPane
+      source={items}
+      loading={loading}
+      emptyMessage='No active bookings yet.'
+    />
+  );
 }
 
 function HistoryPane() {
-  const [items, setItems] = useState<MockActivityItem[]>(MOCK_HISTORY);
+  const [items, setItems] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await listBookings();
-      const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
-      if (!cancelled && history.length > 0) {
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      setLoading(true);
+      (async () => {
+        const res = await listBookings();
+        if (cancelled) return;
+        const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
         setItems(history.map(mapBookingToActivityItem));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+        setLoading(false);
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, []),
+  );
 
-  return <ActivityPane source={items} />;
+  return (
+    <ActivityPane
+      source={items}
+      loading={loading}
+      emptyMessage='No booking history yet.'
+    />
+  );
 }
-
-// ─── Navigator ───────────────────────────────────────────────────────────────
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -492,8 +355,6 @@ export const ConsumerMultiServiceActivity = () => (
     <ActivityNavigator />
   </Wrapper>
 );
-
-// ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   pillWrap: {
@@ -587,6 +448,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 110,
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingTop: 48,
+    paddingBottom: 110,
+    gap: 12,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Medium,
   },
   skCard: {
     borderRadius: 16,

@@ -9,6 +9,8 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
 import { resetToHomeAndScreen } from 'navigation/index';
 import { createRideBooking, estimateBooking } from 'api/functions/snlift/bookings';
+import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
+import { resolveTimerCreatedAt } from 'utils/jobDisplayTimer';
 import type { EstimateCategoryResult } from 'api/functions/snlift/bookings';
 import { showToast } from 'utils/toast';
 import { SCREENS } from 'constants/routes';
@@ -55,6 +57,7 @@ export const ChooseRideScreen = () => {
   const [estimates, setEstimates] = useState<Record<string, EstimateCategoryResult>>({});
   const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
+  const [findDriverLoading, setFindDriverLoading] = useState(false);
   const [currentLocationFallback, setCurrentLocationFallback] = useState<{
     latitude: number;
     longitude: number;
@@ -152,6 +155,7 @@ export const ChooseRideScreen = () => {
   };
 
   const handleFindDriver = async () => {
+    if (findDriverLoading) return;
     const promoTrimmed = promo.trim();
     const payload = {
       booking_type: 'ride' as const,
@@ -165,22 +169,34 @@ export const ChooseRideScreen = () => {
       distance_km: distanceKm ?? estimateDistanceKm(),
       ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
     };
-    const res = await createRideBooking(payload);
-    const booking = res && 'booking' in res ? res.booking : res;
-    if (!booking?.id) {
-      showToast({ message: 'Could not create ride booking. Try again.' });
-      return;
+    setFindDriverLoading(true);
+    try {
+      const searchStartedAt = new Date().toISOString();
+      const [res, timerDurationSeconds] = await Promise.all([
+        createRideBooking(payload, { showLoader: false }),
+        getJobDisplayTimerSeconds(),
+      ]);
+      const booking = res && 'booking' in res ? res.booking : res;
+      if (!booking?.id) {
+        showToast({ message: 'Could not create ride booking. Try again.' });
+        return;
+      }
+      const createdAt = resolveTimerCreatedAt(booking.created_at, searchStartedAt);
+      resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
+        rideType: selected,
+        pickupAddress: payload.pickup_address,
+        dropoffAddress: payload.dropoff_address,
+        pickupLat: pickupCoord.latitude,
+        pickupLng: pickupCoord.longitude,
+        dropoffLat: dropoffCoord.latitude,
+        dropoffLng: dropoffCoord.longitude,
+        bookingId: booking.id,
+        createdAt,
+        timerDurationSeconds,
+      });
+    } finally {
+      setFindDriverLoading(false);
     }
-    resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
-      rideType: selected,
-      pickupAddress: payload.pickup_address,
-      dropoffAddress: payload.dropoff_address,
-      pickupLat: pickupCoord.latitude,
-      pickupLng: pickupCoord.longitude,
-      dropoffLat: dropoffCoord.latitude,
-      dropoffLng: dropoffCoord.longitude,
-      bookingId: booking.id,
-    });
   };
 
   return (
@@ -317,7 +333,13 @@ export const ChooseRideScreen = () => {
           );
         })()}
 
-        <Button title='Find Driver' style={styles.ctaBtn} onPress={handleFindDriver} />
+        <Button
+          title='Find Driver'
+          style={styles.ctaBtn}
+          loading={findDriverLoading}
+          loadingText='Finding driver...'
+          onPress={handleFindDriver}
+        />
       </View>
     </Wrapper>
   );

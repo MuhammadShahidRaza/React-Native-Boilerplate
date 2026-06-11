@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import {
@@ -7,22 +7,32 @@ import {
   GRADIENT_START,
   Typography,
   Wrapper,
+  WorkerRequestTimer,
 } from 'components/index';
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, COLORS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
-import { onBack, replace } from 'navigation/index';
+import {
+  APP_GRADIENT_HORIZONTAL,
+  COLORS,
+  parcelCoordsNavParams,
+  resolveParcelTripCoords,
+} from 'utils/index';
+import { navigate, onBack, replace } from 'navigation/index';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
+import { JobTimerExpiredModal } from './JobTimerExpiredModal';
+import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
+import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 
- 
 export const SendParcelFindingScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL_FINDING>>();
   const [cancelVisible, setCancelVisible] = useState(false);
+  const [expiredVisible, setExpiredVisible] = useState(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
+  const timerHandledRef = useRef(false);
 
   const { pickup, dropoff } = useMemo(
     () => resolveParcelTripCoords(route.params),
@@ -30,10 +40,16 @@ export const SendParcelFindingScreen = () => {
   );
 
   const bookingId = route.params?.bookingId;
+  const createdAt = useMemo(
+    () => route.params?.createdAt ?? new Date().toISOString(),
+    [route.params?.createdAt],
+  );
+  const timerDurationSeconds = route.params?.timerDurationSeconds;
+  const { expiresAt, ready } = useJobDisplayTimer(createdAt, timerDurationSeconds);
 
   const navCoords = useMemo(
-    () => parcelCoordsNavParams(pickup, dropoff, bookingId),
-    [pickup, dropoff, bookingId],
+    () => parcelCoordsNavParams(pickup, dropoff, bookingId, createdAt),
+    [pickup, dropoff, bookingId, createdAt],
   );
 
   useEffect(() => {
@@ -50,26 +66,49 @@ export const SendParcelFindingScreen = () => {
       ]),
     );
     pulse.start();
-    const timer = setTimeout(() => {
-      pulse.stop();
-      replace(SCREENS.COURIER_MATCHED, navCoords);
-    }, 2800);
-    return () => {
-      pulse.stop();
-      clearTimeout(timer);
-    };
-  }, [pulseAnim, pulseOpacity, navCoords]);
+    return () => pulse.stop();
+  }, [pulseAnim, pulseOpacity]);
+
+  const goToCourierMatched = useCallback(() => {
+    replace(SCREENS.COURIER_MATCHED, navCoords);
+  }, [navCoords]);
+
+  useBookingAcceptPoll(bookingId, goToCourierMatched);
+
+  const handleTimerExpire = () => {
+    if (timerHandledRef.current) return;
+    timerHandledRef.current = true;
+    setExpiredVisible(true);
+  };
+
+  const handleSearchAgain = async () => {
+    setExpiredVisible(false);
+    await cancelSniftBooking(bookingId, 'Courier search timeout — searching again');
+    navigate(SCREENS.SEND_PARCEL);
+  };
+
+  const timerSubtitle = ready && expiresAt
+    ? 'Time remaining is shown above'
+    : 'Please wait while we match you';
 
   return (
     <Wrapper
       headerTitle='Send Parcel'
       showBackButton
-       
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
       <View style={styles.center}>
+        {ready && expiresAt ? (
+          <View style={styles.timerWrap}>
+            <WorkerRequestTimer
+              expiresAt={expiresAt}
+              onExpire={handleTimerExpire}
+              active={!expiredVisible}
+            />
+          </View>
+        ) : null}
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <AppGradient
             colors={[...APP_GRADIENT_HORIZONTAL]}
@@ -82,8 +121,19 @@ export const SendParcelFindingScreen = () => {
           </AppGradient>
         </Animated.View>
         <Typography style={styles.title}>Finding a Courier...</Typography>
-        <Typography style={styles.sub}>Please wait while we match you</Typography>
+        <Typography style={styles.sub}>{timerSubtitle}</Typography>
       </View>
+
+      <JobTimerExpiredModal
+        visible={expiredVisible}
+        title='No Courier Found'
+        description='We could not find a courier in time. Search again or cancel this booking.'
+        onSearchAgain={handleSearchAgain}
+        onCancel={() => {
+          setExpiredVisible(false);
+          setCancelVisible(true);
+        }}
+      />
 
       <CancelReasonModal
         visible={cancelVisible}
@@ -105,6 +155,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
     paddingBottom: 24,
+  },
+  timerWrap: {
+    marginBottom: 16,
   },
   iconCircle: {
     width: 120,

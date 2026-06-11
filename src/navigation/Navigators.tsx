@@ -164,6 +164,8 @@ export type RootStackParamList = {
     dropoffLat?: number;
     dropoffLng?: number;
     bookingId?: number;
+    createdAt?: string;
+    timerDurationSeconds?: number;
   } | undefined;
   [SCREENS.DRIVER_FOUND]: {
     pickupLat?: number;
@@ -190,6 +192,7 @@ export type RootStackParamList = {
   [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
   [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase; bookingId?: number } | undefined;
+  [SCREENS.CONSUMER_BOOKING_DETAIL]: { bookingId: number };
   [SCREENS.WORKER_RIDE_HISTORY]: undefined;
   [SCREENS.WORKER_EARNINGS]: undefined;
   [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: undefined;
@@ -236,9 +239,22 @@ export function navigate<T extends keyof RootStackParamList>(
   name: T,
   params?: RootStackParamList[T],
 ) {
-  if (navigationRef.isReady()) {
-    (navigationRef.navigate as any)(name, params);
-  }
+  if (!navigationRef.isReady()) return;
+  navigationRef.dispatch(
+    CommonActions.navigate({
+      name: name as string,
+      params,
+    }),
+  );
+}
+
+/** Push onto the root stack — use from tab/nested screens (e.g. Activity → detail). */
+export function pushRootScreen<T extends keyof RootStackParamList>(
+  name: T,
+  params?: RootStackParamList[T],
+) {
+  if (!navigationRef.isReady()) return;
+  navigationRef.dispatch(StackActions.push(name as string, params));
 }
 
 export function onBack() {

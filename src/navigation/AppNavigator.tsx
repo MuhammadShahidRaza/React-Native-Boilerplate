@@ -53,6 +53,7 @@ import {
   WorkerJobNavigationScreen,
   WorkerJobCompletedScreen,
 } from 'screens/user';
+import { ConsumerBookingDetailScreen } from 'screens/consumer/ConsumerBookingDetailScreen';
 import { BottomNavigator } from './BottomNavigator';
 import { useBackHandler } from 'hooks/index';
 import { screenOptions } from '.';
@@ -117,6 +118,7 @@ export const AppNavigator = () => {
     [SCREENS.RESTAURANT_MENU]: RestaurantMenuScreen,
     [SCREENS.FOOD_DELIVERY_CART]: FoodDeliveryCartScreen,
     [SCREENS.TRACK_FOOD_ORDER]: TrackFoodOrderScreen,
+    [SCREENS.CONSUMER_BOOKING_DETAIL]: ConsumerBookingDetailScreen,
     [SCREENS.WORKER_LOOKING_FOR_DELIVERIES]: WorkerLookingForDeliveriesScreen,
     [SCREENS.WORKER_REQUESTS]: WorkerRequestsScreen,
     [SCREENS.WORKER_REQUEST_DETAIL]: WorkerRequestDetailScreen,

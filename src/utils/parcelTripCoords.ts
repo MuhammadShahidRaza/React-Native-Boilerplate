@@ -26,6 +26,7 @@ export function parcelCoordsNavParams(
   pickup: MapCoord,
   dropoff: MapCoord,
   bookingId?: number,
+  createdAt?: string,
 ): ParcelTripCoords {
   return {
     pickupLat: pickup.latitude,
@@ -33,5 +34,6 @@ export function parcelCoordsNavParams(
     dropoffLat: dropoff.latitude,
     dropoffLng: dropoff.longitude,
     ...(bookingId != null ? { bookingId } : {}),
+    ...(createdAt ? { createdAt } : {}),
   };
 }

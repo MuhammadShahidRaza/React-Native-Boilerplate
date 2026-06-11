@@ -154,6 +154,7 @@ type BookingRequestOptions = {
   showLoader?: boolean;
   showError?: boolean;
   addToPending?: boolean;
+  silentErrors?: boolean;
 };
 
 export async function getBookingById(
@@ -166,6 +167,7 @@ export async function getBookingById(
     showLoader: options?.showLoader ?? true,
     showError: options?.showError ?? true,
     addToPending: options?.addToPending ?? false,
+    silentErrors: options?.silentErrors ?? false,
   });
 }
 
@@ -195,17 +197,57 @@ export async function getBookingTracking(
     showLoader: options?.showLoader ?? true,
     showError: options?.showError ?? true,
     addToPending: options?.addToPending ?? false,
+    silentErrors: options?.silentErrors ?? false,
   });
   if (!raw) return null;
   if ('tracking' in raw && raw.tracking) return raw.tracking;
   return raw as SnliftBookingTracking;
 }
 
-export async function createRideBooking(data: CreateRideBookingPayload) {
+export type BookingAcceptPollResult = {
+  status: string;
+  pollAfterSeconds?: number;
+};
+
+/** Poll until driver/courier accepts — tracking API first, booking detail fallback. */
+export async function pollBookingAcceptStatus(
+  id: number | string,
+  role?: BookingRole,
+  options?: BookingRequestOptions,
+): Promise<BookingAcceptPollResult | null> {
+  const silent: BookingRequestOptions = {
+    showLoader: false,
+    showError: false,
+    addToPending: true,
+    silentErrors: true,
+    ...options,
+  };
+
+  const tracking = await getBookingTracking(id, role, silent);
+  if (tracking?.status) {
+    return {
+      status: tracking.status,
+      pollAfterSeconds: tracking.poll_after_seconds,
+    };
+  }
+
+  const res = await getBookingById(id, role, silent);
+  const booking = extractBookingFromResponse(res);
+  if (booking?.status) {
+    return { status: booking.status };
+  }
+
+  return null;
+}
+
+export async function createRideBooking(
+  data: CreateRideBookingPayload,
+  options?: { showLoader?: boolean },
+) {
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateRideBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS,
     data,
-    showLoader: true,
+    showLoader: options?.showLoader ?? true,
   });
 }
 

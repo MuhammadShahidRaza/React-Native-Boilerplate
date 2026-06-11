@@ -9,6 +9,8 @@ const RING = 8;
 
 export interface WorkerRequestTimerProps {
   seconds?: number;
+  /** Absolute expiry timestamp (ms). When set, countdown is derived from created_at + admin timer. */
+  expiresAt?: number;
   onExpire?: () => void;
   /** When false, countdown pauses and onExpire will not fire. */
   active?: boolean;
@@ -16,31 +18,47 @@ export interface WorkerRequestTimerProps {
 
 export const WorkerRequestTimer = ({
   seconds = 60,
+  expiresAt,
   onExpire,
   active = true,
 }: WorkerRequestTimerProps) => {
-  const [remaining, setRemaining] = useState(seconds);
+  const [remaining, setRemaining] = useState(() => {
+    if (expiresAt != null) {
+      return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    }
+    return seconds;
+  });
   const onExpireRef = useRef(onExpire);
   const activeRef = useRef(active);
+  const expiredRef = useRef(false);
   onExpireRef.current = onExpire;
   activeRef.current = active;
 
   useEffect(() => {
+    expiredRef.current = false;
+
     if (!active) {
       setRemaining(seconds);
       return;
     }
 
-    setRemaining(seconds);
-    const startedAt = Date.now();
+    const getRemaining = () => {
+      if (expiresAt != null) {
+        return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      }
+      return seconds;
+    };
 
-    const tick = () => {
+    const tick = (startedAt?: number) => {
       if (!activeRef.current) return false;
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      const left = Math.max(0, seconds - elapsed);
+      const left =
+        expiresAt != null
+          ? getRemaining()
+          : Math.max(0, seconds - Math.floor((Date.now() - (startedAt ?? Date.now())) / 1000));
       setRemaining(left);
       if (left <= 0) {
-        if (activeRef.current) {
+        if (activeRef.current && !expiredRef.current) {
+          expiredRef.current = true;
           onExpireRef.current?.();
         }
         return false;
@@ -48,13 +66,14 @@ export const WorkerRequestTimer = ({
       return true;
     };
 
-    tick();
+    const startedAt = Date.now();
+    setRemaining(getRemaining());
     const id = setInterval(() => {
-      if (!tick()) clearInterval(id);
+      if (!tick(startedAt)) clearInterval(id);
     }, 250);
 
     return () => clearInterval(id);
-  }, [seconds, active]);
+  }, [seconds, expiresAt, active]);
 
   const displayMin = String(Math.floor(remaining / 60)).padStart(2, '0');
   const displaySec = String(remaining % 60).padStart(2, '0');
@@ -77,7 +96,7 @@ export const WorkerRequestTimer = ({
               </>
             ) : (
               <>
-                <Typography style={styles.time}>{displayMin}</Typography>
+                <Typography style={styles.time}>{`${displayMin}:${displaySec}`}</Typography>
                 <Typography style={styles.unit}>Min</Typography>
               </>
             )}
