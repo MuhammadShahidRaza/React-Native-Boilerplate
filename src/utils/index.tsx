@@ -16,3 +16,5 @@ export * from './parcelTripCoords';
 export * from './themedStyleSheet';
 export * from './appIcon';
 export * from './haptic';
+export * from './currency';
+export * from './distance';

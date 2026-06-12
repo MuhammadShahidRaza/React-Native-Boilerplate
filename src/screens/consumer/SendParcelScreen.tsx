@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import {
   Autocomplete,
   Button,
@@ -12,15 +13,26 @@ import { FocusProvider } from 'hooks/useFocus';
 import { useFormikForm } from 'hooks/useFormik';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { navigate } from 'navigation/index';
+import { resetToHomeAndScreen } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS, screenHeight } from 'utils/index';
 import {
+  COLORS,
+  screenHeight,
+  formatMoneyOrDash,
+  extractEstimateDistanceKm,
+  formatDistanceKm,
+  haversineDistanceKm,
+} from 'utils/index';
+import {
+  buildParcelBookingPayload,
   createParcelBooking,
+  estimateBooking,
   extractBookingFromResponse,
+  resolveParcelEstimateBaseFare,
+  type EstimateBookingResult,
 } from 'api/functions/snlift/bookings';
+import { logger } from 'utils/logger';
 import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
-import { resolveTimerCreatedAt } from 'utils/jobDisplayTimer';
 import { showToast } from 'utils/toast';
 import type { AddressDetails } from 'utils/location';
 import { sendParcelValidationSchema } from 'utils/validations';
@@ -47,54 +59,150 @@ const initialValues: ParcelFormValues = {
 };
 
 export const SendParcelScreen = () => {
+  const [baseFare, setBaseFare] = useState<number | null>(null);
+  const [parcelEstimate, setParcelEstimate] = useState<EstimateBookingResult | null>(null);
+  const [estimateLoading, setEstimateLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [timerDurationSeconds, setTimerDurationSeconds] = useState<number | undefined>();
+  const parcelEstimateRef = useRef<EstimateBookingResult | null>(null);
+
+  useEffect(() => {
+    parcelEstimateRef.current = parcelEstimate;
+  }, [parcelEstimate]);
+
+  useEffect(() => {
+    getJobDisplayTimerSeconds().then(seconds => {
+      if (seconds > 0) setTimerDurationSeconds(seconds);
+    });
+  }, []);
+
   const formik = useFormikForm<ParcelFormValues>({
     initialValues,
     validationSchema: sendParcelValidationSchema,
     onSubmit: async values => {
-      const distanceKm = Math.max(
-        0.5,
-        Math.round(
-          (Math.abs(values.pickup!.latitude - values.dropoff!.latitude) +
-            Math.abs(values.pickup!.longitude - values.dropoff!.longitude)) *
-            111 *
-            10,
-        ) / 10,
-      );
-      const searchStartedAt = new Date().toISOString();
-      const [res, timerDurationSeconds] = await Promise.all([
-        createParcelBooking({
-          booking_type: 'parcel',
-          pickup_address: values.pickup!.fullAddress ?? 'Pickup',
-          dropoff_address: values.dropoff!.fullAddress ?? 'Drop-off',
-          pickup_latitude: values.pickup!.latitude,
-          pickup_longitude: values.pickup!.longitude,
-          dropoff_latitude: values.dropoff!.latitude,
-          dropoff_longitude: values.dropoff!.longitude,
-          distance_km: distanceKm,
-          ...(values.pkg.trim() ? { item_description: values.pkg.trim() } : {}),
-        }),
-        getJobDisplayTimerSeconds(),
-      ]);
-      const booking = extractBookingFromResponse(res);
-      if (!booking?.id) {
-        showToast({ message: 'Could not create parcel booking. Try again.' });
-        return;
+      if (submitting) return;
+      setSubmitting(true);
+      try {
+        const fallbackDistanceKm = haversineDistanceKm(
+          values.pickup!.latitude,
+          values.pickup!.longitude,
+          values.dropoff!.latitude,
+          values.dropoff!.longitude,
+        );
+        const estimate = parcelEstimateRef.current;
+        const res = await createParcelBooking(
+          buildParcelBookingPayload({
+            pickupAddress: values.pickup!.fullAddress ?? 'Pickup',
+            dropoffAddress: values.dropoff!.fullAddress ?? 'Drop-off',
+            pickupLatitude: values.pickup!.latitude,
+            pickupLongitude: values.pickup!.longitude,
+            dropoffLatitude: values.dropoff!.latitude,
+            dropoffLongitude: values.dropoff!.longitude,
+            distanceKm: fallbackDistanceKm,
+            itemDescription: values.pkg,
+            senderName: values.senderName,
+            senderPhone: values.senderPhone,
+            receiverName: values.receiverName,
+            receiverPhone: values.receiverPhone,
+            estimate,
+          }),
+          { showLoader: false },
+        );
+        const booking = extractBookingFromResponse(res);
+        if (!booking?.id) {
+          showToast({ message: 'Could not create parcel booking. Try again.' });
+          return;
+        }
+        const durationSeconds =
+          timerDurationSeconds ?? (await getJobDisplayTimerSeconds());
+        resetToHomeAndScreen(SCREENS.SEND_PARCEL_FINDING, {
+          pickupLat: values.pickup!.latitude,
+          pickupLng: values.pickup!.longitude,
+          dropoffLat: values.dropoff!.latitude,
+          dropoffLng: values.dropoff!.longitude,
+          bookingId: booking.id,
+          timerDurationSeconds: durationSeconds,
+          startTimerOnMount: true,
+        });
+      } finally {
+        setSubmitting(false);
       }
-      const createdAt = resolveTimerCreatedAt(booking.created_at, searchStartedAt);
-      navigate(SCREENS.SEND_PARCEL_FINDING, {
-        pickupLat: values.pickup!.latitude,
-        pickupLng: values.pickup!.longitude,
-        dropoffLat: values.dropoff!.latitude,
-        dropoffLng: values.dropoff!.longitude,
-        bookingId: booking.id,
-        createdAt,
-        timerDurationSeconds,
-      });
     },
   });
 
   const showFieldError = (field: keyof ParcelFormValues) =>
     Boolean(formik.touched[field] && formik.submitCount > 0 && formik.errors[field]);
+
+  const pickup = formik.values.pickup;
+  const dropoff = formik.values.dropoff;
+
+  const displayDistanceKm = useMemo(() => {
+    const fromApi = extractEstimateDistanceKm(parcelEstimate);
+    if (fromApi != null) return fromApi;
+    if (
+      pickup?.latitude != null &&
+      pickup?.longitude != null &&
+      dropoff?.latitude != null &&
+      dropoff?.longitude != null
+    ) {
+      return haversineDistanceKm(
+        pickup.latitude,
+        pickup.longitude,
+        dropoff.latitude,
+        dropoff.longitude,
+      );
+    }
+    return null;
+  }, [parcelEstimate, pickup, dropoff]);
+
+  useEffect(() => {
+    if (
+      pickup?.latitude == null ||
+      pickup?.longitude == null ||
+      dropoff?.latitude == null ||
+      dropoff?.longitude == null
+    ) {
+      setBaseFare(null);
+      setParcelEstimate(null);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchParcelEstimate = async () => {
+      setEstimateLoading(true);
+      try {
+        const result = await estimateBooking({
+          booking_type: 'parcel',
+          pickup_latitude: pickup.latitude,
+          pickup_longitude: pickup.longitude,
+          dropoff_latitude: dropoff.latitude,
+          dropoff_longitude: dropoff.longitude,
+        });
+        if (!cancelled) {
+          setParcelEstimate(result ?? null);
+          setBaseFare(resolveParcelEstimateBaseFare(result));
+        }
+      } catch (error) {
+        logger.error('parcel estimateBooking failed', error);
+        if (!cancelled) {
+          setBaseFare(null);
+          setParcelEstimate(null);
+        }
+      } finally {
+        if (!cancelled) setEstimateLoading(false);
+      }
+    };
+
+    fetchParcelEstimate();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    pickup?.latitude,
+    pickup?.longitude,
+    dropoff?.latitude,
+    dropoff?.longitude,
+  ]);
 
   return (
     <Wrapper
@@ -169,9 +277,17 @@ export const SendParcelScreen = () => {
               />
               <View style={styles.priceInfo}>
                 <Typography style={styles.priceLabel}>Base Fare</Typography>
-                <Typography style={styles.priceSub}>Standard delivery</Typography>
+                <Typography style={styles.priceSub}>
+                  {displayDistanceKm != null
+                    ? formatDistanceKm(displayDistanceKm)
+                    : 'Standard delivery'}
+                </Typography>
               </View>
-              <Typography style={styles.priceAmount}>CFA 550</Typography>
+              {estimateLoading ? (
+                <ActivityIndicator size='small' color={COLORS.APP_SECONDARY} />
+              ) : (
+                <Typography style={styles.priceAmount}>{formatMoneyOrDash(baseFare)}</Typography>
+              )}
             </View>
           </View>
 
@@ -267,6 +383,8 @@ export const SendParcelScreen = () => {
             title='Request Courier'
             onPress={() => formik.handleSubmit()}
             style={styles.ctaBtn}
+            loading={submitting}
+            disabled={submitting}
           />
         </FocusProvider>
       </View>

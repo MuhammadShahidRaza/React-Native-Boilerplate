@@ -165,7 +165,10 @@ export type RootStackParamList = {
     dropoffLng?: number;
     bookingId?: number;
     createdAt?: string;
+    /** Client time when booking succeeded — full timer on fresh create. */
+    timerAnchorAt?: string;
     timerDurationSeconds?: number;
+    startTimerOnMount?: boolean;
   } | undefined;
   [SCREENS.DRIVER_FOUND]: {
     pickupLat?: number;

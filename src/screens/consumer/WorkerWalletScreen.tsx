@@ -27,7 +27,7 @@ import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { VARIABLES } from 'constants/common';
 import { COMMON_TEXT } from 'constants/screens';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, COLORS, screenWidth, showToast } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, screenWidth, showToast, formatMoney } from 'utils/index';
 import { IMAGES } from 'constants/assets';
 import { useAppSelector } from 'types/reduxTypes';
 import type { User } from 'types/index';
@@ -179,10 +179,6 @@ export const WorkerWalletScreen = () => {
     setIsWithdrawModalVisible(true);
   };
 
-  const formattedBalance = Number.isFinite(balance)
-    ? balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-    : '0.00';
-
   return (
     <View style={styles.root}>
       <SafeAreaView edges={['top']} style={{ backgroundColor: COLORS.BACKGROUND }}>
@@ -202,7 +198,7 @@ export const WorkerWalletScreen = () => {
           </View>
           <View style={styles.cardInfo}>
             <Typography style={styles.cardLabel}>Available Balance</Typography>
-            <Typography style={styles.cardAmount}>{`CFA ${formattedBalance}`}</Typography>
+            <Typography style={styles.cardAmount}>{formatMoney(balance)}</Typography>
           </View>
         </AppGradient>
 

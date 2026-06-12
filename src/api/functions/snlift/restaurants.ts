@@ -4,6 +4,12 @@ import { handleGetApiRequest } from '../app';
 import type { SnliftRestaurant } from 'types/snliftApi';
 import { IMAGES } from 'constants/assets';
 import type { RestaurantItem, FoodTag } from 'components/common/food/foodRestaurants';
+import { formatMoney } from 'utils/currency';
+
+export type SnliftMenuCategory = {
+  id?: number;
+  title?: string;
+};
 
 export type SnliftMenuItem = {
   id: number;
@@ -14,28 +20,85 @@ export type SnliftMenuItem = {
   image?: string | null;
   is_available?: number | boolean;
   is_popular?: number | boolean;
-  category?: string;
+  category?: SnliftMenuCategory | string;
+  category_id?: number;
 };
+
+export type SnliftMenuPage = {
+  menu_items?: SnliftMenuItem[];
+  current_page?: number;
+  last_page?: number;
+};
+
+function isMenuItemAvailable(item: SnliftMenuItem): boolean {
+  return item.is_available !== false && item.is_available !== 0;
+}
+
+export function isMenuItemPopular(item: SnliftMenuItem): boolean {
+  return item.is_popular === true || item.is_popular === 1;
+}
+
+export function extractMenuCategoryTitle(item: SnliftMenuItem): string {
+  const category = item.category;
+  if (category && typeof category === 'object') {
+    return category.title?.trim() ?? '';
+  }
+  if (typeof category === 'string') return category.trim();
+  return '';
+}
 
 export async function getRestaurantMenu(
   restaurantId: number | string,
   params?: { page?: number },
+  options?: { showLoader?: boolean },
 ) {
-  const raw = await handleGetApiRequest<
-    SnliftMenuItem[] | { menu: SnliftMenuItem[]; data: SnliftMenuItem[] }
-  >({
+  const raw = await handleGetApiRequest<SnliftMenuItem[] | SnliftMenuPage>({
     url: API_ROUTES.RESTAURANT_MENU(restaurantId),
     params: params as Record<string, number> | undefined,
     showError: false,
+    showLoader: options?.showLoader ?? false,
   });
   if (!raw) return [];
-  return extractApiList<SnliftMenuItem>(raw, ['menu', 'data', 'items']);
+  return extractApiList<SnliftMenuItem>(raw, ['menu_items', 'menu', 'items', 'data']);
 }
 
-export async function listRestaurants(params?: { latitude?: number; longitude?: number }) {
+/** Fetch all paginated menu pages for a restaurant. */
+export async function getRestaurantMenuAll(
+  restaurantId: number | string,
+  options?: { showLoader?: boolean },
+): Promise<SnliftMenuItem[]> {
+  const items: SnliftMenuItem[] = [];
+  let page = 1;
+  let lastPage = 1;
+
+  while (page <= lastPage) {
+    const raw = await handleGetApiRequest<SnliftMenuItem[] | SnliftMenuPage>({
+      url: API_ROUTES.RESTAURANT_MENU(restaurantId),
+      params: { page },
+      showError: page === 1,
+      showLoader: options?.showLoader === true && page === 1,
+    });
+    if (!raw) break;
+
+    const pageItems = extractApiList<SnliftMenuItem>(raw, ['menu_items', 'menu', 'items', 'data']);
+    items.push(...pageItems.filter(isMenuItemAvailable));
+
+    const last = (raw as SnliftMenuPage).last_page;
+    lastPage = typeof last === 'number' && last > 0 ? last : 1;
+    page += 1;
+  }
+
+  return items;
+}
+
+export async function listRestaurants(
+  params?: { latitude?: number; longitude?: number },
+  options?: { showLoader?: boolean },
+) {
   return handleGetApiRequest<SnliftRestaurant[] | { restaurants: SnliftRestaurant[] }>({
     url: API_ROUTES.RESTAURANTS,
     showError: false,
+    showLoader: options?.showLoader ?? false,
     params: params as Record<string, number> | undefined,
   });
 }
@@ -74,7 +137,7 @@ export function mapApiRestaurantToItem(r: SnliftRestaurant): RestaurantItem {
 
   const feeNum =
     typeof r.delivery_fee === 'number' ? r.delivery_fee : parseFloat(String(r.delivery_fee ?? '30'));
-  const fee = Number.isNaN(feeNum) ? 'CFA 30' : `CFA ${feeNum}`;
+  const fee = formatMoney(Number.isNaN(feeNum) ? 30 : feeNum);
 
   return {
     id: String(r.id),

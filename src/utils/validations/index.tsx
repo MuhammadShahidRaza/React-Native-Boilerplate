@@ -499,6 +499,7 @@ export const vehicleDetailsValidationSchema = createObjectShape({
 });
 
 export const workerDocumentsValidationSchema = createObjectShape({
+  driver_license_number: driverLicenseSchema,
   driver_license_validity_date: createStringValidationSchema({
     name: 'Driver License validity date',
     minLength: 8,

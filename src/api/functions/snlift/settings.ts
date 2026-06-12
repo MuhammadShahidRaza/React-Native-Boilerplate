@@ -1,6 +1,7 @@
 import { API_ROUTES } from 'api/routes';
 import { handleGetApiRequest } from '../app';
 import { parseJobDisplayTimer } from 'utils/jobDisplayTimer';
+import { logger } from 'utils/logger';
 
 export type AppSettings = {
   id?: number;
@@ -25,39 +26,20 @@ function extractAppSettings(res: unknown): AppSettings | null {
   return null;
 }
 
-let cachedSettings: AppSettings | null = null;
-let settingsPromise: Promise<AppSettings | null> | null = null;
-
-export async function getAppSettings(forceRefresh = false): Promise<AppSettings | null> {
-  if (!forceRefresh && cachedSettings) return cachedSettings;
-  if (!forceRefresh && settingsPromise) return settingsPromise;
-
-  settingsPromise = (async () => {
-    const res = await handleGetApiRequest<SettingsResponse>({
-      url: API_ROUTES.GET_APP_SETTINGS,
-      showLoader: false,
-      showError: false,
-      addToPending: true,
-    });
-    const settings = extractAppSettings(res);
-    if (!settings) return null;
-    cachedSettings = settings;
-    return cachedSettings;
-  })();
-
-  try {
-    return await settingsPromise;
-  } finally {
-    settingsPromise = null;
-  }
-}
-
-export function clearAppSettingsCache(): void {
-  cachedSettings = null;
-  settingsPromise = null;
+export async function getAppSettings(): Promise<AppSettings | null> {
+  const res = await handleGetApiRequest<SettingsResponse>({
+    url: API_ROUTES.GET_APP_SETTINGS,
+    showLoader: false,
+    showError: false,
+    addToPending: true,
+  });
+  return extractAppSettings(res);
 }
 
 export async function getJobDisplayTimerSeconds(): Promise<number> {
   const settings = await getAppSettings();
-  return parseJobDisplayTimer(settings?.job_display_timer);
+  const raw = settings?.job_display_timer;
+  const seconds = parseJobDisplayTimer(raw);
+  logger.log('[job timer] settings:', raw, '→', seconds, 'seconds');
+  return seconds;
 }

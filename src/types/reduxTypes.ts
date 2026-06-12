@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AddressState } from 'store/slices/address';
 import { AppSettingsState } from 'store/slices/appSettings';
 import { BookingsState } from 'store/slices/bookings';
+import type { FoodCartState } from 'store/slices/foodCart';
 import { NotificationState } from 'store/slices/notification';
 import { ServicesState } from 'store/slices/services';
 import { UserState } from 'store/slices/user';
@@ -18,6 +19,7 @@ export type RootState = {
   services: ServicesState;
   bookings: BookingsState;
   worker: WorkerAvailabilityState;
+  foodCart: FoodCartState;
 };
 
 export type AppDispatch = typeof store.dispatch;

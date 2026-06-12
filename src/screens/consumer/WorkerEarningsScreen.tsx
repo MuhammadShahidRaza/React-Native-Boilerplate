@@ -3,36 +3,28 @@ import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppGradient, Icon, RowComponent, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
-import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, formatMoney } from 'utils/index';
 import { FONT_FAMILY, IMAGES } from 'constants/assets';
 import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
 import { useAppSelector } from 'types/reduxTypes';
 
-function formatCfa(amount: number | string | undefined, fallback: string): string {
-  if (amount === undefined || amount === null || amount === '') return fallback;
-  const n = typeof amount === 'number' ? amount : parseFloat(String(amount));
-  if (Number.isNaN(n)) return fallback;
-  return `CFA ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
-
 export const WorkerEarningsScreen = () => {
   const role = useAppSelector(state => state.user?.role);
-  const [total, setTotal] = useState<string>(WORKER_EARNINGS_SUMMARY.total);
-  const [today, setToday] = useState<string>(WORKER_EARNINGS_SUMMARY.today);
-  const [week, setWeek] = useState<string>(WORKER_EARNINGS_SUMMARY.week);
-  const [month, setMonth] = useState<string>(WORKER_EARNINGS_SUMMARY.month);
+  const [total, setTotal] = useState(formatMoney(0));
+  const [today, setToday] = useState(formatMoney(0));
+  const [week, setWeek] = useState(formatMoney(0));
+  const [month, setMonth] = useState(formatMoney(0));
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const summary = await getWorkerWalletSummary(role);
       if (cancelled || !summary) return;
-      setTotal(formatCfa(summary.total_earnings, WORKER_EARNINGS_SUMMARY.total));
-      setToday(formatCfa(summary.today_earnings, WORKER_EARNINGS_SUMMARY.today));
-      setWeek(formatCfa(summary.week_earnings, WORKER_EARNINGS_SUMMARY.week));
-      setMonth(formatCfa(summary.month_earnings, WORKER_EARNINGS_SUMMARY.month));
+      setTotal(formatMoney(summary.total_earnings));
+      setToday(formatMoney(summary.today_earnings));
+      setWeek(formatMoney(summary.week_earnings));
+      setMonth(formatMoney(summary.month_earnings));
     })();
     return () => {
       cancelled = true;

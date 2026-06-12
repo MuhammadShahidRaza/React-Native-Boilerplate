@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { AppGradient, AppStatusModal, Button, GradientIcon, Map, Typography } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, BRAND_PRIMARY, COLORS, screenHeight } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, screenHeight, formatMoney } from 'utils/index';
 import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
@@ -14,39 +15,83 @@ import { getMapVehicleMarkerKind, getWorkerRoleCopy } from 'utils/workerRoleCopy
 import { getCurrentLocation } from 'utils/location';
 import { updateUserLocation } from 'api/functions/app/user';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
+import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
+import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
+import { useCurrentLocation } from 'hooks/useCurrentLocation';
+
+function formatRating(user: { details?: Record<string, unknown> } | null | undefined): string {
+  const d = user?.details;
+  const raw =
+    d?.average_rating ??
+    d?.avg_rating ??
+    d?.rating ??
+    (user as { average_rating?: number | string } | null)?.average_rating;
+  if (raw === undefined || raw === null || raw === '') return '—';
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw));
+  return Number.isNaN(n) ? '—' : n.toFixed(1);
+}
 
 export const WorkerHomeScreen = () => {
   const dispatch = useAppDispatch();
+  const isFocused = useIsFocused();
   const userDetails = useAppSelector(state => state?.user?.userDetails);
   const role = useAppSelector(state => state?.user?.role);
   const { isOnline } = useAppSelector(state => state.worker);
   const copy = getWorkerRoleCopy(role);
+  const { loadCurrentLocation } = useCurrentLocation();
   const [topOffVisible, setTopOffVisible] = useState(false);
-  const [locationLabel, setLocationLabel] = useState('Locating...');
+  const [todayEarnings, setTodayEarnings] = useState(formatMoney(0));
+  const [tripCount, setTripCount] = useState('0');
   const locationUpdatedRef = useRef(false);
-  const firstName = userDetails?.full_name?.split(' ')?.[0] ?? 'Alex';
+
+  const firstName = useMemo(() => {
+    const full = userDetails?.full_name?.trim();
+    if (full) return full.split(/\s+/)[0];
+    return 'there';
+  }, [userDetails?.full_name]);
+
+  const ratingLabel = useMemo(() => formatRating(userDetails), [userDetails]);
   const walletBalance = useMemo(() => parseWalletBalance(userDetails), [userDetails]);
   const walletFunded = walletBalance > 0;
 
   const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
 
-  // Update location on mount (once) via REST API + Firestore
+  const loadWorkerStats = useCallback(async () => {
+    if (!role) return;
+    const [summary, bookingsRes] = await Promise.all([
+      getWorkerWalletSummary(role),
+      listBookings({ status: 'completed' }, role),
+    ]);
+    setTodayEarnings(formatMoney(summary?.today_earnings));
+    const completed = extractBookingsList(bookingsRes).filter(
+      b => (b.status ?? '').toLowerCase() === 'completed',
+    );
+    setTripCount(String(completed.length));
+  }, [role]);
+
+  useEffect(() => {
+    if (!isFocused) return;
+    loadWorkerStats();
+  }, [isFocused, loadWorkerStats]);
+
+  // GPS + address + sync location to API / Firestore (once per session)
   useEffect(() => {
     if (locationUpdatedRef.current || !userDetails?.id) return;
     locationUpdatedRef.current = true;
     (async () => {
-      const pos = await getCurrentLocation();
-      if (!pos) {
-        setLocationLabel('Location unavailable');
-        return;
+      const located = await loadCurrentLocation();
+      let latitude = located?.latitude;
+      let longitude = located?.longitude;
+      if (latitude == null || longitude == null) {
+        const pos = await getCurrentLocation();
+        if (!pos) return;
+        latitude = pos.coords.latitude;
+        longitude = pos.coords.longitude;
       }
-      const { latitude, longitude } = pos.coords;
-      setLocationLabel(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
       updateUserLocation(latitude, longitude);
       updateWorkerFirestoreLocation(userDetails.id, latitude, longitude, role);
     })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userDetails?.id]);
+  }, [userDetails?.id, loadCurrentLocation, role]);
 
   const blockIfWalletEmpty = () => {
     if (walletFunded) return false;
@@ -83,26 +128,11 @@ export const WorkerHomeScreen = () => {
       </View>
 
       <SafeAreaView edges={['top']} style={styles.overlayTop} pointerEvents='box-none'>
-        {/* Top bar: location label + notification bell */}
         <View style={styles.topBar} pointerEvents='box-none'>
-          <View style={styles.locPill} pointerEvents='none'>
-            <GradientIcon
-              componentName={VARIABLES.EvilIcons}
-              iconName='location'
-              size={FontSize.ExtraLarge}
-              color={COLORS.WHITE}
-            />
-            <View style={styles.locTexts}>
-              <Typography style={styles.locLabel}>Location</Typography>
-              <Typography style={styles.locValue} numberOfLines={1}>
-                {locationLabel}
-              </Typography>
-            </View>
-          </View>
           <GradientIcon
             componentName={VARIABLES.Feather}
             iconName='bell'
-            size={FontSize.Medium}
+            size={FontSize.MediumLarge}
             color={COLORS.WHITE}
             onPress={() => navigate(SCREENS.NOTIFICATIONS)}
           />
@@ -151,17 +181,17 @@ export const WorkerHomeScreen = () => {
         </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>CFA 87.50</Typography>
-            <Typography style={styles.statLabel}>Earning</Typography>
+            <Typography style={styles.statValue}>{todayEarnings}</Typography>
+            <Typography style={styles.statLabel}>Today</Typography>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>12</Typography>
+            <Typography style={styles.statValue}>{tripCount}</Typography>
             <Typography style={styles.statLabel}>{copy.tripsStatLabel}</Typography>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>4.9</Typography>
+            <Typography style={styles.statValue}>{ratingLabel}</Typography>
             <Typography style={styles.statLabel}>Rating</Typography>
           </View>
         </View>
@@ -221,30 +251,11 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     width: '100%',
     paddingHorizontal: 16,
     paddingTop: 8,
     marginBottom: 8,
-  },
-  locPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    flex: 1,
-  },
-  locTexts: {
-    flex: 1,
-  },
-  locLabel: {
-    color: COLORS.WHITE,
-    fontSize: FontSize.ExtraSmall,
-    opacity: 0.85,
-  },
-  locValue: {
-    color: COLORS.WHITE,
-    fontSize: FontSize.MediumSmall,
-    fontWeight: FontWeight.SemiBold,
   },
   togglePill: {
     flexDirection: 'row',

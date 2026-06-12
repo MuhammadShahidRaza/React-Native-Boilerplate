@@ -15,7 +15,9 @@ import { ENV_CONSTANTS } from 'constants/common';
 import store from 'store/store';
 import { logger } from 'utils/logger';
 import { setUserDetails } from 'store/slices/user';
-import { normalizeSniftUser } from 'api/normalizers/snlift';
+import { normalizeSniftUser, unwrapApiUser } from 'api/normalizers/snlift';
+import { syncWorkerOnboardingFlags } from 'utils/workerOnboarding';
+import { isWorkerRole } from 'config/app';
 import { getContentBySlug } from 'api/functions/snlift/content';
 
 const logout = async (data: { udid: string }) => {
@@ -59,17 +61,23 @@ const completeProfile = async ({ data }: { data: CompleteProfileFormValues }) =>
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     return store.getState().user.userDetails as User;
   }
-  const user: User | undefined = await handleFormDataPatchRequest<User, CompleteProfileFormValues>({
+  const response = await handleFormDataPatchRequest<
+    User | { user: User },
+    CompleteProfileFormValues
+  >({
     url: API_ROUTES.COMPLETE_PROFILE,
     data,
   });
 
-  if (user) {
-    store.dispatch(
-      setUserDetails(normalizeSniftUser(user as Partial<User> & Record<string, unknown>)),
-    );
+  if (!response) return;
+
+  const rawUser = unwrapApiUser(response);
+  const normalized = normalizeSniftUser(rawUser);
+  store.dispatch(setUserDetails(normalized));
+  if (isWorkerRole(normalized.user_type ?? normalized.user_role)) {
+    syncWorkerOnboardingFlags(normalized);
   }
-  return user;
+  return normalized;
 };
 
 // const toggleNotification = async () => {

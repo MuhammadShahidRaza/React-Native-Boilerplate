@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  View,
-  Pressable,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
+import { ScrollView, StyleSheet, View, Pressable, TouchableOpacity } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
@@ -66,7 +60,6 @@ const formatProfileLocation = (profile: User | null | undefined): string => {
 };
 
 export const Home = () => {
-  const isFocused = useIsFocused();
   const user = useSelector((state: RootState) => state.user.userDetails);
   const addressList = useSelector((state: RootState) => state.address.addressList);
   const locationUpdatedRef = useRef(false);
@@ -74,7 +67,7 @@ export const Home = () => {
 
   // Update user location once when Home tab is visible — REST API + Firestore
   useEffect(() => {
-    if (!isFocused || locationUpdatedRef.current || !user?.id) return;
+    if (locationUpdatedRef.current || !user?.id) return;
     locationUpdatedRef.current = true;
     (async () => {
       const pos = await getCurrentLocation();
@@ -84,22 +77,20 @@ export const Home = () => {
       updateWorkerFirestoreLocation(user.id, latitude, longitude, 'user');
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFocused, user?.id]);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (!isFocused) return;
     getAppSettings();
-  }, [isFocused]);
+  }, []);
 
   useEffect(() => {
-    if (!isFocused) return;
     const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];
     const savedLocation = defaultAddr ? formatSavedAddress(defaultAddr) : '';
     const profileLocation = formatProfileLocation(user);
     if (!savedLocation && !profileLocation && !currentAddress?.fullAddress) {
       loadCurrentLocation();
     }
-  }, [isFocused, addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
+  }, [addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
 
   const applyHomeData = useCallback((data: SnliftHomeData) => {
     setBanners(data.banners);
@@ -115,18 +106,20 @@ export const Home = () => {
   const [loading, setLoading] = useState(true);
 
   const loadHome = useCallback(async () => {
-    // getHomeData returns cached data instantly if within TTL — no flicker
-    const data = await getHomeData();
-    if (data) {
-      applyHomeData(data);
+    setLoading(true);
+    try {
+      const data = await getHomeData();
+      if (data) {
+        applyHomeData(data);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [applyHomeData]);
 
   useEffect(() => {
-    if (!isFocused) return;
     loadHome();
-  }, [isFocused, loadHome]);
+  }, [loadHome]);
 
   const primaryBanner = banners[0];
 
@@ -199,12 +192,16 @@ export const Home = () => {
             </Typography>
             <Typography style={styles.sub}>Where would you like to go today?</Typography>
 
-            {loading && !primaryBanner ? (
-              <ActivityIndicator color={COLORS.WHITE} style={styles.bannerLoader} />
+            {loading ? (
+              <HomeBannerSkeleton />
             ) : (
               <Pressable style={styles.banner} onPress={() => navigate(SCREENS.BOOK_RIDE)}>
                 <Photo
-                  source={primaryBanner?.image ? { uri: primaryBanner.image } : IMAGES.HOME}
+                  source={
+                    primaryBanner?.image
+                      ? { uri: primaryBanner.image, cache: 'force-cache' }
+                      : IMAGES.HOME
+                  }
                   imageStyle={styles.bannerImg}
                 />
                 <View style={styles.bannerText}>
@@ -275,8 +272,8 @@ export const Home = () => {
                 See All
               </Typography>
             </View>
-            {loading && hotOffers?.length === 0 ? (
-              <ActivityIndicator color={COLORS.APP_PRIMARY} />
+            {loading ? (
+              <HomeHotOffersSkeleton />
             ) : (
               hotOffers?.length > 0 &&
               hotOffers?.map(offer => <HotOfferCard key={offer.id} offer={offer} />)
@@ -295,8 +292,8 @@ export const Home = () => {
                 Promo Codes
               </Typography>
             </View>
-            {loading && promoCodes.length === 0 ? (
-              <ActivityIndicator color={COLORS.APP_PRIMARY} />
+            {loading ? (
+              <HomePromoSkeleton />
             ) : promoCodes.length === 0 ? (
               <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
             ) : (
@@ -327,6 +324,46 @@ export const Home = () => {
     </Wrapper>
   );
 };
+
+const HomeBannerSkeleton = () => (
+  <SkeletonPlaceholder backgroundColor='#FFFFFF2E' highlightColor='#FFFFFF52'>
+    <SkeletonPlaceholder.Item width='100%' height={180} borderRadius={20} marginBottom={10} />
+  </SkeletonPlaceholder>
+);
+
+const HomeHotOffersSkeleton = () => (
+  <SkeletonPlaceholder
+    backgroundColor={COLORS.SKELETON_BACKGROUND}
+    highlightColor={COLORS.SKELETON_HIGHLIGHT}
+  >
+    {[0, 1].map(i => (
+      <SkeletonPlaceholder.Item
+        key={i}
+        width='100%'
+        height={120}
+        borderRadius={16}
+        marginBottom={12}
+      />
+    ))}
+  </SkeletonPlaceholder>
+);
+
+const HomePromoSkeleton = () => (
+  <SkeletonPlaceholder
+    backgroundColor={COLORS.SKELETON_BACKGROUND}
+    highlightColor={COLORS.SKELETON_HIGHLIGHT}
+  >
+    {[0, 1, 2].map(i => (
+      <SkeletonPlaceholder.Item
+        key={i}
+        width='100%'
+        height={56}
+        borderRadius={100}
+        marginBottom={10}
+      />
+    ))}
+  </SkeletonPlaceholder>
+);
 
 const HotOfferCard = ({ offer }: { offer: SnliftHomeHotOffer }) => (
   <Pressable style={styles.hotOfferCard} onPress={() => navigate(SCREENS.ORDER_FOOD)}>
@@ -409,7 +446,7 @@ const styles = StyleSheet.create({
   locText: {
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
-    width: '60%',
+    width: '40%',
     fontWeight: FontWeight.SemiBold,
   },
   greet: {
@@ -423,21 +460,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 16,
   },
-  bannerLoader: {
-    height: 180,
-    marginBottom: 10,
-  },
   banner: {
     height: 180,
     marginBottom: 10,
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: COLORS.APP_MAP_BG,
+    // backgroundColor: COLORS.APP_MAP_BG,
   },
   bannerImg: {
     width: '100%',
     height: '100%',
-    backgroundColor: COLORS.SECONDARY,
+    // backgroundColor: COLORS.SECONDARY,
   },
   bannerText: {
     position: 'absolute',

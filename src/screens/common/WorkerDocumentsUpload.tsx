@@ -1,27 +1,49 @@
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Input, Button, Wrapper } from 'components/index';
+import { Input, Button, Wrapper, ModalComponent, Icon, Typography } from 'components/index';
 import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { VARIABLES } from 'constants/common';
 import { COMMON_TEXT } from 'constants/index';
 import { setIsUserLoggedIn } from 'store/slices/appSettings';
-import { resetWorkerAvailability, setDocumentsComplete } from 'store/slices/worker';
-import store from 'store/store';
+import { resetWorkerAvailability } from 'store/slices/worker';
 import { useAppDispatch } from 'types/reduxTypes';
 import { onBack } from 'navigation/index';
 import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
-import { STYLES, hasUri, screenHeight, COLORS, removeKeychainItem } from 'utils/index';
+import { STYLES, screenHeight, COLORS, removeKeychainItem } from 'utils/index';
 import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
 import { ImageUpload } from 'components/common/ImageUpload';
 import { workerDocumentsValidationSchema } from 'utils/validations';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS } from 'constants/index';
+import type { CompleteProfileFormValues } from './CompleteProfile';
 import { completeProfile } from 'api/functions/app/settings';
 import { SelectedMedia } from 'hooks/useMediaPicker';
 import { useAppSelector } from 'types/reduxTypes';
-import { safeString } from 'utils/index';
+import { pickFromUserDetails } from 'api/normalizers/snlift';
+import { buildWorkerDocumentsUploadPayload } from 'utils/workerOnboarding';
+import { Calendar } from 'react-native-calendars';
+import { FontSize } from 'types/fontTypes';
+
+function parseStoredDate(value: string | undefined): string {
+  if (!value?.trim()) return '';
+  const raw = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+  const ddmmyyyy = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2]}-${ddmmyyyy[1]}`;
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+  return '';
+}
+
+function formatDisplayDate(isoDate: string): string {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.split('T')[0].split('-');
+  if (!year || !month || !day) return isoDate;
+  return `${day}/${month}/${year}`;
+}
 
 export interface WorkerDocumentsFormValues {
+  driver_license_number: string;
   driver_license_validity_date: string;
   driver_license_front?: SelectedMedia | null | string;
   driver_license_back?: SelectedMedia | null | string;
@@ -34,12 +56,15 @@ export const WorkerDocumentsUpload = (
   const dispatch = useAppDispatch();
   const isFromSettings = Boolean(props.route.params?.isFromSettings);
   const [submittedModalVisible, setSubmittedModalVisible] = useState(false);
-  const user = useAppSelector(state => state.user.userDetails?.details);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const user = useAppSelector(state => state.user.userDetails?.details) as
+    | Record<string, unknown>
+    | undefined;
   const userRoot = useAppSelector(state => state.user.userDetails);
 
   const returnToLoginAfterSignup = async () => {
     setSubmittedModalVisible(false);
-    store.dispatch(setIsUserLoggedIn(false));
+    dispatch(setIsUserLoggedIn(false));
     dispatch(resetWorkerAvailability());
     await removeKeychainItem(VARIABLES.USER_TOKEN);
     props.navigation.reset({
@@ -49,22 +74,10 @@ export const WorkerDocumentsUpload = (
   };
 
   const handleSubmit = async (values: WorkerDocumentsFormValues) => {
-    const data = {
-      issue_date: values.driver_license_validity_date,
-      ...(hasUri(values.driver_license_front) && {
-        driving_license_front: values.driver_license_front,
-      }),
-      ...(hasUri(values.driver_license_back) && {
-        driving_license_back: values.driver_license_back,
-      }),
-      ...(hasUri(values.mot_picture) && {
-        business_license_front: values.mot_picture,
-      }),
-    };
+    const data = buildWorkerDocumentsUploadPayload(values) as CompleteProfileFormValues;
     const user = await completeProfile({ data });
     if (!user) return;
 
-    dispatch(setDocumentsComplete(true));
     if (!isFromSettings) {
       setSubmittedModalVisible(true);
     } else {
@@ -77,13 +90,25 @@ export const WorkerDocumentsUpload = (
 
   const formik = useFormikForm({
     initialValues: {
-      driver_license_validity_date:
-        safeString(userRoot?.issue_date) ||
-        safeString((user as { driver_license_validity_date?: string })?.driver_license_validity_date) ||
-        '03/05/2029',
-      driver_license_front: user?.driving_license_front ?? null,
-      driver_license_back: user?.driving_license_back ?? null,
-      mot_picture: user?.business_license_front ?? null,
+      driver_license_number: pickFromUserDetails(userRoot, [
+        'driver_license_number',
+        'driving_license_number',
+      ]),
+      driver_license_validity_date: parseStoredDate(
+        pickFromUserDetails(userRoot, ['driver_license_validity_date', 'issue_date']),
+      ),
+      driver_license_front:
+        (user?.driving_license_front as string | null | undefined) ??
+        (user?.driver_license_front as string | null | undefined) ??
+        null,
+      driver_license_back:
+        (user?.driving_license_back as string | null | undefined) ??
+        (user?.driver_license_back as string | null | undefined) ??
+        null,
+      mot_picture:
+        (user?.mot_certificate as string | null | undefined) ??
+        (user?.business_license_front as string | null | undefined) ??
+        null,
     },
     enableReinitialize: true,
     validationSchema: workerDocumentsValidationSchema,
@@ -97,16 +122,48 @@ export const WorkerDocumentsUpload = (
     formik.setFieldTouched(name, true);
   };
 
+  const handleDateSelect = (day: { dateString: string }) => {
+    formik.setFieldValue('driver_license_validity_date', day.dateString);
+    formik.setFieldTouched('driver_license_validity_date', true);
+    setShowDatePicker(false);
+  };
+
+  const selectedDate = formik.values.driver_license_validity_date;
+  const todayIso = new Date().toISOString().split('T')[0];
+
   return (
     <Wrapper useScrollView headerTitle='Documents'>
       <View style={styles.container}>
         <FocusProvider>
           <Input
+            name='driver_license_number'
+            title='Driver License Number'
+            value={formik.values.driver_license_number}
+            onChangeText={text =>
+              formik.setFieldValue('driver_license_number', text.toUpperCase())
+            }
+            placeholder='Enter driver license number'
+            autoCapitalize='characters'
+            maxLength={14}
+            error={formik.errors.driver_license_number}
+            touched={Boolean(formik.touched.driver_license_number && formik.submitCount)}
+          />
+
+          <Input
             name='driver_license_validity_date'
             title='Driver License validity date'
-            value={formik.values.driver_license_validity_date}
-            onChangeText={formik.handleChange('driver_license_validity_date')}
-            placeholder='DD/MM/YYYY'
+            value={formatDisplayDate(selectedDate)}
+            onChangeText={() => {}}
+            placeholder='Select validity date'
+            editable={false}
+            endIcon={{
+              componentName: VARIABLES.MaterialIcons,
+              iconName: 'calendar-today',
+              color: COLORS.BORDER,
+              size: FontSize.MediumLarge,
+              iconStyle: { marginRight: 3 },
+            }}
+            onPress={() => setShowDatePicker(true)}
             error={formik.errors.driver_license_validity_date}
             touched={Boolean(
               formik.touched.driver_license_validity_date && formik.submitCount,
@@ -152,6 +209,58 @@ export const WorkerDocumentsUpload = (
         </FocusProvider>
       </View>
 
+      <ModalComponent
+        position='center'
+        modalVisible={showDatePicker}
+        setModalVisible={setShowDatePicker}
+        modalSecondaryContainerStyle={styles.datePickerModal}
+      >
+        <View style={styles.datePickerHeader}>
+          <Typography style={styles.datePickerTitle}>License validity date</Typography>
+          <Icon
+            componentName={VARIABLES.Ionicons}
+            iconName='close'
+            size={FontSize.XXL}
+            color={COLORS.PRIMARY}
+            onPress={() => setShowDatePicker(false)}
+          />
+        </View>
+        <Calendar
+          onDayPress={handleDateSelect}
+          style={styles.calendar}
+          markedDates={
+            selectedDate
+              ? {
+                  [selectedDate]: {
+                    selected: true,
+                    selectedColor: COLORS.PRIMARY,
+                  },
+                }
+              : undefined
+          }
+          minDate={todayIso}
+          theme={{
+            backgroundColor: COLORS.BACKGROUND,
+            calendarBackground: COLORS.BACKGROUND,
+            textSectionTitleColor: COLORS.TEXT,
+            selectedDayBackgroundColor: COLORS.PRIMARY,
+            selectedDayTextColor: COLORS.WHITE,
+            todayTextColor: COLORS.PRIMARY,
+            dayTextColor: COLORS.TEXT,
+            textDisabledColor: COLORS.HEADER,
+            arrowColor: COLORS.PRIMARY,
+            monthTextColor: COLORS.TEXT,
+            textDayFontWeight: '500',
+            textMonthFontWeight: 'bold',
+            textDayHeaderFontWeight: '600',
+            textDayFontSize: FontSize.Medium,
+            textMonthFontSize: FontSize.Large,
+            textDayHeaderFontSize: FontSize.MediumSmall,
+          }}
+        />
+        <Button title='Done' onPress={() => setShowDatePicker(false)} style={styles.datePickerButton} />
+      </ModalComponent>
+
       <SuccessFailureModal
         isVisible={submittedModalVisible}
         setIsVisible={setSubmittedModalVisible}
@@ -180,5 +289,27 @@ const styles = StyleSheet.create({
   submitButton: {
     marginTop: 28,
     backgroundColor: COLORS.SECONDARY,
+  },
+  datePickerModal: {
+    gap: 20,
+    padding: 20,
+    backgroundColor: COLORS.SURFACE,
+    borderRadius: 20,
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  datePickerTitle: {
+    fontSize: FontSize.Large,
+    fontWeight: 'bold',
+  },
+  calendar: {
+    borderRadius: 10,
+    padding: 10,
+  },
+  datePickerButton: {
+    marginTop: 4,
   },
 });

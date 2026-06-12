@@ -23,33 +23,51 @@ import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 import { JobTimerExpiredModal } from './JobTimerExpiredModal';
+import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
+import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
 
 export const SendParcelFindingScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL_FINDING>>();
   const [cancelVisible, setCancelVisible] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
+  const freshTimerRef = useRef(isFreshJobTimer(route.params));
+  const [timerCreatedAt, setTimerCreatedAt] = useState<string | undefined>(() =>
+    resolveJobTimerAnchor(route.params),
+  );
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const timerHandledRef = useRef(false);
 
-  const { pickup, dropoff } = useMemo(
-    () => resolveParcelTripCoords(route.params),
-    [route.params],
-  );
+  const { pickup, dropoff } = useMemo(() => resolveParcelTripCoords(route.params), [route.params]);
 
   const bookingId = route.params?.bookingId;
-  const createdAt = useMemo(
-    () => route.params?.createdAt ?? new Date().toISOString(),
-    [route.params?.createdAt],
-  );
   const timerDurationSeconds = route.params?.timerDurationSeconds;
-  const { expiresAt, ready } = useJobDisplayTimer(createdAt, timerDurationSeconds);
+  const { expiresAt, ready } = useJobDisplayTimer(timerCreatedAt, timerDurationSeconds);
+
+  useEffect(() => {
+    if (freshTimerRef.current || !bookingId || timerCreatedAt) return;
+    let cancelled = false;
+    (async () => {
+      const res = await getBookingById(bookingId, 'user', {
+        showLoader: false,
+        showError: false,
+        silentErrors: true,
+      });
+      const booking = extractBookingFromResponse(res);
+      if (!cancelled && booking?.created_at) {
+        setTimerCreatedAt(booking.created_at.trim());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingId, timerCreatedAt]);
 
   const navCoords = useMemo(
-    () => parcelCoordsNavParams(pickup, dropoff, bookingId, createdAt),
-    [pickup, dropoff, bookingId, createdAt],
+    () => parcelCoordsNavParams(pickup, dropoff, bookingId, timerCreatedAt),
+    [pickup, dropoff, bookingId, timerCreatedAt],
   );
 
   useEffect(() => {
@@ -84,12 +102,11 @@ export const SendParcelFindingScreen = () => {
   const handleSearchAgain = async () => {
     setExpiredVisible(false);
     await cancelSniftBooking(bookingId, 'Courier search timeout — searching again');
-    navigate(SCREENS.SEND_PARCEL);
+    replace(SCREENS.SEND_PARCEL);
   };
 
-  const timerSubtitle = ready && expiresAt
-    ? 'Time remaining is shown above'
-    : 'Please wait while we match you';
+  const timerSubtitle =
+    ready && expiresAt ? 'Time remaining is shown above' : 'Please wait while we match you';
 
   return (
     <Wrapper
@@ -100,15 +117,6 @@ export const SendParcelFindingScreen = () => {
       darkMode={false}
     >
       <View style={styles.center}>
-        {ready && expiresAt ? (
-          <View style={styles.timerWrap}>
-            <WorkerRequestTimer
-              expiresAt={expiresAt}
-              onExpire={handleTimerExpire}
-              active={!expiredVisible}
-            />
-          </View>
-        ) : null}
         <Animated.View style={{ transform: [{ scale: pulseAnim }], opacity: pulseOpacity }}>
           <AppGradient
             colors={[...APP_GRADIENT_HORIZONTAL]}
@@ -121,13 +129,24 @@ export const SendParcelFindingScreen = () => {
           </AppGradient>
         </Animated.View>
         <Typography style={styles.title}>Finding a Courier...</Typography>
+
+        {ready && expiresAt ? (
+          <View style={styles.timerWrap}>
+            <WorkerRequestTimer
+              expiresAt={expiresAt}
+              onExpire={handleTimerExpire}
+              active={!expiredVisible}
+            />
+          </View>
+        ) : null}
+
         <Typography style={styles.sub}>{timerSubtitle}</Typography>
       </View>
 
       <JobTimerExpiredModal
         visible={expiredVisible}
         title='No Courier Found'
-        description='We could not find a courier in time. Search again or cancel this booking.'
+        description='We could not find a courier in time. Search again or delete this booking.'
         onSearchAgain={handleSearchAgain}
         onCancel={() => {
           setExpiredVisible(false);
@@ -157,7 +176,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   timerWrap: {
-    marginBottom: 16,
+    marginVertical: 25,
   },
   iconCircle: {
     width: 120,

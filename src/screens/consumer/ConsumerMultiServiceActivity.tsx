@@ -207,7 +207,7 @@ const ActivityCard = ({ item, onPress }: { item: ActivityItem; onPress?: () => v
     </View>
 
     <View style={styles.cardRight}>
-      <Typography style={styles.price}>{`CFA ${item.price}`}</Typography>
+      <Typography style={styles.price}>{item.price}</Typography>
       <Typography style={styles.status}>{item.status}</Typography>
     </View>
   </Pressable>

@@ -6,6 +6,8 @@ import type {
   WorkerTripRecord,
 } from 'components/common/worker/workerMockData';
 import type { SnliftBooking, SnliftBookingStatus } from 'types/snliftApi';
+import { formatMoney } from 'utils/currency';
+import { formatDistanceKm } from 'utils/distance';
 
 export type ConsumerActivityItem = {
   id: string;
@@ -21,13 +23,6 @@ export type ConsumerActivityItem = {
   dropAddr: string;
 };
 
-function formatCfa(amount: number | string | null | undefined): string {
-  if (amount === null || amount === undefined || amount === '') return 'CFA 0';
-  const n = typeof amount === 'number' ? amount : parseFloat(String(amount));
-  if (Number.isNaN(n)) return 'CFA 0';
-  return `CFA ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-}
-
 function bookingTypeToService(type: string | undefined): WorkerServiceType {
   if (type === 'food') return 'food';
   if (type === 'ride') return 'ride';
@@ -39,7 +34,7 @@ export function mapBookingToWorkerRequest(booking: SnliftBooking): WorkerRequest
   return {
     id: String(b.id),
     customerName: b.customer?.full_name ?? 'Customer',
-    fare: formatCfa(b.total_amount ?? b.estimated_amount),
+    fare: formatMoney(b.total_amount ?? b.estimated_amount),
     serviceType: bookingTypeToService(b.booking_type),
   };
 }
@@ -53,12 +48,6 @@ function statusLabel(status: SnliftBookingStatus | undefined): string {
     cancelled: 'Cancelled',
   };
   return map[status ?? ''] ?? (status ?? 'Pending');
-}
-
-function parseAmount(amount: number | string | null | undefined): string {
-  if (amount === null || amount === undefined || amount === '') return '0';
-  const n = typeof amount === 'number' ? amount : parseFloat(String(amount));
-  return Number.isNaN(n) ? '0' : String(Math.round(n));
 }
 
 function formatDate(d: string | null | undefined): string {
@@ -84,7 +73,7 @@ export function mapBookingToActivityItem(booking: SnliftBooking): ConsumerActivi
     rawStatus: (b.status ?? 'pending').toLowerCase(),
     serviceLabel,
     isoDate: b.created_at ?? b.completed_at ?? new Date().toISOString(),
-    price: parseAmount(b.total_amount ?? b.estimated_amount ?? b.fare),
+    price: formatMoney(b.total_amount ?? b.estimated_amount ?? b.fare),
     status: statusLabel(b.status),
     pickupTitle: serviceLabel === 'Food' ? (b.restaurant?.name ?? 'Restaurant') : 'Pickup',
     pickupAddr,
@@ -97,11 +86,11 @@ export function mapBookingToWorkerTrip(booking: SnliftBooking): WorkerTripRecord
   const b = normalizeSniftBooking(booking as SnliftBooking & Record<string, unknown>);
   const pickup = b.pickup_address ?? 'Pickup';
   const drop = b.dropoff_address ?? b.delivery_address ?? 'Destination';
-  const km = b.distance_km != null ? `${b.distance_km} km` : '—';
+  const km = formatDistanceKm(b.distance_km);
   return {
     id: String(b.id),
     date: formatDate(b.completed_at),
-    earned: formatCfa(b.total_amount ?? b.estimated_amount),
+    earned: formatMoney(b.total_amount ?? b.estimated_amount),
     pickupLabel: `Pickup: ${pickup.slice(0, 28)}`,
     pickupAddress: pickup,
     destinationLabel: `Destination: ${drop.slice(0, 28)}`,
@@ -126,14 +115,16 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
     pickupAddress: pickup,
     dropoffAddress: drop,
     dropoffShortName: drop.split(',')[0] ?? drop,
-    distance: b.distance_km != null ? `${b.distance_km} km` : '—',
+    distance: formatDistanceKm(b.distance_km),
     eta: '12 min',
     payment: 'Cash',
-    baseFare: formatCfa(b.sub_total ?? b.estimated_amount),
-    commission: formatCfa(b.commission_amount ? -Number(b.commission_amount) : 0),
-    earned: formatCfa(b.total_amount ?? b.estimated_amount),
-    previousWallet: 'CFA 0',
-    newWallet: 'CFA 0',
+    baseFare: formatMoney(b.sub_total ?? b.estimated_amount),
+    commission: formatMoney(
+      b.commission_amount ? -Number(b.commission_amount) : 0,
+    ),
+    earned: formatMoney(b.total_amount ?? b.estimated_amount),
+    previousWallet: formatMoney(0),
+    newWallet: formatMoney(0),
     pickupLat: lat(b.pickup_latitude, 40.7128),
     pickupLng: lat(b.pickup_longitude, -74.006),
     dropoffLat: lat(b.dropoff_latitude, 40.708),

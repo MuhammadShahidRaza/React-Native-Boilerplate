@@ -2,6 +2,7 @@ import { COMMON_TEXT } from 'constants/screens';
 import i18n from 'i18n/index';
 import {
   get,
+  getResponseEnvelopeError,
   patch,
   patchWithSingleFile,
   post,
@@ -26,8 +27,13 @@ export const parseApiResponse = <R>(response: {
   data?: unknown;
   messages?: string[];
   code?: number;
-}): R => {
+  error?: { code?: number; messages?: string[]; status?: boolean; message?: string };
+}): R | undefined => {
   logger.log('parseApiResponse', response);
+  const envelopeError = getResponseEnvelopeError(response);
+  if (envelopeError) {
+    throw new Error(envelopeError.message);
+  }
   const data = response?.data;
   if (!isDataEmpty(data)) return data as R;
   return { message: response?.messages?.[0], code: response?.code } as R;
@@ -93,10 +99,8 @@ const handlePostApiRequest = async <R extends object, A extends object>({
       config,
       showLoader,
     });
-    logger.log('parseApiResponse', response);
     return parseApiResponse<R>(response);
   } catch (error) {
-    logger.log(error);
     if (showError) {
       handleApiError(error);
     }

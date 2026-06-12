@@ -5,6 +5,7 @@ import {
   AddressReducer,
   AppReducer,
   BookingsReducer,
+  FoodCartReducer,
   NotificationReducer,
   ServicesReducer,
   UserReducer,
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   services: ServicesReducer,
   bookings: BookingsReducer,
   worker: WorkerReducer,
+  foodCart: FoodCartReducer,
 });
 
 // Redux Persist configuration

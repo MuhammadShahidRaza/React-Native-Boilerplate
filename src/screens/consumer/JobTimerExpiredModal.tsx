@@ -15,7 +15,7 @@ type Props = {
 export const JobTimerExpiredModal = ({
   visible,
   title = 'No Match Found',
-  description = 'We could not find a driver in time. Search again or cancel this booking.',
+  description = 'We could not find a driver in time. Search again or delete this booking.',
   onSearchAgain,
   onCancel,
 }: Props) => (
@@ -40,7 +40,7 @@ export const JobTimerExpiredModal = ({
       <Typography style={styles.description}>{description}</Typography>
       <Button title='Search Again' onPress={onSearchAgain} style={styles.primaryBtn} />
       <Button
-        title='Cancel Booking'
+        title='Delete Booking'
         onPress={onCancel}
         style={styles.secondaryBtn}
         textStyle={styles.secondaryBtnTxt}

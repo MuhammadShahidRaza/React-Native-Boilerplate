@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppStatusModal, Button, Icon, RowComponent, Wrapper } from 'components/common';
 import { useWorkerProfileGate } from 'hooks/useWorkerProfileGate';
+import { showToast } from 'utils/toast';
 import { VARIABLES } from 'constants/common';
 import { COLORS } from 'utils/colors';
 import { STYLES } from 'utils/commonStyles';
@@ -15,6 +17,7 @@ import { SelectedMedia } from 'hooks/useMediaPicker';
 import { useResetStackOnBack } from 'hooks/useResetStackOnBack';
 import { getAuthStackLoginIndex, getAuthStackRoutes } from 'config/authFlow';
 import { useAppSelector } from 'types/reduxTypes';
+import { syncWorkerOnboardingFlags } from 'utils/workerOnboarding';
 
 export interface CompleteProfileFormValues {
   address?: string;
@@ -33,9 +36,14 @@ export interface CompleteProfileFormValues {
   driver_license_number?: string;
   driver_license_validity_date?: string;
   social_security_number?: string;
+  issue_date?: string;
+  driver_license_front?: SelectedMedia | null | string;
+  driver_license_back?: SelectedMedia | null | string;
   driving_license_front?: SelectedMedia | null | string;
   driving_license_back?: SelectedMedia | null | string;
+  mot_certificate?: SelectedMedia | null | string;
   business_license?: SelectedMedia | null | string;
+  business_license_front?: SelectedMedia | null | string;
   insurance_document?: SelectedMedia | null | string;
   vehicle_brand?: string;
   vehicle_model?: string;
@@ -55,8 +63,16 @@ export const CompleteProfile = ({
   const isPendingForApproval = Boolean(!user?.is_admin_verified && user?.is_onboarded);
   const profileGate = useWorkerProfileGate();
 
+  useEffect(() => {
+    syncWorkerOnboardingFlags(user);
+  }, [user]);
+
   const openDocuments = () => {
     if (!profileGate.vehicleComplete) {
+      showToast({
+        message: 'Please save your vehicle details first.',
+        isError: true,
+      });
       profileGate.setDetailsRequiredVisible(true);
       return;
     }

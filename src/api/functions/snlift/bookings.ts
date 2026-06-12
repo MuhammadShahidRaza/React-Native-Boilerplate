@@ -7,6 +7,7 @@ import {
   handlePatchApiRequest,
 } from '../app';
 import type { SnliftBooking, SnliftBookingsListResponse } from 'types/snliftApi';
+import { extractEstimateDistanceKm, resolveBookingDistanceKm } from 'utils/distance';
 
 export type BookingRole = 'driver' | 'courier' | 'user' | string | null | undefined;
 
@@ -77,16 +78,56 @@ export type EstimateBookingResult = {
   discount_amount?: number | string;
   total_amount?: number | string;
   estimated_amount?: number | string;
+  base_fare?: number | string;
   promo_code?: string;
   [key: string]: unknown;
 };
 
+function pickEstimateNumber(raw: unknown): number | null {
+  if (raw == null || raw === '') return null;
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/[^0-9.-]/g, ''));
+  return Number.isNaN(n) ? null : n;
+}
+
+/** Parcel estimate — prefers API `base_fare`, then estimated/sub/total amounts. */
+export function resolveParcelEstimateBaseFare(
+  result: EstimateBookingResult | null | undefined,
+): number | null {
+  if (!result) return null;
+  const cat = result.categories?.[0];
+  const value =
+    cat?.base_fare ??
+    result.base_fare ??
+    cat?.estimated_amount ??
+    result.sub_total ??
+    result.estimated_amount ??
+    cat?.total_amount ??
+    result.total_amount;
+  return pickEstimateNumber(value);
+}
+
+/** Flatten nested estimate + normalize distance_km from all API aliases. */
+export function normalizeEstimateBookingResult(
+  raw: EstimateBookingResult | null | undefined,
+): EstimateBookingResult | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const record = raw as EstimateBookingResult & Record<string, unknown>;
+  const nested =
+    record.estimate && typeof record.estimate === 'object'
+      ? (record.estimate as Record<string, unknown>)
+      : null;
+  const merged = nested ? { ...record, ...nested } : record;
+  const distance_km = extractEstimateDistanceKm(merged) ?? merged.distance_km;
+  return { ...merged, distance_km };
+}
+
 export async function estimateBooking(data: EstimateBookingPayload) {
-  return handlePostApiRequest<EstimateBookingResult, EstimateBookingPayload>({
+  const result = await handlePostApiRequest<EstimateBookingResult, EstimateBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS_ESTIMATE,
     data,
     showLoader: false,
   });
+  return normalizeEstimateBookingResult(result) ?? undefined;
 }
 
 export type CreateRideBookingPayload = {
@@ -122,9 +163,70 @@ export type CreateParcelBookingPayload = {
   dropoff_latitude: number;
   dropoff_longitude: number;
   distance_km: number;
-  item_description?: string;
+  item_description: string;
+  sender_name: string;
+  sender_phone: string;
+  receiver_name: string;
+  receiver_phone: string;
+  base_fare?: number;
+  estimated_amount?: number;
+  sub_total?: number;
+  total_amount?: number;
   promo_code?: string;
 };
+
+export function buildParcelBookingPayload(input: {
+  pickupAddress: string;
+  dropoffAddress: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
+  dropoffLatitude: number;
+  dropoffLongitude: number;
+  distanceKm: number;
+  itemDescription: string;
+  senderName: string;
+  senderPhone: string;
+  receiverName: string;
+  receiverPhone: string;
+  estimate?: EstimateBookingResult | null;
+  promoCode?: string;
+}): CreateParcelBookingPayload {
+  const cat = input.estimate?.categories?.[0];
+  const payload: CreateParcelBookingPayload = {
+    booking_type: 'parcel',
+    pickup_address: input.pickupAddress,
+    dropoff_address: input.dropoffAddress,
+    pickup_latitude: input.pickupLatitude,
+    pickup_longitude: input.pickupLongitude,
+    dropoff_latitude: input.dropoffLatitude,
+    dropoff_longitude: input.dropoffLongitude,
+    distance_km: resolveBookingDistanceKm(input.estimate, input.distanceKm),
+    item_description: input.itemDescription.trim(),
+    sender_name: input.senderName.trim(),
+    sender_phone: input.senderPhone.trim(),
+    receiver_name: input.receiverName.trim(),
+    receiver_phone: input.receiverPhone.trim(),
+  };
+
+  const baseFare = resolveParcelEstimateBaseFare(input.estimate);
+  const estimatedAmount = pickEstimateNumber(
+    cat?.estimated_amount ?? input.estimate?.estimated_amount,
+  );
+  const subTotal = pickEstimateNumber(cat?.estimated_amount ?? input.estimate?.sub_total);
+  const totalAmount = pickEstimateNumber(
+    cat?.total_amount ?? input.estimate?.total_amount,
+  );
+
+  if (baseFare != null) payload.base_fare = baseFare;
+  if (estimatedAmount != null) payload.estimated_amount = estimatedAmount;
+  if (subTotal != null) payload.sub_total = subTotal;
+  if (totalAmount != null) payload.total_amount = totalAmount;
+
+  const promo = input.promoCode?.trim();
+  if (promo) payload.promo_code = promo;
+
+  return payload;
+}
 
 export function extractBookingFromResponse(
   res: { booking: SnliftBooking } | SnliftBooking | null | undefined,
@@ -142,11 +244,15 @@ export function extractBookingFromResponse(
 export async function listBookings(
   params?: { scope?: string; booking_type?: string; status?: string; page?: number },
   role?: BookingRole,
+  options?: BookingRequestOptions,
 ) {
   return handleGetApiRequest<SnliftBookingsListResponse>({
     url: bookingUrls(role).list,
     params: params as Record<string, string | number> | undefined,
-    addToPending: true,
+    addToPending: options?.addToPending ?? true,
+    showLoader: options?.showLoader ?? true,
+    showError: options?.showError ?? true,
+    silentErrors: options?.silentErrors ?? false,
   });
 }
 
@@ -259,11 +365,14 @@ export async function createFoodBooking(data: CreateFoodBookingPayload) {
   });
 }
 
-export async function createParcelBooking(data: CreateParcelBookingPayload) {
+export async function createParcelBooking(
+  data: CreateParcelBookingPayload,
+  options?: { showLoader?: boolean },
+) {
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateParcelBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS,
     data,
-    showLoader: true,
+    showLoader: options?.showLoader ?? true,
   });
 }
 
@@ -293,17 +402,23 @@ export async function cancelBooking(
   id: number | string,
   cancellation_reason: string,
   role?: BookingRole,
+  options?: { showLoader?: boolean },
 ) {
   return handlePostApiRequest<{ booking: SnliftBooking }, { cancellation_reason: string }>({
     url: bookingUrls(role).cancel(id),
     data: { cancellation_reason },
+    showLoader: options?.showLoader ?? true,
   });
 }
 
-export async function deleteBooking(id: number | string) {
+export async function deleteBooking(
+  id: number | string,
+  options?: { showLoader?: boolean },
+) {
   return handleDeleteApiRequest<{ message?: string }, Record<string, never>>({
     url: API_ROUTES.USER_BOOKING_BY_ID(id),
     data: {},
+    showLoader: options?.showLoader ?? true,
   });
 }
 

@@ -1,6 +1,7 @@
 import { API_ROUTES } from 'api/routes';
 import { pickString } from 'api/normalizers/snlift';
 import { handleGetApiRequest } from '../app';
+import { formatMoney } from 'utils/currency';
 
 export type SnliftHomeBanner = {
   id: number;
@@ -46,10 +47,10 @@ function formatPromoDescription(promo: SnliftHomePromo): string {
   const value = promo.discount_value;
   if (promo.discount_type === 'percent') {
     const cap =
-      promo.max_discount != null ? ` (max CFA ${promo.max_discount})` : '';
+      promo.max_discount != null ? ` (max ${formatMoney(promo.max_discount)})` : '';
     return `${value}% off${cap}.`;
   }
-  return `CFA ${value} off.`;
+  return `${formatMoney(value)} off.`;
 }
 
 function normalizeBannerItem(
@@ -135,7 +136,7 @@ export function homeHotOffersForDisplay(
       title:
         p.discount_type === 'percent'
           ? `Up to ${Math.round(p.discount_value)}% OFF`
-          : `CFA ${p.discount_value} OFF`,
+          : `${formatMoney(p.discount_value)} OFF`,
       sub_title:
         p.description?.trim() ||
         formatPromoDescription(p).replace(/\.$/, '') ||
@@ -155,23 +156,12 @@ export function homePromosForDisplay(promos: SnliftHomePromo[]): HomePromoDispla
   }));
 }
 
-// Module-level cache — persists for the app session so navigating back doesn't re-fetch.
-let _homeDataCache: SnliftHomeData | null = null;
-let _homeDataFetchedAt = 0;
-const HOME_CACHE_TTL_MS = 5 * 60 * 1000; // 5 min
-
-export async function getHomeData(forceRefresh = false): Promise<SnliftHomeData | null> {
-  const now = Date.now();
-  if (!forceRefresh && _homeDataCache && now - _homeDataFetchedAt < HOME_CACHE_TTL_MS) {
-    return _homeDataCache;
-  }
+export async function getHomeData(options?: { showLoader?: boolean }): Promise<SnliftHomeData | null> {
   const raw = await handleGetApiRequest<SnliftHomeData>({
     url: API_ROUTES.HOME,
     addToPending: true,
+    showLoader: options?.showLoader ?? true,
   });
-  if (!raw) return _homeDataCache;
-  const data = normalizeHomeData(raw);
-  _homeDataCache = data;
-  _homeDataFetchedAt = now;
-  return data;
+  if (!raw) return null;
+  return normalizeHomeData(raw);
 }

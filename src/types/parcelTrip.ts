@@ -7,5 +7,8 @@ export type ParcelTripCoords = {
   dropoffLng?: number;
   bookingId?: number;
   createdAt?: string;
+  timerAnchorAt?: string;
   timerDurationSeconds?: number;
+  /** Fresh booking — countdown starts when this screen mounts (full admin timer). */
+  startTimerOnMount?: boolean;
 };

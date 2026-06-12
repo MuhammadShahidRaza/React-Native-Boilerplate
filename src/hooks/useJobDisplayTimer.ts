@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
-import { getJobExpiresAt } from 'utils/jobDisplayTimer';
+import { getJobExpiresAt, parseJobDisplayTimer } from 'utils/jobDisplayTimer';
 
 type JobDisplayTimerState = {
   expiresAt: number | null;
@@ -8,13 +8,32 @@ type JobDisplayTimerState = {
   ready: boolean;
 };
 
+function normalizeDurationSeconds(value: unknown): number | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return Math.round(value);
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.includes(':') || !Number.isFinite(Number(trimmed))) {
+      const parsed = parseJobDisplayTimer(trimmed);
+      return parsed > 0 ? parsed : null;
+    }
+    const n = Number(trimmed);
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  return null;
+}
+
 function buildTimerState(
   createdAt: string | undefined,
   durationSeconds: number,
 ): JobDisplayTimerState {
-  const expiresAt = createdAt
-    ? getJobExpiresAt(createdAt, durationSeconds)
-    : Date.now() + durationSeconds * 1000;
+  if (!createdAt) {
+    return { expiresAt: null, durationSeconds, ready: false };
+  }
+  const expiresAt = getJobExpiresAt(createdAt, durationSeconds);
   return { expiresAt, durationSeconds, ready: true };
 }
 
@@ -22,9 +41,11 @@ export function useJobDisplayTimer(
   createdAt: string | undefined,
   durationSeconds?: number,
 ): JobDisplayTimerState {
+  const normalizedDuration = normalizeDurationSeconds(durationSeconds);
+
   const [state, setState] = useState<JobDisplayTimerState>(() => {
-    if (durationSeconds != null && durationSeconds > 0) {
-      return buildTimerState(createdAt, durationSeconds);
+    if (normalizedDuration != null) {
+      return buildTimerState(createdAt, normalizedDuration);
     }
     return { expiresAt: null, durationSeconds: null, ready: false };
   });
@@ -32,8 +53,8 @@ export function useJobDisplayTimer(
   useEffect(() => {
     let cancelled = false;
 
-    if (durationSeconds != null && durationSeconds > 0) {
-      setState(buildTimerState(createdAt, durationSeconds));
+    if (normalizedDuration != null) {
+      setState(buildTimerState(createdAt, normalizedDuration));
       return;
     }
 
@@ -46,7 +67,7 @@ export function useJobDisplayTimer(
     return () => {
       cancelled = true;
     };
-  }, [createdAt, durationSeconds]);
+  }, [createdAt, normalizedDuration]);
 
   return state;
 }

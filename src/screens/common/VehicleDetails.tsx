@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { useAppDispatch } from 'types/reduxTypes';
-import { setVehicleDetailsComplete } from 'store/slices/worker';
 import { onBack } from 'navigation/index';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Input, Button, Wrapper, Dropdown, GradientIcon } from 'components/index';
 import { VehicleDetailRow } from 'components/common/VehicleDetailRow';
-import { safeString, STYLES, COLORS } from 'utils/index';
-import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
+import { STYLES, COLORS } from 'utils/index';
+import { buildVehicleDetailsUploadPayload } from 'utils/workerOnboarding';
 import { vehicleDetailsValidationSchema } from 'utils/validations';
+import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
+import { sanitizeVehicleYear, pickFromUserDetails } from 'api/normalizers/snlift';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS, VARIABLES } from 'constants/index';
 import { completeProfile } from 'api/functions/app/settings';
@@ -33,41 +33,28 @@ export interface VehicleDetailsFormValues {
 export const VehicleDetails = ({
   route,
 }: AppScreenProps<typeof SCREENS.VEHICLE_DETAILS>) => {
-  const dispatch = useAppDispatch();
   const isFromSettings = Boolean(route.params?.isFromSettings);
   const [isEditing, setIsEditing] = useState(!isFromSettings);
-  const user = useAppSelector(state => state.user.userDetails?.details);
   const userRoot = useAppSelector(state => state.user.userDetails);
 
   const initialValues: VehicleDetailsFormValues = {
-    vehicle_brand: safeString((user as { vehicle_brand?: string })?.vehicle_brand) || 'Toyota',
-    vehicle_model:
-      safeString((user as { vehicle_model?: string })?.vehicle_model) ||
-      safeString(userRoot?.category) ||
-      'Corolla',
-    vehicle_license_plate:
-      safeString((user as { vehicle_license_plate?: string })?.vehicle_license_plate) ||
-      'AB20 CDE',
-    vehicle_year: safeString((user as { vehicle_year?: string })?.vehicle_year) || '2020',
-    vehicle_color: safeString((user as { vehicle_color?: string })?.vehicle_color) || 'Silver',
-    vehicle_type: safeString((user as { vehicle_type?: string })?.vehicle_type) || 'Standard',
+    vehicle_brand: pickFromUserDetails(userRoot, ['vehicle_brand', 'vehicle_make']),
+    vehicle_model: pickFromUserDetails(userRoot, ['vehicle_model', 'category']),
+    vehicle_license_plate: pickFromUserDetails(userRoot, ['vehicle_license_plate', 'license_plate']),
+    vehicle_year: sanitizeVehicleYear(
+      pickFromUserDetails(userRoot, ['vehicle_year', 'year']),
+      pickFromUserDetails(userRoot, ['vehicle_brand', 'vehicle_make']),
+    ),
+    vehicle_color: pickFromUserDetails(userRoot, ['vehicle_color', 'color']),
+    vehicle_type: pickFromUserDetails(userRoot, ['vehicle_type', 'type']),
   };
 
   const handleSubmit = async (values: VehicleDetailsFormValues) => {
     const user = await completeProfile({
-      data: {
-        vehicle_brand: values.vehicle_brand,
-        vehicle_model: values.vehicle_model,
-        vehicle_license_plate: values.vehicle_license_plate,
-        vehicle_year: values.vehicle_year,
-        vehicle_color: values.vehicle_color,
-        vehicle_type: values.vehicle_type,
-        vehicle_make: values.vehicle_brand,
-      },
+      data: buildVehicleDetailsUploadPayload(values),
     });
     if (!user) return;
 
-    dispatch(setVehicleDetailsComplete(true));
     if (isFromSettings) {
       setIsEditing(false);
     } else {
@@ -139,7 +126,7 @@ export const VehicleDetails = ({
             />
             <Input
               name='vehicle_year'
-              title='Vehicle Make'
+              title='Vehicle Year'
               value={formik.values.vehicle_year}
               onChangeText={formik.handleChange('vehicle_year')}
               placeholder='2020'
@@ -183,7 +170,7 @@ export const VehicleDetails = ({
               label='Vehicle License Plate'
               value={formik.values.vehicle_license_plate}
             />
-            <VehicleDetailRow label='Vehicle Make' value={formik.values.vehicle_year} />
+            <VehicleDetailRow label='Vehicle Year' value={formik.values.vehicle_year} />
             <VehicleDetailRow label='Vehicle Color' value={formik.values.vehicle_color} />
             <VehicleDetailRow
               label='Vehicle Type'

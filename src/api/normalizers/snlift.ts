@@ -5,6 +5,19 @@ import type {
   SnliftWalletSummary,
   SnliftWalletTransaction,
 } from 'types/snliftApi';
+import { formatMoney } from 'utils/currency';
+
+/** API often returns `{ user: {...} }` inside `data` — unwrap to the user object. */
+export function unwrapApiUser(
+  payload: unknown,
+): Partial<User> & Record<string, unknown> {
+  if (!payload || typeof payload !== 'object') return {};
+  const obj = payload as Record<string, unknown>;
+  if (obj.user && typeof obj.user === 'object') {
+    return obj.user as Partial<User> & Record<string, unknown>;
+  }
+  return obj as Partial<User> & Record<string, unknown>;
+}
 
 /** First defined non-empty string from alias keys. */
 export function pickString(
@@ -41,40 +54,77 @@ export function parseBalanceValue(raw: string | number | null | undefined): numb
   return Number.isNaN(n) ? null : n;
 }
 
-function formatCfaAmount(amount: number | string | null | undefined): string {
-  if (amount === null || amount === undefined || amount === '') return 'CFA 0';
-  const s = String(amount).trim();
-  if (/^cfa/i.test(s)) return s;
-  const n = typeof amount === 'number' ? amount : parseFloat(s.replace(/[^0-9.-]/g, ''));
-  if (Number.isNaN(n)) return s || 'CFA 0';
-  const prefix = n < 0 ? '-CFA ' : 'CFA ';
-  return `${prefix}${Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+function pickFromDetailsFirst(raw: Record<string, unknown>, keys: string[]): string {
+  const nested =
+    raw.details && typeof raw.details === 'object'
+      ? (raw.details as Record<string, unknown>)
+      : {};
+  return pickString(nested, keys) || pickString(raw, keys);
+}
+
+/** Read a field from normalized user.details only (not root). */
+export function pickFromUserDetails(
+  user: { details?: unknown } | null | undefined,
+  keys: string[],
+): string {
+  const nested =
+    user?.details && typeof user.details === 'object'
+      ? (user.details as Record<string, unknown>)
+      : {};
+  return pickString(nested, keys);
+}
+
+/** Keep any 4-digit year; drop only invalid text or brand duplicates (e.g. year "Toyota"). */
+export function sanitizeVehicleYear(
+  year: string | undefined,
+  brand?: string | undefined,
+): string {
+  if (!year?.trim()) return '';
+  const value = year.trim();
+  if (!/^\d{4}$/.test(value)) return '';
+  if (brand && value.toLowerCase() === brand.trim().toLowerCase()) return '';
+  return value;
 }
 
 function buildUserDetails(raw: Record<string, unknown>): User['details'] | undefined {
-  const existing = raw.details as User['details'] | undefined;
-  const fromFlat: Partial<NonNullable<User['details']>> = {
+  const existing = raw.details as Record<string, unknown> | undefined;
+
+  const merged: Record<string, unknown> = {
+    ...(existing ?? {}),
     driving_license_front:
-      pickString(raw, ['driver_license_front']) ||
-      existing?.driving_license_front ||
-      null,
+      pickFromDetailsFirst(raw, ['driver_license_front', 'driving_license_front']) || null,
     driving_license_back:
-      pickString(raw, ['driver_license_back']) || existing?.driving_license_back || null,
+      pickFromDetailsFirst(raw, ['driver_license_back', 'driving_license_back']) || null,
     business_license_front:
-      pickString(raw, ['mot_certificate', 'business_license_front']) ||
-      existing?.business_license_front ||
-      null,
+      pickFromDetailsFirst(raw, ['mot_certificate', 'business_license_front']) || null,
     business_license_back:
-      pickString(raw, ['business_license_back']) || existing?.business_license_back || null,
+      pickFromDetailsFirst(raw, ['business_license_back']) || null,
+    driver_license_number:
+      pickFromDetailsFirst(raw, ['driver_license_number', 'driving_license_number']) || null,
     driving_license_number:
-      pickString(raw, ['driver_license_number']) || existing?.driving_license_number || null,
+      pickFromDetailsFirst(raw, ['driver_license_number', 'driving_license_number']) || null,
+    driver_license_validity_date:
+      pickFromDetailsFirst(raw, ['driver_license_validity_date', 'driver_license_validity_date', 'issue_date']) ||
+      null,
+    vehicle_brand: pickFromDetailsFirst(raw, ['vehicle_brand', 'vehicle_make']),
+    vehicle_model: pickFromDetailsFirst(raw, ['vehicle_model', 'category']),
+    vehicle_license_plate: pickFromDetailsFirst(raw, ['vehicle_license_plate', 'license_plate']),
+    vehicle_year: (() => {
+      const brand = pickFromDetailsFirst(raw, ['vehicle_brand', 'vehicle_make']);
+      const yearRaw = pickFromDetailsFirst(raw, ['vehicle_year', 'year']);
+      return sanitizeVehicleYear(yearRaw, brand) || null;
+    })(),
+    vehicle_color: pickFromDetailsFirst(raw, ['vehicle_color', 'color']),
+    vehicle_type: pickFromDetailsFirst(raw, ['vehicle_type', 'type']),
   };
 
-  const hasFlat = Object.values(fromFlat).some(v => v != null && v !== '');
-  if (existing) {
-    return { ...existing, ...fromFlat };
+  const hasAny = Object.values(merged).some(v => v != null && v !== '');
+  if (!hasAny) return undefined;
+
+  if (existing && typeof existing === 'object') {
+    return { ...(existing as User['details']), ...merged } as User['details'];
   }
-  if (!hasFlat) return undefined;
+
   return {
     id: Number(raw.id) || 0,
     user_id: Number(raw.id) || 0,
@@ -82,12 +132,12 @@ function buildUserDetails(raw: Record<string, unknown>): User['details'] | undef
     experience: pickString(raw, ['experience']) || '0',
     radius: null,
     area: null,
-    driving_license_number: fromFlat.driving_license_number ?? null,
+    driving_license_number: (merged.driving_license_number as string | null) ?? null,
     social_security_number: null,
-    driving_license_front: fromFlat.driving_license_front ?? null,
-    driving_license_back: fromFlat.driving_license_back ?? null,
-    business_license_front: fromFlat.business_license_front ?? null,
-    business_license_back: fromFlat.business_license_back ?? null,
+    driving_license_front: (merged.driving_license_front as string | null) ?? null,
+    driving_license_back: (merged.driving_license_back as string | null) ?? null,
+    business_license_front: (merged.business_license_front as string | null) ?? null,
+    business_license_back: (merged.business_license_back as string | null) ?? null,
     insurance_document: null,
     created_at: pickString(raw, ['created_at']),
     updated_at: pickString(raw, ['updated_at']),
@@ -96,7 +146,8 @@ function buildUserDetails(raw: Record<string, unknown>): User['details'] | undef
     city: pickString(raw, ['city']) || null,
     country: pickString(raw, ['country']) || null,
     state: pickString(raw, ['state']) || null,
-  };
+    ...merged,
+  } as User['details'];
 }
 
 /** User — maps API aliases (`total_cfa_balance`, `is_email_verified`, flat license fields, etc.). */
@@ -121,6 +172,10 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
     pickString(raw, ['token', 'access_token', 'auth_token']) || (raw.token as string | undefined);
 
   const details = buildUserDetails(raw);
+  const detailsRecord = (details ?? {}) as Record<string, unknown>;
+  const brand = pickString(detailsRecord, ['vehicle_brand', 'vehicle_make']);
+  const yearRaw = pickString(detailsRecord, ['vehicle_year', 'year']);
+  const vehicleYear = sanitizeVehicleYear(yearRaw, brand) || yearRaw;
 
   return {
     ...(raw as User),
@@ -132,7 +187,7 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
     user_type: (raw.user_type ?? raw.user_role ?? raw.user_type) as User['user_type'],
     user_role: (raw.user_role ?? raw.user_type) as User['user_role'],
     is_onboarded: raw.is_onboarded ?? (raw.status === 1 || raw.status === '1' ? 1 : 0),
-    is_admin_verified: raw.is_admin_verified ?? 1,
+    is_admin_verified: raw.is_admin_verified ?? 0,
     is_approved:
       raw.is_approved ??
       (typeof raw.status === 'number' ? raw.status : raw.is_approved ?? 1),
@@ -156,13 +211,17 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
       pickString(raw, ['profile_image', 'avatar', 'image', 'photo']) ||
       raw.profile_image ||
       null,
-    vehicle_brand: pickString(raw, ['vehicle_brand']) || (raw.vehicle_brand as string),
-    vehicle_model: pickString(raw, ['vehicle_model']) || (raw.vehicle_model as string),
-    vehicle_license_plate:
-      pickString(raw, ['vehicle_license_plate', 'license_plate']) ||
-      (raw.vehicle_license_plate as string),
-    vehicle_color: pickString(raw, ['vehicle_color']) || (raw.vehicle_color as string),
-    vehicle_type: pickString(raw, ['vehicle_type']) || (raw.vehicle_type as string),
+    vehicle_brand: brand,
+    vehicle_model: pickString(detailsRecord, ['vehicle_model', 'category']),
+    vehicle_license_plate: pickString(detailsRecord, ['vehicle_license_plate', 'license_plate']),
+    vehicle_year: vehicleYear,
+    vehicle_color: pickString(detailsRecord, ['vehicle_color', 'color']),
+    vehicle_type: pickString(detailsRecord, ['vehicle_type', 'type']),
+    issue_date: pickString(detailsRecord, ['issue_date', 'driver_license_validity_date']),
+    driver_license_validity_date: pickString(detailsRecord, [
+      'driver_license_validity_date',
+      'issue_date',
+    ]),
     upcoming_balance: totalEarnings ?? raw.upcoming_balance,
     details,
   };
@@ -237,7 +296,7 @@ export function normalizeWalletTransaction(
     id: String(raw.id ?? ''),
     name: name || 'Transaction',
     type: type || 'Booking',
-    amount: formatCfaAmount(amountRaw as string | number),
+    amount: formatMoney(amountRaw as string | number),
   };
 }
 

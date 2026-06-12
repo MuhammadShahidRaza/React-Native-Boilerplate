@@ -161,9 +161,9 @@ export const DriverFoundScreen = () => {
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
         onContinue={async reason => {
-          setCancelVisible(false);
           const ok = await cancelSniftBooking(bookingId, reason);
           if (ok) replace(SCREENS.BOOK_RIDE);
+          return ok;
         }}
       />
     </Wrapper>

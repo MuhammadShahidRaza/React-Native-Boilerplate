@@ -26,8 +26,12 @@ export function parseJobDisplayTimer(value: string | number | null | undefined):
     return hours * 3600 + minutes * 60 + seconds;
   }
   if (parts.length === 2) {
-    const [minutes, seconds] = parts;
-    return minutes * 60 + seconds;
+    const [first, second] = parts;
+    // HH:MM (e.g. 00:02 = 2 minutes) vs MM:SS (e.g. 01:30 = 90 seconds).
+    if (first === 0 || first > 59) {
+      return first * 3600 + second * 60;
+    }
+    return first * 60 + second;
   }
   const only = parts[0] ?? 2;
   return only >= 60 ? only : only * 60;
@@ -38,8 +42,8 @@ export function parseBookingCreatedAtMs(value: string | null | undefined): numbe
   const raw = value.trim();
   let normalized = raw;
   if (raw.includes('T')) {
-    normalized = raw.replace(/\.(\d{3})\d*/, '.$1');
-    if (!/[zZ]|[+-]\d{2}:\d{2}$/.test(normalized)) {
+    normalized = raw.replace(/\.(\d{3})\d+/, '.$1');
+    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(normalized)) {
       normalized = `${normalized}Z`;
     }
   } else {
@@ -49,28 +53,25 @@ export function parseBookingCreatedAtMs(value: string | null | undefined): numbe
   return Number.isNaN(ms) ? null : ms;
 }
 
-/**
- * Use server booking created_at unless it is clearly skewed vs the client clock.
- * Fixes cases where server time is ~minutes behind and timer opens with 30s left instead of 2min.
- */
-export function resolveTimerCreatedAt(
+/** Always prefer server booking created_at for countdown (remaining = duration - (now - created_at)). */
+export function resolveBookingTimerCreatedAt(
   serverCreatedAt: string | null | undefined,
-  clientStartedAt: string = new Date().toISOString(),
-  maxSkewMs = 10_000,
+  fallback?: string,
 ): string {
-  const serverMs = parseBookingCreatedAtMs(serverCreatedAt);
-  const now = Date.now();
+  if (serverCreatedAt?.trim()) return serverCreatedAt.trim();
+  return fallback ?? new Date().toISOString();
+}
 
-  if (serverMs == null) return clientStartedAt;
-
-  const elapsedSinceServer = now - serverMs;
-  const serverAhead = serverMs - now;
-
-  if (elapsedSinceServer > maxSkewMs || serverAhead > 5_000) {
-    return clientStartedAt;
-  }
-
-  return serverCreatedAt!.trim();
+/**
+ * Fresh booking: client anchor (full admin timer).
+ * Reopen from activity: server created_at (elapsed time applies).
+ */
+export function resolveTimerAnchorAt(
+  timerAnchorAt?: string | null,
+  serverCreatedAt?: string | null,
+): string {
+  if (timerAnchorAt?.trim()) return timerAnchorAt.trim();
+  return resolveBookingTimerCreatedAt(serverCreatedAt);
 }
 
 export function getJobExpiresAt(createdAt: string, durationSeconds: number): number {
@@ -84,12 +85,28 @@ export function getRemainingJobTimerSeconds(
   nowMs: number = Date.now(),
 ): number {
   const expiresAt = getJobExpiresAt(createdAt, durationSeconds);
-  return Math.max(0, Math.ceil((expiresAt - nowMs) / 1000));
+  return Math.max(0, Math.floor((expiresAt - nowMs) / 1000));
+}
+
+export function formatJobTimerParts(totalSeconds: number): {
+  minutes: string;
+  seconds: string;
+  label: string;
+} {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return {
+    minutes: String(mins).padStart(2, '0'),
+    seconds: String(secs).padStart(2, '0'),
+    label: mins > 0 && secs > 0 ? 'Min Sec' : mins > 0 ? 'Min' : 'Sec',
+  };
 }
 
 export function formatJobTimerLabel(totalSeconds: number): string {
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
+  const { minutes, seconds } = formatJobTimerParts(totalSeconds);
+  const mins = parseInt(minutes, 10);
+  const secs = parseInt(seconds, 10);
   if (mins <= 0) return `${secs} sec`;
   if (secs === 0) return `${mins} min`;
   return `${mins} min ${secs} sec`;

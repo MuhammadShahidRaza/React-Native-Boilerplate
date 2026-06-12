@@ -6,11 +6,20 @@ import MapViewDirections from 'react-native-maps-directions';
 import { Icon, Wrapper, Button, Typography, Input, SvgComponent, Map } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, getCurrentLocation, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
+import {
+  COLORS,
+  getCurrentLocation,
+  screenHeight,
+  fitMapToDirectionCoordinates,
+  extractEstimateDistanceKm,
+  formatMoney,
+  formatDistanceKm,
+  haversineDistanceKm,
+  resolveBookingDistanceKm,
+} from 'utils/index';
 import { resetToHomeAndScreen } from 'navigation/index';
-import { createRideBooking, estimateBooking } from 'api/functions/snlift/bookings';
+import { createRideBooking, estimateBooking, extractBookingFromResponse } from 'api/functions/snlift/bookings';
 import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
-import { resolveTimerCreatedAt } from 'utils/jobDisplayTimer';
 import type { EstimateCategoryResult } from 'api/functions/snlift/bookings';
 import { showToast } from 'utils/toast';
 import { SCREENS } from 'constants/routes';
@@ -46,7 +55,7 @@ const RIDE_TYPES = [
 
 const fmtPrice = (cat: EstimateCategoryResult | null | undefined): string | null => {
   if (!cat) return null;
-  return `CFA ${Math.round(cat.total_amount)}`;
+  return formatMoney(cat.total_amount);
 };
 
 export const ChooseRideScreen = () => {
@@ -106,11 +115,13 @@ export const ChooseRideScreen = () => {
     longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
   };
 
-  const estimateDistanceKm = () => {
-    const dLat = Math.abs(pickupCoord.latitude - dropoffCoord.latitude);
-    const dLng = Math.abs(pickupCoord.longitude - dropoffCoord.longitude);
-    return Math.max(0.5, Math.round((dLat + dLng) * 111 * 10) / 10);
-  };
+  const fallbackDistanceKm = haversineDistanceKm(
+    pickupCoord.latitude,
+    pickupCoord.longitude,
+    dropoffCoord.latitude,
+    dropoffCoord.longitude,
+  );
+  const resolvedDistanceKm = resolveBookingDistanceKm(distanceKm, fallbackDistanceKm);
 
   const fetchEstimates = async (promoCode?: string) => {
     setEstimateLoading(true);
@@ -123,8 +134,9 @@ export const ChooseRideScreen = () => {
         dropoff_longitude: dropoffCoord.longitude,
         ...(promoCode ? { promo_code: promoCode } : {}),
       });
-      if (result?.distance_km != null) {
-        setDistanceKm(Number(result.distance_km));
+      const apiDistance = extractEstimateDistanceKm(result);
+      if (apiDistance != null) {
+        setDistanceKm(apiDistance);
       }
       if (result?.categories?.length) {
         const map: Record<string, EstimateCategoryResult> = {};
@@ -166,22 +178,18 @@ export const ChooseRideScreen = () => {
       pickup_longitude: pickupCoord.longitude,
       dropoff_latitude: dropoffCoord.latitude,
       dropoff_longitude: dropoffCoord.longitude,
-      distance_km: distanceKm ?? estimateDistanceKm(),
+      distance_km: resolvedDistanceKm,
       ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
     };
     setFindDriverLoading(true);
     try {
-      const searchStartedAt = new Date().toISOString();
-      const [res, timerDurationSeconds] = await Promise.all([
-        createRideBooking(payload, { showLoader: false }),
-        getJobDisplayTimerSeconds(),
-      ]);
-      const booking = res && 'booking' in res ? res.booking : res;
+      const res = await createRideBooking(payload, { showLoader: false });
+      const booking = extractBookingFromResponse(res);
       if (!booking?.id) {
         showToast({ message: 'Could not create ride booking. Try again.' });
         return;
       }
-      const createdAt = resolveTimerCreatedAt(booking.created_at, searchStartedAt);
+      const timerDurationSeconds = await getJobDisplayTimerSeconds();
       resetToHomeAndScreen(SCREENS.FINDING_DRIVER, {
         rideType: selected,
         pickupAddress: payload.pickup_address,
@@ -191,8 +199,8 @@ export const ChooseRideScreen = () => {
         dropoffLat: dropoffCoord.latitude,
         dropoffLng: dropoffCoord.longitude,
         bookingId: booking.id,
-        createdAt,
         timerDurationSeconds,
+        startTimerOnMount: true,
       });
     } finally {
       setFindDriverLoading(false);
@@ -255,9 +263,7 @@ export const ChooseRideScreen = () => {
         <Typography translate={false} style={styles.distanceTxt}>
           {estimateLoading
             ? 'Calculating distance...'
-            : distanceKm != null
-              ? `Estimated Distance: ${distanceKm.toFixed(1)} km`
-              : `Estimated Distance: ${estimateDistanceKm()} km`}
+            : `Estimated Distance: ${formatDistanceKm(resolvedDistanceKm)}`}
         </Typography>
 
         {RIDE_TYPES.map(ride => {
@@ -282,7 +288,7 @@ export const ChooseRideScreen = () => {
                   : <Typography style={styles.ridePrice}>{fmtPrice(cat) ?? '—'}</Typography>}
                 {cat?.promo_applied && (
                   <Typography style={[styles.rideEta, styles.discountText]}>
-                    {`- CFA ${Math.round(cat.discount_amount)}`}
+                    {formatMoney(-cat.discount_amount)}
                   </Typography>
                 )}
               </View>
@@ -300,9 +306,9 @@ export const ChooseRideScreen = () => {
 
         {(() => {
           const cat = estimates[selected];
-          const baseFare = cat ? `CFA ${Math.round(cat.estimated_amount)}` : '—';
+          const baseFare = cat ? formatMoney(cat.estimated_amount) : '—';
           const discount = cat?.discount_amount ?? 0;
-          const total = cat ? `CFA ${Math.round(cat.total_amount)}` : '—';
+          const total = cat ? formatMoney(cat.total_amount) : '—';
           return (
             <View style={styles.fareCard}>
               <View style={styles.fareRow}>
@@ -317,7 +323,7 @@ export const ChooseRideScreen = () => {
                   <View style={styles.fareRow}>
                     <Typography style={styles.fareLabel}>Discount</Typography>
                     <Typography style={[styles.fareValue, styles.discountText]}>
-                      {`- CFA ${Math.round(discount)}`}
+                      {formatMoney(-discount)}
                     </Typography>
                   </View>
                 </>

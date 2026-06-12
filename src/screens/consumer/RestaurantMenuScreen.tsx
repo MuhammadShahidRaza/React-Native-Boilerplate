@@ -14,7 +14,7 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { CustomBackIcon, navigate, onBack } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
-import { COLORS, screenHeight } from 'utils/index';
+import { COLORS, screenHeight, formatMoney } from 'utils/index';
 import { getRestaurantMenu } from 'api/functions/snlift/restaurants';
 
 type MenuItem = {
@@ -64,7 +64,7 @@ export const RestaurantMenuScreen = () => {
           title: m.name ?? m.title ?? 'Item',
           desc: m.description ?? '',
           price,
-          priceLabel: price > 0 ? `CFA ${price}` : 'CFA 0',
+          priceLabel: formatMoney(price),
           popular: Boolean(m.is_popular),
         };
       });
@@ -101,7 +101,7 @@ export const RestaurantMenuScreen = () => {
     return { cartCount: count, cartTotal: total };
   }, [qtys, items]);
 
-  const cartTotalLabel = `CFA ${cartTotal.toLocaleString()}`;
+  const cartTotalLabel = formatMoney(cartTotal);
 
   // Wrapper
   // headerTitle={name}

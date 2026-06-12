@@ -31,10 +31,7 @@ interface RequestOptions {
 const isFileValue = (value: unknown): value is FileLike => {
   if (!value || typeof value !== 'object') return false;
   const v = value as FileLike;
-  const hasPath = !!(v.uri || v.path);
-  const hasName = !!(v.name || v.filename);
-  const hasType = !!(v.type || v.mime);
-  return !!(hasPath && hasName && hasType);
+  return !!(v.uri || v.path);
 };
 
 const hasFileInData = (data?: object): boolean => {
@@ -197,6 +194,25 @@ const checkUnAuth = async (errorMessage?: string, statusCode?: number): Promise<
   }
 };
 
+/** Detects `{ error: { status: false, code: 422, messages: [...] } }` returned with HTTP 200. */
+export const getResponseEnvelopeError = (
+  payload: unknown,
+): { message: string; code: number } | null => {
+  if (!payload || typeof payload !== 'object') return null;
+  const envelope = payload as ErrorResponse & {
+    error?: { code?: number; messages?: string[]; status?: boolean; message?: string };
+  };
+  const error = envelope.error;
+  if (!error) return null;
+  const failed =
+    error.status === false || (typeof error.code === 'number' && error.code >= 400);
+  if (!failed) return null;
+  return {
+    message: error.messages?.[0] || error.message || 'Request failed',
+    code: error.code || 422,
+  };
+};
+
 /**
  * Extracts error message from response data following priority order
  */
@@ -330,11 +346,12 @@ const makeHttpRequest = async (
       logger.log('response?.data', response?.data);
     }
 
-    if (response?.data?.response) {
-      return response?.data?.response;
-    } else {
-      return response?.data;
+    const payload = response?.data?.response ?? response?.data;
+    const envelopeError = getResponseEnvelopeError(payload);
+    if (envelopeError) {
+      throw new HttpError(envelopeError.message, envelopeError.code);
     }
+    return payload;
   } catch (error) {
     // Always set loading to false first
     store.dispatch(setIsAppLoading(false));
@@ -493,7 +510,7 @@ const makeBlobFileRequest = async (
     store.dispatch(setIsAppLoading(true));
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     let req = ReactNativeBlobUtil.fetch(httpMethod, fullUrl, headers, formBody);
 
     if (onUploadProgress) {
@@ -508,10 +525,15 @@ const makeBlobFileRequest = async (
         store.dispatch(setIsAppLoading(false));
         try {
           const json = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-          if (json?.response) return resolve(json.response);
-          return resolve(json);
+          const payload = json?.response ?? json;
+          const envelopeError = getResponseEnvelopeError(payload);
+          if (envelopeError) {
+            reject(new HttpError(envelopeError.message, envelopeError.code));
+            return;
+          }
+          resolve(payload);
         } catch {
-          return resolve(res.data);
+          resolve(res.data);
         }
       })
       .catch(async err => {

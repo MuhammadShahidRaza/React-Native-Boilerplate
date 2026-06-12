@@ -3,8 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { AppGradient, Typography } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
+import { formatJobTimerParts } from 'utils/jobDisplayTimer';
 
-const SIZE = 100;
+const SIZE = 108;
 const RING = 8;
 
 export interface WorkerRequestTimerProps {
@@ -24,7 +25,7 @@ export const WorkerRequestTimer = ({
 }: WorkerRequestTimerProps) => {
   const [remaining, setRemaining] = useState(() => {
     if (expiresAt != null) {
-      return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+      return Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
     }
     return seconds;
   });
@@ -44,7 +45,7 @@ export const WorkerRequestTimer = ({
 
     const getRemaining = () => {
       if (expiresAt != null) {
-        return Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+        return Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
       }
       return seconds;
     };
@@ -75,9 +76,7 @@ export const WorkerRequestTimer = ({
     return () => clearInterval(id);
   }, [seconds, expiresAt, active]);
 
-  const displayMin = String(Math.floor(remaining / 60)).padStart(2, '0');
-  const displaySec = String(remaining % 60).padStart(2, '0');
-  const showSecondsOnly = remaining < 60;
+  const { minutes: displayMin, seconds: displaySec } = formatJobTimerParts(remaining);
 
   return (
     <View style={styles.wrap}>
@@ -88,18 +87,18 @@ export const WorkerRequestTimer = ({
           end={{ x: 1, y: 1 }}
           style={styles.circle}
         >
-          <View style={styles.labelWrap}>
-            {showSecondsOnly ? (
-              <>
-                <Typography style={styles.time}>{displaySec}</Typography>
-                <Typography style={styles.unit}>Sec</Typography>
-              </>
-            ) : (
-              <>
-                <Typography style={styles.time}>{`${displayMin}:${displaySec}`}</Typography>
-                <Typography style={styles.unit}>Min</Typography>
-              </>
-            )}
+          <View style={styles.timerBody}>
+            <Typography
+              style={styles.time}
+              translate={false}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {`${displayMin}:${displaySec}`}
+            </Typography>
+            <Typography style={styles.unit} translate={false} numberOfLines={1}>
+              min : sec
+            </Typography>
           </View>
         </AppGradient>
       </View>
@@ -122,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: (SIZE + RING * 2) / 2,
     backgroundColor: COLORS.WHITE,
     borderWidth: 1,
-    padding: RING,  
+    padding: RING,
     borderColor: COLORS.SKELETON_BACKGROUND,
     alignItems: 'center',
     justifyContent: 'center',
@@ -134,19 +133,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  labelWrap: {
+  timerBody: {
+    width: SIZE,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   time: {
     fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.WHITE,
-    lineHeight: 32,
+    lineHeight: 30,
+    textAlign: 'center',
+    width: SIZE - 16,
   },
   unit: {
-    fontSize: FontSize.Small,
-    fontWeight: FontWeight.Bold,
+    fontSize: FontSize.ExtraSmall,
+    fontWeight: FontWeight.SemiBold,
     color: COLORS.WHITE,
-    marginTop: -2,
+    lineHeight: 14,
+    textAlign: 'center',
+    marginTop: 1,
   },
 });

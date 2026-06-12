@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {
   Button,
   FilterChipRow,
@@ -34,7 +35,7 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
   const [category, setCategory] = useState<FoodCategory>('All');
   const [query, setQuery] = useState('');
   const [locating, setLocating] = useState(false);
-  const { restaurants, locationMissing } = useRestaurantCatalog();
+  const { restaurants, loading, locationMissing } = useRestaurantCatalog();
   const { likedIds, toggleLike } = useFavoriteRestaurants();
   const dispatch = useAppDispatch();
   const userDetails = useAppSelector(state => state.user.userDetails);
@@ -155,20 +156,57 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
       </View>
 
       <FlatListComponent
-        data={filtered}
+        data={loading ? [] : filtered}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         style={styles.list}
-        scrollEnabled
-        contentContainerStyle={filtered.length === 0 ? styles.listEmpty : styles.listContent}
+        scrollEnabled={!loading}
+        contentContainerStyle={
+          loading ? styles.listContent : filtered.length === 0 ? styles.listEmpty : styles.listContent
+        }
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
-        EmptyComponent={ListEmpty}
+        EmptyComponent={loading ? RestaurantListSkeleton : ListEmpty}
         extraData={likedIds}
       />
     </View>
   );
 };
+
+const RestaurantListSkeleton = () => (
+  <SkeletonPlaceholder
+    backgroundColor={COLORS.SKELETON_BACKGROUND}
+    highlightColor={COLORS.SKELETON_HIGHLIGHT}
+  >
+    {[0, 1, 2, 3].map(i => (
+      <View key={i} style={styles.skeletonCard}>
+        <SkeletonPlaceholder.Item width='100%' height={140} borderRadius={16} />
+        <SkeletonPlaceholder.Item
+          width='68%'
+          height={18}
+          borderRadius={6}
+          marginTop={12}
+          marginLeft={10}
+        />
+        <SkeletonPlaceholder.Item
+          width='42%'
+          height={14}
+          borderRadius={6}
+          marginTop={8}
+          marginLeft={10}
+        />
+        <SkeletonPlaceholder.Item
+          width='36%'
+          height={14}
+          borderRadius={6}
+          marginTop={8}
+          marginLeft={10}
+          marginBottom={4}
+        />
+      </View>
+    ))}
+  </SkeletonPlaceholder>
+);
 
 const styles = StyleSheet.create({
   root: {
@@ -239,5 +277,14 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
     textAlign: 'center',
     paddingHorizontal: 24,
+  },
+  skeletonCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
+    marginBottom: 16,
+    padding: 8,
+    backgroundColor: COLORS.WHITE,
+    overflow: 'hidden',
   },
 });

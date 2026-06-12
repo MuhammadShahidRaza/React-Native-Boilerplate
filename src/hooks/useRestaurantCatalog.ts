@@ -29,6 +29,7 @@ export function useRestaurantCatalog() {
       return;
     }
     setLocationMissing(false);
+    setLoading(true);
     (async () => {
       try {
         const res = await listRestaurants({ latitude, longitude });

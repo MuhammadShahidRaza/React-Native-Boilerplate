@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { Region } from 'react-native-maps';
 import type MapView from 'react-native-maps';
@@ -8,10 +8,14 @@ import { Autocomplete, Button, GradientIcon, Icon, Typography, Wrapper } from 'c
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight } from 'utils/index';
-import { reverseGeocode, getLocationPermission, type AddressDetails } from 'utils/location';
+import {
+  reverseGeocode,
+  getCurrentLocation,
+  getLocationPermission,
+  type AddressDetails,
+} from 'utils/location';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { logger } from 'utils/logger';
 import { setPickerResult } from 'utils/pickerStore';
 import { useAppSelector } from 'types/reduxTypes';
 
@@ -60,15 +64,33 @@ const SAVED = [
 ];
 // ── Component ─────────────────────────────────────────────────────────────────
 
+type StoredAddress = NonNullable<
+  NonNullable<RootStackParamList[typeof SCREENS.RIDE_LOCATION_PICKER]>['storedPickup']
+>;
+
+function storedToAddressDetails(stored: StoredAddress): AddressDetails {
+  return {
+    fullAddress: stored.fullAddress,
+    postalCode: stored.postalCode,
+    street: stored.street,
+    city: stored.city,
+    state: stored.state,
+    country: stored.country,
+    latitude: stored.latitude,
+    longitude: stored.longitude,
+  };
+}
+
 export const RideLocationPickerScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RIDE_LOCATION_PICKER>>();
   const navigation = useNavigation();
   const field = route.params?.field ?? 'dropoff';
   const [selectedSavedId, setSelectedSavedId] = useState<string | null>(null);
+  const [initialRegion, setInitialRegion] = useState<Region>(INITIAL_REGION);
+  const [regionReady, setRegionReady] = useState(false);
 
-  const addressList = ENV_CONSTANTS.IS_ALPHA_PHASE
-    ? SAVED
-    : useAppSelector(state => state.address.addressList);
+  const reduxAddressList = useAppSelector(state => state.address.addressList);
+  const addressList = ENV_CONSTANTS.IS_ALPHA_PHASE ? SAVED : reduxAddressList;
   const savedPlaces = useMemo<SavedPlaceItem[]>(() => {
     const filtered = addressList
       .filter(a => {
@@ -85,16 +107,12 @@ export const RideLocationPickerScreen = () => {
       }));
     return filtered;
   }, [addressList]);
-  useEffect(() => {
-    void getLocationPermission();
-  }, []);
-
   const mapRef = useRef<MapView>(null);
   const [address, setAddress] = useState<AddressDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const skipNextRegionGeocodeRef = useRef(true);
 
-  // Called when user stops dragging the map — reverse-geocode the center pin
-  const handleRegionChangeComplete = useCallback(async (region: Region) => {
+  const resolveAddressForRegion = useCallback(async (region: Region) => {
     setLoading(true);
     try {
       const result = await reverseGeocode({
@@ -107,9 +125,76 @@ export const RideLocationPickerScreen = () => {
     }
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const setupInitialLocation = async () => {
+      await getLocationPermission();
+
+      const stored =
+        field === 'pickup' ? route.params?.storedPickup : route.params?.storedDropoff;
+
+      if (
+        stored &&
+        stored.latitude != null &&
+        stored.longitude != null &&
+        !Number.isNaN(stored.latitude) &&
+        !Number.isNaN(stored.longitude)
+      ) {
+        const region: Region = {
+          ...INITIAL_REGION,
+          latitude: stored.latitude,
+          longitude: stored.longitude,
+        };
+        if (!cancelled) {
+          setInitialRegion(region);
+          setAddress(storedToAddressDetails(stored));
+          setRegionReady(true);
+        }
+        return;
+      }
+
+      const position = await getCurrentLocation();
+      if (position && !cancelled) {
+        const region: Region = {
+          ...INITIAL_REGION,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        setInitialRegion(region);
+        setRegionReady(true);
+        await resolveAddressForRegion(region);
+        return;
+      }
+
+      if (!cancelled) {
+        setInitialRegion(INITIAL_REGION);
+        setRegionReady(true);
+        await resolveAddressForRegion(INITIAL_REGION);
+      }
+    };
+
+    void setupInitialLocation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [field, route.params?.storedPickup, route.params?.storedDropoff, resolveAddressForRegion]);
+
+  // Called when user stops dragging the map — reverse-geocode the center pin
+  const handleRegionChangeComplete = useCallback(
+    async (region: Region) => {
+      if (skipNextRegionGeocodeRef.current) {
+        skipNextRegionGeocodeRef.current = false;
+        return;
+      }
+      await resolveAddressForRegion(region);
+    },
+    [resolveAddressForRegion],
+  );
+
   // Called when user picks from Autocomplete suggestions
   const handleAutocomplete = useCallback((result: AddressDetails | null) => {
-    logger.log('Autocomplete result:', result);
     if (!result) return;
     setAddress(result);
     mapRef.current?.animateToRegion(
@@ -168,23 +253,26 @@ export const RideLocationPickerScreen = () => {
 
       {/* ── Map with draggable center pin ────────────────────────────────── */}
       <View style={styles.mapWrap}>
-        <Map
-          mapRef={mapRef}
-          showCenterMarker
-          showCurrentLocation
-          showCurrentLocationButton
-          scrollEnabled
-          mapStyle='light'
-          minZoomLevel={0}
-          style={styles.map}
-          onRegionChangeComplete={handleRegionChangeComplete}
-          currentLocationButtonStyle={styles.locBtn}
-        />
-        {/* {loading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size='small' color={COLORS.APP_PRIMARY} />
+        {regionReady ? (
+          <Map
+            mapRef={mapRef}
+            region={initialRegion}
+            regionTracking='initialOnly'
+            showCenterMarker
+            showCurrentLocation
+            showCurrentLocationButton
+            scrollEnabled
+            mapStyle='light'
+            minZoomLevel={0}
+            style={styles.map}
+            onRegionChangeComplete={handleRegionChangeComplete}
+            currentLocationButtonStyle={styles.locBtn}
+          />
+        ) : (
+          <View style={styles.mapLoading}>
+            <ActivityIndicator size='large' color={COLORS.APP_PRIMARY} />
           </View>
-        )} */}
+        )}
       </View>
 
       {/* ── Bottom sheet ─────────────────────────────────────────────────── */}
@@ -286,13 +374,13 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   map: { flex: 1 },
-  locBtn: { bottom: 16, right: 12 },
-  loadingOverlay: {
-    // ...StyleSheet.absoluteFill,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // backgroundColor: 'rgba(255,255,255,0.4)',
+  mapLoading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.INPUT_BACKGROUND,
   },
+  locBtn: { bottom: 16, right: 12 },
   sheet: {
     flex: 1,
     backgroundColor: COLORS.WHITE,

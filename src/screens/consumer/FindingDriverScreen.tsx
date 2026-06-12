@@ -24,24 +24,51 @@ import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
 import { JobTimerExpiredModal } from './JobTimerExpiredModal';
 import { SVG } from 'constants/assets/svg';
+import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
+import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
+import { logger } from 'utils/logger';
 
 export const FindingDriverScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.FINDING_DRIVER>>();
   const [cancelVisible, setCancelVisible] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
+  const freshTimerRef = useRef(isFreshJobTimer(route.params));
+  const [timerCreatedAt, setTimerCreatedAt] = useState<string | undefined>(() =>
+    resolveJobTimerAnchor(route.params),
+  );
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacity = useRef(new Animated.Value(1)).current;
   const mapRef = useRef<MapView>(null);
   const timerHandledRef = useRef(false);
   const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
-  const createdAt = useMemo(
-    () => route.params?.createdAt ?? new Date().toISOString(),
-    [route.params?.createdAt],
-  );
   const timerDurationSeconds = route.params?.timerDurationSeconds;
-  const { expiresAt, ready } = useJobDisplayTimer(createdAt, timerDurationSeconds);
+  const { expiresAt, ready } = useJobDisplayTimer(timerCreatedAt, timerDurationSeconds);
+
+  logger.log('FindingDriverScreen timerDurationSeconds', timerDurationSeconds);
+  logger.log('FindingDriverScreen expiresAt', expiresAt);
+  logger.log('FindingDriverScreen ready', ready);
+  logger.log('FindingDriverScreen timerCreatedAt', timerCreatedAt);
+
+  useEffect(() => {
+    if (freshTimerRef.current || !bookingId || timerCreatedAt) return;
+    let cancelled = false;
+    (async () => {
+      const res = await getBookingById(bookingId, 'user', {
+        showLoader: false,
+        showError: false,
+        silentErrors: true,
+      });
+      const booking = extractBookingFromResponse(res);
+      if (!cancelled && booking?.created_at) {
+        setTimerCreatedAt(booking.created_at.trim());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingId, timerCreatedAt]);
 
   const pickupCoord = useMemo(
     () => ({
@@ -209,7 +236,7 @@ export const FindingDriverScreen = () => {
       <JobTimerExpiredModal
         visible={expiredVisible}
         title='No Driver Found'
-        description='We could not find a driver in time. Search again or cancel this booking.'
+        description='We could not find a driver in time. Search again or delete this booking.'
         onSearchAgain={handleSearchAgain}
         onCancel={async () => {
           setExpiredVisible(false);

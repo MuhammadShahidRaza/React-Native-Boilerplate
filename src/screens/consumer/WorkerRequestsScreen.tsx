@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
-import { Wrapper, WorkerRequestCard } from 'components/index';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { Typography, Wrapper, WorkerRequestCard } from 'components/index';
+import { FontSize } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import {
-  WORKER_MOCK_REQUESTS,
-  type WorkerRequestRecord,
-} from 'components/common/worker/workerMockData';
+import type { WorkerRequestRecord } from 'components/common/worker/workerMockData';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
@@ -18,7 +16,8 @@ export const WorkerRequestsScreen = () => {
   const dispatch = useAppDispatch();
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
-  const [requests, setRequests] = useState<WorkerRequestRecord[]>(WORKER_MOCK_REQUESTS);
+  const [requests, setRequests] = useState<WorkerRequestRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     dispatch(setLookingForDeliveries(true));
@@ -27,19 +26,22 @@ export const WorkerRequestsScreen = () => {
     };
   }, [dispatch]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const loadRequests = useCallback(async () => {
+    setLoading(true);
+    try {
       const res = await listBookings({ scope: 'available' }, role);
       const bookings = extractBookingsList(res);
-      if (!cancelled && bookings.length > 0) {
-        setRequests(bookings.map(mapBookingToWorkerRequest));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      setRequests(bookings.map(mapBookingToWorkerRequest));
+    } catch {
+      setRequests([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [role]);
+
+  useEffect(() => {
+    loadRequests();
+  }, [loadRequests]);
 
   return (
     <Wrapper
@@ -49,21 +51,30 @@ export const WorkerRequestsScreen = () => {
       backgroundColor={COLORS.BACKGROUND}
       darkMode={false}
     >
-      <FlatList
-        data={requests}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <WorkerRequestCard
-            request={item}
-            fareLabel={copy.fareLabel}
-            onPress={() =>
-              navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })
-            }
-          />
-        )}
-      />
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size='large' color={COLORS.PRIMARY} />
+        </View>
+      ) : (
+        <FlatList
+          data={requests}
+          keyExtractor={item => item.id}
+          contentContainerStyle={requests.length === 0 ? styles.emptyList : styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Typography style={styles.emptyText}>No available requests right now.</Typography>
+          }
+          renderItem={({ item }) => (
+            <WorkerRequestCard
+              request={item}
+              fareLabel={copy.fareLabel}
+              onPress={() =>
+                navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })
+              }
+            />
+          )}
+        />
+      )}
     </Wrapper>
   );
 };
@@ -73,5 +84,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 32,
+  },
+  emptyList: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 32,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT,
+    fontSize: FontSize.Medium,
+    marginTop: 24,
   },
 });

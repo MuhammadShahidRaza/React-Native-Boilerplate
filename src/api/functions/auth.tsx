@@ -15,6 +15,7 @@ import { DUMMY_USER } from './app/user';
 import { isWorkerRole } from 'config/app';
 import { resetToAuthEntry } from 'config/authFlow';
 import { normalizeSniftUser } from 'api/normalizers/snlift';
+import { syncWorkerOnboardingFlags } from 'utils/workerOnboarding';
 import { registerUserDevice, type RegisterDevicePayload } from 'api/functions/snlift/user';
 import { normalizePhoneNumber } from 'utils/helpers/functions';
 import { handleApiError, parseApiResponse } from './app';
@@ -27,6 +28,13 @@ function phoneForOtpApi(data: {
 }): string {
   if (data.phone?.trim()) return data.phone.trim();
   return normalizePhoneNumber(data.phone_number ?? '', data.calling_code);
+}
+
+function applySessionUser(normalized: User) {
+  store.dispatch(setUserDetails(normalized));
+  if (isWorkerRole(normalized?.user_type ?? normalized?.user_role)) {
+    syncWorkerOnboardingFlags(normalized);
+  }
 }
 
 // R type for Return
@@ -125,7 +133,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
     }
     const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
     await setKeychainItem(VARIABLES.USER_TOKEN, normalized?.token ?? '');
-    store.dispatch(setUserDetails(normalized));
+    applySessionUser(normalized);
     await syncUserDeviceFromLoginPayload(data);
     if (
       isWorkerRole(normalized?.user_type) &&
@@ -285,9 +293,10 @@ const verifySignupOtp = async <
   if (user) {
     const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
     await setKeychainItem(VARIABLES.USER_TOKEN, normalized?.token ?? '');
-    store.dispatch(setUserDetails(normalized));
+    applySessionUser(normalized);
     if (isWorkerRole(normalized?.user_type)) {
       store.dispatch(resetWorkerAvailability());
+      syncWorkerOnboardingFlags(normalized);
       navigate(SCREENS.COMPLETE_PROFILE);
     } else {
       store.dispatch(setIsUserLoggedIn(true));
@@ -360,17 +369,19 @@ const signUpUser = async <R extends User, A extends Login_SignUp>({ data }: { da
     url: API_ROUTES.REGISTER,
     data,
   });
-  if (user) {
-    const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
-    if (normalized?.token) {
-      await setKeychainItem(VARIABLES.USER_TOKEN, normalized.token);
-    }
-    navigate(SCREENS.VERIFICATION, {
-      phone_number: data?.phone_number ?? data?.phone,
-      calling_code: data?.calling_code,
-      country_code: data?.country_code,
-    });
+  if (!user || typeof user !== 'object' || !('id' in user) || !user.id) {
+    return;
   }
+
+  const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
+  if (normalized?.token) {
+    await setKeychainItem(VARIABLES.USER_TOKEN, normalized.token);
+  }
+  navigate(SCREENS.VERIFICATION, {
+    phone_number: data?.phone_number ?? data?.phone,
+    calling_code: data?.calling_code,
+    country_code: data?.country_code,
+  });
 };
 
 const loginUser = async <R extends User, A extends Login_SignUp>({
@@ -402,7 +413,7 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
       return;
     }
     await setKeychainItem(VARIABLES.USER_TOKEN, normalized?.token ?? '');
-    store.dispatch(setUserDetails(normalized));
+    applySessionUser(normalized);
     await syncUserDeviceFromLoginPayload(data);
 
     if (

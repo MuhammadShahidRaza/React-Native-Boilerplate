@@ -17,7 +17,7 @@ import { onBack, pushRootScreen } from 'navigation/Navigators';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { getBookingStatusLabel } from 'api/mappers/snliftBooking';
 import type { SnliftBooking } from 'types/snliftApi';
-import { COLORS } from 'utils/index';
+import { COLORS, formatMoney, formatDistanceKm } from 'utils/index';
 import {
   buildConsumerBookingTrackTarget,
   canCancelConsumerBooking,
@@ -51,13 +51,6 @@ function formatDateTime(raw: string | null | undefined): string {
     minute: '2-digit',
     hour12: true,
   });
-}
-
-function formatCfa(amount: number | string | null | undefined): string {
-  if (amount == null || amount === '') return 'CFA 0';
-  const n = typeof amount === 'number' ? amount : parseFloat(String(amount));
-  if (Number.isNaN(n)) return 'CFA 0';
-  return `CFA ${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 }
 
 export const ConsumerBookingDetailScreen = () => {
@@ -152,11 +145,11 @@ export const ConsumerBookingDetailScreen = () => {
           <View style={styles.priceCard}>
             <Typography style={styles.priceLabel}>Total</Typography>
             <Typography style={styles.priceValue}>
-              {formatCfa(booking.total_amount ?? booking.estimated_amount ?? booking.fare)}
+              {formatMoney(booking.total_amount ?? booking.estimated_amount ?? booking.fare)}
             </Typography>
             {booking.distance_km != null ? (
               <Typography style={styles.distance}>
-                {`${booking.distance_km} km`}
+                {formatDistanceKm(booking.distance_km)}
               </Typography>
             ) : null}
           </View>

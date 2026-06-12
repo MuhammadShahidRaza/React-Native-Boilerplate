@@ -1,56 +1,78 @@
-import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography, WorkerStatPills, WorkerTripCard } from 'components/index';
-import {
-  WORKER_HISTORY_STATS,
-  WORKER_HISTORY_TRIPS,
-  type WorkerTripRecord,
-} from 'components/common/worker/workerMockData';
+import type { WorkerTripRecord } from 'components/common/worker/workerMockData';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import { mapBookingToWorkerTrip } from 'api/mappers/snliftBooking';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS } from 'utils/index';
+import { COLORS, formatMoney, parseMoneyAmount } from 'utils/index';
+import { useAppSelector } from 'types/reduxTypes';
+import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
+
+function sumTripEarnings(trips: WorkerTripRecord[]): string {
+  let total = 0;
+  for (const trip of trips) {
+    const n = parseMoneyAmount(trip.earned);
+    if (n != null) total += n;
+  }
+  return formatMoney(total);
+}
 
 export const WorkerRideHistoryScreen = () => {
-  const [trips, setTrips] = useState<WorkerTripRecord[]>(WORKER_HISTORY_TRIPS);
+  const role = useAppSelector(state => state.user?.role);
+  const copy = getWorkerRoleCopy(role);
+  const [trips, setTrips] = useState<WorkerTripRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await listBookings({ status: 'completed' });
+  const loadHistory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await listBookings({ status: 'completed' }, role);
       const bookings = extractBookingsList(res).filter(
         b => (b.status ?? '').toLowerCase() === 'completed',
       );
-      if (!cancelled && bookings.length > 0) {
-        setTrips(bookings.map(mapBookingToWorkerTrip));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      setTrips(bookings.map(mapBookingToWorkerTrip));
+    } catch {
+      setTrips([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [role]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const historyStats = [
-    { value: String(trips.length).padStart(2, '0'), label: 'Trips' },
-    { value: WORKER_HISTORY_STATS.earned, label: 'Earned' },
-    { value: WORKER_HISTORY_STATS.rating, label: 'Avg Rating' },
+    { value: String(trips.length).padStart(2, '0'), label: copy.tripsStatLabel },
+    { value: sumTripEarnings(trips), label: 'Earned' },
+    { value: '—', label: 'Avg Rating' },
   ];
 
   return (
     <View style={styles.root}>
       <SafeAreaView edges={['top']} style={styles.safeTop}>
-        <Typography style={styles.header}>Ride History</Typography>
+        <Typography style={styles.header}>{copy.historyTitle}</Typography>
       </SafeAreaView>
 
-      <FlatList
-        data={trips}
-        keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={<WorkerStatPills stats={historyStats} />}
-        renderItem={({ item }) => <WorkerTripCard trip={item} />}
-      />
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size='large' color={COLORS.PRIMARY} />
+        </View>
+      ) : (
+        <FlatList
+          data={trips}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={trips.length === 0 ? styles.emptyList : styles.list}
+          ListHeaderComponent={<WorkerStatPills stats={historyStats} />}
+          ListEmptyComponent={
+            <Typography style={styles.emptyText}>No completed jobs yet.</Typography>
+          }
+          renderItem={({ item }) => <WorkerTripCard trip={item} />}
+        />
+      )}
     </View>
   );
 };
@@ -72,5 +94,21 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: 120,
+  },
+  emptyList: {
+    flexGrow: 1,
+    paddingBottom: 120,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT,
+    fontSize: FontSize.Medium,
+    marginTop: 24,
+    paddingHorizontal: 24,
   },
 });
