@@ -19,6 +19,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS } from 'utils/index';
+import { parseMoneyAmount } from 'utils/currency';
 import { useFavoriteRestaurants } from 'hooks/useFavoriteRestaurants';
 import { useRestaurantCatalog } from 'hooks/useRestaurantCatalog';
 import { getCurrentLocation } from 'utils/location';
@@ -35,7 +36,7 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
   const [category, setCategory] = useState<FoodCategory>('All');
   const [query, setQuery] = useState('');
   const [locating, setLocating] = useState(false);
-  const { restaurants, loading, locationMissing } = useRestaurantCatalog();
+  const { restaurants, loading, refreshing, refresh, locationMissing } = useRestaurantCatalog();
   const { likedIds, toggleLike } = useFavoriteRestaurants();
   const dispatch = useAppDispatch();
   const userDetails = useAppSelector(state => state.user.userDetails);
@@ -62,7 +63,8 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
   );
 
   const openRestaurant = useCallback((r: RestaurantItem) => {
-    navigate(SCREENS.RESTAURANT_MENU, { restaurantId: r.id, name: r.name });
+    const deliveryFee = parseMoneyAmount(r.fee) ?? 50;
+    navigate(SCREENS.RESTAURANT_MENU, { restaurantId: r.id, name: r.name, deliveryFee });
   }, []);
 
   const renderItem = useCallback(
@@ -156,17 +158,23 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
       </View>
 
       <FlatListComponent
-        data={loading ? [] : filtered}
+        data={loading && !refreshing ? [] : filtered}
         keyExtractor={item => item.id}
         renderItem={renderItem}
         style={styles.list}
-        scrollEnabled={!loading}
+        scrollEnabled={!loading || refreshing}
         contentContainerStyle={
-          loading ? styles.listContent : filtered.length === 0 ? styles.listEmpty : styles.listContent
+          loading && !refreshing
+            ? styles.listContent
+            : filtered.length === 0
+              ? styles.listEmpty
+              : styles.listContent
         }
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps='handled'
-        EmptyComponent={loading ? RestaurantListSkeleton : ListEmpty}
+        EmptyComponent={loading && !refreshing ? RestaurantListSkeleton : ListEmpty}
+        onRefresh={refresh}
+        refreshing={refreshing}
         extraData={likedIds}
       />
     </View>

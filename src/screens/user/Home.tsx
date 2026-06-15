@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View, Pressable, TouchableOpacity } from 'react-native';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import type { SvgProps } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
-import { useIsFocused } from '@react-navigation/native';
 import {
   Typography,
   Photo,
@@ -63,6 +69,7 @@ export const Home = () => {
   const user = useSelector((state: RootState) => state.user.userDetails);
   const addressList = useSelector((state: RootState) => state.address.addressList);
   const locationUpdatedRef = useRef(false);
+  const homeLoadedRef = useRef(false);
   const { currentAddress, loading: locationLoading, loadCurrentLocation } = useCurrentLocation();
 
   // Update user location once when Home tab is visible — REST API + Firestore
@@ -92,6 +99,12 @@ export const Home = () => {
     }
   }, [addressList, user, currentAddress?.fullAddress, loadCurrentLocation]);
 
+  const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
+  const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
+  const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
   const applyHomeData = useCallback((data: SnliftHomeData) => {
     setBanners(data.banners);
     setPromoCodes(homePromosForDisplay(data.promo_codes));
@@ -100,25 +113,27 @@ export const Home = () => {
     );
   }, []);
 
-  const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
-  const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
-  const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadHome = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getHomeData();
-      if (data) {
-        applyHomeData(data);
+  const loadHome = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      try {
+        const data = await getHomeData({ showLoader: !isRefresh });
+        if (data) {
+          applyHomeData(data);
+        }
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [applyHomeData]);
+    },
+    [applyHomeData],
+  );
 
   useEffect(() => {
-    loadHome();
+    if (homeLoadedRef.current) return;
+    homeLoadedRef.current = true;
+    loadHome(false);
   }, [loadHome]);
 
   const primaryBanner = banners[0];
@@ -192,7 +207,7 @@ export const Home = () => {
             </Typography>
             <Typography style={styles.sub}>Where would you like to go today?</Typography>
 
-            {loading ? (
+            {loading && !refreshing ? (
               <HomeBannerSkeleton />
             ) : (
               <Pressable style={styles.banner} onPress={() => navigate(SCREENS.BOOK_RIDE)}>
@@ -205,10 +220,10 @@ export const Home = () => {
                   imageStyle={styles.bannerImg}
                 />
                 <View style={styles.bannerText}>
-                  <Typography style={styles.bannerTitle}>
+                  <Typography numberOfLines={1} style={styles.bannerTitle}>
                     {primaryBanner?.title ?? 'Book a Ride'}
                   </Typography>
-                  <Typography style={styles.bannerSub}>
+                  <Typography numberOfLines={1} style={styles.bannerSub}>
                     {primaryBanner?.sub_title ??
                       (IS_SENGO ? 'Get started with Sengo' : 'Get started with SNLift')}
                   </Typography>
@@ -229,6 +244,14 @@ export const Home = () => {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => loadHome(true)}
+            tintColor={COLORS.APP_PRIMARY}
+            colors={[COLORS.APP_PRIMARY]}
+          />
+        }
       >
         <View style={[styles.bodySection, { backgroundColor: COLORS.BACKGROUND }]}>
           <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
@@ -272,7 +295,7 @@ export const Home = () => {
                 See All
               </Typography>
             </View>
-            {loading ? (
+            {loading && !refreshing ? (
               <HomeHotOffersSkeleton />
             ) : (
               hotOffers?.length > 0 &&
@@ -292,7 +315,7 @@ export const Home = () => {
                 Promo Codes
               </Typography>
             </View>
-            {loading ? (
+            {loading && !refreshing ? (
               <HomePromoSkeleton />
             ) : promoCodes.length === 0 ? (
               <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>

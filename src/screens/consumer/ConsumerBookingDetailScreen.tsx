@@ -204,9 +204,9 @@ export const ConsumerBookingDetailScreen = () => {
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
         onContinue={async reason => {
-          setCancelVisible(false);
           const ok = await cancelSniftBooking(bookingId, reason);
           if (ok) onBack();
+          return ok;
         }}
       />
     </Wrapper>

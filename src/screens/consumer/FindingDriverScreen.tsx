@@ -17,7 +17,7 @@ import {
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight, fitMapToDirectionCoordinates } from 'utils/index';
-import { navigate, onBack, replace } from 'navigation/index';
+import { onBack, replace } from 'navigation/index';
 import { cancelSniftBooking, deleteSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
@@ -135,8 +135,7 @@ export const FindingDriverScreen = () => {
     setExpiredVisible(false);
     const ok = await deleteSniftBooking(bookingId);
     if (ok) {
-      // await cancelSniftBooking(bookingId, 'Driver search timeout — searching again');
-      navigate(SCREENS.CHOOSE_RIDE, {
+      replace(SCREENS.CHOOSE_RIDE, {
         pickupAddress: route.params?.pickupAddress,
         dropoffAddress: route.params?.dropoffAddress,
         pickupLat,
@@ -147,6 +146,11 @@ export const FindingDriverScreen = () => {
     }
   };
 
+  const handleBackPress = async () => {
+    await deleteSniftBooking(bookingId);
+    replace(SCREENS.BOTTOM_STACK);
+  };
+
   const timerSubtitle =
     ready && expiresAt ? 'Time remaining is shown above' : 'Please wait while we match you';
 
@@ -154,6 +158,7 @@ export const FindingDriverScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
+      onPressBack={handleBackPress}
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -249,9 +254,9 @@ export const FindingDriverScreen = () => {
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
         onContinue={async reason => {
-          setCancelVisible(false);
           const ok = await cancelSniftBooking(bookingId, reason);
           if (ok) onBack();
+          return ok;
         }}
       />
     </Wrapper>

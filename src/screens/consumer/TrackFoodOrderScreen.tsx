@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
@@ -17,6 +17,7 @@ import {
   RideVehicleStatsRow,
   Typography,
   Wrapper,
+  WorkerRequestTimer,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { IMAGES } from 'constants/assets';
@@ -24,12 +25,17 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import { FOOD_ORDER_PHASE_INDEX } from 'types/foodOrderTracking';
 import type { RootStackParamList } from 'navigation/index';
-import { reset } from 'navigation/index';
+import { navigate, onBack, replace, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS, coordinateAlongPolyline, openPhoneNumber, screenHeight } from 'utils/index';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { CancelReasonModal } from './CancelReasonModal';
-import { cancelSniftBooking } from 'utils/snliftBookingActions';
+import { JobTimerExpiredModal } from './JobTimerExpiredModal';
+import { cancelSniftBooking, deleteSniftBooking } from 'utils/snliftBookingActions';
+import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
+import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
+import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
+import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
 
 const PHASE_ORDER: FoodOrderPhase[] = [
   'placing_order',
@@ -66,12 +72,14 @@ function FoodOrderPhaseModal({
   title,
   subtitle,
   icon,
+  timerElement,
 }: {
   visible: boolean;
   heading?: string;
   title: string;
   subtitle: string;
   icon: PhaseStatus['icon'];
+  timerElement?: React.ReactNode;
 }) {
   return (
     <Modal
@@ -94,6 +102,7 @@ function FoodOrderPhaseModal({
           />
           <Typography style={styles.overlayTitle}>{title}</Typography>
           <Typography style={styles.overlaySubtitle}>{subtitle}</Typography>
+          {timerElement ?? null}
         </View>
       </View>
     </Modal>
@@ -103,12 +112,66 @@ function FoodOrderPhaseModal({
 export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
   const bookingId = route.params?.bookingId;
-  const [phase, setPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'placing_order');
+  const timerDurationSeconds = route.params?.timerDurationSeconds;
+  const [phase, setPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'order_placed');
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [expiredVisible, setExpiredVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const [courierCoord, setCourierCoord] = useState<MapCoord | null>(null);
   const mapRef = useRef<MapView>(null);
+  const freshTimerRef = useRef(isFreshJobTimer(route.params));
+  const timerHandledRef = useRef(false);
+  const [timerCreatedAt, setTimerCreatedAt] = useState<string | undefined>(() =>
+    resolveJobTimerAnchor(route.params),
+  );
+
+  const { expiresAt, ready } = useJobDisplayTimer(timerCreatedAt, timerDurationSeconds);
+
+  useEffect(() => {
+    if (freshTimerRef.current || !bookingId || timerCreatedAt) return;
+    let cancelled = false;
+    (async () => {
+      const res = await getBookingById(bookingId, 'user', {
+        showLoader: false,
+        showError: false,
+        silentErrors: true,
+      });
+      const booking = extractBookingFromResponse(res);
+      if (!cancelled && booking?.created_at) {
+        setTimerCreatedAt(booking.created_at.trim());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookingId, timerCreatedAt]);
+
+  const handleBookingAccepted = useCallback(() => {
+    timerHandledRef.current = true;
+    setPhase('order_accepted');
+  }, []);
+
+  useBookingAcceptPoll(phase === 'order_placed' ? bookingId : undefined, handleBookingAccepted);
+
+  const handleTimerExpire = () => {
+    if (timerHandledRef.current) return;
+    timerHandledRef.current = true;
+    setExpiredVisible(true);
+  };
+
+  const handleSearchAgain = async () => {
+    setExpiredVisible(false);
+    const ok = await deleteSniftBooking(bookingId);
+    if (ok) navigate(SCREENS.ORDER_FOOD);
+  };
+
+  const handleBackPress = async () => {
+    if (phase === 'order_placed') {
+      await deleteSniftBooking(bookingId);
+    }
+    onBack();
+  };
 
   const { pickup, dropoff } = MOCK_FOOD_ORDER;
   const mapRegion = useMemo(
@@ -131,7 +194,7 @@ export const TrackFoodOrderScreen = () => {
     phase !== 'picked_up' && phase !== 'on_the_way' && phase !== 'delivered';
 
   useEffect(() => {
-    if (phase === 'delivered') return undefined;
+    if (phase === 'delivered' || phase === 'order_placed') return undefined;
     const ms = PHASE_MS[phase] ?? 3000;
     const tid = setTimeout(() => {
       setPhase(curr => {
@@ -230,7 +293,7 @@ export const TrackFoodOrderScreen = () => {
     <Wrapper
       headerTitle='Food Delivery'
       showBackButton
-      
+      onPressBack={handleBackPress}
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -346,20 +409,38 @@ export const TrackFoodOrderScreen = () => {
       </View>
 
       <FoodOrderPhaseModal
-        visible={showOverlayCard}
+        visible={showOverlayCard && !expiredVisible}
         heading={status.overlayHeading}
         title={status.title}
         subtitle={status.subtitle}
         icon={status.icon}
+        timerElement={
+          phase === 'order_placed' && ready && expiresAt ? (
+            <WorkerRequestTimer
+              expiresAt={expiresAt}
+              onExpire={handleTimerExpire}
+              active={!expiredVisible}
+            />
+          ) : null
+        }
+      />
+
+      <JobTimerExpiredModal
+        visible={expiredVisible}
+        title='No Restaurant Found'
+        description='We could not find a restaurant to accept your order. Search again or cancel.'
+        onSearchAgain={handleSearchAgain}
+        onCancel={async () => {
+          setExpiredVisible(false);
+          const ok = await deleteSniftBooking(bookingId);
+          if (ok) replace(SCREENS.BOTTOM_STACK);
+        }}
       />
 
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        onContinue={async reason => {
-          setCancelOpen(false);
-          await cancelSniftBooking(bookingId, reason);
-        }}
+        onContinue={reason => cancelSniftBooking(bookingId, reason)}
       />
     </Wrapper>
   );

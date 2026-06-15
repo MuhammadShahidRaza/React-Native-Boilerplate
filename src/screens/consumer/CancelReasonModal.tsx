@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, TextInput } from 'react-native';
 import { GradientIcon, Typography, Button } from 'components/index';
 import { VARIABLES } from 'constants/common';
@@ -8,20 +8,44 @@ import { COLORS } from 'utils/index';
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onContinue: (reason: string) => void;
+  onContinue: (reason: string) => void | boolean | Promise<void | boolean>;
 };
 
 export const CancelReasonModal = ({ visible, onClose, onContinue }: Props) => {
   const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleContinue = () => {
-    onContinue(reason);
-    setReason('');
+  useEffect(() => {
+    if (!visible) {
+      setReason('');
+      setSubmitting(false);
+    }
+  }, [visible]);
+
+  const handleContinue = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const ok = await onContinue(reason);
+      if (ok !== false) {
+        setReason('');
+        onClose();
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => {
+        if (!submitting) onClose();
+      }}
+    >
+      <Pressable style={styles.overlay} onPress={submitting ? undefined : onClose}>
         <Pressable style={styles.card} onPress={e => e.stopPropagation()}>
           <GradientIcon
             componentName={VARIABLES.Feather}
@@ -36,6 +60,7 @@ export const CancelReasonModal = ({ visible, onClose, onContinue }: Props) => {
             placeholder="Type Here..."
             placeholderTextColor={COLORS.APP_TEXT_MUTED}
             multiline
+            editable={!submitting}
             value={reason}
             onChangeText={setReason}
           />
@@ -44,6 +69,8 @@ export const CancelReasonModal = ({ visible, onClose, onContinue }: Props) => {
             onPress={handleContinue}
             style={styles.btn}
             textStyle={styles.btnText}
+            loading={submitting}
+            disabled={submitting}
           />
         </Pressable>
       </Pressable>

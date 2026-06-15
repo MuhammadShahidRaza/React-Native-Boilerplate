@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FOOD_RESTAURANTS, type RestaurantItem } from 'components/common/food/foodRestaurants';
 import {
   extractRestaurants,
@@ -15,38 +15,54 @@ export function useRestaurantCatalog() {
     ENV_CONSTANTS.IS_ALPHA_PHASE ? FOOD_RESTAURANTS : [],
   );
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [locationMissing, setLocationMissing] = useState(false);
 
   const userDetails = useAppSelector(state => state.user.userDetails);
   const latitude = userDetails?.latitude ? Number(userDetails.latitude) : undefined;
   const longitude = userDetails?.longitude ? Number(userDetails.longitude) : undefined;
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!latitude || !longitude) {
-      setLocationMissing(true);
-      setLoading(false);
-      return;
-    }
-    setLocationMissing(false);
-    setLoading(true);
-    (async () => {
+  const loadRestaurants = useCallback(
+    async (isRefresh = false) => {
+      if (!latitude || !longitude) {
+        setLocationMissing(true);
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
+      setLocationMissing(false);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
       try {
         const res = await listRestaurants({ latitude, longitude });
         const list = extractRestaurants(res);
-        if (!cancelled && list.length > 0) {
+        if (list.length > 0) {
           setRestaurants(list.map(mapApiRestaurantToItem));
         }
       } catch (e) {
         logger.error('listRestaurants failed', e);
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
+        setRefreshing(false);
       }
+    },
+    [latitude, longitude],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await loadRestaurants(false);
+      if (cancelled) return;
     })();
     return () => {
       cancelled = true;
     };
-  }, [latitude, longitude]);
+  }, [loadRestaurants]);
 
-  return { restaurants, loading, locationMissing };
-}
+  const refresh = useCallback(() => loadRestaurants(true), [loadRestaurants]);
+
+  return { restaurants, loading, refreshing, refresh, locationMissing };
+};

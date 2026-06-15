@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import type { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { Image, StyleSheet, View, Pressable, ScrollView } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {
   AppGradient,
@@ -217,10 +217,14 @@ function ActivityPane({
   source,
   loading,
   emptyMessage,
+  onRefresh,
+  refreshing = false,
 }: {
   source: ActivityItem[];
   loading: boolean;
   emptyMessage: string;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }) {
   const [cat, setCat] = useState<ServiceCat>('All');
 
@@ -233,19 +237,36 @@ function ActivityPane({
     <View style={styles.pane}>
       <CategoryTabs value={cat} onChange={setCat} />
 
-      <SkeletonWrapper isLoading={loading} count={4} renderItem={activitySkeletonItem}>
-        {filtered.length === 0 ? (
-          <View style={styles.emptyWrap}>
-            <Icon
-              componentName={VARIABLES.Feather}
-              iconName='inbox'
-              size={40}
-              color={COLORS.APP_TEXT_MUTED}
-            />
-            <Typography style={styles.emptyText}>{emptyMessage}</Typography>
-          </View>
+      <SkeletonWrapper isLoading={loading && !refreshing} count={4} renderItem={activitySkeletonItem}>
+        {filtered.length === 0 && !loading ? (
+          <ScrollView
+            contentContainerStyle={styles.emptyScroll}
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              ) : undefined
+            }
+          >
+            <View style={styles.emptyWrap}>
+              <Icon
+                componentName={VARIABLES.Feather}
+                iconName='inbox'
+                size={40}
+                color={COLORS.APP_TEXT_MUTED}
+              />
+              <Typography style={styles.emptyText}>{emptyMessage}</Typography>
+            </View>
+          </ScrollView>
         ) : (
-          <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              ) : undefined
+            }
+          >
             {filtered.map(it => (
               <ActivityCard
                 key={it.id}
@@ -268,28 +289,33 @@ function ActivityPane({
 function ActivePane() {
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadItems = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const res = await listBookings(undefined, 'user', { showLoader: false });
+      const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
+      setItems(active.map(mapBookingToActivityItem));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      let cancelled = false;
-      setLoading(true);
-      (async () => {
-        const res = await listBookings();
-        if (cancelled) return;
-        const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
-        setItems(active.map(mapBookingToActivityItem));
-        setLoading(false);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, []),
+      loadItems(false);
+    }, [loadItems]),
   );
 
   return (
     <ActivityPane
       source={items}
       loading={loading}
+      refreshing={refreshing}
+      onRefresh={() => loadItems(true)}
       emptyMessage='No active bookings yet.'
     />
   );
@@ -298,28 +324,33 @@ function ActivePane() {
 function HistoryPane() {
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadItems = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const res = await listBookings(undefined, 'user', { showLoader: false });
+      const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
+      setItems(history.map(mapBookingToActivityItem));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      let cancelled = false;
-      setLoading(true);
-      (async () => {
-        const res = await listBookings();
-        if (cancelled) return;
-        const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
-        setItems(history.map(mapBookingToActivityItem));
-        setLoading(false);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, []),
+      loadItems(false);
+    }, [loadItems]),
   );
 
   return (
     <ActivityPane
       source={items}
       loading={loading}
+      refreshing={refreshing}
+      onRefresh={() => loadItems(true)}
       emptyMessage='No booking history yet.'
     />
   );
@@ -457,6 +488,9 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 110,
     gap: 12,
+  },
+  emptyScroll: {
+    flexGrow: 1,
   },
   emptyText: {
     textAlign: 'center',

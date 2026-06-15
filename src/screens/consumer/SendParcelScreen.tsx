@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import {
   Autocomplete,
   Button,
@@ -14,6 +15,7 @@ import { useFormikForm } from 'hooks/useFormik';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { resetToHomeAndScreen } from 'navigation/index';
+import type { RootStackParamList } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
 import {
   COLORS,
@@ -58,7 +60,60 @@ const initialValues: ParcelFormValues = {
   pkg: '',
 };
 
+const emptyAddressFields = {
+  postalCode: '',
+  street: '',
+  city: '',
+  state: '',
+  country: '',
+};
+
+const addressFromRoute = (
+  lat: number,
+  lng: number,
+  fullAddress: string,
+): AddressDetails => ({
+  latitude: lat,
+  longitude: lng,
+  fullAddress,
+  ...emptyAddressFields,
+});
+
+const buildInitialValues = (
+  params?: RootStackParamList[typeof SCREENS.SEND_PARCEL],
+): ParcelFormValues => {
+  const pickup =
+    params?.pickupLat != null && params?.pickupLng != null
+      ? addressFromRoute(
+          params.pickupLat,
+          params.pickupLng,
+          params.pickupAddress?.trim() || 'Pickup',
+        )
+      : null;
+  const dropoff =
+    params?.dropoffLat != null && params?.dropoffLng != null
+      ? addressFromRoute(
+          params.dropoffLat,
+          params.dropoffLng,
+          params.dropoffAddress?.trim() || 'Drop-off',
+        )
+      : null;
+
+  return {
+    ...initialValues,
+    pickup,
+    dropoff,
+    senderName: params?.senderName ?? '',
+    senderPhone: params?.senderPhone ?? '',
+    receiverName: params?.receiverName ?? '',
+    receiverPhone: params?.receiverPhone ?? '',
+    pkg: params?.pkg ?? '',
+  };
+};
+
 export const SendParcelScreen = () => {
+  const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL>>();
+  const formInitialValues = useMemo(() => buildInitialValues(route.params), [route.params]);
   const [baseFare, setBaseFare] = useState<number | null>(null);
   const [parcelEstimate, setParcelEstimate] = useState<EstimateBookingResult | null>(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
@@ -77,7 +132,8 @@ export const SendParcelScreen = () => {
   }, []);
 
   const formik = useFormikForm<ParcelFormValues>({
-    initialValues,
+    initialValues: formInitialValues,
+    enableReinitialize: true,
     validationSchema: sendParcelValidationSchema,
     onSubmit: async values => {
       if (submitting) return;
@@ -116,6 +172,8 @@ export const SendParcelScreen = () => {
         const durationSeconds =
           timerDurationSeconds ?? (await getJobDisplayTimerSeconds());
         resetToHomeAndScreen(SCREENS.SEND_PARCEL_FINDING, {
+          pickupAddress: values.pickup!.fullAddress ?? 'Pickup',
+          dropoffAddress: values.dropoff!.fullAddress ?? 'Drop-off',
           pickupLat: values.pickup!.latitude,
           pickupLng: values.pickup!.longitude,
           dropoffLat: values.dropoff!.latitude,
@@ -123,6 +181,11 @@ export const SendParcelScreen = () => {
           bookingId: booking.id,
           timerDurationSeconds: durationSeconds,
           startTimerOnMount: true,
+          senderName: values.senderName,
+          senderPhone: values.senderPhone,
+          receiverName: values.receiverName,
+          receiverPhone: values.receiverPhone,
+          pkg: values.pkg,
         });
       } finally {
         setSubmitting(false);

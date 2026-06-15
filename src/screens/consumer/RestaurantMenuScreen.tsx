@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import {
   FoodCartBar,
@@ -15,7 +15,17 @@ import { CustomBackIcon, navigate, onBack } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { IMAGES } from 'constants/assets';
 import { COLORS, screenHeight, formatMoney } from 'utils/index';
-import { getRestaurantMenu } from 'api/functions/snlift/restaurants';
+import {
+  getRestaurantMenuAll,
+  isMenuItemPopular,
+} from 'api/functions/snlift/restaurants';
+import { parseMoneyAmount } from 'utils/currency';
+import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import {
+  setCartRestaurant,
+  upsertItem,
+  decrementItem,
+} from 'store/slices/foodCart';
 
 type MenuItem = {
   id: string;
@@ -24,82 +34,108 @@ type MenuItem = {
   price: number;
   priceLabel: string;
   popular: boolean;
+  imageUri?: string | null;
 };
-
-// const FALLBACK_ITEMS: MenuItem[] = [
-//   {
-//     id: '1',
-//     title: 'Double Smash Burger',
-//     desc: 'Two smashed patties with cheddar cheese and lettuce',
-//     price: 330,
-//     priceLabel: 'CFA 330',
-//     popular: true,
-//   },
-//   {
-//     id: '2',
-//     title: 'Loaded Fries',
-//     desc: 'Crispy fries with cheese sauce and jalapenos and lettuce',
-//     price: 330,
-//     priceLabel: 'CFA 330',
-//     popular: false,
-//   },
-// ];
 
 export const RestaurantMenuScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RESTAURANT_MENU>>();
   const name = route.params?.name ?? 'Restaurant';
   const restaurantId = route?.params?.restaurantId;
-  const [qtys, setQtys] = useState<Record<string, number>>({});
+  const deliveryFee = route.params?.deliveryFee ?? 50;
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const cartState = useAppSelector(s => s.foodCart);
 
   useEffect(() => {
     if (!restaurantId) return;
-    getRestaurantMenu(restaurantId).then(apiItems => {
-      if (!apiItems || apiItems.length === 0) return;
-      const mapped: MenuItem[] = apiItems.map(m => {
-        const priceNum = parseFloat(String(m.price ?? 0));
-        const price = Number.isNaN(priceNum) ? 0 : priceNum;
-        return {
-          id: String(m.id),
-          title: m.name ?? m.title ?? 'Item',
-          desc: m.description ?? '',
-          price,
-          priceLabel: formatMoney(price),
-          popular: Boolean(m.is_popular),
-        };
-      });
-      setItems(mapped);
-    });
+    if (cartState.restaurantId === restaurantId) return;
+
+    if (cartState.items.length > 0) {
+      Alert.alert(
+        'Switch Restaurant?',
+        `You have items from "${cartState.restaurantName}" in your cart. Switching will clear your cart.`,
+        [
+          { text: 'Cancel', style: 'cancel', onPress: () => onBack() },
+          {
+            text: 'Switch',
+            style: 'destructive',
+            onPress: () =>
+              dispatch(setCartRestaurant({ restaurantId, restaurantName: name, deliveryFee })),
+          },
+        ],
+      );
+    } else {
+      dispatch(setCartRestaurant({ restaurantId, restaurantName: name, deliveryFee }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
 
-  const increment = (id: string) => {
-    setQtys(q => ({ ...q, [id]: (q[id] ?? 0) + 1 }));
+  useEffect(() => {
+    if (!restaurantId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
+    getRestaurantMenuAll(restaurantId)
+      .then(apiItems => {
+        if (cancelled) return;
+        const mapped: MenuItem[] = apiItems.map(m => {
+          const price = parseMoneyAmount(m.price) ?? 0;
+          return {
+            id: String(m.id),
+            title: m.name ?? m.title ?? 'Item',
+            desc: m.description ?? '',
+            price,
+            priceLabel: formatMoney(price),
+            popular: isMenuItemPopular(m),
+            imageUri: m.image,
+          };
+        });
+        setItems(mapped);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurantId]);
+
+  const qtys = useMemo(
+    () => Object.fromEntries(cartState.items.map(i => [i.id, i.qty])),
+    [cartState.items],
+  );
+
+  const increment = (item: MenuItem) => {
+    dispatch(
+      upsertItem({
+        id: item.id,
+        menuItemId: Number(item.id),
+        title: item.title,
+        price: item.price,
+        imageUri: item.imageUri,
+      }),
+    );
   };
 
   const decrement = (id: string) => {
-    setQtys(q => {
-      const next = (q[id] ?? 0) - 1;
-      if (next <= 0) {
-        const copy = { ...q };
-        delete copy[id];
-        return copy;
-      }
-      return { ...q, [id]: next };
-    });
+    dispatch(decrementItem(id));
   };
 
   const { cartCount, cartTotal } = useMemo(() => {
     let count = 0;
     let total = 0;
-    items.length > 0 && items?.forEach(item => {
-      const qty = qtys[item.id] ?? 0;
-      if (qty > 0) {
-        count += qty;
-        total += item.price * qty;
-      }
+    cartState.items.forEach(i => {
+      count += i.qty;
+      total += i.price * i.qty;
     });
     return { cartCount: count, cartTotal: total };
-  }, [qtys, items]);
+  }, [cartState.items]);
 
   const cartTotalLabel = formatMoney(cartTotal);
 
@@ -148,17 +184,33 @@ export const RestaurantMenuScreen = () => {
                 />
                 <Typography
                   style={styles.metaTxt}
-                >{`4.9 · 15-25 min · CFA 30 Delivery`}</Typography>
+                >{`4.9 · 15-25 min · ${formatMoney(deliveryFee)} Delivery`}</Typography>
               </View>
             </View>
           </View>
 
-          {items.length > 0 && items?.map(item => {
+          {loading ? (
+            <View style={styles.loaderWrap}>
+              <ActivityIndicator size='large' color={COLORS.APP_PRIMARY} />
+              <Typography style={styles.loaderTxt}>Loading menu...</Typography>
+            </View>
+          ) : items.length === 0 ? (
+            <View style={styles.emptyWrap}>
+              <Icon
+                componentName={VARIABLES.Feather}
+                iconName='coffee'
+                size={40}
+                color={COLORS.APP_TEXT_MUTED}
+              />
+              <Typography style={styles.emptyTxt}>No menu items available</Typography>
+            </View>
+          ) : (
+            items.map(item => {
             const qty = qtys[item.id] ?? 0;
             return (
               <View key={item.id} style={styles.itemCard}>
                 <Photo
-                  source={IMAGES.RESTAURANT_TWO}
+                  source={item.imageUri ? { uri: item.imageUri } : IMAGES.RESTAURANT_TWO}
                   size={72}
                   borderRadius={10}
                   imageStyle={styles.thumb}
@@ -188,13 +240,14 @@ export const RestaurantMenuScreen = () => {
                 <View style={styles.qtyCol}>
                   <MenuItemQuantityControl
                     quantity={qty}
-                    onIncrement={() => increment(item.id)}
+                    onIncrement={() => increment(item)}
                     onDecrement={() => decrement(item.id)}
                   />
                 </View>
               </View>
             );
-          })}
+          })
+          )}
         </ScrollView>
 
         <FoodCartBar
@@ -310,5 +363,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minWidth: 70,
     alignSelf: 'flex-end',
+  },
+  loaderWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 12,
+  },
+  loaderTxt: {
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    paddingHorizontal: 32,
+    gap: 12,
+  },
+  emptyTxt: {
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Medium,
+    textAlign: 'center',
   },
 });

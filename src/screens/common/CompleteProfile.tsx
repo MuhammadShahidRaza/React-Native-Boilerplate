@@ -69,10 +69,10 @@ export const CompleteProfile = ({
 
   const openDocuments = () => {
     if (!profileGate.vehicleComplete) {
-      showToast({
-        message: 'Please save your vehicle details first.',
-        isError: true,
-      });
+      // showToast({
+      //   message: 'Please save your vehicle details first.',
+      //   isError: true,
+      // });
       profileGate.setDetailsRequiredVisible(true);
       return;
     }

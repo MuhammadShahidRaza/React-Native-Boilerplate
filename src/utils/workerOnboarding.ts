@@ -1,5 +1,6 @@
 import type { User } from 'types/responseTypes';
 import { pickFromUserDetails } from 'api/normalizers/snlift';
+import { vehicleTypeToApiValue } from 'constants/vehicleTypes';
 import { hasUri } from 'utils/index';
 import store from 'store/store';
 import { setDocumentsComplete, setVehicleDetailsComplete } from 'store/slices/worker';
@@ -40,7 +41,7 @@ export function buildVehicleDetailsUploadPayload(values: {
     vehicle_year: year,
     year,
     vehicle_color: values.vehicle_color.trim(),
-    vehicle_type: values.vehicle_type.trim(),
+    vehicle_type: vehicleTypeToApiValue(values.vehicle_type),
   };
 }
 

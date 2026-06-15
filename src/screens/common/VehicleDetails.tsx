@@ -10,16 +10,13 @@ import { useFormikForm, FocusProvider, useAsyncButton } from 'hooks/index';
 import { sanitizeVehicleYear, pickFromUserDetails } from 'api/normalizers/snlift';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS, VARIABLES } from 'constants/index';
+import {
+  WORKER_VEHICLE_TYPE_DROPDOWN,
+  vehicleTypeDisplayLabel,
+  vehicleTypeToFormLabel,
+} from 'constants/vehicleTypes';
 import { completeProfile } from 'api/functions/app/settings';
 import { useAppSelector } from 'types/reduxTypes';
-import type { DropdownItemProps } from 'components/common/Dropdown';
-
-const VEHICLE_TYPES: DropdownItemProps[] = [
-  { name: 'Standard', id: 1 },
-  { name: 'Premium', id: 2 },
-  { name: 'XL', id: 3 },
-  { name: 'Bike', id: 4 },
-];
 
 export interface VehicleDetailsFormValues {
   vehicle_brand: string;
@@ -46,7 +43,9 @@ export const VehicleDetails = ({
       pickFromUserDetails(userRoot, ['vehicle_brand', 'vehicle_make']),
     ),
     vehicle_color: pickFromUserDetails(userRoot, ['vehicle_color', 'color']),
-    vehicle_type: pickFromUserDetails(userRoot, ['vehicle_type', 'type']),
+    vehicle_type: vehicleTypeToFormLabel(
+      pickFromUserDetails(userRoot, ['vehicle_type', 'type']),
+    ),
   };
 
   const handleSubmit = async (values: VehicleDetailsFormValues) => {
@@ -146,7 +145,7 @@ export const VehicleDetails = ({
             />
             <Dropdown
               title='Vehicle Type'
-              options={VEHICLE_TYPES}
+              options={WORKER_VEHICLE_TYPE_DROPDOWN}
               selectedValue={formik.values.vehicle_type}
               onSelect={value => {
                 formik.setFieldValue('vehicle_type', value);
@@ -174,7 +173,7 @@ export const VehicleDetails = ({
             <VehicleDetailRow label='Vehicle Color' value={formik.values.vehicle_color} />
             <VehicleDetailRow
               label='Vehicle Type'
-              value={formik.values.vehicle_type}
+              value={vehicleTypeDisplayLabel(formik.values.vehicle_type)}
               isLast
             />
           </View>

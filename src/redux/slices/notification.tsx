@@ -28,6 +28,9 @@ const notificationSlice = createSlice({
     resetNewInquiriesUnreadCount(state) {
       state.newInquiriesUnreadCount = 0;
     },
+    resetNotificationState() {
+      return initialState;
+    },
   },
 });
 
@@ -36,5 +39,6 @@ export const {
   setIsNotificationAllowed,
   incrementNewInquiriesUnreadCount,
   resetNewInquiriesUnreadCount,
+  resetNotificationState,
 } = notificationSlice.actions;
 export default notificationSlice.reducer;

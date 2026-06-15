@@ -6,11 +6,7 @@ import { STYLES } from 'utils/commonStyles';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
-import { resetAppState } from 'store/slices/appSettings';
-import { resetUserState } from 'store/slices/user';
-import { resetAddressState } from 'store/slices/address';
-import { resetBookingsState } from 'store/slices/bookings';
-import { resetServicesState } from 'store/slices/services';
+import { resetSessionState } from 'store/resetSessionState';
 import { clearSavedCredentials, clearUserStorageOnLogout } from 'utils/storage';
 import CustomSwitch from 'components/common/SwitchButton';
 import { useState } from 'react';
@@ -25,7 +21,6 @@ import { deviceUdid } from 'utils/index';
 import { APP_CONFIG } from 'config/app';
 
 export const handleAccountLogout = async ({ isDelete }: { isDelete: boolean }) => {
-  store.dispatch(resetAppState());
   // 1. Call API first (needs token)
   if (isDelete) {
     await deleteAccount({});
@@ -37,11 +32,8 @@ export const handleAccountLogout = async ({ isDelete }: { isDelete: boolean }) =
   // 2. Clear all user-related storage (keychain + AsyncStorage)
   await clearUserStorageOnLogout();
 
-  // 3. Reset Redux state (user, address, bookings, services, app) - persist will auto-update
-  store.dispatch(resetUserState());
-  store.dispatch(resetAddressState());
-  store.dispatch(resetBookingsState());
-  store.dispatch(resetServicesState());
+  // 3. Reset all session Redux slices (user, worker online, cart, bookings, etc.)
+  resetSessionState(store.dispatch);
 };
 export const Settings = () => {
   const { t } = useTranslation();

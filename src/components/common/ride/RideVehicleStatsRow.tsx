@@ -5,6 +5,7 @@ import { Typography } from '../Typography';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
+import { vehicleTypeDisplayLabel } from 'constants/vehicleTypes';
 
 export interface RideVehicleStatItem {
   icon: string;
@@ -43,18 +44,7 @@ export const RideVehicleStatsRow = ({
   );
 };
 
-const formatVehicleTypeValue = (value: string) => {
-  const normalized = value.trim().toLowerCase();
-  if (
-    normalized === 'cycle' ||
-    normalized === 'bicycle' ||
-    normalized === 'motorbike' ||
-    normalized === 'motorcycle'
-  ) {
-    return 'Bike';
-  }
-  return value;
-};
+const formatVehicleTypeValue = (value: string) => vehicleTypeDisplayLabel(value) || value;
 
 const StatItem = ({ icon, label, value }: RideVehicleStatItem) => {
   const displayValue = label === 'Vehicle Type' ? formatVehicleTypeValue(value) : value;

@@ -1,6 +1,8 @@
 export type ParcelTrackPhase = 'picked_up' | 'in_transit' | 'delivered';
 
 export type ParcelTripCoords = {
+  pickupAddress?: string;
+  dropoffAddress?: string;
   pickupLat?: number;
   pickupLng?: number;
   dropoffLat?: number;
@@ -11,4 +13,9 @@ export type ParcelTripCoords = {
   timerDurationSeconds?: number;
   /** Fresh booking — countdown starts when this screen mounts (full admin timer). */
   startTimerOnMount?: boolean;
+  senderName?: string;
+  senderPhone?: string;
+  receiverName?: string;
+  receiverPhone?: string;
+  pkg?: string;
 };

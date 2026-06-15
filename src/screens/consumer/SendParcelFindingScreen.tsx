@@ -3,6 +3,7 @@ import { Animated, Image, StyleSheet, View } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import {
   AppGradient,
+  Button,
   GRADIENT_END,
   GRADIENT_START,
   Typography,
@@ -17,8 +18,8 @@ import {
   parcelCoordsNavParams,
   resolveParcelTripCoords,
 } from 'utils/index';
-import { navigate, onBack, replace } from 'navigation/index';
-import { cancelSniftBooking } from 'utils/snliftBookingActions';
+import { onBack, replace } from 'navigation/index';
+import { cancelSniftBooking, deleteSniftBooking } from 'utils/snliftBookingActions';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CancelReasonModal } from './CancelReasonModal';
@@ -43,6 +44,7 @@ export const SendParcelFindingScreen = () => {
   const { pickup, dropoff } = useMemo(() => resolveParcelTripCoords(route.params), [route.params]);
 
   const bookingId = route.params?.bookingId;
+  const { pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
   const timerDurationSeconds = route.params?.timerDurationSeconds;
   const { expiresAt, ready } = useJobDisplayTimer(timerCreatedAt, timerDurationSeconds);
 
@@ -101,8 +103,27 @@ export const SendParcelFindingScreen = () => {
 
   const handleSearchAgain = async () => {
     setExpiredVisible(false);
-    await cancelSniftBooking(bookingId, 'Courier search timeout — searching again');
-    replace(SCREENS.SEND_PARCEL);
+    const ok = await deleteSniftBooking(bookingId);
+    if (ok) {
+      replace(SCREENS.SEND_PARCEL, {
+        pickupAddress: route.params?.pickupAddress,
+        dropoffAddress: route.params?.dropoffAddress,
+        pickupLat,
+        pickupLng,
+        dropoffLat,
+        dropoffLng,
+        senderName: route.params?.senderName,
+        senderPhone: route.params?.senderPhone,
+        receiverName: route.params?.receiverName,
+        receiverPhone: route.params?.receiverPhone,
+        pkg: route.params?.pkg,
+      });
+    }
+  };
+
+  const handleBackPress = async () => {
+    await deleteSniftBooking(bookingId);
+    replace(SCREENS.BOTTOM_STACK);
   };
 
   const timerSubtitle =
@@ -112,6 +133,7 @@ export const SendParcelFindingScreen = () => {
     <Wrapper
       headerTitle='Send Parcel'
       showBackButton
+      onPressBack={handleBackPress}
       useScrollView={false}
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -143,14 +165,22 @@ export const SendParcelFindingScreen = () => {
         <Typography style={styles.sub}>{timerSubtitle}</Typography>
       </View>
 
+      <Button
+        style={styles.cancelBtn}
+        textStyle={styles.cancelTxt}
+        title='Cancel'
+        onPress={() => setCancelVisible(true)}
+      />
+
       <JobTimerExpiredModal
         visible={expiredVisible}
         title='No Courier Found'
         description='We could not find a courier in time. Search again or delete this booking.'
         onSearchAgain={handleSearchAgain}
-        onCancel={() => {
+        onCancel={async () => {
           setExpiredVisible(false);
-          setCancelVisible(true);
+          const ok = await deleteSniftBooking(bookingId);
+          if (ok) replace(SCREENS.BOTTOM_STACK);
         }}
       />
 
@@ -158,9 +188,9 @@ export const SendParcelFindingScreen = () => {
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
         onContinue={async reason => {
-          setCancelVisible(false);
           const ok = await cancelSniftBooking(bookingId, reason);
           if (ok) onBack();
+          return ok;
         }}
       />
     </Wrapper>
@@ -201,5 +231,14 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_SMALL,
     textAlign: 'center',
     marginTop: 4,
+  },
+  cancelBtn: {
+    marginBottom: 32,
+    backgroundColor: COLORS.APP_DANGER_BG,
+    marginHorizontal: 20,
+    borderRadius: 28,
+  },
+  cancelTxt: {
+    color: COLORS.RED,
   },
 });

@@ -237,10 +237,7 @@ export const TrackParcelScreen = () => {
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        onContinue={async reason => {
-          setCancelOpen(false);
-          await cancelSniftBooking(bookingId, reason);
-        }}
+        onContinue={reason => cancelSniftBooking(bookingId, reason)}
       />
     </Wrapper>
   );

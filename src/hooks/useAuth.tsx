@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
-import { resetAppState } from 'store/slices/appSettings';
+import { resetSessionState } from 'store/resetSessionState';
 import { RootState, useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { useTranslation } from './useTranslation';
 import { requestNotificationPermission } from 'utils/notifications';
@@ -59,12 +59,12 @@ export const useUserLoginStatus = (): UserLoginStatus => {
           // });
         } else if (!authToken && isUserLoggedIn) {
           // Token missing but state says logged in - logout user
-          dispatch(resetAppState());
+          resetSessionState(dispatch);
         }
       } catch (error) {
         logger.error('Error checking user login status:', error);
         // On error, logout user to be safe
-        dispatch(resetAppState());
+        resetSessionState(dispatch);
       } finally {
         // Match the splash video duration (3 seconds)
         setTimeout(() => {

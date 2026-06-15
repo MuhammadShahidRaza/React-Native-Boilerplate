@@ -2,7 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
-import { AppGradient, AppStatusModal, Button, GradientIcon, Map, Typography } from 'components/index';
+import {
+  AppGradient,
+  AppStatusModal,
+  Button,
+  GradientIcon,
+  Map,
+  Typography,
+} from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, COLORS, screenHeight, formatMoney } from 'utils/index';
@@ -127,17 +134,7 @@ export const WorkerHomeScreen = () => {
         />
       </View>
 
-      <SafeAreaView edges={['top']} style={styles.overlayTop} pointerEvents='box-none'>
-        <View style={styles.topBar} pointerEvents='box-none'>
-          <GradientIcon
-            componentName={VARIABLES.Feather}
-            iconName='bell'
-            size={FontSize.MediumLarge}
-            color={COLORS.WHITE}
-            onPress={() => navigate(SCREENS.NOTIFICATIONS)}
-          />
-        </View>
-
+      <View style={styles.overlayTop}>
         <View style={styles.togglePill}>
           <TouchableOpacity
             activeOpacity={0.85}
@@ -172,7 +169,22 @@ export const WorkerHomeScreen = () => {
             </Typography>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+        <View
+          style={{
+            right: 20,
+            top: 5,
+            position: 'absolute',
+          }}
+        >
+          <GradientIcon
+            componentName={VARIABLES.Feather}
+            iconName='bell'
+            size={FontSize.MediumLarge}
+            color={COLORS.WHITE}
+            onPress={() => navigate(SCREENS.NOTIFICATIONS)}
+          />
+        </View>
+      </View>
 
       <View style={styles.card}>
         <View style={styles.cardInner}>
@@ -243,10 +255,12 @@ const styles = StyleSheet.create({
   },
   overlayTop: {
     position: 'absolute',
-    top: 0,
+    top: 50,
     left: 0,
     right: 0,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   topBar: {
     flexDirection: 'row',
@@ -254,8 +268,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     width: '100%',
     paddingHorizontal: 16,
-    paddingTop: 8,
-    marginBottom: 8,
   },
   togglePill: {
     flexDirection: 'row',

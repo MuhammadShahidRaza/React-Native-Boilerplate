@@ -29,10 +29,11 @@ const foodCartSlice = createSlice({
   reducers: {
     setCartRestaurant(
       state,
-      action: PayloadAction<{ restaurantId: string; restaurantName: string }>,
+      action: PayloadAction<{ restaurantId: string; restaurantName: string; deliveryFee?: number }>,
     ) {
       state.restaurantId = action.payload.restaurantId;
       state.restaurantName = action.payload.restaurantName;
+      state.deliveryFee = action.payload.deliveryFee ?? 50;
       state.items = [];
     },
     upsertItem(state, action: PayloadAction<Omit<FoodCartItem, 'qty'>>) {
@@ -61,9 +62,12 @@ const foodCartSlice = createSlice({
       state.restaurantName = '';
       state.items = [];
     },
+    resetFoodCartState() {
+      return initialState;
+    },
   },
 });
 
-export const { setCartRestaurant, upsertItem, decrementItem, removeItem, clearCart } =
+export const { setCartRestaurant, upsertItem, decrementItem, removeItem, clearCart, resetFoodCartState } =
   foodCartSlice.actions;
 export default foodCartSlice.reducer;

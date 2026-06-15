@@ -5,7 +5,8 @@ import { logger } from 'utils/logger';
 import NetInfo from '@react-native-community/netinfo';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import store from 'store/store';
-import { resetAppState, setIsAppLoading } from 'store/slices/appSettings';
+import { resetSessionState } from 'store/resetSessionState';
+import { setIsAppLoading } from 'store/slices/appSettings';
 
 type FileLike = {
   uri?: string;
@@ -188,7 +189,7 @@ const checkUnAuth = async (errorMessage?: string, statusCode?: number): Promise<
 
   if (isUnauthMessage || isUnauthCode) {
     // Clear auth state and tokens only (keep language/theme/onboarding)
-    store.dispatch(resetAppState());
+    resetSessionState(store.dispatch);
     await removeMultipleItem([VARIABLES.IS_USER_LOGGED_IN, VARIABLES.USER_TOKEN]);
     await removeKeychainItem(VARIABLES.USER_TOKEN);
   }

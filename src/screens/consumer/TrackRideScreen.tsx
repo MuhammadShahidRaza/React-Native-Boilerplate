@@ -346,9 +346,9 @@ export const TrackRideScreen = () => {
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}
         onContinue={async reason => {
-          setCancelVisible(false);
           const ok = await cancelSniftBooking(bookingId, reason);
           if (ok) navigate(SCREENS.BOOK_RIDE);
+          return ok;
         }}
       />
     </Wrapper>

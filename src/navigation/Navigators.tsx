@@ -187,14 +187,26 @@ export type RootStackParamList = {
         bookingId?: number;
       }
     | undefined;
-  [SCREENS.SEND_PARCEL]: undefined;
+  [SCREENS.SEND_PARCEL]: {
+    pickupAddress?: string;
+    dropoffAddress?: string;
+    pickupLat?: number;
+    pickupLng?: number;
+    dropoffLat?: number;
+    dropoffLng?: number;
+    senderName?: string;
+    senderPhone?: string;
+    receiverName?: string;
+    receiverPhone?: string;
+    pkg?: string;
+  } | undefined;
   [SCREENS.SEND_PARCEL_FINDING]: ParcelTripCoords | undefined;
   [SCREENS.COURIER_MATCHED]: ParcelTripCoords | undefined;
   [SCREENS.TRACK_PARCEL]: (ParcelTripCoords & { phase?: ParcelTrackPhase }) | undefined;
   [SCREENS.ORDER_FOOD]: undefined;
-  [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string } | undefined;
+  [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string; deliveryFee?: number } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
-  [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase; bookingId?: number } | undefined;
+  [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase; bookingId?: number; timerAnchorAt?: string; timerDurationSeconds?: number } | undefined;
   [SCREENS.CONSUMER_BOOKING_DETAIL]: { bookingId: number };
   [SCREENS.WORKER_RIDE_HISTORY]: undefined;
   [SCREENS.WORKER_EARNINGS]: undefined;
