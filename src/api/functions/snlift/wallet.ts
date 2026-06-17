@@ -8,6 +8,8 @@ import {
 } from 'api/normalizers/snlift';
 import { handleGetApiRequest, handlePostApiRequest } from '../app';
 import { APP_CONFIG } from 'config/app';
+import { ENV_CONSTANTS } from 'constants/common';
+import { ALPHA_WORKER_WALLET_SUMMARY } from 'components/common/worker/workerMockData';
 import type { SnliftWalletSummary, SnliftWalletTransaction } from 'types/snliftApi';
 
 function walletRoutesForRole(role: string | null | undefined) {
@@ -24,6 +26,10 @@ function walletRoutesForRole(role: string | null | undefined) {
 }
 
 export async function getWorkerWalletSummary(role: string | null | undefined) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return normalizeWalletSummary(ALPHA_WORKER_WALLET_SUMMARY);
+  }
+
   const routes = walletRoutesForRole(role);
   const raw = await handleGetApiRequest<SnliftWalletSummary>({
     url: routes.summary,
@@ -88,6 +94,29 @@ export function parseWalletSummaryBalance(summary: SnliftWalletSummary | null): 
     parseBalanceValue(summary.balance) ??
     parseBalanceValue(summary.total_cfa_balance)
   );
+}
+
+type WalletServiceCounts = {
+  ride?: number;
+  parcel?: number;
+  food?: number;
+  total?: number;
+};
+
+/** Completed job count from wallet `service_summary.counts` (avoids extra bookings list on home). */
+export function getWorkerJobCountFromWalletSummary(
+  summary: SnliftWalletSummary | null | undefined,
+  role: string | null | undefined,
+): number {
+  const counts = (summary as { service_summary?: { counts?: WalletServiceCounts } } | null)
+    ?.service_summary?.counts;
+  if (!counts) return 0;
+
+  if (role === APP_CONFIG.COURIER_ROLE) {
+    return counts.parcel ?? counts.food ?? counts.total ?? 0;
+  }
+
+  return counts.ride ?? counts.total ?? 0;
 }
 
 export function mapTransactionsToUi(

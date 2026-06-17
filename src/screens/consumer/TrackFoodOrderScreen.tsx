@@ -1,15 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
-import { Marker } from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   GradientIcon,
   Icon,
-  MapVehicleMarker,
+  LiveVehicleMapMarker,
   type IconComponentProps,
   FoodPreparingAnimation,
-  MOCK_FOOD_ORDER,
   ParcelCourierCard,
   ParcelRouteMap,
   RideAnimatedStatusBlock,
@@ -19,7 +17,7 @@ import {
   Wrapper,
   WorkerRequestTimer,
 } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { FoodOrderPhase } from 'types/foodOrderTracking';
@@ -27,7 +25,7 @@ import { FOOD_ORDER_PHASE_INDEX } from 'types/foodOrderTracking';
 import type { RootStackParamList } from 'navigation/index';
 import { navigate, onBack, replace, reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { COLORS, coordinateAlongPolyline, openPhoneNumber, screenHeight } from 'utils/index';
+import { COLORS, openPhoneNumber, screenHeight } from 'utils/index';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { CancelReasonModal } from './CancelReasonModal';
 import { JobTimerExpiredModal } from './JobTimerExpiredModal';
@@ -36,25 +34,14 @@ import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
+import { useFoodOrderDisplay } from 'hooks/useFoodOrderDisplay';
+import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { mapFoodOrderPhase } from 'utils/bookingTrackPhases';
+import { resolveCourierToDropoffLeg } from 'utils/trackingDirections';
+import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
+import { showToast } from 'utils/toast';
 
-const PHASE_ORDER: FoodOrderPhase[] = [
-  'placing_order',
-  'order_placed',
-  'order_accepted',
-  'preparing',
-  'picked_up',
-  'on_the_way',
-  'delivered',
-];
-
-const PHASE_MS: Partial<Record<FoodOrderPhase, number>> = {
-  placing_order: 1800,
-  order_placed: 2200,
-  order_accepted: 2200,
-  preparing: 4000,
-  picked_up: 5500,
-  on_the_way: 6500,
-};
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 const OVERLAY_PHASES: FoodOrderPhase[] = ['placing_order', 'order_placed', 'order_accepted'];
 
@@ -113,12 +100,12 @@ export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
   const bookingId = route.params?.bookingId;
   const timerDurationSeconds = route.params?.timerDurationSeconds;
-  const [phase, setPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'order_placed');
+  const [localPhase, setLocalPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'order_placed');
+  const { order } = useFoodOrderDisplay(bookingId);
+  const track = useConsumerBookingTrack(bookingId, undefined, 'bike');
   const [cancelOpen, setCancelOpen] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
   const [rating, setRating] = useState(0);
-  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
-  const [courierCoord, setCourierCoord] = useState<MapCoord | null>(null);
   const mapRef = useRef<MapView>(null);
   const freshTimerRef = useRef(isFreshJobTimer(route.params));
   const timerHandledRef = useRef(false);
@@ -149,8 +136,17 @@ export const TrackFoodOrderScreen = () => {
 
   const handleBookingAccepted = useCallback(() => {
     timerHandledRef.current = true;
-    setPhase('order_accepted');
+    setLocalPhase(IS_ALPHA ? 'order_accepted' : 'preparing');
   }, []);
+
+  const pickup = track.pickup ?? order?.pickup ?? { latitude: 0, longitude: 0 };
+  const dropoff = track.dropoff ?? order?.dropoff ?? { latitude: 0, longitude: 0 };
+
+  const phase = useMemo(() => {
+    if (IS_ALPHA) return localPhase;
+    if (track.status) return mapFoodOrderPhase(track.status);
+    return localPhase;
+  }, [localPhase, track.status]);
 
   useBookingAcceptPoll(phase === 'order_placed' ? bookingId : undefined, handleBookingAccepted);
 
@@ -173,63 +169,28 @@ export const TrackFoodOrderScreen = () => {
     onBack();
   };
 
-  const { pickup, dropoff } = MOCK_FOOD_ORDER;
-  const mapRegion = useMemo(
-    () => ({
-      latitude: (pickup.latitude + dropoff.latitude) / 2,
-      longitude: (pickup.longitude + dropoff.longitude) / 2,
-      latitudeDelta: 0.04,
-      longitudeDelta: 0.04,
-    }),
-    [pickup, dropoff],
-  );
+  const mapRegion = track.mapRegion ?? {
+    latitude: (pickup.latitude + dropoff.latitude) / 2,
+    longitude: (pickup.longitude + dropoff.longitude) / 2,
+    latitudeDelta: 0.04,
+    longitudeDelta: 0.04,
+  };
 
-  const showMap = phase === 'picked_up' || phase === 'on_the_way' || phase === 'delivered';
+  const showMap = phase === 'on_the_way';
+  const directionsLeg = useMemo(
+    () => (showMap ? resolveCourierToDropoffLeg(dropoff, track.providerCoord) : null),
+    [showMap, dropoff, track.providerCoord],
+  );
   const showPreparingHero = phase === 'preparing';
-  const showOverlayCard = OVERLAY_PHASES.includes(phase);
+  const showOverlayCard = IS_ALPHA
+    ? OVERLAY_PHASES.includes(phase)
+    : phase === 'order_placed';
   const showTrackingUi = !showOverlayCard;
   const activeSegment = Math.max(0, FOOD_ORDER_PHASE_INDEX[phase]);
   const isDelivered = phase === 'delivered';
-  const canCancel =
-    phase !== 'picked_up' && phase !== 'on_the_way' && phase !== 'delivered';
+  const canCancel = phase !== 'on_the_way' && phase !== 'delivered';
 
-  useEffect(() => {
-    if (phase === 'delivered' || phase === 'order_placed') return undefined;
-    const ms = PHASE_MS[phase] ?? 3000;
-    const tid = setTimeout(() => {
-      setPhase(curr => {
-        const idx = PHASE_ORDER.indexOf(curr);
-        return PHASE_ORDER[Math.min(idx + 1, PHASE_ORDER.length - 1)];
-      });
-    }, ms);
-    return () => clearTimeout(tid);
-  }, [phase]);
-
-  useEffect(() => {
-    if (!showMap || phase === 'delivered') {
-      setCourierCoord(null);
-      return undefined;
-    }
-    let raf = 0;
-    const loop = () => {
-      const wave = (Math.sin(Date.now() / 1000 * Math.PI * 2 * 0.2) + 1) / 2;
-      if (routeCoords.length >= 2) {
-        setCourierCoord(coordinateAlongPolyline(routeCoords, 0.1 + wave * 0.8));
-      } else {
-        setCourierCoord({
-          latitude: pickup.latitude + (dropoff.latitude - pickup.latitude) * wave,
-          longitude: pickup.longitude + (dropoff.longitude - pickup.longitude) * wave,
-        });
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    loop();
-    return () => cancelAnimationFrame(raf);
-  }, [showMap, phase, routeCoords, pickup, dropoff]);
-
-  const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
-    setRouteCoords(coordinates);
-  }, []);
+  const onDirectionsReady = useCallback((_coordinates: MapCoord[]) => {}, []);
 
   const status = useMemo((): PhaseStatus => {
     switch (phase) {
@@ -306,12 +267,16 @@ export const TrackFoodOrderScreen = () => {
               dropoff={dropoff}
               mapRegion={mapRegion}
               mapRef={mapRef}
+              directionsLeg={directionsLeg}
+              extraRecenterPoints={[track.providerCoord]}
               onDirectionsReady={onDirectionsReady}
             >
-              {courierCoord && !isDelivered ? (
-                <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
-                  <MapVehicleMarker kind='bike' />
-                </Marker>
+              {track.providerCoord && !isDelivered ? (
+                <LiveVehicleMapMarker
+                  coordinate={track.providerCoord}
+                  bearing={track.providerBearing}
+                  kind='bike'
+                />
               ) : null}
             </ParcelRouteMap>
           </View>
@@ -332,7 +297,7 @@ export const TrackFoodOrderScreen = () => {
               <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
               <View style={styles.etaPill}>
                 <Typography style={styles.etaTxt}>
-                  {`Estimated delivery: ${MOCK_FOOD_ORDER.etaLabel}`}
+                  {`Estimated delivery: ${order?.etaLabel ?? '—'}`}
                 </Typography>
               </View>
             </>
@@ -347,22 +312,36 @@ export const TrackFoodOrderScreen = () => {
             />
           ) : null}
 
-          {showMap && !isDelivered ? (
+          {showMap && !isDelivered && order ? (
             <ParcelCourierCard
-              courierName={MOCK_FOOD_ORDER.courierName}
-              phone={MOCK_FOOD_ORDER.courierPhone}
+              courierName={order.courierName}
+              phone={order.courierPhone}
               avatarSource={IMAGES.USER}
-              onPhonePress={() => openPhoneNumber(MOCK_FOOD_ORDER.courierPhone)}
-              onMessagePress={() => {}}
+              onPhonePress={() => {
+                if (order.courierPhone) {
+                  openPhoneNumber(order.courierPhone);
+                  return;
+                }
+                showToast({ message: 'Courier phone number is not available.' });
+              }}
+              onMessagePress={() =>
+                navigateToBookingFirebaseChat({
+                  otherUser: {
+                    id: order.providerId,
+                    full_name: order.courierName,
+                  },
+                  bookingId,
+                })
+              }
             />
           ) : null}
 
-          {showMap && !isDelivered ? (
+          {showMap && !isDelivered && order ? (
             <RideVehicleStatsRow
               items={[
-                { icon: 'motorbike', label: 'Vehicle Type', value: MOCK_FOOD_ORDER.vehicleType },
-                { icon: 'card-text', label: 'License Plate', value: MOCK_FOOD_ORDER.licensePlate },
-                { icon: 'water', label: 'Color', value: MOCK_FOOD_ORDER.vehicleColor },
+                { icon: 'motorbike', label: 'Vehicle Type', value: order.vehicleType },
+                { icon: 'card-text', label: 'License Plate', value: order.licensePlate },
+                { icon: 'water', label: 'Color', value: order.vehicleColor },
               ]}
               marginHorizontal={0}
             />

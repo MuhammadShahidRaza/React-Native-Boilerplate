@@ -7,6 +7,7 @@ import {
   BookingsReducer,
   FoodCartReducer,
   NotificationReducer,
+  PlatformSettingsReducer,
   ServicesReducer,
   UserReducer,
   WorkerReducer,
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   bookings: BookingsReducer,
   worker: WorkerReducer,
   foodCart: FoodCartReducer,
+  platformSettings: PlatformSettingsReducer,
 });
 
 // Redux Persist configuration
@@ -32,7 +34,7 @@ const persistConfig = {
   // Only persist these reducers (theme and language will be auto-saved)
   whitelist: ['app', 'user', 'address'],
   // Don't persist notification state (it's temporary)
-  blacklist: ['notification', 'services', 'bookings', 'worker'],
+  blacklist: ['notification', 'services', 'bookings', 'worker', 'platformSettings'],
   // Debug mode in development
   debug: __DEV__,
   // Migration function to handle version changes

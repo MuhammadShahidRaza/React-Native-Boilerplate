@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
@@ -6,6 +6,7 @@ import {
   Photo,
   Typography,
   WorkerRouteAddresses,
+  WorkerRequestDetailSkeleton,
   WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
@@ -17,19 +18,15 @@ import { SCREENS } from 'constants/routes';
 import { COLORS, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
-import {
-  formatWorkerServiceType,
-  getWorkerRequestDetail,
-  type WorkerRequestDetail,
-} from 'components/common/worker/workerMockData';
-import {
-  acceptBooking,
-  extractBookingFromResponse,
-  getBookingById,
-} from 'api/functions/snlift/bookings';
-import { mapBookingToWorkerRequestDetail, getBookingStatusLabel } from 'api/mappers/snliftBooking';
+import { formatWorkerServiceType } from 'components/common/worker/workerMockData';
+import { acceptBooking, rejectBooking } from 'api/functions/snlift/bookings';
+import { getBookingStatusLabel } from 'api/mappers/snliftBooking';
 import { showToast } from 'utils/toast';
+import { ENV_CONSTANTS } from 'constants/common';
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
+import { useWorkerRequestDetail } from 'hooks/useWorkerRequestDetail';
+import { logger } from 'utils/logger';
+import { startWorkerActiveJobTracking } from 'services/location/workerActiveJobTracking';
 
 const AVATAR_SIZE = 56;
 
@@ -45,32 +42,17 @@ export const WorkerRequestDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.WORKER_REQUEST_DETAIL>>();
   const role = useAppSelector(state => state.user?.role);
+  const userDetails = useAppSelector(state => state.user?.userDetails);
   const copy = getWorkerRoleCopy(role);
   const requestId = route.params?.requestId ?? '1';
-  const [detail, setDetail] = useState<WorkerRequestDetail>(() =>
-    getWorkerRequestDetail(requestId),
-  );
-  const [bookingCreatedAt, setBookingCreatedAt] = useState<string | undefined>();
-  const [bookingStatus, setBookingStatus] = useState<string>('pending');
+  const { detail, loading, bookingCreatedAt, bookingStatus, setBookingStatus } =
+    useWorkerRequestDetail(requestId, role);
   const { expiresAt, ready } = useJobDisplayTimer(bookingCreatedAt);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await getBookingById(requestId, role);
-      const booking = extractBookingFromResponse(res);
-      if (!cancelled && booking) {
-        setDetail(mapBookingToWorkerRequestDetail(booking));
-        if (booking.created_at) setBookingCreatedAt(booking.created_at);
-        setBookingStatus((booking.status ?? 'pending').toLowerCase());
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [requestId, role]);
   const [timerActive, setTimerActive] = useState(true);
+  const [rejecting, setRejecting] = useState(false);
   const hasAcceptedRef = useRef(false);
+
+  logger.log('detail', detail);
 
   useFocusEffect(
     useCallback(() => {
@@ -95,6 +77,7 @@ export const WorkerRequestDetailScreen = () => {
   };
 
   const accept = async () => {
+    if (!detail) return;
     const res = await acceptBooking(requestId, role);
     if (!res) {
       showToast({ message: 'Could not accept this request. Try again.' });
@@ -103,6 +86,13 @@ export const WorkerRequestDetailScreen = () => {
     hasAcceptedRef.current = true;
     setTimerActive(false);
     setBookingStatus('accepted');
+    if (userDetails?.id) {
+      void startWorkerActiveJobTracking({
+        userId: String(userDetails.id),
+        role: role ?? 'driver',
+        bookingId: detail.id,
+      });
+    }
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: 'pickup',
@@ -113,7 +103,35 @@ export const WorkerRequestDetailScreen = () => {
   const isActiveJob = bookingStatus === 'accepted' || bookingStatus === 'in_transit';
   const isTerminal = bookingStatus === 'completed' || bookingStatus === 'cancelled';
 
+  const reject = async () => {
+    if (!detail || rejecting || hasAcceptedRef.current) return;
+
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      handleBack();
+      return;
+    }
+
+    setRejecting(true);
+    setTimerActive(false);
+
+    const res = await rejectBooking(requestId, role, {
+      showLoader: true,
+    });
+
+    setRejecting(false);
+
+    if (!res) {
+      showToast({ message: 'Could not reject this request. Try again.' });
+      if (isPending) setTimerActive(true);
+      return;
+    }
+
+    showToast({ message: 'Request rejected.', isError: false });
+    handleBack();
+  };
+
   const goToJob = () => {
+    if (!detail) return;
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: bookingStatus === 'in_transit' ? 'dropoff' : 'pickup',
@@ -128,7 +146,7 @@ export const WorkerRequestDetailScreen = () => {
       darkMode={false}
     >
       <View style={styles.content} pointerEvents='box-none'>
-        {isPending && timerActive && ready && expiresAt ? (
+        {isPending && timerActive && ready && expiresAt && !loading ? (
           <View style={styles.timerWrap} pointerEvents='none'>
             <WorkerRequestTimer
               expiresAt={expiresAt}
@@ -146,80 +164,105 @@ export const WorkerRequestDetailScreen = () => {
           </Pressable>
           <View pointerEvents='auto'>
             <Typography style={styles.screenTitle}>{copy.requestDetailTitle}</Typography>
-
-            <View style={styles.paymentBadge}>
-              <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
-            </View>
-            <View style={styles.statusBadge}>
-              <Typography style={styles.statusBadgeTxt}>
-                {getBookingStatusLabel(bookingStatus)}
-              </Typography>
-            </View>
           </View>
 
-          <View style={styles.sheetBody} pointerEvents='auto'>
-            <View style={[styles.passengerCard, CARD_SHADOW]}>
-              <Photo
-                source={IMAGES.USER}
-                size={AVATAR_SIZE}
-                borderRadius={AVATAR_SIZE / 2}
-                containerStyle={styles.avatarWrap}
-              />
-              <View style={styles.passengerInfo}>
-                <Typography style={styles.passengerName}>{detail.customerName}</Typography>
-                <Typography style={styles.serviceType}>
-                  {formatWorkerServiceType(detail.serviceType)}
-                </Typography>
-              </View>
-              <View style={styles.fareCol}>
-                <Typography style={styles.fareLabel}>{copy.fareLabel}</Typography>
-                <Typography style={styles.fareAmount}>{detail.fare}</Typography>
-              </View>
-            </View>
-
-            <WorkerRouteAddresses
-              pickupAddress={detail.pickupAddress}
-              dropoffAddress={detail.dropoffAddress}
-            />
-
-            <View style={styles.statsRow}>
-              <View style={styles.statCell}>
-                <Typography style={styles.statValue}>{detail.distance}</Typography>
-                <Typography style={styles.statLabel}>Distance</Typography>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statCell}>
-                <Typography style={styles.statValue}>{detail.eta}</Typography>
-                <Typography style={styles.statLabel}>ETA</Typography>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statCell}>
-                <Typography style={styles.statValue}>{detail.fare}</Typography>
-                <Typography style={styles.statLabel}>{detail.payment}</Typography>
-              </View>
-            </View>
-
-            {isPending ? (
-              <>
-                <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
-                <Pressable onPress={handleBack} style={styles.rejectBtn}>
-                  <Typography style={styles.rejectTxt}>Reject</Typography>
-                </Pressable>
-              </>
-            ) : null}
-
-            {isActiveJob ? (
-              <Button title='Continue Job' onPress={goToJob} style={styles.acceptBtn} />
-            ) : null}
-
-            {isTerminal ? (
+          {loading ? (
+            <WorkerRequestDetailSkeleton />
+          ) : !detail ? (
+            <View style={styles.sheetBody} pointerEvents='auto'>
               <Typography style={styles.terminalNote}>
-                {bookingStatus === 'completed'
-                  ? 'This job has been completed.'
-                  : 'This request is no longer available.'}
+                Could not load this request. Please go back and try again.
               </Typography>
-            ) : null}
-          </View>
+              <Button title='Back' onPress={handleBack} style={styles.acceptBtn} />
+            </View>
+          ) : (
+            <>
+              <View pointerEvents='auto'>
+                <View style={styles.paymentBadge}>
+                  <Typography style={styles.paymentTxt}>{detail.payment}</Typography>
+                </View>
+                <View style={styles.statusBadge}>
+                  <Typography style={styles.statusBadgeTxt}>
+                    {getBookingStatusLabel(bookingStatus)}
+                  </Typography>
+                </View>
+              </View>
+
+              <View style={styles.sheetBody} pointerEvents='auto'>
+                <View style={[styles.passengerCard, CARD_SHADOW]}>
+                  <Photo
+                    source={
+                      detail.customerAvatar
+                        ? { uri: detail.customerAvatar }
+                        : IMAGES.USER
+                    }
+                    size={AVATAR_SIZE}
+                    borderRadius={AVATAR_SIZE / 2}
+                    containerStyle={styles.avatarWrap}
+                  />
+                  <View style={styles.passengerInfo}>
+                    <Typography style={styles.passengerName}>{detail.customerName}</Typography>
+                    <Typography style={styles.serviceType}>
+                      {formatWorkerServiceType(detail.serviceType)}
+                    </Typography>
+                  </View>
+                  <View style={styles.fareCol}>
+                    <Typography style={styles.fareLabel}>{copy.fareLabel}</Typography>
+                    <Typography style={styles.fareAmount}>{detail.fare}</Typography>
+                  </View>
+                </View>
+
+                <WorkerRouteAddresses
+                  pickupAddress={detail.pickupAddress}
+                  dropoffAddress={detail.dropoffAddress}
+                />
+
+                <View style={styles.statsRow}>
+                  <View style={styles.statCell}>
+                    <Typography style={styles.statValue}>{detail.distance}</Typography>
+                    <Typography style={styles.statLabel}>Distance</Typography>
+                  </View>
+                  <View style={styles.statDivider} />
+                  <View style={styles.statCell}>
+                    <Typography style={styles.statValue}>{detail.eta}</Typography>
+                    <Typography style={styles.statLabel}>ETA</Typography>
+                  </View>
+                  <View style={styles.statDivider} />
+                  <View style={styles.statCell}>
+                    <Typography style={styles.statValue}>{detail.fare}</Typography>
+                    <Typography style={styles.statLabel}>{detail.payment}</Typography>
+                  </View>
+                </View>
+
+                {isPending ? (
+                  <>
+                    <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
+                    <Pressable
+                      onPress={reject}
+                      disabled={rejecting}
+                      style={[styles.rejectBtn, rejecting && styles.rejectBtnDisabled]}
+                    >
+                      <Typography style={styles.rejectTxt}>
+                        {rejecting ? 'Rejecting…' : 'Reject'}
+                      </Typography>
+                    </Pressable>
+                  </>
+                ) : null}
+
+                {isActiveJob ? (
+                  <Button title='Continue Job' onPress={goToJob} style={styles.acceptBtn} />
+                ) : null}
+
+                {isTerminal ? (
+                  <Typography style={styles.terminalNote}>
+                    {bookingStatus === 'completed'
+                      ? 'This job has been completed.'
+                      : 'This request is no longer available.'}
+                  </Typography>
+                ) : null}
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Wrapper>
@@ -245,7 +288,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Medium,
   },
   screenTitle: {
-    // flex: 1,
     textAlign: 'center',
     fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
@@ -288,14 +330,16 @@ const styles = StyleSheet.create({
     marginTop: screenHeight(8),
     paddingBottom: 100,
     overflow: 'visible',
+    zIndex: 2,
   },
   timerWrap: {
     position: 'absolute',
-    top: 20,
+    top: screenHeight(8) - 58,
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 1,
+    zIndex: 10,
+    elevation: 10,
   },
   sheetBody: {
     paddingHorizontal: 16,
@@ -379,6 +423,9 @@ const styles = StyleSheet.create({
   rejectBtn: {
     alignItems: 'center',
     paddingVertical: 8,
+  },
+  rejectBtnDisabled: {
+    opacity: 0.5,
   },
   rejectTxt: {
     color: COLORS.ERROR,

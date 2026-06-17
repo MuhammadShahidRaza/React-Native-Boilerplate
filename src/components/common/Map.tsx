@@ -1,9 +1,12 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import { isValidMapCoord } from 'utils/coordinateAlongPolyline';
 import { COLORS, getCurrentLocation } from 'utils/index';
+import { fitMapToCoords } from 'utils/mapDirections';
 import { Icon } from './Icon';
-import { MapVehicleMarker, type MapVehicleMarkerKind } from './MapVehicleMarker';
+import { LiveVehicleMapMarker } from './LiveVehicleMapMarker';
+import { type MapVehicleMarkerKind } from './MapVehicleMarker';
 import { INITIAL_REGION, VARIABLES } from 'constants/common';
 import { logger } from 'utils/logger';
 import { ChildrenType, voidFuntionType } from 'types/common';
@@ -46,6 +49,17 @@ interface MapProps {
   currentLocationButtonStyle?: ViewStyle;
   /** When false, hides the blue user-location dot (use during route preview). Default: true unless `showCenterMarker`. */
   showsUserLocationDot?: boolean;
+  /** Google Maps traffic overlay (tracking / navigation). */
+  showsTraffic?: boolean;
+  /** Fired when the user pans or pinches the map. */
+  onMapUserInteraction?: () => void;
+  /** Fit route + markers (+ optional user GPS) — tracking screens. */
+  showRecenterButton?: boolean;
+  recenterPoints?: MapLocation[];
+  recenterIncludeUserLocation?: boolean;
+  recenterButtonStyle?: ViewStyle;
+  /** Called after recenter fit — e.g. resume drive-follow mode. */
+  onRecenterPress?: () => void;
   /** Ref to access map (e.g. animateToRegion) */
   mapRef?: React.MutableRefObject<MapView | null>;
   /** Children rendered inside MapView (e.g. Polyline, Marker) */
@@ -84,6 +98,13 @@ export const Map: FC<MapProps> = ({
   centerMarkerStyle,
   currentLocationButtonStyle,
   showsUserLocationDot,
+  showsTraffic = false,
+  onMapUserInteraction,
+  showRecenterButton = false,
+  recenterPoints = [],
+  recenterIncludeUserLocation = true,
+  recenterButtonStyle,
+  onRecenterPress,
   mapRef: mapRefProp,
   children,
   minZoomLevel = 14,
@@ -162,6 +183,49 @@ export const Map: FC<MapProps> = ({
     [onRegionChange, onRegionChangeComplete],
   );
 
+  const handleRegionChangeStart = useCallback(
+    (_newRegion: Region, details?: { isGesture?: boolean }) => {
+      if (details?.isGesture) {
+        onMapUserInteraction?.();
+      }
+    },
+    [onMapUserInteraction],
+  );
+
+  const handlePanDrag = useCallback(() => {
+    onMapUserInteraction?.();
+  }, [onMapUserInteraction]);
+
+  const handleRecenter = useCallback(async () => {
+    const points = recenterPoints.filter(
+      c => isValidMapCoord(c.latitude, c.longitude),
+    );
+
+    if (recenterIncludeUserLocation) {
+      try {
+        const position = await getCurrentLocation();
+        if (position) {
+          points.push({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        }
+      } catch (error) {
+        logger.warn('Map: recenter could not read current location', error);
+      }
+    }
+
+    if (points.length > 0) {
+      fitMapToCoords(mapRef, points, { animated: true });
+      onRecenterPress?.();
+      return;
+    }
+
+    void fetchCurrentLocation().then(() => {
+      onRecenterPress?.();
+    });
+  }, [recenterPoints, recenterIncludeUserLocation, mapRef, fetchCurrentLocation, onRecenterPress]);
+
   const handleMarkerDragEnd = useCallback(
     (e: { nativeEvent: { coordinate: MapLocation } }) => {
       const { latitude, longitude } = e.nativeEvent.coordinate;
@@ -184,14 +248,28 @@ export const Map: FC<MapProps> = ({
           showsUserLocation={false}
           showsMyLocationButton={false}
           showsCompass={false}
+          showsTraffic={showsTraffic}
+          onPanDrag={handlePanDrag}
           minZoomLevel={minZoomLevel}
           userInterfaceStyle={resolvedMapStyle}
           onMapReady={handleMapReady}
           {...(showCenterMarker
-            ? { initialRegion: region, onRegionChangeComplete: handleRegionChangeComplete }
+            ? {
+                initialRegion: region,
+                onRegionChangeStart: handleRegionChangeStart,
+                onRegionChangeComplete: handleRegionChangeComplete,
+              }
             : regionTracking === 'initialOnly'
-              ? { initialRegion: region }
-              : { region: currentRegion, onRegionChangeComplete: handleRegionChangeComplete })}
+              ? {
+                  initialRegion: region,
+                  onRegionChangeStart: handleRegionChangeStart,
+                  onRegionChangeComplete: handleRegionChangeComplete,
+                }
+              : {
+                  region: currentRegion,
+                  onRegionChangeStart: handleRegionChangeStart,
+                  onRegionChangeComplete: handleRegionChangeComplete,
+                })}
         >
           {showMarker && (
             <Marker
@@ -211,9 +289,10 @@ export const Map: FC<MapProps> = ({
             ))}
           {useCustomUserLocationMarker && userLocation ? (
             userLocationVehicleKind ? (
-              <Marker coordinate={userLocation} anchor={{ x: 0.5, y: 0.5 }} flat>
-                <MapVehicleMarker kind={userLocationVehicleKind} />
-              </Marker>
+              <LiveVehicleMapMarker
+                coordinate={userLocation}
+                kind={userLocationVehicleKind}
+              />
             ) : (
               <Marker coordinate={userLocation} pinColor={COLORS.APP_PRIMARY} />
             )
@@ -231,19 +310,35 @@ export const Map: FC<MapProps> = ({
           </View>
         )}
       </View>
-      {showCurrentLocationButton && (
+      {showCurrentLocationButton ? (
         <TouchableOpacity
           style={[styles.currentLocationButton, currentLocationButtonStyle]}
           onPress={fetchCurrentLocation}
         >
           <Icon
             componentName={VARIABLES.MaterialIcons}
-            iconName={'my-location'}
+            iconName='my-location'
             size={30}
             iconStyle={styles.iconStyle}
           />
         </TouchableOpacity>
-      )}
+      ) : null}
+      {showRecenterButton ? (
+        <TouchableOpacity
+          style={[styles.currentLocationButton, recenterButtonStyle]}
+          onPress={() => {
+            void handleRecenter();
+          }}
+          accessibilityLabel='Recenter map'
+        >
+          <Icon
+            componentName={VARIABLES.MaterialIcons}
+            iconName='my-location'
+            size={30}
+            iconStyle={styles.iconStyle}
+          />
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };
@@ -276,7 +371,7 @@ const styles = StyleSheet.create({
   currentLocationButton: {
     position: 'absolute',
     zIndex: 2,
-    bottom: 8,
+    bottom: 58,
     right: 8,
     backgroundColor: COLORS.WHITE,
     padding: 10,

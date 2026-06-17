@@ -8,6 +8,8 @@ import type {
 import type { SnliftBooking, SnliftBookingStatus } from 'types/snliftApi';
 import { formatMoney } from 'utils/currency';
 import { formatDistanceKm } from 'utils/distance';
+import { parseMapCoord } from 'utils/coordinateAlongPolyline';
+import { COLORS } from 'utils/colors';
 
 export type ConsumerActivityItem = {
   id: string;
@@ -57,8 +59,44 @@ function formatDate(d: string | null | undefined): string {
   return dt.toLocaleDateString('en-GB').replace(/\//g, '-');
 }
 
+function shortPlaceName(address: string): string {
+  const trimmed = address.trim();
+  if (!trimmed) return 'Destination';
+  return trimmed.split(',')[0]?.trim() || trimmed;
+}
+
+function formatCustomerRating(customer: SnliftBooking['customer']): string {
+  const raw = customer as Record<string, unknown> | undefined;
+  const value = raw?.average_rating ?? raw?.avg_rating ?? raw?.rating;
+  if (value === undefined || value === null || value === '') return '—';
+  const n = typeof value === 'number' ? value : parseFloat(String(value));
+  return Number.isNaN(n) ? '—' : n.toFixed(1);
+}
+
+function estimateEtaMinutes(distanceKm: number | string | null | undefined): string {
+  const n = typeof distanceKm === 'number' ? distanceKm : parseFloat(String(distanceKm ?? ''));
+  if (Number.isNaN(n) || n <= 0) return '—';
+  return `${Math.max(1, Math.ceil(n * 2.5))} min`;
+}
+
 export function getBookingStatusLabel(status: SnliftBookingStatus | undefined): string {
   return statusLabel(status);
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#F59E0B',
+  accepted: COLORS.APP_PRIMARY,
+  in_transit: COLORS.APP_SECONDARY,
+  completed: '#16A34A',
+  complete: '#16A34A',
+  delivered: '#16A34A',
+  finished: '#16A34A',
+  cancelled: COLORS.RED,
+};
+
+export function getBookingStatusColor(status: SnliftBookingStatus | string | undefined): string {
+  const s = (status ?? 'pending').toLowerCase();
+  return STATUS_COLORS[s] ?? COLORS.APP_PRIMARY;
 }
 
 export function mapBookingToActivityItem(booking: SnliftBooking): ConsumerActivityItem {
@@ -89,14 +127,16 @@ export function mapBookingToWorkerTrip(booking: SnliftBooking): WorkerTripRecord
   const km = formatDistanceKm(b.distance_km);
   return {
     id: String(b.id),
-    date: formatDate(b.completed_at),
+    status: (b.status ?? 'pending').toLowerCase(),
+    statusLabel: statusLabel(b.status),
+    date: formatDate(b.completed_at ?? b.created_at),
     earned: formatMoney(b.total_amount ?? b.estimated_amount),
     pickupLabel: `Pickup: ${pickup.slice(0, 28)}`,
     pickupAddress: pickup,
     destinationLabel: `Destination: ${drop.slice(0, 28)}`,
     destinationAddress: drop,
     distance: km,
-    rating: '5.0',
+    rating: formatCustomerRating(b.customer),
     payment: 'Cash',
   };
 }
@@ -106,17 +146,18 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
   const b = normalizeSniftBooking(booking as SnliftBooking & Record<string, unknown>);
   const pickup = b.pickup_address ?? 'Pickup';
   const drop = b.dropoff_address ?? b.delivery_address ?? 'Drop-off';
-  const lat = (v: number | string | null | undefined, fallback: number) => {
-    const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''));
-    return Number.isNaN(n) ? fallback : n;
-  };
   return {
     ...base,
+    customerId: b.customer?.id ?? b.customer_id,
+    customerPhone: b.customer?.phone ?? undefined,
+    customerAvatar: b.customer?.profile_image ?? null,
+    customerRating: formatCustomerRating(b.customer),
     pickupAddress: pickup,
+    pickupShortName: shortPlaceName(pickup),
     dropoffAddress: drop,
-    dropoffShortName: drop.split(',')[0] ?? drop,
+    dropoffShortName: shortPlaceName(drop),
     distance: formatDistanceKm(b.distance_km),
-    eta: '12 min',
+    eta: estimateEtaMinutes(b.distance_km),
     payment: 'Cash',
     baseFare: formatMoney(b.sub_total ?? b.estimated_amount),
     commission: formatMoney(
@@ -125,14 +166,20 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
     earned: formatMoney(b.total_amount ?? b.estimated_amount),
     previousWallet: formatMoney(0),
     newWallet: formatMoney(0),
-    pickupLat: lat(b.pickup_latitude, 40.7128),
-    pickupLng: lat(b.pickup_longitude, -74.006),
-    dropoffLat: lat(b.dropoff_latitude, 40.708),
-    dropoffLng: lat(b.dropoff_longitude, -74.001),
+    pickupLat: parseMapCoord(b.pickup_latitude) ?? 0,
+    pickupLng: parseMapCoord(b.pickup_longitude) ?? 0,
+    dropoffLat: parseMapCoord(b.dropoff_latitude) ?? 0,
+    dropoffLng: parseMapCoord(b.dropoff_longitude) ?? 0,
   };
 }
 
 export function isActiveBookingStatus(status: SnliftBookingStatus | undefined): boolean {
   const s = (status ?? '').toLowerCase();
-  return s !== 'completed' && s !== 'cancelled';
+  return s !== 'completed' && s !== 'cancelled' && s !== 'complete' && s !== 'delivered';
+}
+
+/** Worker ride history — completed/delivered jobs (API status aliases). */
+export function isCompletedBookingStatus(status: SnliftBookingStatus | undefined): boolean {
+  const s = (status ?? '').toLowerCase();
+  return s === 'completed' || s === 'complete' || s === 'delivered' || s === 'finished';
 }

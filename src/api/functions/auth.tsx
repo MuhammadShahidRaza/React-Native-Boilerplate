@@ -11,12 +11,11 @@ import { MessageResponse, User } from 'types/responseTypes';
 import { post, postWithSingleFile } from 'utils/axios';
 import { saveUserDetailsForRole, setKeychainItem } from 'utils/storage';
 import { showToast } from 'utils/toast';
-import { DUMMY_USER } from './app/user';
+import { DUMMY_USER, getAlphaDummyUser } from './app/user';
 import { isWorkerRole } from 'config/app';
 import { resetToAuthEntry } from 'config/authFlow';
 import { normalizeSniftUser } from 'api/normalizers/snlift';
-import { syncWorkerOnboardingFlags } from 'utils/workerOnboarding';
-import { registerUserDevice, type RegisterDevicePayload } from 'api/functions/snlift/user';
+import { syncWorkerOnboardingFlags, syncWorkerOnlineFromUser } from 'utils/workerOnboarding';
 import { normalizePhoneNumber } from 'utils/helpers/functions';
 import { handleApiError, parseApiResponse } from './app';
 import { logger } from 'utils/logger';
@@ -34,6 +33,7 @@ function applySessionUser(normalized: User) {
   store.dispatch(setUserDetails(normalized));
   if (isWorkerRole(normalized?.user_type ?? normalized?.user_role)) {
     syncWorkerOnboardingFlags(normalized);
+    syncWorkerOnlineFromUser(normalized);
   }
 }
 
@@ -99,7 +99,7 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
   data: A;
 }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    const userData = { ...DUMMY_USER, user_type: data?.user_type || 'user' };
+    const userData = getAlphaDummyUser(data?.user_type || 'user');
     store.dispatch(setIsUserLoggedIn(true));
     store.dispatch(setUserDetails(userData));
     await setKeychainItem(VARIABLES.USER_TOKEN, 'temp_token');
@@ -134,7 +134,6 @@ const loginUserThroughSocial = async <R extends User, A extends SocialLogin>({
     const normalized = normalizeSniftUser(user as Partial<User> & Record<string, unknown>);
     await setKeychainItem(VARIABLES.USER_TOKEN, normalized?.token ?? '');
     applySessionUser(normalized);
-    await syncUserDeviceFromLoginPayload(data);
     if (
       isWorkerRole(normalized?.user_type) &&
       (!normalized?.is_onboarded || !normalized?.is_admin_verified)
@@ -222,26 +221,6 @@ const forgotPassword = async <
     });
   }
 };
-async function syncUserDeviceFromLoginPayload(data: {
-  udid?: string;
-  device_type?: string;
-  device_brand?: string;
-  device_os?: string;
-  app_version?: string;
-  device_token?: string;
-}) {
-  if (!data?.udid || !data?.device_token || !data?.device_os) return;
-  const payload: RegisterDevicePayload = {
-    udid: data.udid,
-    device_type: data.device_type ?? 'android',
-    device_brand: data.device_brand,
-    device_os: data.device_os,
-    app_version: data.app_version,
-    device_token: data.device_token,
-  };
-  await registerUserDevice(payload);
-}
-
 /** Signup / email verification — `POST /verify-otp` (phone + otp_code only). */
 const verifySignupOtp = async <
   R extends User,
@@ -261,8 +240,7 @@ const verifySignupOtp = async <
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     const isWorker = isWorkerRole(data?.user_type);
     const userData = {
-      ...DUMMY_USER,
-      user_type: data?.user_type,
+      ...getAlphaDummyUser(data?.user_type ?? 'user'),
       email_verified_at: new Date().toISOString(),
       ...(isWorker ? { is_onboarded: 0, is_admin_verified: 0, is_approved: 0 } : {}),
     };
@@ -392,7 +370,7 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
   rememberMe: boolean;
 }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    const userData = { ...DUMMY_USER, user_type: data?.user_type || 'user' };
+    const userData = getAlphaDummyUser(data?.user_type || 'user');
     store.dispatch(setIsUserLoggedIn(true));
     store.dispatch(setUserDetails(userData));
     await setKeychainItem(VARIABLES.USER_TOKEN, 'temp_token');
@@ -414,7 +392,6 @@ const loginUser = async <R extends User, A extends Login_SignUp>({
     }
     await setKeychainItem(VARIABLES.USER_TOKEN, normalized?.token ?? '');
     applySessionUser(normalized);
-    await syncUserDeviceFromLoginPayload(data);
 
     if (
       isWorkerRole(normalized?.user_type) &&

@@ -1,9 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { Icon, Typography } from 'components/index';
-import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
-import type { NavStep } from 'hooks/useWorkerLiveNavigation';
+import type { NavStep } from 'utils/workerNavigation';
+import { resolveNavStepIcon } from 'utils/workerNavigation';
 
 export interface WorkerNavInstructionCardProps {
   distanceLabel: string;
@@ -17,7 +17,10 @@ export const WorkerNavInstructionCard = ({
   etaLabel,
   distanceCaption,
   step,
-}: WorkerNavInstructionCardProps) => (
+}: WorkerNavInstructionCardProps) => {
+  const turnIcon = resolveNavStepIcon(step);
+
+  return (
   <View style={styles.card}>
     <View style={styles.topRow}>
       <View>
@@ -33,9 +36,9 @@ export const WorkerNavInstructionCard = ({
     <View style={styles.instructionRow}>
       <View style={styles.arrowCircle}>
         <Icon
-          componentName={VARIABLES.Feather}
-          iconName='arrow-up'
-          size={FontSize.Medium}
+          componentName={turnIcon.componentName}
+          iconName={turnIcon.iconName}
+          size={FontSize.Large}
           color={COLORS.WHITE}
         />
       </View>
@@ -49,7 +52,8 @@ export const WorkerNavInstructionCard = ({
       </View>
     </View>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

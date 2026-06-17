@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type MapView from 'react-native-maps';
 import {
   AppGradient,
   Button,
   GRADIENT_END,
   GRADIENT_START,
+  GradientIcon,
   RideDriverCard,
   Typography,
   WorkerJobRouteMap,
@@ -15,112 +17,173 @@ import {
 } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
-import { INITIAL_REGION } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { navigate } from 'navigation/index';
+import { CustomBackIcon, navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import {
-  APP_GRADIENT_HORIZONTAL,
-  BRAND_PRIMARY,
-  COLORS,
-  openPhoneNumber,
-  screenHeight,
-} from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, openPhoneNumber, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
-import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
-import {
-  getActiveNavStep,
-  parseDirectionSteps,
-  useWorkerLiveNavigation,
-  type NavStep,
-} from 'hooks/useWorkerLiveNavigation';
+import { useWorkerRequestDetail } from 'hooks/useWorkerRequestDetail';
+import { useWorkerGpsNavigation } from 'hooks/useWorkerGpsNavigation';
+import { useMapDriveFollow } from 'hooks/useMapDriveFollow';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
-import { extrapolatePastEnd, mapCoordDistanceApprox } from 'utils/coordinateAlongPolyline';
+import { isValidMapCoord } from 'utils/coordinateAlongPolyline';
+import {
+  isWorkerNearCoord,
+  parseDirectionSteps,
+  workerProximityBlockedMessage,
+  type NavStep,
+  type WorkerRouteMetrics,
+} from 'utils/workerNavigation';
+import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
+import { showToast } from 'utils/toast';
+import { updateBookingStatus } from 'api/functions/snlift/bookings';
+import {
+  ensureWorkerActiveJobTracking,
+  stopWorkerActiveJobTracking,
+} from 'services/location/workerActiveJobTracking';
+import { refreshWorkerHomeStats } from 'utils/workerHomeStats';
 
 type JobPhase = 'pickup' | 'dropoff';
 
 export const WorkerJobNavigationScreen = () => {
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.WORKER_JOB_NAVIGATION>>();
   const role = useAppSelector(state => state.user?.role);
+  const userDetails = useAppSelector(state => state.user?.userDetails);
   const copy = getWorkerRoleCopy(role);
-  const detail = useMemo(
-    () => getWorkerRequestDetail(route.params?.requestId ?? '1'),
-    [route.params?.requestId],
-  );
+  const requestId = route.params?.requestId ?? '1';
+  const { detail, loading } = useWorkerRequestDetail(requestId, role);
   const [phase, setPhase] = useState<JobPhase>(route.params?.phase ?? 'pickup');
   const [pickupConfirmed, setPickupConfirmed] = useState(false);
   const mapRef = useRef<MapView>(null);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const [navSteps, setNavSteps] = useState<NavStep[]>([]);
-  const [routeDurationMin, setRouteDurationMin] = useState(5);
+  const [routeMetrics, setRouteMetrics] = useState<WorkerRouteMetrics>({
+    distanceKm: 0,
+    durationMin: 5,
+  });
+  const [directionsOrigin, setDirectionsOrigin] = useState<MapCoord | null>(null);
 
   const pickupCoord = useMemo(
     () => ({
-      latitude: detail.pickupLat ?? INITIAL_REGION.latitude + 0.008,
-      longitude: detail.pickupLng ?? INITIAL_REGION.longitude,
+      latitude: detail?.pickupLat ?? 0,
+      longitude: detail?.pickupLng ?? 0,
     }),
-    [detail.pickupLat, detail.pickupLng],
+    [detail?.pickupLat, detail?.pickupLng],
   );
 
   const dropoffCoord = useMemo(
     () => ({
-      latitude: detail.dropoffLat ?? INITIAL_REGION.latitude - 0.004,
-      longitude: detail.dropoffLng ?? INITIAL_REGION.longitude + 0.005,
+      latitude: detail?.dropoffLat ?? 0,
+      longitude: detail?.dropoffLng ?? 0,
     }),
-    [detail.dropoffLat, detail.dropoffLng],
+    [detail?.dropoffLat, detail?.dropoffLng],
   );
 
-  const routeOrigin = useMemo(() => {
-    if (phase === 'dropoff') return pickupCoord;
-    const approach = extrapolatePastEnd(
-      dropoffCoord,
-      pickupCoord,
-      mapCoordDistanceApprox(dropoffCoord, pickupCoord) * 0.12,
-    );
-    return approach;
-  }, [phase, pickupCoord, dropoffCoord]);
-
-  const routeDestination = phase === 'pickup' ? pickupCoord : dropoffCoord;
-
-  const mapRegion = useMemo(
-    () => ({
-      latitude: (routeOrigin.latitude + routeDestination.latitude) / 2,
-      longitude: (routeOrigin.longitude + routeDestination.longitude) / 2,
-      latitudeDelta: Math.abs(routeOrigin.latitude - routeDestination.latitude) * 2.4 + 0.018,
-      longitudeDelta: Math.abs(routeOrigin.longitude - routeDestination.longitude) * 2.4 + 0.018,
-    }),
-    [routeOrigin, routeDestination],
+  const hasBookingCoords = useMemo(
+    () =>
+      isValidMapCoord(pickupCoord.latitude, pickupCoord.longitude) &&
+      isValidMapCoord(dropoffCoord.latitude, dropoffCoord.longitude),
+    [pickupCoord, dropoffCoord],
   );
 
-  const live = useWorkerLiveNavigation({
+  const directionsDestination = phase === 'pickup' ? pickupCoord : dropoffCoord;
+  const vehicleMarkerKind = copy.jobKind === 'delivery' ? 'bike' : 'car';
+
+  const live = useWorkerGpsNavigation({
     routeCoords,
-    durationMinutes: routeDurationMin,
-    enabled: routeCoords.length >= 2,
+    destinationCoord: directionsDestination,
+    routeMetrics,
+    navSteps,
+    enabled: hasBookingCoords,
+    vehicleKind: vehicleMarkerKind,
   });
 
-  const activeStep = useMemo(
-    () => getActiveNavStep(navSteps, live.progress),
-    [navSteps, live.progress],
+  const isNearTarget = useMemo(
+    () => isWorkerNearCoord(live.vehicleCoord, directionsDestination),
+    [live.vehicleCoord, directionsDestination],
   );
 
-  const distanceCaption = phase === 'pickup' ? 'Distance to pickup' : 'Distance to drop off';
+  const proximityRequired = !ENV_CONSTANTS.IS_ALPHA_PHASE;
+  const proximityBlocked =
+    proximityRequired && (!live.vehicleCoord || !isNearTarget);
 
-  const lastCameraAt = useRef(0);
+  const { onMapUserInteraction, resumeFollow } = useMapDriveFollow(
+    mapRef,
+    live.vehicleCoord,
+    live.vehicleBearing,
+    live.isMoving,
+  );
+
+  const recenterPoints = useMemo(() => {
+    const points: MapCoord[] = [...routeCoords, pickupCoord, dropoffCoord];
+    if (live.vehicleCoord) points.push(live.vehicleCoord);
+    return points;
+  }, [routeCoords, pickupCoord, dropoffCoord, live.vehicleCoord]);
+
   useEffect(() => {
-    if (!live.vehicleCoord || !mapRef.current) return;
-    const now = Date.now();
-    if (now - lastCameraAt.current < 1800) return;
-    lastCameraAt.current = now;
-    mapRef.current.animateToRegion(
-      {
-        ...live.vehicleCoord,
-        latitudeDelta: 0.018,
-        longitudeDelta: 0.018,
-      },
-      700,
-    );
-  }, [live.vehicleCoord]);
+    if (!detail?.id || !userDetails?.id) return;
+    void ensureWorkerActiveJobTracking({
+      userId: String(userDetails.id),
+      role: role ?? 'driver',
+      bookingId: detail.id,
+    });
+  }, [detail?.id, userDetails?.id, role]);
+
+  useEffect(() => {
+    if (phase === 'dropoff') {
+      setDirectionsOrigin(pickupCoord);
+      setRouteCoords([]);
+      setNavSteps([]);
+      return;
+    }
+    setDirectionsOrigin(null);
+  }, [phase, pickupCoord]);
+
+  useEffect(() => {
+    if (phase !== 'pickup' || directionsOrigin) return;
+    const coord = live.vehicleCoord;
+    if (coord && isValidMapCoord(coord.latitude, coord.longitude)) {
+      setDirectionsOrigin(coord);
+    }
+  }, [phase, directionsOrigin, live.vehicleCoord]);
+
+  const mapRegion = useMemo(() => {
+    const points = [pickupCoord, dropoffCoord, directionsDestination];
+    if (live.vehicleCoord) points.push(live.vehicleCoord);
+    const lats = points.map(p => p.latitude);
+    const lngs = points.map(p => p.longitude);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    return {
+      latitude: (minLat + maxLat) / 2,
+      longitude: (minLng + maxLng) / 2,
+      latitudeDelta: Math.max((maxLat - minLat) * 2.4, 0.018),
+      longitudeDelta: Math.max((maxLng - minLng) * 2.4, 0.018),
+    };
+  }, [pickupCoord, dropoffCoord, directionsDestination, live.vehicleCoord]);
+
+  const distanceCaption = phase === 'pickup' ? 'Distance to pickup' : 'Distance to drop off';
+  const headingDestination =
+    phase === 'pickup' ? detail?.pickupShortName : detail?.dropoffShortName;
+
+  const customerAvatar = useMemo(() => {
+    if (detail?.customerAvatar) return { uri: detail.customerAvatar };
+    return IMAGES.USER;
+  }, [detail?.customerAvatar]);
+
+  const handleBack = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+    navigate(SCREENS.BOTTOM_STACK);
+  }, [navigation]);
 
   const onDirectionsReady = useCallback(
     (result: {
@@ -130,7 +193,10 @@ export const WorkerJobNavigationScreen = () => {
       legs?: { steps?: { html_instructions?: string; distance?: { text?: string } }[] }[];
     }) => {
       setRouteCoords(result.coordinates);
-      setRouteDurationMin(Math.max(1, Math.round(result.duration)));
+      setRouteMetrics({
+        distanceKm: Math.max(0.1, result.distance),
+        durationMin: Math.max(1, Math.round(result.duration)),
+      });
       setNavSteps(parseDirectionSteps(result.legs));
     },
     [],
@@ -143,20 +209,93 @@ export const WorkerJobNavigationScreen = () => {
         : copy.arrivedAtPickup
       : copy.completeJob;
 
-  const onPrimaryPress = () => {
+  const onPrimaryPress = async () => {
+    if (!detail) return;
+
+    if (proximityRequired) {
+      if (!live.vehicleCoord) {
+        showToast({ message: 'Waiting for GPS location…' });
+        return;
+      }
+      if (!isNearTarget) {
+        showToast({ message: workerProximityBlockedMessage(phase) });
+        return;
+      }
+    }
+
     if (phase === 'pickup') {
       if (!pickupConfirmed) {
         setPickupConfirmed(true);
         return;
       }
-      setRouteCoords([]);
-      setNavSteps([]);
+      if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        await updateBookingStatus(detail.id, 'in_transit', role);
+      }
       setPickupConfirmed(false);
       setPhase('dropoff');
       return;
     }
+    if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      await updateBookingStatus(detail.id, 'completed', role);
+    }
+    await stopWorkerActiveJobTracking();
+    refreshWorkerHomeStats();
     navigate(SCREENS.WORKER_JOB_COMPLETED, { requestId: detail.id });
   };
+
+  const onPhonePress = () => {
+    if (detail?.customerPhone) {
+      openPhoneNumber(detail.customerPhone);
+      return;
+    }
+    showToast({ message: 'Customer phone number is not available.' });
+  };
+
+  const onMessagePress = () => {
+    navigateToBookingFirebaseChat({
+      otherUser: {
+        id: detail?.customerId,
+        full_name: detail?.customerName,
+        profile_image: detail?.customerAvatar,
+      },
+      bookingId: detail?.id,
+    });
+  };
+
+  if (loading || !detail) {
+    return (
+      <Wrapper
+        showBackButton={false}
+        useScrollView={false}
+        backgroundColor={COLORS.BACKGROUND}
+        darkMode={false}
+      >
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size='large' color={COLORS.PRIMARY} />
+        </View>
+      </Wrapper>
+    );
+  }
+
+  if (!hasBookingCoords) {
+    return (
+      <Wrapper
+        showBackButton={false}
+        useScrollView={false}
+        backgroundColor={COLORS.BACKGROUND}
+        darkMode={false}
+      >
+        <View style={styles.loadingWrap}>
+          <Typography style={styles.errorText}>
+            Booking location data is missing. Please go back and try again.
+          </Typography>
+          <Button title='Back' onPress={handleBack} style={styles.backBtnFallback} />
+        </View>
+      </Wrapper>
+    );
+  }
+
+  const awaitingGpsForDirections = phase === 'pickup' && !directionsOrigin;
 
   return (
     <Wrapper
@@ -165,39 +304,75 @@ export const WorkerJobNavigationScreen = () => {
       backgroundColor={COLORS.TRANSPARENT}
       darkMode={false}
     >
+      <View
+        style={{
+          left: 20,
+          top: 5,
+          position: 'absolute',
+          zIndex: 20,
+        }}
+      >
+        <CustomBackIcon />
+      </View>
       <View style={styles.root}>
         <View style={styles.mapSection}>
-          <WorkerJobRouteMap
-            origin={routeOrigin}
-            destination={routeDestination}
-            mapRegion={mapRegion}
-            mapRef={mapRef}
-            vehicleCoord={live.vehicleCoord}
-            vehicleMarkerKind={copy.jobKind === 'delivery' ? 'bike' : 'car'}
-            onDirectionsReady={onDirectionsReady}
-          />
-          <View style={styles.navOverlay} pointerEvents='box-none'>
-            <WorkerNavInstructionCard
-              distanceCaption={distanceCaption}
-              distanceLabel={live.distanceLabel}
-              etaLabel={live.etaLabel}
-              step={activeStep}
+          {awaitingGpsForDirections ? (
+            <View style={styles.gpsWait}>
+              <ActivityIndicator size='large' color={COLORS.PRIMARY} />
+              <Typography style={styles.gpsWaitText}>
+                Getting your location for directions…
+              </Typography>
+            </View>
+          ) : directionsOrigin ? (
+            <WorkerJobRouteMap
+              directionsOrigin={directionsOrigin}
+              directionsDestination={directionsDestination}
+              routeLegKey={phase}
+              pickupCoord={pickupCoord}
+              dropoffCoord={dropoffCoord}
+              phase={phase}
+              mapRegion={mapRegion}
+              mapRef={mapRef}
+              vehicleCoord={live.vehicleCoord}
+              vehicleBearing={live.vehicleBearing}
+              vehicleMarkerKind={vehicleMarkerKind}
+              recenterPoints={recenterPoints}
+              onMapUserInteraction={onMapUserInteraction}
+              onRecenterPress={resumeFollow}
+              onDirectionsReady={onDirectionsReady}
             />
-          </View>
+          ) : null}
+          {/* <Pressable
+            onPress={handleBack}
+            hitSlop={12}
+            style={[styles.backBtn, { top: insets.top + 8 }]}
+          >
+            <Typography style={styles.backTxt}>Back</Typography>
+          </Pressable> */}
+          {!awaitingGpsForDirections ? (
+            <View style={styles.navOverlay} pointerEvents='box-none'>
+              <WorkerNavInstructionCard
+                distanceCaption={distanceCaption}
+                distanceLabel={live.distanceLabel}
+                etaLabel={live.etaLabel}
+                step={live.activeStep}
+              />
+            </View>
+          ) : null}
         </View>
 
         <View style={styles.bottom}>
           <RideDriverCard
             driverName={detail.customerName}
-            rating='5.0'
-            avatarSource={IMAGES.USER}
-            onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
-            onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+            rating={detail.customerRating ?? '—'}
+            avatarSource={customerAvatar}
+            onPhonePress={onPhonePress}
+            onMessagePress={onMessagePress}
             showVehicleSection={false}
             variant='elevatedWhite'
           />
 
-          {phase === 'dropoff' ? (
+          {headingDestination ? (
             <AppGradient
               colors={[...APP_GRADIENT_HORIZONTAL]}
               start={GRADIENT_START}
@@ -205,14 +380,26 @@ export const WorkerJobNavigationScreen = () => {
               fill
               style={styles.headingPill}
             >
-              <Typography style={styles.headingLabel}>Heading to</Typography>
+              <Typography style={styles.headingLabel}>
+                {phase === 'pickup' ? 'Heading to pickup' : 'Heading to'}
+              </Typography>
               <Typography style={styles.headingDestination} numberOfLines={2}>
-                {detail.dropoffShortName}
+                {headingDestination}
               </Typography>
             </AppGradient>
           ) : null}
 
-          <Button title={primaryCta} onPress={onPrimaryPress} style={styles.cta} />
+          <Button
+            title={primaryCta}
+            onPress={onPrimaryPress}
+            disabled={proximityBlocked}
+            style={[styles.cta, proximityBlocked && styles.ctaDisabled]}
+          />
+          {proximityBlocked ? (
+            <Typography style={styles.proximityHint}>
+              {workerProximityBlockedMessage(phase)}
+            </Typography>
+          ) : null}
         </View>
       </View>
     </Wrapper>
@@ -220,6 +407,33 @@ export const WorkerJobNavigationScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    gap: 16,
+  },
+  gpsWait: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 24,
+  },
+  gpsWaitText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Medium,
+  },
+  errorText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Medium,
+  },
+  backBtnFallback: {
+    minWidth: 120,
+  },
   root: {
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
@@ -230,9 +444,28 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
     overflow: 'hidden',
   },
+  backBtn: {
+    position: 'absolute',
+    left: 16,
+    zIndex: 20,
+    elevation: 20,
+    backgroundColor: COLORS.WHITE,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  backTxt: {
+    color: COLORS.APP_PRIMARY,
+    fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.Medium,
+  },
   navOverlay: {
     position: 'absolute',
-    top: 12,
+    top: 52,
     left: 16,
     right: 16,
   },
@@ -271,5 +504,14 @@ const styles = StyleSheet.create({
   cta: {
     marginHorizontal: 20,
     backgroundColor: '#21409A',
+  },
+  ctaDisabled: {
+    opacity: 0.55,
+  },
+  proximityHint: {
+    marginHorizontal: 24,
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
   },
 });

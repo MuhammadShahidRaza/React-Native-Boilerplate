@@ -40,12 +40,7 @@ export function extractEstimateDistanceKm(source: unknown): number | null {
 }
 
 /** Great-circle distance in km (client fallback when estimate API has no distance_km). */
-export function haversineDistanceKm(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
+function haversineKmCore(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
@@ -54,7 +49,25 @@ export function haversineDistanceKm(
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.max(0.1, Math.round(R * c * 10) / 10);
+  return R * c;
+}
+
+export function haversineDistanceKmExact(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  return haversineKmCore(lat1, lon1, lat2, lon2);
+}
+
+export function haversineDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  return Math.max(0.1, Math.round(haversineKmCore(lat1, lon1, lat2, lon2) * 10) / 10);
 }
 
 export function formatDistanceKm(km: number | string | null | undefined): string {

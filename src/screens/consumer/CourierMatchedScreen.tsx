@@ -4,25 +4,44 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import {
   Button,
   GradientIcon,
-  Icon,
-  MOCK_PARCEL_COURIER,
-  PARCEL_COURIER_VEHICLE_STATS,
   RideVehicleStatsRow,
+  SkeletonWrapper,
   Typography,
   Wrapper,
 } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
+import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, isIOS, parcelCoordsNavParams, resolveParcelTripCoords } from 'utils/index';
-import { navigate } from 'navigation/index';
+import { COLORS, formatMoney, isIOS } from 'utils/index';
+import { replace } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
+import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
+import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
 
- 
 export const CourierMatchedScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.COURIER_MATCHED>>();
-  const { pickup, dropoff } = useMemo(() => resolveParcelTripCoords(route.params), [route.params]);
-  const navCoords = useMemo(() => parcelCoordsNavParams(pickup, dropoff), [pickup, dropoff]);
+  const { bookingId, pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
+  const { trip, loading } = useParcelTripDisplay(bookingId);
+  const track = useConsumerBookingTrack(
+    bookingId,
+    { pickupLat, pickupLng, dropoffLat, dropoffLng },
+    'bike',
+  );
+
+  const trackParams = useMemo(
+    () => ({
+      bookingId,
+      pickupLat: track.pickup?.latitude ?? pickupLat,
+      pickupLng: track.pickup?.longitude ?? pickupLng,
+      dropoffLat: track.dropoff?.latitude ?? dropoffLat,
+      dropoffLng: track.dropoff?.longitude ?? dropoffLng,
+      phase: 'picked_up' as const,
+    }),
+    [bookingId, track.pickup, track.dropoff, pickupLat, pickupLng, dropoffLat, dropoffLng],
+  );
+
+  const deliveryFee = track.booking?.total_amount ?? track.booking?.estimated_amount;
 
   return (
     <Wrapper
@@ -42,35 +61,28 @@ export const CourierMatchedScreen = () => {
         />
         <Typography style={styles.headline}>Courier Found!</Typography>
 
-        <View style={styles.card}>
-          <Image source={MOCK_PARCEL_COURIER.avatar} style={styles.avatar} />
-          <Typography style={styles.name}>{MOCK_PARCEL_COURIER.courierName}</Typography>
-          <View style={styles.ratingRow}>
-            <Icon
-              componentName={VARIABLES.Ionicons}
-              iconName='star'
-              size={FontSize.Small}
-              color={COLORS.APP_STAR}
+        <SkeletonWrapper isLoading={loading && !ENV_CONSTANTS.IS_ALPHA_PHASE} height={220} count={1}>
+          <View style={styles.card}>
+            <Image source={trip?.avatar ?? IMAGES.USER} style={styles.avatar} />
+            <Typography style={styles.name}>{trip?.courierName ?? '—'}</Typography>
+            <View style={styles.feeBlock}>
+              <Typography style={styles.feeLabel}>Delivery Fee</Typography>
+              <Typography style={styles.feeAmt}>
+                {deliveryFee != null ? formatMoney(deliveryFee) : '—'}
+              </Typography>
+              <Typography style={styles.cash}>Cash Payment</Typography>
+            </View>
+            <RideVehicleStatsRow
+              items={trip?.vehicleStats ?? []}
+              showVerticalDividers
+              marginHorizontal={0}
             />
-            <Typography style={styles.rating}>{MOCK_PARCEL_COURIER.rating}</Typography>
           </View>
-          <View style={styles.feeBlock}>
-            <Typography style={styles.feeLabel}>Delivery Fee</Typography>
-            <Typography style={styles.feeAmt}>{MOCK_PARCEL_COURIER.deliveryFee}</Typography>
-            <Typography
-              style={styles.cash}
-            >{`${MOCK_PARCEL_COURIER.paymentMethod} Payment`}</Typography>
-          </View>
-          <RideVehicleStatsRow
-            items={PARCEL_COURIER_VEHICLE_STATS}
-            showVerticalDividers
-            marginHorizontal={0}
-          />
-        </View>
+        </SkeletonWrapper>
 
         <Button
           title='Track Delivery'
-          onPress={() => navigate(SCREENS.TRACK_PARCEL, { ...navCoords, phase: 'picked_up' })}
+          onPress={() => replace(SCREENS.TRACK_PARCEL, trackParams)}
           style={styles.cta}
           textStyle={styles.ctaText}
         />
@@ -115,12 +127,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
   avatar: {
     width: 60,
     height: 60,
@@ -133,10 +139,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.ExtraLarge,
     color: COLORS.APP_TEXT,
     marginTop: 3,
-  },
-  rating: {
-    color: COLORS.APP_TEXT,
-    marginBottom: -4,
   },
   feeBlock: {
     borderColor: COLORS.APP_LINE,

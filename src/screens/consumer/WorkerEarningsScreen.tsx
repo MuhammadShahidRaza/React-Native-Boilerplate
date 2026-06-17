@@ -6,15 +6,25 @@ import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, COLORS, formatMoney } from 'utils/index';
 import { FONT_FAMILY, IMAGES } from 'constants/assets';
+import { WORKER_EARNINGS_SUMMARY } from 'components/common/worker/workerMockData';
 import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
+import { ENV_CONSTANTS } from 'constants/common';
 import { useAppSelector } from 'types/reduxTypes';
 
 export const WorkerEarningsScreen = () => {
   const role = useAppSelector(state => state.user?.role);
-  const [total, setTotal] = useState(formatMoney(0));
-  const [today, setToday] = useState(formatMoney(0));
-  const [week, setWeek] = useState(formatMoney(0));
-  const [month, setMonth] = useState(formatMoney(0));
+  const [total, setTotal] = useState(
+    ENV_CONSTANTS.IS_ALPHA_PHASE ? WORKER_EARNINGS_SUMMARY.total : formatMoney(0),
+  );
+  const [today, setToday] = useState(
+    ENV_CONSTANTS.IS_ALPHA_PHASE ? WORKER_EARNINGS_SUMMARY.today : formatMoney(0),
+  );
+  const [week, setWeek] = useState(
+    ENV_CONSTANTS.IS_ALPHA_PHASE ? WORKER_EARNINGS_SUMMARY.week : formatMoney(0),
+  );
+  const [month, setMonth] = useState(
+    ENV_CONSTANTS.IS_ALPHA_PHASE ? WORKER_EARNINGS_SUMMARY.month : formatMoney(0),
+  );
 
   useEffect(() => {
     let cancelled = false;

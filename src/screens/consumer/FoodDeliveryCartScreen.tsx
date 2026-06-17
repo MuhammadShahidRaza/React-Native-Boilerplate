@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import {
   AppGradient,
+  Button,
   Icon,
   Input,
   Photo,
@@ -16,9 +17,15 @@ import { resetToHomeAndScreen } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { formatMoney } from 'utils/currency';
 import { SCREENS } from 'constants/routes';
-import { createFoodBooking } from 'api/functions/snlift/bookings';
+import {
+  createFoodBooking,
+  estimateBooking,
+  resolveFoodEstimateTotals,
+  type EstimateBookingResult,
+} from 'api/functions/snlift/bookings';
 import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
 import { showToast } from 'utils/toast';
+import { logger } from 'utils/logger';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import {
   clearCart,
@@ -27,8 +34,12 @@ import {
   upsertItem,
 } from 'store/slices/foodCart';
 
+const DEFAULT_DISTANCE_KM = 4.2;
+
 export const FoodDeliveryCartScreen = () => {
   const [promo, setPromo] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [foodEstimate, setFoodEstimate] = useState<EstimateBookingResult | null>(null);
   const [note, setNote] = useState('');
   const [placing, setPlacing] = useState(false);
   const dispatch = useAppDispatch();
@@ -36,11 +47,78 @@ export const FoodDeliveryCartScreen = () => {
     s => s.foodCart,
   );
 
-  const subtotal = useMemo(
+  const localSubtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
     [items],
   );
-  const total = subtotal + deliveryFee;
+
+  const totals = useMemo(
+    () =>
+      resolveFoodEstimateTotals(foodEstimate, {
+        subTotal: localSubtotal,
+        deliveryFee,
+      }),
+    [foodEstimate, localSubtotal, deliveryFee],
+  );
+
+  useEffect(() => {
+    setFoodEstimate(null);
+  }, [items, restaurantId]);
+
+  const buildFoodEstimatePayload = (promoCode?: string) => ({
+    booking_type: 'food' as const,
+    restaurant_id: Number(restaurantId) || 1,
+    delivery_latitude: 0,
+    delivery_longitude: 0,
+    distance_km: DEFAULT_DISTANCE_KM,
+    items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
+    ...(promoCode ? { promo_code: promoCode } : {}),
+  });
+
+  const handleApplyPromo = async () => {
+    const promoTrimmed = promo.trim();
+    if (!promoTrimmed) {
+      showToast({ message: 'Enter a promo code.' });
+      return;
+    }
+    if (items.length === 0) {
+      showToast({ message: 'Add items before applying a promo.' });
+      return;
+    }
+
+    setPromoLoading(true);
+    try {
+      const result = await estimateBooking(buildFoodEstimatePayload(promoTrimmed));
+      if (!result) {
+        showToast({ message: 'Could not validate promo. Try again.', isError: true });
+        return;
+      }
+
+      if (result.promo_valid === false) {
+        setFoodEstimate(null);
+        showToast({ message: 'Invalid promo code.', isError: true });
+        return;
+      }
+
+      setFoodEstimate(result);
+
+      const applied = resolveFoodEstimateTotals(result, {
+        subTotal: localSubtotal,
+        deliveryFee,
+      });
+
+      if (applied.promoApplied || applied.discountAmount > 0) {
+        showToast({ message: 'Promo applied successfully.' });
+        return;
+      }
+
+      showToast({ message: 'Promo code is not applicable to this order.', isError: true });
+    } catch (error) {
+      logger.error('food estimateBooking failed', error);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (placing) return;
@@ -57,7 +135,7 @@ export const FoodDeliveryCartScreen = () => {
         delivery_address: 'Delivery address',
         delivery_latitude: 0,
         delivery_longitude: 0,
-        distance_km: 4.2,
+        distance_km: DEFAULT_DISTANCE_KM,
         items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
         ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
       });
@@ -167,18 +245,24 @@ export const FoodDeliveryCartScreen = () => {
               width: screenWidth(70),
             }}
           />
-          <Pressable style={styles.apply}>
-            <Typography style={styles.applyTxt}>Apply</Typography>
-          </Pressable>
+          <Button
+            title='Apply'
+            style={styles.applyBtn}
+            loading={promoLoading}
+            onPress={handleApplyPromo}
+          />
         </View>
 
         <Typography style={styles.section}>Order Summary</Typography>
         <View style={styles.summary}>
-          <Row label='Subtotal' value={formatMoney(subtotal)} />
-          <Row label='Delivery Fee' value={formatMoney(deliveryFee)} />
+          <Row label='Subtotal' value={formatMoney(totals.subTotal)} />
+          <Row label='Delivery Fee' value={formatMoney(totals.deliveryFee)} />
+          {totals.discountAmount > 0 ? (
+            <Row label='Discount' value={formatMoney(-totals.discountAmount)} valueStyle={styles.discountVal} />
+          ) : null}
           <RowComponent style={styles.totalRow}>
             <Typography style={styles.totalLabel}>Total</Typography>
-            <Typography style={styles.total}>{formatMoney(total)}</Typography>
+            <Typography style={styles.total}>{formatMoney(totals.totalAmount)}</Typography>
           </RowComponent>
           <View style={styles.payBadge}>
             <Icon
@@ -210,7 +294,7 @@ export const FoodDeliveryCartScreen = () => {
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>
             <Typography style={styles.placeTxt}>
-              {placing ? 'Placing Order...' : `Place Order · ${formatMoney(total)}`}
+              {placing ? 'Placing Order...' : `Place Order · ${formatMoney(totals.totalAmount)}`}
             </Typography>
           </AppGradient>
         </Pressable>
@@ -219,10 +303,18 @@ export const FoodDeliveryCartScreen = () => {
   );
 };
 
-const Row = ({ label, value }: { label: string; value: string }) => (
+const Row = ({
+  label,
+  value,
+  valueStyle,
+}: {
+  label: string;
+  value: string;
+  valueStyle?: object;
+}) => (
   <View style={styles.rowBetween}>
     <Typography style={styles.muted}>{label}</Typography>
-    <Typography style={styles.rowVal}>{value}</Typography>
+    <Typography style={[styles.rowVal, valueStyle]}>{value}</Typography>
   </View>
 );
 
@@ -309,15 +401,14 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
   },
-  apply: {
-    backgroundColor: COLORS.APP_SECONDARY,
-    paddingHorizontal: 20,
+  applyBtn: {
+    minWidth: screenWidth(22),
+    paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 50,
   },
-  applyTxt: {
-    color: COLORS.WHITE,
-    fontWeight: FontWeight.Bold,
+  discountVal: {
+    color: COLORS.APP_PRIMARY,
   },
   summary: {
     borderWidth: 1,

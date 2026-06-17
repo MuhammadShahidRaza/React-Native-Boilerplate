@@ -60,7 +60,7 @@ export const BookRideScreen = () => {
     });
   };
 
-  const showDirections = !!(pickup?.latitude && dropoff?.latitude);
+  const showDirections = Boolean(pickup?.latitude && dropoff?.latitude);
   return (
     <Wrapper
       headerTitle='Book a Ride'
@@ -92,8 +92,13 @@ export const BookRideScreen = () => {
                 origin={{ latitude: pickup.latitude, longitude: pickup.longitude }}
                 destination={{ latitude: dropoff.latitude, longitude: dropoff.longitude }}
                 apikey={ENV_CONSTANTS.MAP_API_KEY}
+                mode='DRIVING'
+                precision='high'
+                resetOnChange
                 strokeColor={COLORS.APP_PRIMARY}
                 strokeWidth={4}
+                lineCap='round'
+                lineJoin='round'
                 onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
               />
               <Marker
@@ -180,7 +185,12 @@ export const BookRideScreen = () => {
           </View>
         </View>
 
-        <Button title="Let's Go"   style={styles.ctaBtn} onPress={handleLetsGo} disabled={!dropoff} />
+        <Button
+          title="Let's Go"
+          style={styles.ctaBtn}
+          onPress={handleLetsGo}
+          disabled={!pickup || !dropoff}
+        />
       </View>
     </Wrapper>
   );

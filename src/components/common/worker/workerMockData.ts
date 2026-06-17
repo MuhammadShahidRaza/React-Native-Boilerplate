@@ -1,5 +1,7 @@
 export type WorkerTripRecord = {
   id: string;
+  status: string;
+  statusLabel: string;
   date: string;
   earned: string;
   pickupLabel: string;
@@ -23,6 +25,8 @@ export const WORKER_HISTORY_STATS = {
 export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
   {
     id: '1',
+    status: 'completed',
+    statusLabel: 'Completed',
     date: '15-04-2026',
     earned: 'CFA 59.45',
     pickupLabel: 'Pickup: Central Station',
@@ -35,6 +39,8 @@ export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
   },
   {
     id: '2',
+    status: 'completed',
+    statusLabel: 'Completed',
     date: '15-04-2026',
     earned: 'CFA 59.45',
     pickupLabel: 'Pickup: Central Station',
@@ -63,7 +69,12 @@ export function formatWorkerServiceType(type: WorkerServiceType): string {
 }
 
 export type WorkerRequestDetail = WorkerRequestRecord & {
+  customerId?: number;
+  customerPhone?: string;
+  customerAvatar?: string | null;
+  customerRating?: string;
   pickupAddress: string;
+  pickupShortName: string;
   dropoffAddress: string;
   dropoffShortName: string;
   distance: string;
@@ -92,7 +103,12 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     customerName: 'John Doe',
     fare: 'CFA 18.50',
     serviceType: 'parcel',
+    customerId: 1,
+    customerPhone: '+1234567890',
+    customerAvatar: null,
+    customerRating: '4.8',
     pickupAddress: '67 Murray Street, NY',
+    pickupShortName: 'Murray Street',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
@@ -113,7 +129,12 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     customerName: 'John Doe',
     fare: 'CFA 18.50',
     serviceType: 'food',
+    customerId: 1,
+    customerPhone: '+1234567890',
+    customerAvatar: null,
+    customerRating: '4.8',
     pickupAddress: '67 Murray Street, NY',
+    pickupShortName: 'Murray Street',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
@@ -134,7 +155,12 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     customerName: 'John Doe',
     fare: 'CFA 18.50',
     serviceType: 'food',
+    customerId: 1,
+    customerPhone: '+1234567890',
+    customerAvatar: null,
+    customerRating: '4.8',
     pickupAddress: '67 Murray Street, NY',
+    pickupShortName: 'Murray Street',
     dropoffAddress: '85 W Broadway, NY',
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
@@ -161,4 +187,13 @@ export const WORKER_EARNINGS_SUMMARY = {
   today: '+CFA 10.19',
   week: '+CFA 3',
   month: '+CFA 7.73',
+} as const;
+
+export const ALPHA_WORKER_WALLET_SUMMARY = {
+  total_earnings: 850,
+  today_earnings: 10.19,
+  week_earnings: 3,
+  month_earnings: 7.73,
+  wallet_balance: 500,
+  balance: 500,
 } as const;

@@ -1,5 +1,9 @@
 import { API_ROUTES } from 'api/routes';
-import { extractApiList, normalizeSniftBooking } from 'api/normalizers/snlift';
+import {
+  extractApiList,
+  normalizeSniftBooking,
+  normalizeSniftProvider,
+} from 'api/normalizers/snlift';
 import {
   handleDeleteApiRequest,
   handleGetApiRequest,
@@ -17,6 +21,7 @@ function bookingUrls(role: BookingRole) {
       list: API_ROUTES.COURIER_BOOKINGS,
       byId: API_ROUTES.COURIER_BOOKING_BY_ID,
       accept: API_ROUTES.COURIER_BOOKING_ACCEPT,
+      reject: API_ROUTES.COURIER_BOOKING_REJECT,
       status: API_ROUTES.COURIER_BOOKING_STATUS,
       cancel: API_ROUTES.COURIER_BOOKING_CANCEL,
       tracking: API_ROUTES.COURIER_BOOKING_TRACKING,
@@ -27,6 +32,7 @@ function bookingUrls(role: BookingRole) {
       list: API_ROUTES.DRIVER_BOOKINGS,
       byId: API_ROUTES.DRIVER_BOOKING_BY_ID,
       accept: API_ROUTES.DRIVER_BOOKING_ACCEPT,
+      reject: API_ROUTES.DRIVER_BOOKING_REJECT,
       status: API_ROUTES.DRIVER_BOOKING_STATUS,
       cancel: API_ROUTES.DRIVER_BOOKING_CANCEL,
       tracking: API_ROUTES.DRIVER_BOOKING_TRACKING,
@@ -36,6 +42,7 @@ function bookingUrls(role: BookingRole) {
     list: API_ROUTES.USER_BOOKINGS,
     byId: API_ROUTES.USER_BOOKING_BY_ID,
     accept: null as null,
+    reject: null as null,
     status: null as null,
     cancel: API_ROUTES.USER_BOOKING_CANCEL,
     tracking: API_ROUTES.USER_BOOKING_TRACKING,
@@ -119,6 +126,28 @@ export function normalizeEstimateBookingResult(
   const merged = nested ? { ...record, ...nested } : record;
   const distance_km = extractEstimateDistanceKm(merged) ?? merged.distance_km;
   return { ...merged, distance_km };
+}
+
+/** Food estimate — subtotal, delivery, discount, and total from flat estimate response. */
+export function resolveFoodEstimateTotals(
+  result: EstimateBookingResult | null | undefined,
+  fallback: { subTotal: number; deliveryFee: number },
+) {
+  const subTotal = pickEstimateNumber(result?.sub_total) ?? fallback.subTotal;
+  const deliveryFee = pickEstimateNumber(result?.delivery_fee) ?? fallback.deliveryFee;
+  const discountAmount = pickEstimateNumber(result?.discount_amount) ?? 0;
+  const totalAmount =
+    pickEstimateNumber(result?.total_amount) ??
+    Math.max(0, subTotal + deliveryFee - discountAmount);
+
+  return {
+    subTotal,
+    deliveryFee,
+    discountAmount,
+    totalAmount,
+    promoApplied: Boolean(result?.promo_applied),
+    promoValid: result?.promo_valid ?? null,
+  };
 }
 
 export async function estimateBooking(data: EstimateBookingPayload) {
@@ -291,6 +320,16 @@ export type SnliftBookingTracking = {
   poll_after_seconds: number;
 };
 
+function normalizeTrackingPayload(raw: SnliftBookingTracking): SnliftBookingTracking {
+  const providerRaw = raw.provider as Record<string, unknown> | undefined;
+  return {
+    ...raw,
+    provider: providerRaw
+      ? normalizeSniftProvider(providerRaw, raw.provider_id ?? undefined)
+      : raw.provider,
+  };
+}
+
 export async function getBookingTracking(
   id: number | string,
   role?: BookingRole,
@@ -306,8 +345,9 @@ export async function getBookingTracking(
     silentErrors: options?.silentErrors ?? false,
   });
   if (!raw) return null;
-  if ('tracking' in raw && raw.tracking) return raw.tracking;
-  return raw as SnliftBookingTracking;
+  const payload =
+    'tracking' in raw && raw.tracking ? raw.tracking : (raw as SnliftBookingTracking);
+  return normalizeTrackingPayload(payload);
 }
 
 export type BookingAcceptPollResult = {
@@ -385,6 +425,21 @@ export async function acceptBooking(id: number | string, role: BookingRole) {
   });
 }
 
+/** Driver/courier declines an incoming request — POST `…/bookings/{id}/reject`. */
+export async function rejectBooking(
+  id: number | string,
+  role: BookingRole,
+  options?: { showLoader?: boolean },
+) {
+  const urls = bookingUrls(role);
+  if (!urls.reject) return null;
+  return handlePostApiRequest<{ booking: SnliftBooking }, Record<string, never>>({
+    url: urls.reject(id),
+    data: {},
+    showLoader: options?.showLoader ?? true,
+  });
+}
+
 export async function updateBookingStatus(
   id: number | string,
   status: string,
@@ -422,7 +477,44 @@ export async function deleteBooking(
   });
 }
 
+/** Unwrap `{ code, data: paginator }` if a caller passes the full API envelope. */
+function unwrapBookingsListPayload(res: unknown): unknown {
+  if (!res || typeof res !== 'object') return res;
+  const record = res as Record<string, unknown>;
+  if ('bookings' in record || Array.isArray(record.data)) return res;
+  const nested = record.data;
+  if (nested && typeof nested === 'object') return nested;
+  return res;
+}
+
 export function extractBookingsList(res: SnliftBookingsListResponse | undefined): SnliftBooking[] {
-  const list = extractApiList<SnliftBooking>(res, ['bookings', 'data', 'items']);
+  const list = extractApiList<SnliftBooking>(unwrapBookingsListPayload(res), [
+    'bookings',
+    'data',
+    'items',
+    'history',
+    'records',
+  ]);
   return list.map(b => normalizeSniftBooking(b as SnliftBooking & Record<string, unknown>));
+}
+
+/** Driver/courier booking history — single list call (all statuses). */
+export async function listWorkerBookingHistory(
+  role?: BookingRole,
+  options?: BookingRequestOptions,
+) {
+  const requestOptions: BookingRequestOptions = {
+    showLoader: false,
+    showError: false,
+    addToPending: false,
+    ...options,
+  };
+
+  return extractBookingsList(await listBookings(undefined, role, requestOptions)).sort(
+    (a, b) => {
+      const aTime = Date.parse(a.created_at ?? '') || 0;
+      const bTime = Date.parse(b.created_at ?? '') || 0;
+      return bTime - aTime;
+    },
+  );
 }

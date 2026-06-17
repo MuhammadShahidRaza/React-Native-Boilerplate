@@ -1,33 +1,63 @@
-import { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { AppGradient, Button, Icon, Typography, Wrapper } from 'components/index';
+import {
+  AppGradient,
+  Button,
+  Icon,
+  Typography,
+  WorkerRequestDetailSkeleton,
+  Wrapper,
+} from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { APP_GRADIENT_HORIZONTAL, COLORS } from 'utils/index';
-import { useAppSelector } from 'types/reduxTypes';
+import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
-import { getWorkerRequestDetail } from 'components/common/worker/workerMockData';
 import { setLookingForDeliveries } from 'store/slices/worker';
-import { useAppDispatch } from 'types/reduxTypes';
+import { useWorkerRequestDetail } from 'hooks/useWorkerRequestDetail';
+import { stopWorkerActiveJobTracking } from 'services/location/workerActiveJobTracking';
+import { refreshWorkerHomeStats } from 'utils/workerHomeStats';
 
 export const WorkerJobCompletedScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.WORKER_JOB_COMPLETED>>();
   const dispatch = useAppDispatch();
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
-  const detail = useMemo(
-    () => getWorkerRequestDetail(route.params?.requestId ?? '1'),
-    [route.params?.requestId],
-  );
+  const requestId = route.params?.requestId ?? '1';
+  const { detail, loading } = useWorkerRequestDetail(requestId, role);
+
+  useEffect(() => {
+    void stopWorkerActiveJobTracking();
+    refreshWorkerHomeStats();
+  }, []);
 
   const finish = () => {
     dispatch(setLookingForDeliveries(false));
     reset(SCREENS.BOTTOM_STACK);
   };
+
+  if (loading || !detail) {
+    return (
+      <Wrapper
+        showBackButton={false}
+        useScrollView={false}
+        backgroundColor={COLORS.BACKGROUND}
+        darkMode={false}
+      >
+        <View style={styles.loadingWrap}>
+          {loading ? (
+            <WorkerRequestDetailSkeleton />
+          ) : (
+            <Typography style={styles.errorText}>Could not load job summary.</Typography>
+          )}
+        </View>
+      </Wrapper>
+    );
+  }
 
   return (
     <Wrapper
@@ -75,7 +105,7 @@ export const WorkerJobCompletedScreen = () => {
               componentName={VARIABLES.FontAwesome}
               iconName='long-arrow-right'
               size={FontSize.Large}
-              iconStyle={{marginBottom: 5}}
+              iconStyle={{ marginBottom: 5 }}
               color={COLORS.APP_TEXT_MUTED}
             />
             <View style={[styles.walletCol, styles.walletColEnd]}>
@@ -107,6 +137,16 @@ const Row = ({
 );
 
 const styles = StyleSheet.create({
+  loadingWrap: {
+    flex: 1,
+    paddingTop: 24,
+  },
+  errorText: {
+    textAlign: 'center',
+    color: COLORS.APP_TEXT_MUTED,
+    paddingHorizontal: 24,
+    marginTop: 40,
+  },
   scroll: {
     paddingHorizontal: 16,
     paddingTop: 40,
@@ -132,7 +172,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Small,
 
     textAlign: 'center',
-    // marginTop: 8,
     color: COLORS.BLACK,
     marginBottom: 24,
   },

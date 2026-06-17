@@ -1,4 +1,5 @@
 import { IconComponentName } from 'types/iconTypes';
+import { VARIANT } from 'config/variant';
 import {
   API_BASE_URL,
   ANDROID_MAP_KEYS,
@@ -14,7 +15,6 @@ import {
   ANDROID_CHANNEL_ZENDESK,
   MAP_API_KEY,
   IOS_CHANNEL_ZENDESK,
-  IS_ALPHA_PHASE,
   SOCKET_BASE_URL,
 } from '@env';
 
@@ -34,7 +34,8 @@ export const ENV_CONSTANTS = {
   ZENDESK_IOS: IOS_CHANNEL_ZENDESK,
   MAP_API_KEY: MAP_API_KEY,
   SOCKET_BASE_URL: SOCKET_BASE_URL,
-  IS_ALPHA_PHASE: IS_ALPHA_PHASE === 'true',
+  /** Sengo / Sengo Workers = alpha (mock). SN Lift = beta (live API). */
+  IS_ALPHA_PHASE: VARIANT.isAlphaPhase,
 };
 
 export const LANGUAGES = {

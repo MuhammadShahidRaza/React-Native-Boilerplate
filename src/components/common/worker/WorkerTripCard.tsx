@@ -1,5 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon, Typography } from 'components/index';
+import { getBookingStatusColor } from 'api/mappers/snliftBooking';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
@@ -7,65 +8,81 @@ import type { WorkerTripRecord } from './workerMockData';
 
 export interface WorkerTripCardProps {
   trip: WorkerTripRecord;
+  onPress?: () => void;
 }
 
-export const WorkerTripCard = ({ trip }: WorkerTripCardProps) => (
-  <View style={styles.card}>
-    <View style={styles.headerRow}>
-      <Typography style={styles.date}>{trip.date}</Typography>
-      <Typography style={styles.earned}>{trip.earned}</Typography>
-    </View>
+export const WorkerTripCard = ({ trip, onPress }: WorkerTripCardProps) => {
+  const statusColor = getBookingStatusColor(trip.status);
 
-    <View style={styles.route}>
-      <View style={styles.routeMarkers}>
-        <View style={styles.pickupDot} />
-        <View style={styles.routeLine} />
-        <Icon
-          componentName={VARIABLES.Ionicons}
-          iconName='location'
-          size={18}
-          color={COLORS.APP_SECONDARY}
-        />
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.card, pressed && onPress ? styles.cardPressed : null]}
+      onPress={onPress}
+      disabled={!onPress}
+    >
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          <Typography style={styles.date}>{trip.date}</Typography>
+          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}18` }]}>
+            <Typography style={[styles.statusTxt, { color: statusColor }]}>
+              {trip.statusLabel}
+            </Typography>
+          </View>
+        </View>
+        <Typography style={styles.earned}>{trip.earned}</Typography>
       </View>
-      <View style={styles.routeText}>
-        <Typography style={styles.routeLabel}>{trip.pickupLabel}</Typography>
-        <Typography style={styles.routeAddress}>{trip.pickupAddress}</Typography>
-        <Typography style={[styles.routeLabel, styles.destLabel]}>{trip.destinationLabel}</Typography>
-        <Typography style={styles.routeAddress}>{trip.destinationAddress}</Typography>
-      </View>
-    </View>
 
-    <View style={styles.footer}>
-      <View style={styles.metaItem}>
-        <Icon
-          componentName={VARIABLES.Feather}
-          iconName='navigation'
-          size={14}
-          color={COLORS.APP_TEXT_MUTED}
-        />
-        <Typography style={styles.metaTxt}>{trip.distance}</Typography>
+      <View style={styles.route}>
+        <View style={styles.routeMarkers}>
+          <View style={styles.pickupDot} />
+          <View style={styles.routeLine} />
+          <Icon
+            componentName={VARIABLES.Ionicons}
+            iconName='location'
+            size={18}
+            color={COLORS.APP_SECONDARY}
+          />
+        </View>
+        <View style={styles.routeText}>
+          <Typography style={styles.routeLabel}>{trip.pickupLabel}</Typography>
+          <Typography style={styles.routeAddress}>{trip.pickupAddress}</Typography>
+          <Typography style={[styles.routeLabel, styles.destLabel]}>{trip.destinationLabel}</Typography>
+          <Typography style={styles.routeAddress}>{trip.destinationAddress}</Typography>
+        </View>
       </View>
-      <View style={styles.metaItem}>
-        <Icon
-          componentName={VARIABLES.Ionicons}
-          iconName='star'
-          size={14}
-          color={COLORS.APP_STAR}
-        />
-        <Typography style={styles.metaTxt}>{trip.rating}</Typography>
+
+      <View style={styles.footer}>
+        <View style={styles.metaItem}>
+          <Icon
+            componentName={VARIABLES.Feather}
+            iconName='navigation'
+            size={14}
+            color={COLORS.APP_TEXT_MUTED}
+          />
+          <Typography style={styles.metaTxt}>{trip.distance}</Typography>
+        </View>
+        <View style={styles.metaItem}>
+          <Icon
+            componentName={VARIABLES.Ionicons}
+            iconName='star'
+            size={14}
+            color={COLORS.APP_STAR}
+          />
+          <Typography style={styles.metaTxt}>{trip.rating}</Typography>
+        </View>
+        <View style={styles.metaItem}>
+          <Icon
+            componentName={VARIABLES.MaterialCommunityIcons}
+            iconName='cash'
+            size={14}
+            color={COLORS.APP_TEXT_MUTED}
+          />
+          <Typography style={styles.metaTxt}>{trip.payment}</Typography>
+        </View>
       </View>
-      <View style={styles.metaItem}>
-        <Icon
-          componentName={VARIABLES.MaterialCommunityIcons}
-          iconName='cash'
-          size={14}
-          color={COLORS.APP_TEXT_MUTED}
-        />
-        <Typography style={styles.metaTxt}>{trip.payment}</Typography>
-      </View>
-    </View>
-  </View>
-);
+    </Pressable>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -82,11 +99,29 @@ const styles = StyleSheet.create({
     borderColor: COLORS.APP_LINE,
     backgroundColor: COLORS.WHITE,
   },
+  cardPressed: {
+    opacity: 0.92,
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 8,
+  },
+  headerLeft: {
+    flex: 1,
+    gap: 6,
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusTxt: {
+    fontSize: FontSize.ExtraSmall,
+    fontWeight: FontWeight.SemiBold,
   },
   date: {
     fontSize: FontSize.Small,

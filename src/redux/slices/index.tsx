@@ -3,6 +3,7 @@ export { default as AppReducer } from './appSettings';
 export { default as BookingsReducer } from './bookings';
 export { default as FoodCartReducer } from './foodCart';
 export { default as NotificationReducer } from './notification';
+export { default as PlatformSettingsReducer } from './platformSettings';
 export { default as ServicesReducer } from './services';
 export { default as UserReducer } from './user';
 export { default as WorkerReducer } from './worker';

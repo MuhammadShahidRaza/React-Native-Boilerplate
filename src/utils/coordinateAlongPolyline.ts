@@ -1,5 +1,16 @@
 export type MapCoord = { latitude: number; longitude: number };
 
+export function parseMapCoord(value: number | string | null | undefined): number | null {
+  if (value === undefined || value === null || value === '') return null;
+  const n = typeof value === 'number' ? value : parseFloat(String(value).trim());
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+export function isValidMapCoord(lat: number, lng: number): boolean {
+  return Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && Math.abs(lat) > 0.0001 && Math.abs(lng) > 0.0001;
+}
+
 function segmentMetric(a: MapCoord, b: MapCoord): number {
   const dLat = a.latitude - b.latitude;
   const dLng = a.longitude - b.longitude;
@@ -44,6 +55,63 @@ export function coordinateAlongPolyline(coords: MapCoord[], t: number): MapCoord
     remaining -= segLen;
   }
   return coords[coords.length - 1];
+}
+
+/** Closest-point progress `t ∈ [0,1]` along polyline for a live GPS position. */
+export function progressAlongPolylineFromPoint(coords: MapCoord[], point: MapCoord): number {
+  if (coords.length < 2) return 0;
+
+  const segmentLengths: number[] = [];
+  let total = 0;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const d = segmentMetric(coords[i], coords[i + 1]);
+    segmentLengths.push(d);
+    total += d;
+  }
+  if (total <= 0) return 0;
+
+  let bestDist = Infinity;
+  let bestProgress = 0;
+  let accumulated = 0;
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    const a = coords[i];
+    const b = coords[i + 1];
+    const abLat = b.latitude - a.latitude;
+    const abLng = b.longitude - a.longitude;
+    const ab2 = abLat * abLat + abLng * abLng;
+    const t =
+      ab2 > 0
+        ? Math.max(
+            0,
+            Math.min(
+              1,
+              ((point.latitude - a.latitude) * abLat + (point.longitude - a.longitude) * abLng) /
+                ab2,
+            ),
+          )
+        : 0;
+    const proj = interpolateMapCoord(a, b, t);
+    const dist = segmentMetric(point, proj);
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestProgress = (accumulated + segmentLengths[i] * t) / total;
+    }
+    accumulated += segmentLengths[i];
+  }
+
+  return Math.max(0, Math.min(1, bestProgress));
+}
+
+/** Bearing in degrees clockwise from true north (`from` → `to`). */
+export function bearingBetweenCoords(from: MapCoord, to: MapCoord): number {
+  const lat1 = (from.latitude * Math.PI) / 180;
+  const lat2 = (to.latitude * Math.PI) / 180;
+  const dLng = ((to.longitude - from.longitude) * Math.PI) / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
 /** Extend past `end` along the line from `from` → `end`. */

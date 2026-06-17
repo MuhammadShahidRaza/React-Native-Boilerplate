@@ -9,7 +9,7 @@ export const MAP_DIRECTIONS_EDGE_PADDING = {
   left: 28,
 };
 
-export function fitMapToDirectionCoordinates(
+export function fitMapToCoords(
   mapRef: RefObject<MapView | null>,
   coordinates: { latitude: number; longitude: number }[] | undefined,
   options?: { animated?: boolean },
@@ -24,3 +24,6 @@ export function fitMapToDirectionCoordinates(
     // fitToCoordinates can fail if map not laid out yet
   }
 }
+
+/** @deprecated Use fitMapToCoords */
+export const fitMapToDirectionCoordinates = fitMapToCoords;

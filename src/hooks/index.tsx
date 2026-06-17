@@ -1,4 +1,6 @@
 export * from './useJobDisplayTimer';
+export * from './useWorkerRequestDetail';
+export * from './useRideTripDisplay';
 export * from './useBookingAcceptPoll';
 export * from './useVariantBootstrap';
 export * from './useAddressList';

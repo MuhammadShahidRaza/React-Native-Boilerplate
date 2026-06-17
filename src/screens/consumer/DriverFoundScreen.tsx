@@ -1,71 +1,91 @@
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
   GradientIcon,
   Icon,
+  LiveTrackingMapDirections,
+  LiveVehicleMapMarker,
   Map,
-  MOCK_RIDE_TRIP,
   RideDriverCard,
   RideVehicleStatsRow,
+  SkeletonWrapper,
   Wrapper,
 } from 'components/index';
-import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
+import { VARIABLES } from 'constants/common';
+import { IMAGES } from 'constants/assets';
 import { COLORS, fitMapToDirectionCoordinates, openPhoneNumber, screenHeight } from 'utils/index';
-import { navigate, replace, type RootStackParamList } from 'navigation/index';
+import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
+import { showToast } from 'utils/toast';
+import { replace, type RootStackParamList } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { useMemo, useRef, useState } from 'react';
 import { CancelReasonModal } from './CancelReasonModal';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
-import MapViewDirections from 'react-native-maps-directions';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useRideTripDisplay } from 'hooks/useRideTripDisplay';
+import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { resolveRideDirectionsLeg } from 'utils/rideTrackMap';
+import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
- 
 export const DriverFoundScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
-
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.DRIVER_FOUND>>();
   const mapRef = useRef<MapView>(null);
 
   const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
-
-  const pickupCoord = useMemo(
-    () => ({
-      latitude: pickupLat ?? INITIAL_REGION.latitude + 0.008,
-      longitude: pickupLng ?? INITIAL_REGION.longitude,
-    }),
-    [pickupLat, pickupLng],
+  const { trip, loading: tripLoading } = useRideTripDisplay(bookingId);
+  const track = useConsumerBookingTrack(
+    bookingId,
+    { pickupLat, pickupLng, dropoffLat, dropoffLng },
+    'car',
   );
 
-  const dropoffCoord = useMemo(
-    () => ({
-      latitude: dropoffLat ?? INITIAL_REGION.latitude - 0.004,
-      longitude: dropoffLng ?? INITIAL_REGION.longitude + 0.005,
-    }),
-    [dropoffLat, dropoffLng],
+  const pickupCoord = track.pickup ?? {
+    latitude: pickupLat ?? 0,
+    longitude: pickupLng ?? 0,
+  };
+  const dropoffCoord = track.dropoff ?? {
+    latitude: dropoffLat ?? 0,
+    longitude: dropoffLng ?? 0,
+  };
+
+  const directionsLeg = useMemo(
+    () => resolveRideDirectionsLeg('arriving', pickupCoord, dropoffCoord, track.providerCoord),
+    [pickupCoord, dropoffCoord, track.providerCoord],
   );
 
-  const mapRegion = useMemo(
-    () => ({
-      latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
-      longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
-      latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
-      longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
-    }),
-    [pickupCoord, dropoffCoord],
+  const mapRegion = track.mapRegion ?? {
+    latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
+    longitude: (pickupCoord.longitude + dropoffCoord.longitude) / 2,
+    latitudeDelta: Math.abs(pickupCoord.latitude - dropoffCoord.latitude) * 2 + 0.02,
+    longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
+  };
+
+  const onDirectionsReady = useCallback(
+    (result: { coordinates: MapCoord[] }) => {
+      setRouteCoords(result.coordinates);
+      fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+    },
+    [],
   );
+
+  const recenterPoints = useMemo(() => {
+    const points: MapCoord[] = [...routeCoords, pickupCoord, dropoffCoord];
+    if (track.providerCoord) points.push(track.providerCoord);
+    return points;
+  }, [routeCoords, pickupCoord, dropoffCoord, track.providerCoord]);
 
   const trackRideParams = useMemo(
-    () =>
-      ({
-        phase: 'arriving' as const,
-        pickupLat: pickupCoord.latitude,
-        pickupLng: pickupCoord.longitude,
-        dropoffLat: dropoffCoord.latitude,
-        dropoffLng: dropoffCoord.longitude,
-        bookingId,
-      }),
+    () => ({
+      pickupLat: pickupCoord.latitude,
+      pickupLng: pickupCoord.longitude,
+      dropoffLat: dropoffCoord.latitude,
+      dropoffLng: dropoffCoord.longitude,
+      bookingId,
+    }),
     [pickupCoord, dropoffCoord, bookingId],
   );
 
@@ -73,50 +93,37 @@ export const DriverFoundScreen = () => {
     <Wrapper
       headerTitle='Book a Ride'
       showBackButton
-       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
       <View style={styles.mapContainer}>
         <Map
-          key={`driver-found-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
+          key={`driver-found-${bookingId ?? 'local'}`}
           mapRef={mapRef}
           region={mapRegion}
           regionTracking='initialOnly'
-          scrollEnabled={false}
+          scrollEnabled
+          showsTraffic
+          showRecenterButton
+          recenterPoints={recenterPoints}
+          recenterIncludeUserLocation
           showsUserLocationDot={false}
           showCurrentLocation={false}
           showCurrentLocationButton={false}
           mapStyle='light'
           minZoomLevel={0}
         >
-          <MapViewDirections
-            key={`dir-${pickupCoord.latitude}-${pickupCoord.longitude}-${dropoffCoord.latitude}-${dropoffCoord.longitude}`}
-            origin={pickupCoord}
-            destination={dropoffCoord}
-            apikey={ENV_CONSTANTS.MAP_API_KEY}
-            mode='DRIVING'
-            precision='high'
-            timePrecision='none'
-            resetOnChange
-            language='en'
+          <LiveTrackingMapDirections
+            leg={directionsLeg}
             strokeColor='#374151'
             strokeWidth={5}
-            lineCap='round'
-            lineJoin='round'
-            onReady={result => fitMapToDirectionCoordinates(mapRef, result.coordinates)}
+            onReady={onDirectionsReady}
           />
-          <Marker
-            coordinate={{ latitude: pickupCoord.latitude, longitude: pickupCoord.longitude }}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
+          <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.pickupMapDot} />
           </Marker>
-          <Marker
-            coordinate={{ latitude: dropoffCoord.latitude, longitude: dropoffCoord.longitude }}
-            anchor={{ x: 0.5, y: 1 }}
-          >
+          <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 1 }}>
             <Icon
               componentName={VARIABLES.MaterialCommunityIcons}
               iconName='map-marker'
@@ -124,6 +131,13 @@ export const DriverFoundScreen = () => {
               color={COLORS.APP_SECONDARY}
             />
           </Marker>
+          {track.providerCoord ? (
+            <LiveVehicleMapMarker
+              coordinate={track.providerCoord}
+              bearing={track.providerBearing}
+              kind='car'
+            />
+          ) : null}
         </Map>
       </View>
 
@@ -140,21 +154,41 @@ export const DriverFoundScreen = () => {
         </View>
 
         <RideDriverCard
-          driverName={MOCK_RIDE_TRIP.driverName}
-          rating={MOCK_RIDE_TRIP.rating}
-          avatarSource={MOCK_RIDE_TRIP.avatar}
-          onPhonePress={() => openPhoneNumber('+237 6 99 99 99 99')}
-          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
-          vehicleModel={MOCK_RIDE_TRIP.vehicleModel}
-          vehiclePlate={MOCK_RIDE_TRIP.vehiclePlate}
-          showVehicleSection
+          driverName={trip?.driverName ?? '—'}
+          rating={trip?.rating ?? '—'}
+          avatarSource={trip?.avatar ?? IMAGES.USER}
+          onPhonePress={() => {
+            if (trip?.providerPhone) {
+              openPhoneNumber(trip.providerPhone);
+              return;
+            }
+            showToast({ message: 'Driver phone number is not available.' });
+          }}
+          onMessagePress={() =>
+            navigateToBookingFirebaseChat({
+              otherUser: {
+                id: trip?.providerId,
+                full_name: trip?.driverName,
+              },
+              bookingId,
+            })
+          }
+          vehicleModel={trip?.vehicleModel ?? '—'}
+          vehiclePlate={trip?.vehiclePlate ?? '—'}
+          showVehicleSection={Boolean(trip)}
           variant='elevatedMuted'
           onCancelPress={() => setCancelVisible(true)}
         />
 
-        <RideVehicleStatsRow items={[...MOCK_RIDE_TRIP.vehicleStats]} marginHorizontal={20} />
+        <SkeletonWrapper isLoading={tripLoading} height={72} count={1}>
+          <RideVehicleStatsRow items={trip ? [...trip.vehicleStats] : []} marginHorizontal={20} />
+        </SkeletonWrapper>
 
-        <Button title='Track Ride' style={styles.ctaBtn} onPress={() => replace(SCREENS.TRACK_RIDE, trackRideParams)} />
+        <Button
+          title='Track Ride'
+          style={styles.ctaBtn}
+          onPress={() => replace(SCREENS.TRACK_RIDE, trackRideParams)}
+        />
       </View>
 
       <CancelReasonModal

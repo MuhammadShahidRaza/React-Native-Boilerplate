@@ -1,54 +1,84 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography, WorkerStatPills, WorkerTripCard } from 'components/index';
-import type { WorkerTripRecord } from 'components/common/worker/workerMockData';
-import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
+import {
+  WORKER_HISTORY_TRIPS,
+  type WorkerTripRecord,
+} from 'components/common/worker/workerMockData';
+import { listWorkerBookingHistory } from 'api/functions/snlift/bookings';
 import { mapBookingToWorkerTrip } from 'api/mappers/snliftBooking';
+import { ENV_CONSTANTS } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { COLORS, formatMoney, parseMoneyAmount } from 'utils/index';
+import { COLORS } from 'utils/index';
+import { getWorkerHistoryStats } from 'utils/workerStats';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
-
-function sumTripEarnings(trips: WorkerTripRecord[]): string {
-  let total = 0;
-  for (const trip of trips) {
-    const n = parseMoneyAmount(trip.earned);
-    if (n != null) total += n;
-  }
-  return formatMoney(total);
-}
+import { navigateToWorkerBooking } from 'utils/workerBookingNavigation';
 
 export const WorkerRideHistoryScreen = () => {
   const role = useAppSelector(state => state.user?.role);
+  const userDetails = useAppSelector(state => state.user?.userDetails);
   const copy = getWorkerRoleCopy(role);
   const [trips, setTrips] = useState<WorkerTripRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const loadHistory = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await listBookings({ status: 'completed' }, role);
-      const bookings = extractBookingsList(res).filter(
-        b => (b.status ?? '').toLowerCase() === 'completed',
-      );
-      setTrips(bookings.map(mapBookingToWorkerTrip));
-    } catch {
+  const loadHistory = useCallback(async (isRefresh = false) => {
+    if (!role) {
       setTrips([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    try {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        setTrips(WORKER_HISTORY_TRIPS);
+        return;
+      }
+      const bookings = await listWorkerBookingHistory(role);
+      const trips: WorkerTripRecord[] = [];
+      for (const booking of bookings) {
+        try {
+          trips.push(mapBookingToWorkerTrip(booking));
+        } catch {
+          // Skip malformed rows instead of failing the whole list.
+        }
+      }
+      setTrips(trips);
+    } catch {
+      if (!isRefresh) {
+        setTrips([]);
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [role]);
 
-  useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory]),
+  );
 
-  const historyStats = [
-    { value: String(trips.length).padStart(2, '0'), label: copy.tripsStatLabel },
-    { value: sumTripEarnings(trips), label: 'Earned' },
-    { value: '—', label: 'Avg Rating' },
-  ];
+  const historyStats = useMemo(
+    () => {
+      const stats = getWorkerHistoryStats(userDetails, trips, role);
+      return [
+        { value: stats.tripsCount, label: copy.tripsStatLabel },
+        { value: stats.earned, label: 'Earned' },
+        { value: stats.avgRating, label: 'Avg Rating' },
+      ];
+    },
+    [userDetails, trips, role, copy.tripsStatLabel],
+  );
 
   return (
     <View style={styles.root}>
@@ -66,11 +96,24 @@ export const WorkerRideHistoryScreen = () => {
           keyExtractor={item => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={trips.length === 0 ? styles.emptyList : styles.list}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadHistory(true)}
+              colors={[COLORS.PRIMARY]}
+              tintColor={COLORS.PRIMARY}
+            />
+          }
           ListHeaderComponent={<WorkerStatPills stats={historyStats} />}
           ListEmptyComponent={
-            <Typography style={styles.emptyText}>No completed jobs yet.</Typography>
+            <Typography style={styles.emptyText}>No jobs yet.</Typography>
           }
-          renderItem={({ item }) => <WorkerTripCard trip={item} />}
+          renderItem={({ item }) => (
+            <WorkerTripCard
+              trip={item}
+              onPress={() => navigateToWorkerBooking(item.id, item.status)}
+            />
+          )}
         />
       )}
     </View>

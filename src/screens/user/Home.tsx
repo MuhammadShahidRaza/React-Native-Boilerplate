@@ -43,7 +43,6 @@ import { getCurrentLocation } from 'utils/location';
 import { updateUserLocation } from 'api/functions/app/user';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
-import { getAppSettings } from 'api/functions/snlift/settings';
 import type { Address, User } from 'types/responseTypes';
 
 const IS_SENGO = isSengoBrand();
@@ -85,10 +84,6 @@ export const Home = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
-
-  useEffect(() => {
-    getAppSettings();
-  }, []);
 
   useEffect(() => {
     const defaultAddr = addressList.find(a => a.is_default == 1) ?? addressList[0];

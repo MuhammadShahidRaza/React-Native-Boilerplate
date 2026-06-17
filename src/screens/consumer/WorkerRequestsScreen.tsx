@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { Typography, Wrapper, WorkerRequestCard } from 'components/index';
 import { FontSize } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import type { WorkerRequestRecord } from 'components/common/worker/workerMockData';
+import {
+  WORKER_MOCK_REQUESTS,
+  type WorkerRequestRecord,
+} from 'components/common/worker/workerMockData';
+import { ENV_CONSTANTS } from 'constants/common';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
@@ -29,6 +34,10 @@ export const WorkerRequestsScreen = () => {
   const loadRequests = useCallback(async () => {
     setLoading(true);
     try {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        setRequests(WORKER_MOCK_REQUESTS);
+        return;
+      }
       const res = await listBookings({ scope: 'available' }, role);
       const bookings = extractBookingsList(res);
       setRequests(bookings.map(mapBookingToWorkerRequest));
@@ -52,8 +61,8 @@ export const WorkerRequestsScreen = () => {
       darkMode={false}
     >
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size='large' color={COLORS.PRIMARY} />
+        <View style={styles.list}>
+          <WorkerRequestsSkeleton />
         </View>
       ) : (
         <FlatList
@@ -78,6 +87,22 @@ export const WorkerRequestsScreen = () => {
     </Wrapper>
   );
 };
+
+const WorkerRequestsSkeleton = () => (
+  <SkeletonPlaceholder
+    backgroundColor={COLORS.SKELETON_BACKGROUND}
+    highlightColor={COLORS.SKELETON_HIGHLIGHT}
+  >
+    {[0, 1, 2].map(index => (
+      <SkeletonPlaceholder.Item
+        key={index}
+        height={96}
+        borderRadius={16}
+        marginBottom={12}
+      />
+    ))}
+  </SkeletonPlaceholder>
+);
 
 const styles = StyleSheet.create({
   list: {

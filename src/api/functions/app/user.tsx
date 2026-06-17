@@ -4,10 +4,13 @@ import store from 'store/store';
 import { MessageResponse, User } from 'types/responseTypes';
 import { setUserDetails } from 'store/slices/user';
 import { ChangePasswordFormTypes, EditProfileFormTypes } from 'types/screenTypes';
+import type { USER_TYPE } from 'types/auth';
 import { onBack } from 'navigation/index';
 import { showToast } from 'utils/toast';
 import { ENV_CONSTANTS } from 'constants/common';
 import { normalizeSniftUser } from 'api/normalizers/snlift';
+import { isWorkerRole } from 'config/app';
+import { syncWorkerOnlineFromUser } from 'utils/workerOnboarding';
 // import crashlytics from '@react-native-firebase/crashlytics';
 
 /** Dummy user for alpha/dev phase only. Used when IS_ALPHA_PHASE=true in .env. Remove or set IS_ALPHA_PHASE=false for production. */
@@ -54,6 +57,7 @@ export const DUMMY_USER: User = {
   is_active: 1,
   is_approved: 1,
   availabilty: 1,
+  is_online: 0,
   user_type: 'user',
   updated_at: '',
   is_subscribed: true,
@@ -78,20 +82,49 @@ export const DUMMY_USER: User = {
   whatsapp_number: '234567890',
 };
 
+/** Alpha/demo worker profile — earnings, wallet, rating for Sengo Workers. */
+export function getAlphaDummyUser(userType: USER_TYPE | string = 'user'): User {
+  const isWorker = userType === 'driver' || userType === 'courier';
+  const role = userType as User['user_type'];
+  if (!isWorker) {
+    return { ...DUMMY_USER, user_type: role };
+  }
+
+  return {
+    ...DUMMY_USER,
+    user_type: role,
+    is_onboarded: 1,
+    is_admin_verified: 1,
+    is_approved: 1,
+    is_online: 0,
+    balance: 500,
+    wallet_balance: 500,
+    total_earnings: 850,
+    rides: 4,
+    rating: 4.9,
+    average_rating: 4.9,
+    is_stripe_onboarded: true,
+    stripe_connect_id: 'acct_alpha_mock',
+  } as unknown as User;
+}
+
 const getUserDetails = async <R extends { user: User }>() => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    // In alpha phase, don't overwrite persisted user data
-    // The user data should already be persisted from login
+    const current = store.getState().user?.userDetails;
+    const role = current?.user_type ?? current?.user_role;
+    if (role === 'driver' || role === 'courier') {
+      store.dispatch(setUserDetails(getAlphaDummyUser(role)));
+    }
     return;
   }
 
   const user = await handleGetApiRequest<R>({ url: API_ROUTES.GET_PROFILE, addToPending: true });
   if (user?.user) {
-    store.dispatch(
-      setUserDetails(
-        normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>),
-      ),
-    );
+    const normalized = normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>);
+    store.dispatch(setUserDetails(normalized));
+    if (isWorkerRole(normalized.user_type ?? normalized.user_role)) {
+      syncWorkerOnlineFromUser(normalized);
+    }
     // crashlytics().setUserId(String(user.user.id)),
   }
 };
@@ -160,4 +193,25 @@ const updateUserLocation = async (latitude: number, longitude: number): Promise<
   });
 };
 
-export { getUserDetails, updateUserDetails, updatePassword, getUserById, updateUserLocation };
+/** PATCH `user/update` — persist worker online/offline on backend (`is_online: 0|1`). */
+const updateWorkerOnlineStatus = async (online: boolean): Promise<boolean> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) return true;
+  const user = await handlePatchApiRequest<{ user: User }, { is_online: number }>({
+    url: API_ROUTES.UPDATE_USER_LOCATION,
+    data: { is_online: online ? 1 : 0 },
+  });
+  if (!user?.user) return false;
+  const normalized = normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>);
+  store.dispatch(setUserDetails(normalized));
+  syncWorkerOnlineFromUser(normalized);
+  return true;
+};
+
+export {
+  getUserDetails,
+  updateUserDetails,
+  updatePassword,
+  getUserById,
+  updateUserLocation,
+  updateWorkerOnlineStatus,
+};

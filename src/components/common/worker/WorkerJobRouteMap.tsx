@@ -3,14 +3,20 @@ import { StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import { Icon, Map, MapVehicleMarker, type MapVehicleMarkerKind } from 'components/index';
+import { Icon, LiveVehicleMapMarker, Map, type MapVehicleMarkerKind } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { COLORS, fitMapToDirectionCoordinates } from 'utils/index';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
 export interface WorkerJobRouteMapProps {
-  origin: MapCoord;
-  destination: MapCoord;
+  /** Google Directions API origin — stable per leg (not live GPS). */
+  directionsOrigin: MapCoord;
+  directionsDestination: MapCoord;
+  /** Remount directions when leg changes (`pickup` → `dropoff`). */
+  routeLegKey: string;
+  pickupCoord: MapCoord;
+  dropoffCoord: MapCoord;
+  phase: 'pickup' | 'dropoff';
   mapRegion: {
     latitude: number;
     longitude: number;
@@ -19,8 +25,14 @@ export interface WorkerJobRouteMapProps {
   };
   mapRef: RefObject<MapView | null>;
   vehicleCoord: MapCoord | null;
-  /** Car for ride drivers; bike for delivery couriers. */
+  vehicleBearing?: number;
   vehicleMarkerKind?: MapVehicleMarkerKind;
+  scrollEnabled?: boolean;
+  showsTraffic?: boolean;
+  showRecenterButton?: boolean;
+  recenterPoints?: MapCoord[];
+  onMapUserInteraction?: () => void;
+  onRecenterPress?: () => void;
   onDirectionsReady: (result: {
     coordinates: MapCoord[];
     distance: number;
@@ -30,21 +42,38 @@ export interface WorkerJobRouteMapProps {
 }
 
 export const WorkerJobRouteMap = ({
-  origin,
-  destination,
+  directionsOrigin,
+  directionsDestination,
+  routeLegKey,
+  pickupCoord,
+  dropoffCoord,
+  phase,
   mapRegion,
   mapRef,
   vehicleCoord,
+  vehicleBearing = 0,
   vehicleMarkerKind = 'car',
+  scrollEnabled = true,
+  showsTraffic = true,
+  showRecenterButton = true,
+  recenterPoints = [],
+  onMapUserInteraction,
+  onRecenterPress,
   onDirectionsReady,
 }: WorkerJobRouteMapProps) => (
   <View style={styles.wrap}>
     <Map
-      key={`worker-job-${origin.latitude}-${destination.latitude}`}
+      key={`worker-job-${routeLegKey}`}
       mapRef={mapRef}
       region={mapRegion}
       regionTracking='initialOnly'
-      scrollEnabled={false}
+      scrollEnabled={scrollEnabled}
+      showsTraffic={showsTraffic}
+      showRecenterButton={showRecenterButton}
+      recenterPoints={recenterPoints}
+      recenterIncludeUserLocation
+      onRecenterPress={onRecenterPress}
+      onMapUserInteraction={onMapUserInteraction}
       showsUserLocationDot={false}
       showCurrentLocation={false}
       showCurrentLocationButton={false}
@@ -53,8 +82,8 @@ export const WorkerJobRouteMap = ({
       style={styles.map}
     >
       <MapViewDirections
-        origin={origin}
-        destination={destination}
+        origin={directionsOrigin}
+        destination={directionsDestination}
         apikey={ENV_CONSTANTS.MAP_API_KEY}
         mode='DRIVING'
         precision='high'
@@ -67,21 +96,25 @@ export const WorkerJobRouteMap = ({
           onDirectionsReady(result);
         }}
       />
-      <Marker coordinate={origin} anchor={{ x: 0.5, y: 0.5 }}>
+      <Marker coordinate={pickupCoord} anchor={{ x: 0.5, y: 0.5 }}>
         <View style={styles.pickupDot} />
       </Marker>
-      <Marker coordinate={destination} anchor={{ x: 0.5, y: 1 }}>
-        <Icon
-          componentName={VARIABLES.MaterialCommunityIcons}
-          iconName='map-marker'
-          size={32}
-          color={COLORS.APP_SECONDARY}
-        />
-      </Marker>
-      {vehicleCoord ? (
-        <Marker coordinate={vehicleCoord} anchor={{ x: 0.5, y: 0.5 }} flat>
-          <MapVehicleMarker kind={vehicleMarkerKind} />
+      {phase === 'dropoff' ? (
+        <Marker coordinate={dropoffCoord} anchor={{ x: 0.5, y: 1 }}>
+          <Icon
+            componentName={VARIABLES.MaterialCommunityIcons}
+            iconName='map-marker'
+            size={32}
+            color={COLORS.APP_SECONDARY}
+          />
         </Marker>
+      ) : null}
+      {vehicleCoord ? (
+        <LiveVehicleMapMarker
+          coordinate={vehicleCoord}
+          bearing={vehicleBearing}
+          kind={vehicleMarkerKind}
+        />
       ) : null}
     </Map>
   </View>

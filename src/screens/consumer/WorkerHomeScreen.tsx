@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useIsFocused } from '@react-navigation/native';
 import {
   AppGradient,
   AppStatusModal,
@@ -12,7 +10,7 @@ import {
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { APP_GRADIENT_HORIZONTAL, COLORS, screenHeight, formatMoney } from 'utils/index';
+import { APP_GRADIENT_HORIZONTAL, COLORS, screenHeight } from 'utils/index';
 import { parseWalletBalance, WORKER_WALLET_TOP_OFF } from 'utils/workerOnboarding';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { navigate } from 'navigation/index';
@@ -20,35 +18,23 @@ import { SCREENS } from 'constants/routes';
 import { setWorkerOnline } from 'store/slices/worker';
 import { getMapVehicleMarkerKind, getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { getCurrentLocation } from 'utils/location';
-import { updateUserLocation } from 'api/functions/app/user';
+import { updateUserLocation, updateWorkerOnlineStatus, getUserDetails } from 'api/functions/app/user';
+import { ENV_CONSTANTS } from 'constants/common';
+import { syncWorkerOnlineFromUser } from 'utils/workerOnboarding';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
-import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
-import { getWorkerWalletSummary } from 'api/functions/snlift/wallet';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
-
-function formatRating(user: { details?: Record<string, unknown> } | null | undefined): string {
-  const d = user?.details;
-  const raw =
-    d?.average_rating ??
-    d?.avg_rating ??
-    d?.rating ??
-    (user as { average_rating?: number | string } | null)?.average_rating;
-  if (raw === undefined || raw === null || raw === '') return '—';
-  const n = typeof raw === 'number' ? raw : parseFloat(String(raw));
-  return Number.isNaN(n) ? '—' : n.toFixed(1);
-}
+import { subscribeWorkerHomeStatsRefresh } from 'utils/workerHomeStats';
+import { getWorkerHomeStatsFromUser } from 'utils/workerStats';
 
 export const WorkerHomeScreen = () => {
   const dispatch = useAppDispatch();
-  const isFocused = useIsFocused();
   const userDetails = useAppSelector(state => state?.user?.userDetails);
   const role = useAppSelector(state => state?.user?.role);
   const { isOnline } = useAppSelector(state => state.worker);
   const copy = getWorkerRoleCopy(role);
   const { loadCurrentLocation } = useCurrentLocation();
   const [topOffVisible, setTopOffVisible] = useState(false);
-  const [todayEarnings, setTodayEarnings] = useState(formatMoney(0));
-  const [tripCount, setTripCount] = useState('0');
+  const [statusUpdating, setStatusUpdating] = useState(false);
   const locationUpdatedRef = useRef(false);
 
   const firstName = useMemo(() => {
@@ -57,29 +43,32 @@ export const WorkerHomeScreen = () => {
     return 'there';
   }, [userDetails?.full_name]);
 
-  const ratingLabel = useMemo(() => formatRating(userDetails), [userDetails]);
+  const homeStats = useMemo(
+    () => getWorkerHomeStatsFromUser(userDetails, role),
+    [userDetails, role],
+  );
+
   const walletBalance = useMemo(() => parseWalletBalance(userDetails), [userDetails]);
   const walletFunded = walletBalance > 0;
 
   const statusText = isOnline ? copy.onlineStatus : copy.offlineStatus;
 
-  const loadWorkerStats = useCallback(async () => {
+  const refreshHomeUser = useCallback(async () => {
     if (!role) return;
-    const [summary, bookingsRes] = await Promise.all([
-      getWorkerWalletSummary(role),
-      listBookings({ status: 'completed' }, role),
-    ]);
-    setTodayEarnings(formatMoney(summary?.today_earnings));
-    const completed = extractBookingsList(bookingsRes).filter(
-      b => (b.status ?? '').toLowerCase() === 'completed',
-    );
-    setTripCount(String(completed.length));
+    await getUserDetails();
   }, [role]);
 
+  useEffect(() => subscribeWorkerHomeStatsRefresh(refreshHomeUser), [refreshHomeUser]);
+
   useEffect(() => {
-    if (!isFocused) return;
-    loadWorkerStats();
-  }, [isFocused, loadWorkerStats]);
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      void getUserDetails();
+    }
+  }, []);
+
+  useEffect(() => {
+    syncWorkerOnlineFromUser(userDetails);
+  }, [userDetails?.id, userDetails?.is_online]);
 
   // GPS + address + sync location to API / Firestore (once per session)
   useEffect(() => {
@@ -106,9 +95,26 @@ export const WorkerHomeScreen = () => {
     return true;
   };
 
+  const setOnlineStatus = useCallback(
+    async (online: boolean) => {
+      if (statusUpdating) return;
+      if (online && blockIfWalletEmpty()) return;
+      setStatusUpdating(true);
+      const ok = await updateWorkerOnlineStatus(online);
+      setStatusUpdating(false);
+      if (ok) {
+        dispatch(setWorkerOnline(online));
+      }
+    },
+    [statusUpdating, dispatch, walletFunded],
+  );
+
   const handleGoOnline = () => {
-    if (blockIfWalletEmpty()) return;
-    dispatch(setWorkerOnline(true));
+    void setOnlineStatus(true);
+  };
+
+  const handleGoOffline = () => {
+    void setOnlineStatus(false);
   };
 
   const handleLookingPress = () => {
@@ -118,8 +124,18 @@ export const WorkerHomeScreen = () => {
 
   useEffect(() => {
     if (walletFunded || !isOnline) return;
-    dispatch(setWorkerOnline(false));
-    setTopOffVisible(true);
+    let cancelled = false;
+    (async () => {
+      const ok = await updateWorkerOnlineStatus(false);
+      if (cancelled) return;
+      if (ok) {
+        dispatch(setWorkerOnline(false));
+      }
+      setTopOffVisible(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [walletFunded, isOnline, dispatch]);
 
   return (
@@ -138,7 +154,8 @@ export const WorkerHomeScreen = () => {
         <View style={styles.togglePill}>
           <TouchableOpacity
             activeOpacity={0.85}
-            onPress={() => dispatch(setWorkerOnline(false))}
+            onPress={handleGoOffline}
+            disabled={statusUpdating}
             style={[styles.toggleOption, !isOnline && styles.toggleActive]}
           >
             {!isOnline ? (
@@ -155,6 +172,7 @@ export const WorkerHomeScreen = () => {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={handleGoOnline}
+            disabled={statusUpdating}
             style={[styles.toggleOption, isOnline && styles.toggleActive]}
           >
             {isOnline ? (
@@ -193,17 +211,17 @@ export const WorkerHomeScreen = () => {
         </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>{todayEarnings}</Typography>
-            <Typography style={styles.statLabel}>Today</Typography>
+            <Typography style={styles.statValue}>{homeStats.totalEarnings}</Typography>
+            <Typography style={styles.statLabel}>Total Earned</Typography>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>{tripCount}</Typography>
+            <Typography style={styles.statValue}>{homeStats.tripCount}</Typography>
             <Typography style={styles.statLabel}>{copy.tripsStatLabel}</Typography>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Typography style={styles.statValue}>{ratingLabel}</Typography>
+            <Typography style={styles.statValue}>{homeStats.rating}</Typography>
             <Typography style={styles.statLabel}>Rating</Typography>
           </View>
         </View>

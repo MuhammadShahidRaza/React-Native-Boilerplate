@@ -6,6 +6,7 @@ import type { FoodCartState } from 'store/slices/foodCart';
 import { NotificationState } from 'store/slices/notification';
 import { ServicesState } from 'store/slices/services';
 import { UserState } from 'store/slices/user';
+import type { PlatformSettingsState } from 'store/slices/platformSettings';
 import type { WorkerAvailabilityState } from 'store/slices/worker';
 
 export type { WorkerAvailabilityState };
@@ -20,6 +21,7 @@ export type RootState = {
   bookings: BookingsState;
   worker: WorkerAvailabilityState;
   foodCart: FoodCartState;
+  platformSettings: PlatformSettingsState;
 };
 
 export type AppDispatch = typeof store.dispatch;

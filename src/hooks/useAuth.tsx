@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { resetSessionState } from 'store/resetSessionState';
+import { ensurePlatformSettingsLoaded } from 'services/platformSettings';
 import { RootState, useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { useTranslation } from './useTranslation';
 import { requestNotificationPermission } from 'utils/notifications';
@@ -43,6 +44,7 @@ export const useUserLoginStatus = (): UserLoginStatus => {
           // But if it does, we need to fetch user details
           if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
             await getUserDetails();
+            await ensurePlatformSettingsLoaded(dispatch);
           }
 
           requestNotificationPermission();

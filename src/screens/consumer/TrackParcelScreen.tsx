@@ -1,115 +1,89 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
-import { Marker } from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
   Icon,
-  MapVehicleMarker,
-  MOCK_PARCEL_COURIER,
-  PARCEL_COURIER_VEHICLE_STATS,
+  LiveVehicleMapMarker,
   ParcelCourierCard,
   ParcelRouteMap,
   ParcelTrackingBadge,
   RideAnimatedStatusBlock,
   RideProgressSegments,
   RideVehicleStatsRow,
+  SkeletonWrapper,
   Typography,
   Wrapper,
 } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { ParcelTrackPhase } from 'types/parcelTrip';
-import {
-  COLORS,
-  coordinateAlongPolyline,
-  openPhoneNumber,
-  resolveParcelTripCoords,
-} from 'utils/index';
+import { COLORS, openPhoneNumber } from 'utils/index';
 import type { MapCoord } from 'utils/parcelTripCoords';
 import type { RootStackParamList } from 'navigation/index';
-import { navigate, reset } from 'navigation/index';
+import { reset } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { CancelReasonModal } from './CancelReasonModal';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
+import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
+import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { mapParcelTrackPhase } from 'utils/bookingTrackPhases';
+import { resolveParcelDirectionsLeg } from 'utils/trackingDirections';
+import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
+import { showToast } from 'utils/toast';
 
- 
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
+
 const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
   picked_up: 0,
   in_transit: 1,
   delivered: 2,
 };
 
-const PHASE_AUTO_MS: Record<Exclude<ParcelTrackPhase, 'delivered'>, number> = {
-  picked_up: 4500,
-  in_transit: 9000,
-};
+function fallbackCoord(lat?: number, lng?: number, latOff = 0.008, lngOff = 0): MapCoord {
+  return {
+    latitude: lat ?? INITIAL_REGION.latitude + latOff,
+    longitude: lng ?? INITIAL_REGION.longitude + lngOff,
+  };
+}
 
 export const TrackParcelScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_PARCEL>>();
-  const bookingId = route.params?.bookingId;
-  const phaseParam = route.params?.phase;
-  const initialPhase: ParcelTrackPhase =
-    phaseParam === 'delivered'
-      ? 'delivered'
-      : phaseParam === 'picked_up'
-        ? 'picked_up'
-        : 'picked_up';
+  const { bookingId, pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
 
-  const { pickup, dropoff, mapRegion } = useMemo(
-    () => resolveParcelTripCoords(route.params),
-    [route.params],
+  const { trip, loading: tripLoading } = useParcelTripDisplay(bookingId);
+  const track = useConsumerBookingTrack(
+    bookingId,
+    { pickupLat, pickupLng, dropoffLat, dropoffLng },
+    'bike',
   );
 
-  const [phase, setPhase] = useState<ParcelTrackPhase>(initialPhase);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [rating, setRating] = useState(0);
-  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
-  const [courierCoord, setCourierCoord] = useState<MapCoord | null>(null);
   const mapRef = useRef<MapView>(null);
 
-  const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
-    setRouteCoords(coordinates);
-  }, []);
+  const pickup = track.pickup ?? fallbackCoord(pickupLat, pickupLng);
+  const dropoff = track.dropoff ?? fallbackCoord(dropoffLat, dropoffLng, -0.004, 0.005);
+  const mapRegion = track.mapRegion ?? {
+    latitude: (pickup.latitude + dropoff.latitude) / 2,
+    longitude: (pickup.longitude + dropoff.longitude) / 2,
+    latitudeDelta: Math.abs(pickup.latitude - dropoff.latitude) * 2 + 0.02,
+    longitudeDelta: Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02,
+  };
 
-  useEffect(() => {
-    if (phase === 'delivered') return undefined;
-    const ms = PHASE_AUTO_MS[phase];
-    const tid = setTimeout(() => {
-      setPhase(curr => {
-        if (curr === 'picked_up') return 'in_transit';
-        if (curr === 'in_transit') return 'delivered';
-        return curr;
-      });
-    }, ms);
-    return () => clearTimeout(tid);
-  }, [phase]);
+  const phase = useMemo((): ParcelTrackPhase => {
+    if (IS_ALPHA) return 'picked_up';
+    return mapParcelTrackPhase(track.status);
+  }, [track.status]);
 
-  useEffect(() => {
-    if (phase === 'delivered') {
-      setCourierCoord(null);
-      return undefined;
-    }
-    let raf = 0;
+  const directionsLeg = useMemo(
+    () => resolveParcelDirectionsLeg(phase, pickup, dropoff, track.providerCoord),
+    [phase, pickup, dropoff, track.providerCoord],
+  );
 
-    const loop = () => {
-      const t = Date.now() / 1000;
-      const wave = (Math.sin(t * Math.PI * 2 * 0.22) + 1) / 2;
-
-      if (phase === 'picked_up') {
-        setCourierCoord(pickup);
-      } else if (phase === 'in_transit' && routeCoords.length >= 2) {
-        setCourierCoord(coordinateAlongPolyline(routeCoords, 0.08 + wave * 0.84));
-      }
-
-      raf = requestAnimationFrame(loop);
-    };
-
-    loop();
-    return () => cancelAnimationFrame(raf);
-  }, [phase, pickup, routeCoords]);
+  const onDirectionsReady = useCallback(() => {}, []);
 
   const status = useMemo(() => {
     switch (phase) {
@@ -123,7 +97,9 @@ export const TrackParcelScreen = () => {
             color: COLORS.WHITE,
           },
           title: 'Parcel Picked Up',
-          subtitle: 'Courier has collected your parcel',
+          subtitle: track.status === 'accepted'
+            ? 'Courier has accepted your delivery'
+            : 'Courier has collected your parcel',
         } as const;
       case 'in_transit':
         return {
@@ -145,15 +121,15 @@ export const TrackParcelScreen = () => {
           subtitle: 'Parcel has been delivered',
         } as const;
     }
-  }, [phase]);
+  }, [phase, track.status]);
 
   const isDelivered = phase === 'delivered';
+  const showCourier = !isDelivered && Boolean(track.providerCoord);
 
   return (
     <Wrapper
       headerTitle='Track Parcel'
       showBackButton
-       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -163,19 +139,23 @@ export const TrackParcelScreen = () => {
         dropoff={dropoff}
         mapRegion={mapRegion}
         mapRef={mapRef}
+        directionsLeg={directionsLeg}
+        extraRecenterPoints={[track.providerCoord]}
         onDirectionsReady={onDirectionsReady}
       >
-        {courierCoord ? (
-          <Marker coordinate={courierCoord} anchor={{ x: 0.5, y: 0.5 }}>
-            <MapVehicleMarker kind='bike' />
-          </Marker>
+        {showCourier && track.providerCoord ? (
+          <LiveVehicleMapMarker
+            coordinate={track.providerCoord}
+            bearing={track.providerBearing}
+            kind='bike'
+          />
         ) : null}
       </ParcelRouteMap>
 
       <View style={styles.content}>
         <RideProgressSegments stepCount={3} activeSegmentIndex={PROGRESS_PHASE_INDEX[phase]} />
 
-        <ParcelTrackingBadge trackingId={MOCK_PARCEL_COURIER.trackingId} />
+        <ParcelTrackingBadge trackingId={trip?.trackingId ?? (bookingId ? `SN-${bookingId}` : '—')} />
 
         <RideAnimatedStatusBlock
           animationKey={status.animationKey}
@@ -186,20 +166,36 @@ export const TrackParcelScreen = () => {
         />
 
         <ParcelCourierCard
-          courierName={MOCK_PARCEL_COURIER.courierName}
-          phone={MOCK_PARCEL_COURIER.phone}
-          avatarSource={MOCK_PARCEL_COURIER.avatar}
-          onPhonePress={() => openPhoneNumber(MOCK_PARCEL_COURIER.phone)}
-          onMessagePress={() => navigate(SCREENS.MESSAGES_SOCKET)}
+          courierName={trip?.courierName ?? '—'}
+          phone={trip?.phone ?? ''}
+          avatarSource={trip?.avatar ?? IMAGES.USER}
+          onPhonePress={() => {
+            if (trip?.phone) {
+              openPhoneNumber(trip.phone);
+              return;
+            }
+            showToast({ message: 'Courier phone number is not available.' });
+          }}
+          onMessagePress={() =>
+            navigateToBookingFirebaseChat({
+              otherUser: {
+                id: trip?.providerId,
+                full_name: trip?.courierName,
+              },
+              bookingId,
+            })
+          }
         />
 
         {!isDelivered ? (
-          <RideVehicleStatsRow
-            items={PARCEL_COURIER_VEHICLE_STATS}
-            showVerticalDividers
-            elevated
-            marginHorizontal={0}
-          />
+          <SkeletonWrapper isLoading={tripLoading && !IS_ALPHA} height={72} count={1}>
+            <RideVehicleStatsRow
+              items={trip?.vehicleStats ?? []}
+              showVerticalDividers
+              elevated
+              marginHorizontal={0}
+            />
+          </SkeletonWrapper>
         ) : (
           <>
             <View style={styles.rateWrap}>
@@ -219,9 +215,7 @@ export const TrackParcelScreen = () => {
             </View>
             <Button
               title='Done'
-              onPress={() => {
-                reset(SCREENS.BOTTOM_STACK);
-              }}
+              onPress={() => reset(SCREENS.BOTTOM_STACK)}
               style={styles.doneBtn}
             />
           </>
@@ -264,7 +258,6 @@ const styles = StyleSheet.create({
     gap: 10,
     justifyContent: 'center',
   },
-
   cancelSoft: {
     marginTop: 12,
     paddingVertical: 14,

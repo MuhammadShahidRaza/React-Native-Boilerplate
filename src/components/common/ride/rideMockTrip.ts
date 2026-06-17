@@ -14,4 +14,6 @@ export const MOCK_RIDE_TRIP = {
   ],
   estimateFare: 'CFA 330',
   paymentMethod: 'Cash',
+  providerId: 1 as number | null,
+  providerPhone: '+1234567890' as string | undefined,
 };

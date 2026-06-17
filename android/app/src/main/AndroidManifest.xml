@@ -1,9 +1,14 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
 
   <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false" android:fullBackupContent="false" android:screenOrientation="portrait" android:theme="@style/AppTheme" android:supportsRtl="true" android:usesCleartextTraffic="${usesCleartextTraffic}">
   
@@ -44,5 +49,11 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity-alias>
+
+    <!-- Notifee ships shortService; worker GPS tracking needs location FGS type. -->
+    <service
+      android:name="app.notifee.core.ForegroundService"
+      android:foregroundServiceType="location"
+      tools:replace="android:foregroundServiceType" />
   </application>
 </manifest>

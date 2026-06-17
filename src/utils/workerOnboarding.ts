@@ -3,7 +3,11 @@ import { pickFromUserDetails } from 'api/normalizers/snlift';
 import { vehicleTypeToApiValue } from 'constants/vehicleTypes';
 import { hasUri } from 'utils/index';
 import store from 'store/store';
-import { setDocumentsComplete, setVehicleDetailsComplete } from 'store/slices/worker';
+import {
+  setDocumentsComplete,
+  setVehicleDetailsComplete,
+  setWorkerOnline,
+} from 'store/slices/worker';
 import type { SelectedMedia } from 'hooks/useMediaPicker';
 
 function hasUploadedMedia(value: unknown): boolean {
@@ -135,6 +139,31 @@ export function isWorkerDocumentsComplete(user: User | null | undefined): boolea
 export function syncWorkerOnboardingFlags(user: User | null | undefined): void {
   store.dispatch(setVehicleDetailsComplete(isWorkerVehicleComplete(user)));
   store.dispatch(setDocumentsComplete(isWorkerDocumentsComplete(user)));
+}
+
+/** Read backend online flag (`is_online`, legacy `availabilty`). */
+export function parseUserIsOnline(user: User | null | undefined): boolean | null {
+  if (!user) return null;
+  const raw: unknown =
+    user.is_online ??
+    user.availabilty ??
+    (user as unknown as Record<string, unknown>).availability;
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw === 'boolean') return raw;
+  if (typeof raw === 'number') return raw === 1;
+  if (typeof raw === 'string') {
+    const value = raw.trim().toLowerCase();
+    if (value === '') return null;
+    if (value === '1' || value === 'true' || value === 'online') return true;
+    if (value === '0' || value === 'false' || value === 'offline') return false;
+  }
+  return null;
+}
+
+export function syncWorkerOnlineFromUser(user: User | null | undefined): void {
+  const isOnline = parseUserIsOnline(user);
+  if (isOnline === null) return;
+  store.dispatch(setWorkerOnline(isOnline));
 }
 
 export function isWorkerOnboardingComplete(user: User | null | undefined): boolean {

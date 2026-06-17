@@ -1,5 +1,5 @@
 import { Header, Icon, Input, RowComponent, Typography, Wrapper } from 'components/common';
-import { VARIABLES } from 'constants/common';
+import { VARIABLES, ENV_CONSTANTS } from 'constants/common';
 import { COMMON_TEXT } from 'constants/screens';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { View, SectionList, StyleSheet, Alert } from 'react-native';
@@ -88,12 +88,18 @@ const validateMessage = (text: string): { isValid: boolean; error: string } => {
 
 export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAGES_FIREBASE>) => {
   const { isLangRTL } = useTranslation();
-  const [activeBookingId, setActiveBookingId] = useState<number | null>(null);
   const data = route.params?.data;
   const paramConversationId = data?.conversationId;
   const paramOtherUserId = data?.otherUserId ?? data?.otherUser?.id;
+  const routeBookingId =
+    data?.bookingId != null && data.bookingId !== '' ? Number(data.bookingId) : null;
+  const [activeBookingId, setActiveBookingId] = useState<number | null>(routeBookingId);
   const paramBookingId =
-    data?.bookingId != null ? String(data.bookingId) : activeBookingId != null ? String(activeBookingId) : undefined;
+    routeBookingId != null
+      ? String(routeBookingId)
+      : activeBookingId != null
+        ? String(activeBookingId)
+        : undefined;
   const initialOtherUser = data?.initialOtherUser;
 
   const user = useAppSelector(s => s.user.userDetails);
@@ -107,6 +113,9 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
   const isDentor = isWorkerRole(role);
   useFocusEffect(
     useCallback(() => {
+      if (routeBookingId != null) return;
+      if (!ENV_CONSTANTS.IS_ALPHA_PHASE) return;
+
       const fetchData = async () => {
         const fetcher = isDentor ? fetchDentorBookingsPage : fetchUserBookingsPage;
         const res = await fetcher({ page: 1, limit: 20 });
@@ -115,8 +124,8 @@ export const MessagesFirebase = ({ route }: AppScreenProps<typeof SCREENS.MESSAG
         setActiveBookingId(id);
       };
 
-      fetchData();
-    }, []),
+      void fetchData();
+    }, [isDentor, routeBookingId]),
   );
   const getActiveBookingId = (bookings: Booking[]) => {
     const found = bookings.find(

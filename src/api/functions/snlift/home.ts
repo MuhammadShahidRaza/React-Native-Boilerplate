@@ -1,5 +1,6 @@
 import { API_ROUTES } from 'api/routes';
 import { pickString } from 'api/normalizers/snlift';
+import { ENV_CONSTANTS } from 'constants/common';
 import { handleGetApiRequest } from '../app';
 import { formatMoney } from 'utils/currency';
 
@@ -42,6 +43,42 @@ export const SENGO_HOT_OFFERS_FALLBACK: SnliftHomeHotOffer[] = [
   { id: 1, title: 'Up to 25% OFF', sub_title: 'Package Discount', image: '' },
   { id: 2, title: 'Up to 25% OFF', sub_title: 'Package Discount', image: '' },
 ];
+
+/** Alpha / demo home content when live API is disabled (Sengo flavors). */
+export const ALPHA_HOME_MOCK: SnliftHomeData = {
+  banners: [
+    {
+      id: 1,
+      title: 'Book a Ride',
+      sub_title: 'Get anywhere safely with Sengo',
+      image: '',
+      status: 1,
+    },
+  ],
+  promo_codes: [
+    {
+      id: 1,
+      code: 'SENGO25',
+      description: '25% off your first ride',
+      discount_type: 'percent',
+      discount_value: 25,
+      max_discount: 50,
+      min_order_amount: 0,
+      status: 1,
+    },
+    {
+      id: 2,
+      code: 'DELIVERY10',
+      description: '10% off food delivery',
+      discount_type: 'percent',
+      discount_value: 10,
+      max_discount: null,
+      min_order_amount: 15,
+      status: 1,
+    },
+  ],
+  hot_offers: SENGO_HOT_OFFERS_FALLBACK,
+};
 
 function formatPromoDescription(promo: SnliftHomePromo): string {
   const value = promo.discount_value;
@@ -157,6 +194,10 @@ export function homePromosForDisplay(promos: SnliftHomePromo[]): HomePromoDispla
 }
 
 export async function getHomeData(options?: { showLoader?: boolean }): Promise<SnliftHomeData | null> {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return normalizeHomeData(ALPHA_HOME_MOCK);
+  }
+
   const raw = await handleGetApiRequest<SnliftHomeData>({
     url: API_ROUTES.HOME,
     addToPending: true,

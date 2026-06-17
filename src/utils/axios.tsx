@@ -344,7 +344,11 @@ const makeHttpRequest = async (
     store.dispatch(setIsAppLoading(false));
 
     if (!silentErrors) {
-      logger.log('response?.data', response?.data);
+      try {
+        logger.log('response?.data', JSON.stringify(response?.data ?? null));
+      } catch {
+        logger.log('response?.data', response?.data);
+      }
     }
 
     const payload = response?.data?.response ?? response?.data;

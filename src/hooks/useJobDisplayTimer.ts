@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import store from 'store/store';
 import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
 import { getJobExpiresAt, parseJobDisplayTimer } from 'utils/jobDisplayTimer';
 
@@ -59,7 +60,11 @@ export function useJobDisplayTimer(
     }
 
     (async () => {
-      const resolvedDuration = await getJobDisplayTimerSeconds();
+      const cached = store.getState().platformSettings.jobDisplayTimerSeconds;
+      const resolvedDuration =
+        cached != null && store.getState().platformSettings.loaded
+          ? cached
+          : await getJobDisplayTimerSeconds();
       if (cancelled) return;
       setState(buildTimerState(createdAt, resolvedDuration));
     })();

@@ -1,5 +1,7 @@
 import { API_ROUTES } from 'api/routes';
 import { handleGetApiRequest } from '../app';
+import { ensurePlatformSettingsLoaded } from 'services/platformSettings';
+import store from 'store/store';
 import { parseJobDisplayTimer } from 'utils/jobDisplayTimer';
 import { logger } from 'utils/logger';
 
@@ -26,6 +28,7 @@ function extractAppSettings(res: unknown): AppSettings | null {
   return null;
 }
 
+/** Direct API fetch — prefer ensurePlatformSettingsLoaded() for app usage. */
 export async function getAppSettings(): Promise<AppSettings | null> {
   const res = await handleGetApiRequest<SettingsResponse>({
     url: API_ROUTES.GET_APP_SETTINGS,
@@ -37,9 +40,15 @@ export async function getAppSettings(): Promise<AppSettings | null> {
 }
 
 export async function getJobDisplayTimerSeconds(): Promise<number> {
-  const settings = await getAppSettings();
-  const raw = settings?.job_display_timer;
-  const seconds = parseJobDisplayTimer(raw);
-  logger.log('[job timer] settings:', raw, '→', seconds, 'seconds');
+  const cached = store.getState().platformSettings.jobDisplayTimerSeconds;
+  if (store.getState().platformSettings.loaded && cached != null) {
+    return cached;
+  }
+
+  await ensurePlatformSettingsLoaded();
+  const seconds =
+    store.getState().platformSettings.jobDisplayTimerSeconds ??
+    parseJobDisplayTimer(undefined);
+  logger.log('[job timer] cached settings →', seconds, 'seconds');
   return seconds;
 }

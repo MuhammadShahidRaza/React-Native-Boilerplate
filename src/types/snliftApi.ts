@@ -68,16 +68,21 @@ export interface SnliftBooking {
     phone?: string;
     profile_image?: string | null;
   };
-  provider?: {
-    id?: number;
-    full_name?: string;
-    phone?: string;
-    profile_image?: string | null;
-    vehicle_model?: string;
-    vehicle_license_plate?: string;
-    vehicle_color?: string;
-    vehicle_type?: string;
-  };
+  provider?: SnliftProvider;
+}
+
+export interface SnliftProvider {
+  id?: number;
+  full_name?: string;
+  phone?: string;
+  profile_image?: string | null;
+  vehicle_model?: string;
+  vehicle_license_plate?: string;
+  vehicle_color?: string;
+  vehicle_type?: string;
+  average_rating?: number | string | null;
+  total_rides?: number | string | null;
+  total_earnings?: number | string | null;
 }
 
 export interface SnliftRestaurant {

@@ -1,3 +1,4 @@
+export * from './WorkerRequestDetailSkeleton';
 export * from './WorkerStatPills';
 export * from './WorkerTripCard';
 export * from './WorkerRequestCard';

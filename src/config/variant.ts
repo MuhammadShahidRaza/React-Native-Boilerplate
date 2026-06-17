@@ -38,9 +38,11 @@ const variants = manifest as Record<VariantId, AppVariant>;
 function resolveVariantIdFromBundleId(): VariantId | null {
   try {
     const bundleId = DeviceInfo.getBundleId();
-    const match = (Object.entries(variants) as [VariantId, AppVariant][]).find(
-      ([, v]) => v.bundleId === bundleId,
-    );
+    const match = (Object.entries(variants) as [VariantId, AppVariant][]).find(([, v]) => {
+      if (v.bundleId === bundleId) return true;
+      if (`${v.bundleId}-dev` === bundleId) return true;
+      return false;
+    });
     return match?.[0] ?? null;
   } catch {
     return null;

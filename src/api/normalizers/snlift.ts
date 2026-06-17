@@ -2,6 +2,7 @@ import type { Activity } from 'types/responseTypes';
 import type { User } from 'types/responseTypes';
 import type {
   SnliftBooking,
+  SnliftProvider,
   SnliftWalletSummary,
   SnliftWalletTransaction,
 } from 'types/snliftApi';
@@ -116,6 +117,15 @@ function buildUserDetails(raw: Record<string, unknown>): User['details'] | undef
     })(),
     vehicle_color: pickFromDetailsFirst(raw, ['vehicle_color', 'color']),
     vehicle_type: pickFromDetailsFirst(raw, ['vehicle_type', 'type']),
+    average_rating:
+      pickNumber(raw, ['average_rating', 'avg_rating', 'rating']) ??
+      pickNumber(existing ?? {}, ['average_rating', 'avg_rating', 'rating']),
+    total_rides:
+      pickNumber(raw, ['total_rides', 'rides', 'rides_count', 'completed_rides', 'ride_count']) ??
+      pickNumber(existing ?? {}, ['total_rides', 'rides', 'rides_count', 'completed_rides']),
+    total_earnings:
+      pickNumber(raw, ['total_earnings', 'earnings_total']) ??
+      pickNumber(existing ?? {}, ['total_earnings', 'earnings_total']),
   };
 
   const hasAny = Object.values(merged).some(v => v != null && v !== '');
@@ -160,6 +170,15 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
   ]);
 
   const totalEarnings = pickNumber(raw, ['total_earnings', 'upcoming_balance', 'earnings_total']);
+  const serviceSummary = raw.service_summary as
+    | { counts?: { ride?: number; parcel?: number; food?: number; total?: number } }
+    | undefined;
+  const totalRides =
+    pickNumber(raw, ['total_rides', 'rides', 'rides_count', 'completed_rides', 'ride_count']) ??
+    serviceSummary?.counts?.total ??
+    serviceSummary?.counts?.ride ??
+    serviceSummary?.counts?.parcel ??
+    serviceSummary?.counts?.food;
 
   const emailVerified =
     pickString(raw, ['email_verified_at']) ||
@@ -173,6 +192,9 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
 
   const details = buildUserDetails(raw);
   const detailsRecord = (details ?? {}) as Record<string, unknown>;
+  const averageRating =
+    pickNumber(raw, ['average_rating', 'avg_rating', 'rating']) ??
+    pickNumber(detailsRecord, ['average_rating', 'avg_rating', 'rating']);
   const brand = pickString(detailsRecord, ['vehicle_brand', 'vehicle_make']);
   const yearRaw = pickString(detailsRecord, ['vehicle_year', 'year']);
   const vehicleYear = sanitizeVehicleYear(yearRaw, brand) || yearRaw;
@@ -191,6 +213,9 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
     is_approved:
       raw.is_approved ??
       (typeof raw.status === 'number' ? raw.status : raw.is_approved ?? 1),
+    is_online: (raw.is_online ??
+      raw.availabilty ??
+      (raw as Record<string, unknown>).availability) as User['is_online'],
     notification_unread_count:
       pickNumber(raw, [
         'notification_unread_count',
@@ -223,6 +248,9 @@ export function normalizeSniftUser(raw: Partial<User> & Record<string, unknown>)
       'issue_date',
     ]),
     upcoming_balance: totalEarnings ?? raw.upcoming_balance,
+    total_earnings: totalEarnings ?? (raw as User).total_earnings,
+    total_rides: totalRides ?? (raw as User).total_rides,
+    average_rating: averageRating ?? (raw as User).average_rating,
     details,
   };
 }
@@ -335,17 +363,110 @@ export function normalizeActivitiesList(items: unknown[]): Activity[] {
 function extractList<T>(res: unknown, keys: string[]): T[] {
   if (!res) return [];
   if (Array.isArray(res)) return res as T[];
+  if (typeof res !== 'object') return [];
+
   const r = res as Record<string, unknown>;
+
   for (const key of keys) {
     const v = r[key];
     if (Array.isArray(v)) return v as T[];
   }
+
+  // Laravel paginator: `{ current_page, data: [...] }`
+  const paginatorData = r.data;
+  if (Array.isArray(paginatorData)) return paginatorData as T[];
+
+  // Nested paginator: `{ bookings: { data: [...] } }` or `{ data: { data: [...] } }`
+  for (const key of keys) {
+    const v = r[key];
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      const nested = extractList<T>(v, keys);
+      if (nested.length > 0) return nested;
+    }
+  }
+
+  if (paginatorData && typeof paginatorData === 'object' && !Array.isArray(paginatorData)) {
+    const nested = extractList<T>(paginatorData, keys);
+    if (nested.length > 0) return nested;
+  }
+
   return [];
 }
 
 /** Paginated or wrapped list — `bookings`, `data`, `transactions`, etc. */
 export function extractApiList<T>(res: unknown, keys: string[]): T[] {
   return extractList<T>(res, keys);
+}
+
+/** Provider on booking/tracking — vehicle, rating, and earnings aliases. */
+export function normalizeSniftProvider(
+  raw: Record<string, unknown> | null | undefined,
+  fallbackId?: number | null,
+): SnliftProvider | undefined {
+  if (!raw || typeof raw !== 'object') {
+    return fallbackId != null ? { id: fallbackId } : undefined;
+  }
+
+  const id = pickNumber(raw, ['id']) ?? fallbackId ?? undefined;
+
+  return {
+    ...(raw as SnliftProvider),
+    id,
+    full_name: pickString(raw, ['full_name', 'name', 'title']),
+    phone: pickString(raw, ['phone', 'phone_number']),
+    profile_image: pickString(raw, ['profile_image', 'avatar', 'image']) || null,
+    vehicle_model: pickString(raw, ['vehicle_model', 'model']),
+    vehicle_license_plate: pickString(raw, ['vehicle_license_plate', 'license_plate', 'plate']),
+    vehicle_color: pickString(raw, ['vehicle_color', 'color']),
+    vehicle_type: pickString(raw, ['vehicle_type', 'type']),
+    average_rating:
+      pickNumber(raw, ['average_rating', 'avg_rating', 'rating']) ??
+      (raw.average_rating as SnliftProvider['average_rating']),
+    total_rides:
+      pickNumber(raw, ['total_rides', 'rides_count', 'completed_rides', 'ride_count']) ??
+      (raw.total_rides as SnliftProvider['total_rides']),
+    total_earnings:
+      pickNumber(raw, ['total_earnings', 'earnings_total']) ??
+      (raw.total_earnings as SnliftProvider['total_earnings']),
+  };
+}
+
+export function formatProviderRating(
+  provider: SnliftProvider | Record<string, unknown> | null | undefined,
+): string {
+  const raw = provider as Record<string, unknown> | null | undefined;
+  const value = raw?.average_rating ?? raw?.avg_rating ?? raw?.rating;
+  if (value === undefined || value === null || value === '') return '—';
+  const n = typeof value === 'number' ? value : parseFloat(String(value));
+  return Number.isNaN(n) ? '—' : n.toFixed(1);
+}
+
+/** Prefer tracking provider fields when booking detail is sparse. */
+export function mergeBookingWithTrackingProvider(
+  booking: SnliftBooking | null | undefined,
+  trackingProvider: SnliftProvider | null | undefined,
+  trackingProviderId?: number | null,
+): SnliftBooking | null {
+  if (!booking) return null;
+
+  const fromBooking = booking.provider
+    ? normalizeSniftProvider(booking.provider as Record<string, unknown>, booking.provider_id)
+    : undefined;
+  const fromTracking = trackingProvider
+    ? normalizeSniftProvider(
+        trackingProvider as Record<string, unknown>,
+        trackingProviderId ?? booking.provider_id,
+      )
+    : undefined;
+
+  if (!fromTracking && !fromBooking) return booking;
+
+  const merged = normalizeSniftProvider(
+    { ...(fromBooking ?? {}), ...(fromTracking ?? {}) } as Record<string, unknown>,
+    booking.provider_id ?? trackingProviderId,
+  );
+
+  return merged ? { ...booking, provider: merged } : booking;
 }
 
 /** Booking — provider/customer/restaurant aliases on nested objects. */
@@ -382,20 +503,7 @@ export function normalizeSniftBooking(raw: SnliftBooking & Record<string, unknow
       profile_image: pickString(customerRaw, ['profile_image', 'avatar', 'image']) || null,
     },
     provider: raw.provider
-      ? {
-          ...raw.provider,
-          full_name: pickString(providerRaw, ['full_name', 'name', 'title']),
-          phone: pickString(providerRaw, ['phone', 'phone_number']),
-          profile_image: pickString(providerRaw, ['profile_image', 'avatar', 'image']) || null,
-          vehicle_model: pickString(providerRaw, ['vehicle_model', 'model']),
-          vehicle_license_plate: pickString(providerRaw, [
-            'vehicle_license_plate',
-            'license_plate',
-            'plate',
-          ]),
-          vehicle_color: pickString(providerRaw, ['vehicle_color', 'color']),
-          vehicle_type: pickString(providerRaw, ['vehicle_type', 'type']),
-        }
+      ? normalizeSniftProvider(providerRaw, raw.provider_id)
       : raw.provider,
     restaurant: raw.restaurant
       ? {

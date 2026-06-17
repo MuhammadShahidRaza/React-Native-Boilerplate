@@ -1,12 +1,13 @@
-import type { ReactNode, RefObject } from 'react';
+import { useMemo, useState, type ReactNode, type RefObject } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
 import { Icon } from '../Icon';
+import { LiveTrackingMapDirections } from '../LiveTrackingMapDirections';
 import { Map } from '../Map';
-import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
+import { VARIABLES } from 'constants/common';
 import { COLORS, fitMapToDirectionCoordinates, screenHeight } from 'utils/index';
+import type { TrackingDirectionsLeg } from 'utils/trackingDirections';
 import type { MapCoord } from 'utils/parcelTripCoords';
 
 export interface ParcelRouteMapProps {
@@ -20,6 +21,12 @@ export interface ParcelRouteMapProps {
   };
   mapRef?: RefObject<MapView | null>;
   scrollEnabled?: boolean;
+  showsTraffic?: boolean;
+  showRecenterButton?: boolean;
+  /** Live route from courier/driver GPS — when null, no line until location is available. */
+  directionsLeg?: TrackingDirectionsLeg | null;
+  /** Live courier/driver position — included when recentering. */
+  extraRecenterPoints?: (MapCoord | null | undefined)[];
   onDirectionsReady?: (coordinates: MapCoord[]) => void;
   children?: ReactNode;
 }
@@ -30,55 +37,69 @@ export const ParcelRouteMap = ({
   dropoff,
   mapRegion,
   mapRef,
-  scrollEnabled = false,
+  scrollEnabled = true,
+  showsTraffic = true,
+  showRecenterButton = true,
+  directionsLeg = null,
+  extraRecenterPoints = [],
   onDirectionsReady,
   children,
-}: ParcelRouteMapProps) => (
-  <View style={styles.mapContainer}>
-    <Map
-      key={`parcel-route-${pickup.latitude}-${pickup.longitude}-${dropoff.latitude}-${dropoff.longitude}`}
-      mapRef={mapRef}
-      region={mapRegion}
-      regionTracking='initialOnly'
-      scrollEnabled={scrollEnabled}
-      showsUserLocationDot={false}
-      showCurrentLocation={false}
-      showCurrentLocationButton={false}
-      mapStyle='light'
-      minZoomLevel={0}
-    >
-      <MapViewDirections
-        origin={pickup}
-        destination={dropoff}
-        apikey={ENV_CONSTANTS.MAP_API_KEY}
-        mode='DRIVING'
-        precision='high'
-        strokeColor={COLORS.APP_PRIMARY}
-        strokeWidth={4}
-        lineCap='round'
-        lineJoin='round'
-        onReady={result => {
-          if (mapRef) {
-            fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
-          }
-          onDirectionsReady?.(result.coordinates);
-        }}
-      />
-      <Marker coordinate={pickup} anchor={{ x: 0.5, y: 0.5 }}>
-        <View style={styles.pickupMapDot} />
-      </Marker>
-      <Marker coordinate={dropoff} anchor={{ x: 0.5, y: 1 }}>
-        <Icon
-          componentName={VARIABLES.MaterialCommunityIcons}
-          iconName='map-marker'
-          size={30}
-          color={COLORS.APP_SECONDARY}
+}: ParcelRouteMapProps) => {
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+
+  const recenterPoints = useMemo(() => {
+    const extras = extraRecenterPoints.filter(
+      (c): c is MapCoord => c != null && Number.isFinite(c.latitude) && Number.isFinite(c.longitude),
+    );
+    return [...routeCoords, pickup, dropoff, ...extras];
+  }, [routeCoords, pickup, dropoff, extraRecenterPoints]);
+
+  return (
+    <View style={styles.mapContainer}>
+      <Map
+        key={`parcel-route-${pickup.latitude}-${pickup.longitude}-${dropoff.latitude}-${dropoff.longitude}`}
+        mapRef={mapRef}
+        region={mapRegion}
+        regionTracking='initialOnly'
+        scrollEnabled={scrollEnabled}
+        showsTraffic={showsTraffic}
+        showRecenterButton={showRecenterButton}
+        recenterPoints={recenterPoints}
+        recenterIncludeUserLocation
+        showsUserLocationDot={false}
+        showCurrentLocation={false}
+        showCurrentLocationButton={false}
+        mapStyle='light'
+        minZoomLevel={0}
+      >
+        <LiveTrackingMapDirections
+          leg={directionsLeg}
+          strokeColor={COLORS.APP_PRIMARY}
+          strokeWidth={4}
+          onReady={result => {
+            setRouteCoords(result.coordinates);
+            if (mapRef) {
+              fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+            }
+            onDirectionsReady?.(result.coordinates);
+          }}
         />
-      </Marker>
-      {children}
-    </Map>
-  </View>
-);
+        <Marker coordinate={pickup} anchor={{ x: 0.5, y: 0.5 }}>
+          <View style={styles.pickupMapDot} />
+        </Marker>
+        <Marker coordinate={dropoff} anchor={{ x: 0.5, y: 1 }}>
+          <Icon
+            componentName={VARIABLES.MaterialCommunityIcons}
+            iconName='map-marker'
+            size={30}
+            color={COLORS.APP_SECONDARY}
+          />
+        </Marker>
+        {children}
+      </Map>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   mapContainer: {

@@ -12,6 +12,7 @@ export async function updateWorkerFirestoreLocation(
   latitude: number,
   longitude: number,
   role: string,
+  bookingId?: number | string,
 ): Promise<void> {
   try {
     const db = getFirestore();
@@ -22,6 +23,7 @@ export async function updateWorkerFirestoreLocation(
         latitude,
         longitude,
         role,
+        booking_id: bookingId != null ? String(bookingId) : null,
         updated_at: serverTimestamp(),
         user_id: String(userId),
       },

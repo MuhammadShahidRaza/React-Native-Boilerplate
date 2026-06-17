@@ -90,13 +90,18 @@ export const WorkerRequestTimer = ({
           <View style={styles.timerBody}>
             <Typography
               style={styles.time}
+              fontSize={FontSize.ExtraExtraLarge}
               translate={false}
               numberOfLines={1}
-              adjustsFontSizeToFit
             >
               {`${displayMin}:${displaySec}`}
             </Typography>
-            <Typography style={styles.unit} translate={false} numberOfLines={1}>
+            <Typography
+              style={styles.unit}
+              fontSize={FontSize.Small}
+              translate={false}
+              numberOfLines={1}
+            >
               min : sec
             </Typography>
           </View>
@@ -139,19 +144,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   time: {
-    fontSize: FontSize.ExtraLarge,
     fontWeight: FontWeight.Bold,
     color: COLORS.WHITE,
-    lineHeight: 30,
+    lineHeight: 38,
     textAlign: 'center',
-    width: SIZE - 16,
+    width: SIZE - 12,
   },
   unit: {
-    fontSize: FontSize.ExtraSmall,
     fontWeight: FontWeight.SemiBold,
     color: COLORS.WHITE,
-    lineHeight: 14,
+    lineHeight: 16,
     textAlign: 'center',
-    marginTop: 1,
+    marginTop: 2,
+    letterSpacing: 0.3,
   },
 });

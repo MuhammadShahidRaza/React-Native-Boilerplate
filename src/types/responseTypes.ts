@@ -116,12 +116,17 @@ export interface User {
   forgot_token?: string | null;
   is_active?: number;
   is_approved?: number;
+  /** Backend online flag (PATCH `user/update` with `is_online: 0|1`). */
+  is_online?: number | boolean;
   availabilty?: number;
   is_subscribed?: boolean;
   is_location_updated?: boolean;
   issue_date?: string | null;
   background_image?: string | null;
   upcoming_balance?: number;
+  total_earnings?: number;
+  total_rides?: number;
+  average_rating?: number;
   category?: string | null;
   createdAt?: string;
   invitation_code?: string | null;

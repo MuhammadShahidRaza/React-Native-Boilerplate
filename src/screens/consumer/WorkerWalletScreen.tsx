@@ -42,7 +42,9 @@ import {
 } from 'api/functions/snlift/wallet';
 import { getStripeConnectLink, requestWithdrawAmount } from 'api/functions/app/home';
 import { getUserDetails } from 'api/functions/app/user';
+import { ENV_CONSTANTS } from 'constants/common';
 import { VARIANT_ID } from 'config/variant';
+import { ALPHA_WORKER_WALLET_SUMMARY } from 'components/common/worker/workerMockData';
 
 const IS_SENGO_WORKERS = VARIANT_ID === 'sengoWorkers';
 
@@ -67,7 +69,9 @@ export const WorkerWalletScreen = () => {
   const user = useAppSelector(state => state.user.userDetails);
   const role = useAppSelector(state => state.user?.role);
   const [apiBalance, setApiBalance] = useState<number | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>(DUMMY_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>(() =>
+    ENV_CONSTANTS.IS_ALPHA_PHASE ? DUMMY_TRANSACTIONS : [],
+  );
   const [amount, setAmount] = useState('');
   const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
@@ -83,12 +87,17 @@ export const WorkerWalletScreen = () => {
   const stripeConnected = hasStripeAccount(user);
 
   useLayoutEffect(() => {
-    if (IS_SENGO_WORKERS) {
+    if (IS_SENGO_WORKERS || ENV_CONSTANTS.IS_ALPHA_PHASE) {
       getUserDetails();
     }
   }, []);
 
   useEffect(() => {
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      setApiBalance(ALPHA_WORKER_WALLET_SUMMARY.wallet_balance);
+      return undefined;
+    }
+
     let cancelled = false;
     (async () => {
       const summary = await getWorkerWalletSummary(role);
@@ -202,29 +211,31 @@ export const WorkerWalletScreen = () => {
           </View>
         </AppGradient>
 
-        <View style={styles.summaryCard}>
-          <Typography style={styles.summaryTitle}>Recent Transaction</Typography>
-          {transactions.map((item, index) => (
-            <RowComponent
-              key={item.id}
-              style={[styles.txRow, index < transactions.length - 1 && styles.txRowBorder]}
-            >
-              <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.summaryIcon}>
-                <Icon
-                  componentName={VARIABLES.Ionicons}
-                  iconName='wallet-outline'
-                  size={15}
-                  color={COLORS.WHITE}
-                />
-              </AppGradient>
-              <View style={styles.txBody}>
-                <Typography style={styles.txName}>{item.name}</Typography>
-                <Typography style={styles.txType}>{item.type}</Typography>
-              </View>
-              <Typography style={styles.txAmount}>{item.amount}</Typography>
-            </RowComponent>
-          ))}
-        </View>
+        {transactions?.length > 0 && (
+          <View style={styles.summaryCard}>
+            <Typography style={styles.summaryTitle}>Recent Transaction</Typography>
+            {transactions.map((item, index) => (
+              <RowComponent
+                key={item.id}
+                style={[styles.txRow, index < transactions.length - 1 && styles.txRowBorder]}
+              >
+                <AppGradient colors={[...APP_GRADIENT_HORIZONTAL]} fill style={styles.summaryIcon}>
+                  <Icon
+                    componentName={VARIABLES.Ionicons}
+                    iconName='wallet-outline'
+                    size={15}
+                    color={COLORS.WHITE}
+                  />
+                </AppGradient>
+                <View style={styles.txBody}>
+                  <Typography style={styles.txName}>{item.name}</Typography>
+                  <Typography style={styles.txType}>{item.type}</Typography>
+                </View>
+                <Typography style={styles.txAmount}>{item.amount}</Typography>
+              </RowComponent>
+            ))}
+          </View>
+        )}
 
         {IS_SENGO_WORKERS ? (
           <View style={styles.withdrawSection}>

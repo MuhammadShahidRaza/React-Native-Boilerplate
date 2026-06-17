@@ -4,9 +4,20 @@ import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import type { ParcelTrackPhase } from 'types/parcelTrip';
 import type { RideTrackPhase } from 'types/rideTracking';
 
-function toNum(value: number | string | null | undefined, fallback: number): number {
-  const n = typeof value === 'number' ? value : parseFloat(String(value ?? ''));
-  return Number.isNaN(n) ? fallback : n;
+import { parseMapCoord } from 'utils/bookingCoords';
+
+function bookingCoords(booking: SnliftBooking) {
+  const pickupLat = parseMapCoord(booking.pickup_latitude, booking.pickup_longitude)?.latitude;
+  const pickupLng = parseMapCoord(booking.pickup_latitude, booking.pickup_longitude)?.longitude;
+  const dropoffLat = parseMapCoord(booking.dropoff_latitude, booking.dropoff_longitude)?.latitude;
+  const dropoffLng = parseMapCoord(booking.dropoff_latitude, booking.dropoff_longitude)?.longitude;
+  return {
+    pickupLat,
+    pickupLng,
+    dropoffLat,
+    dropoffLng,
+    bookingId: booking.id,
+  };
 }
 
 export function buildConsumerBookingTrackTarget(booking: SnliftBooking): {
@@ -15,12 +26,7 @@ export function buildConsumerBookingTrackTarget(booking: SnliftBooking): {
 } | null {
   const status = (booking.status ?? 'pending').toLowerCase();
   const type = booking.booking_type ?? 'ride';
-  const bookingId = booking.id;
-  const pickupLat = toNum(booking.pickup_latitude, 0);
-  const pickupLng = toNum(booking.pickup_longitude, 0);
-  const dropoffLat = toNum(booking.dropoff_latitude, 0);
-  const dropoffLng = toNum(booking.dropoff_longitude, 0);
-  const coords = { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId };
+  const coords = bookingCoords(booking);
 
   if (type === 'ride') {
     if (status === 'pending') {
@@ -66,7 +72,7 @@ export function buildConsumerBookingTrackTarget(booking: SnliftBooking): {
       let phase: FoodOrderPhase = 'order_placed';
       if (status === 'accepted') phase = 'preparing';
       if (status === 'in_transit') phase = 'on_the_way';
-      return { screen: SCREENS.TRACK_FOOD_ORDER, params: { bookingId, phase } };
+      return { screen: SCREENS.TRACK_FOOD_ORDER, params: { bookingId: booking.id, phase } };
     }
     return null;
   }
