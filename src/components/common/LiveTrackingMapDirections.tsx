@@ -28,7 +28,7 @@ export const LiveTrackingMapDirections = ({
       mode='DRIVING'
       precision='high'
       timePrecision='none'
-      resetOnChange
+      resetOnChange={false}
       language='en'
       strokeWidth={strokeWidth}
       strokeColor={strokeColor}

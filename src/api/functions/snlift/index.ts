@@ -8,5 +8,4 @@ export * from './legacy';
 export * from './profile';
 export * from './ratings';
 export * from './restaurants';
-export * from './user';
 export * from './wallet';

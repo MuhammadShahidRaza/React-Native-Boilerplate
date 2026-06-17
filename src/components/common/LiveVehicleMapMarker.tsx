@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, View } from 'react-native';
-import { AnimatedRegion, Marker, MarkerAnimated } from 'react-native-maps';
-import type { MapMarker } from 'react-native-maps';
+import { Marker } from 'react-native-maps';
 import { IMAGES } from 'constants/assets';
-import { mapCoordDistanceApprox, type MapCoord } from 'utils/coordinateAlongPolyline';
+import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { MapVehicleMarker, type MapVehicleMarkerKind } from './MapVehicleMarker';
 
 type LiveVehicleMapMarkerProps = {
@@ -17,70 +16,19 @@ const MARKER_IMAGE: Record<MapVehicleMarkerKind, number> = {
   bike: IMAGES.MAP_COURIER_BIKE,
 };
 
-const MIN_ANIM_MS = 600;
-const MAX_ANIM_MS = 2200;
-
-function moveDurationMs(from: MapCoord | null, to: MapCoord): number {
-  if (!from) return 0;
-  const dist = mapCoordDistanceApprox(from, to);
-  return Math.min(MAX_ANIM_MS, Math.max(MIN_ANIM_MS, dist * 900000));
-}
-
 function shortestBearingDelta(from: number, to: number): number {
-  let delta = ((to - from + 540) % 360) - 180;
+  const delta = ((to - from + 540) % 360) - 180;
   return from + delta;
 }
 
-/** Smoothly animated vehicle marker — Android uses native glide; iOS uses AnimatedRegion. */
+/** Live vehicle marker — coordinate updates directly (avoids Android animateMarkerToCoordinate NPE). */
 export const LiveVehicleMapMarker = ({
   coordinate,
   bearing = 0,
   kind,
 }: LiveVehicleMapMarkerProps) => {
-  const markerRef = useRef<MapMarker | null>(null);
-  const prevCoordRef = useRef<MapCoord>(coordinate);
   const prevBearingRef = useRef(bearing);
-  const [androidCoord, setAndroidCoord] = useState(coordinate);
   const [displayBearing, setDisplayBearing] = useState(bearing);
-  const coordAnim = useRef(
-    new AnimatedRegion({
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-      latitudeDelta: 0,
-      longitudeDelta: 0,
-    }),
-  ).current;
-
-  useEffect(() => {
-    const prev = prevCoordRef.current;
-    const duration = moveDurationMs(prev, coordinate);
-
-    if (Platform.OS === 'android') {
-      if (duration > 0 && markerRef.current?.animateMarkerToCoordinate) {
-        markerRef.current.animateMarkerToCoordinate(coordinate, duration);
-      } else {
-        setAndroidCoord(coordinate);
-      }
-    } else if (duration > 0) {
-      coordAnim
-        .timing({
-          latitude: coordinate.latitude,
-          longitude: coordinate.longitude,
-          duration,
-          useNativeDriver: false,
-        })
-        .start();
-    } else {
-      coordAnim.setValue({
-        latitude: coordinate.latitude,
-        longitude: coordinate.longitude,
-        latitudeDelta: 0,
-        longitudeDelta: 0,
-      });
-    }
-
-    prevCoordRef.current = coordinate;
-  }, [coordinate.latitude, coordinate.longitude, coordAnim]);
 
   useEffect(() => {
     const from = prevBearingRef.current;
@@ -107,21 +55,21 @@ export const LiveVehicleMapMarker = ({
   if (Platform.OS === 'android') {
     return (
       <Marker
-        ref={markerRef}
-        coordinate={androidCoord}
+        coordinate={coordinate}
         anchor={{ x: 0.5, y: 0.5 }}
         rotation={displayBearing}
         flat
         image={MARKER_IMAGE[kind]}
+        tracksViewChanges={false}
       />
     );
   }
 
   return (
-    <MarkerAnimated coordinate={coordAnim} anchor={{ x: 0.5, y: 0.5 }} flat>
+    <Marker coordinate={coordinate} anchor={{ x: 0.5, y: 0.5 }} flat tracksViewChanges={false}>
       <View style={{ transform: [{ rotate: `${displayBearing}deg` }] }}>
         <MapVehicleMarker kind={kind} />
       </View>
-    </MarkerAnimated>
+    </Marker>
   );
 };

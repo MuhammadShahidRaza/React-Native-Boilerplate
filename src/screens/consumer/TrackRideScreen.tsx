@@ -32,9 +32,11 @@ import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { mapBookingToRideTrip } from 'hooks/useRideTripDisplay';
 import { MOCK_RIDE_TRIP } from 'components/common/ride/rideMockTrip';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { getVehicleMarkerHeading } from 'hooks/useWorkerGpsNavigation';
+import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { mapRideTrackPhase } from 'utils/bookingTrackPhases';
 import { resolveRideDirectionsLeg, rideStatusLabel } from 'utils/rideTrackMap';
-import type { MapCoord } from 'utils/coordinateAlongPolyline';
+import { bearingAlongPolyline, type MapCoord } from 'utils/coordinateAlongPolyline';
 
 const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
@@ -77,9 +79,11 @@ export const TrackRideScreen = () => {
   const tripLoading = IS_ALPHA ? false : track.bookingLoading;
 
   const mapRef = useRef<MapView>(null);
+  const fittedLegRef = useRef<string | null>(null);
   const [cancelVisible, setCancelVisible] = useState(false);
   const [rideRating, setRideRating] = useState(0);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const directionsOrigin = useThrottledMapCoord(track.providerCoord, 8000, 0.05);
 
   const pickupCoord = track.pickup ?? fallbackCoord(pickupLat, pickupLng, 0.008, 0);
   const dropoffCoord = track.dropoff ?? fallbackCoord(dropoffLat, dropoffLng, -0.004, 0.005);
@@ -90,15 +94,16 @@ export const TrackRideScreen = () => {
   }, [track.status, track.providerCoord, pickupCoord]);
 
   const directionsLeg = useMemo(
-    () => resolveRideDirectionsLeg(phase, pickupCoord, dropoffCoord, track.providerCoord),
-    [phase, pickupCoord, dropoffCoord, track.providerCoord],
+    () => resolveRideDirectionsLeg(phase, pickupCoord, dropoffCoord, directionsOrigin),
+    [phase, pickupCoord, dropoffCoord, directionsOrigin],
   );
 
   useEffect(() => {
     if (!directionsLeg) {
       setRouteCoords([]);
+      fittedLegRef.current = null;
     }
-  }, [directionsLeg?.legKey, directionsLeg?.origin.latitude, directionsLeg?.origin.longitude]);
+  }, [directionsLeg?.legKey]);
 
   const mapRegion = track.mapRegion ?? {
     latitude: (pickupCoord.latitude + dropoffCoord.latitude) / 2,
@@ -110,10 +115,24 @@ export const TrackRideScreen = () => {
   const onDirectionsReady = useCallback(
     (result: { coordinates: MapCoord[] }) => {
       setRouteCoords(result.coordinates);
-      fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+      const legKey = directionsLeg?.legKey ?? '';
+      if (fittedLegRef.current !== legKey) {
+        fittedLegRef.current = legKey;
+        fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+      }
     },
-    [],
+    [directionsLeg?.legKey],
   );
+
+  const vehicleBearing = useMemo(() => {
+    if (routeCoords.length >= 2 && track.providerCoord) {
+      const routeBearing = bearingAlongPolyline(routeCoords, track.providerCoord);
+      if (routeBearing != null) {
+        return getVehicleMarkerHeading(routeBearing, 'car');
+      }
+    }
+    return track.providerBearing;
+  }, [routeCoords, track.providerCoord, track.providerBearing]);
 
   const recenterPoints = useMemo(() => {
     const points: MapCoord[] = [...routeCoords, pickupCoord, dropoffCoord];
@@ -221,7 +240,7 @@ export const TrackRideScreen = () => {
           {showCar && track.providerCoord ? (
             <LiveVehicleMapMarker
               coordinate={track.providerCoord}
-              bearing={track.providerBearing}
+              bearing={vehicleBearing}
               kind='car'
             />
           ) : null}

@@ -103,6 +103,14 @@ export function progressAlongPolylineFromPoint(coords: MapCoord[], point: MapCoo
   return Math.max(0, Math.min(1, bestProgress));
 }
 
+/** Road-facing bearing at `point` along a directions polyline. */
+export function bearingAlongPolyline(coords: MapCoord[], point: MapCoord): number | null {
+  if (coords.length < 2) return null;
+  const t = progressAlongPolylineFromPoint(coords, point);
+  const segIndex = Math.min(coords.length - 2, Math.floor(t * (coords.length - 1)));
+  return bearingBetweenCoords(coords[segIndex], coords[segIndex + 1]);
+}
+
 /** Bearing in degrees clockwise from true north (`from` → `to`). */
 export function bearingBetweenCoords(from: MapCoord, to: MapCoord): number {
   const lat1 = (from.latitude * Math.PI) / 180;

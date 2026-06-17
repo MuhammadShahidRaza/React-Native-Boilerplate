@@ -26,14 +26,17 @@ import { CancelReasonModal } from './CancelReasonModal';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { useRideTripDisplay } from 'hooks/useRideTripDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { getVehicleMarkerHeading } from 'hooks/useWorkerGpsNavigation';
+import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { resolveRideDirectionsLeg } from 'utils/rideTrackMap';
-import type { MapCoord } from 'utils/coordinateAlongPolyline';
+import { bearingAlongPolyline, type MapCoord } from 'utils/coordinateAlongPolyline';
 
 export const DriverFoundScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.DRIVER_FOUND>>();
   const mapRef = useRef<MapView>(null);
+  const fittedLegRef = useRef(false);
 
   const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
   const { trip, loading: tripLoading } = useRideTripDisplay(bookingId);
@@ -42,6 +45,7 @@ export const DriverFoundScreen = () => {
     { pickupLat, pickupLng, dropoffLat, dropoffLng },
     'car',
   );
+  const directionsOrigin = useThrottledMapCoord(track.providerCoord, 8000, 0.05);
 
   const pickupCoord = track.pickup ?? {
     latitude: pickupLat ?? 0,
@@ -53,8 +57,19 @@ export const DriverFoundScreen = () => {
   };
 
   const directionsLeg = useMemo(
-    () => resolveRideDirectionsLeg('arriving', pickupCoord, dropoffCoord, track.providerCoord),
-    [pickupCoord, dropoffCoord, track.providerCoord],
+    () => resolveRideDirectionsLeg('arriving', pickupCoord, dropoffCoord, directionsOrigin),
+    [pickupCoord, dropoffCoord, directionsOrigin],
+  );
+
+  const onDirectionsReady = useCallback(
+    (result: { coordinates: MapCoord[] }) => {
+      setRouteCoords(result.coordinates);
+      if (!fittedLegRef.current) {
+        fittedLegRef.current = true;
+        fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+      }
+    },
+    [],
   );
 
   const mapRegion = track.mapRegion ?? {
@@ -64,13 +79,15 @@ export const DriverFoundScreen = () => {
     longitudeDelta: Math.abs(pickupCoord.longitude - dropoffCoord.longitude) * 2 + 0.02,
   };
 
-  const onDirectionsReady = useCallback(
-    (result: { coordinates: MapCoord[] }) => {
-      setRouteCoords(result.coordinates);
-      fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
-    },
-    [],
-  );
+  const vehicleBearing = useMemo(() => {
+    if (routeCoords.length >= 2 && track.providerCoord) {
+      const routeBearing = bearingAlongPolyline(routeCoords, track.providerCoord);
+      if (routeBearing != null) {
+        return getVehicleMarkerHeading(routeBearing, 'car');
+      }
+    }
+    return track.providerBearing;
+  }, [routeCoords, track.providerCoord, track.providerBearing]);
 
   const recenterPoints = useMemo(() => {
     const points: MapCoord[] = [...routeCoords, pickupCoord, dropoffCoord];
@@ -134,7 +151,7 @@ export const DriverFoundScreen = () => {
           {track.providerCoord ? (
             <LiveVehicleMapMarker
               coordinate={track.providerCoord}
-              bearing={track.providerBearing}
+              bearing={vehicleBearing}
               kind='car'
             />
           ) : null}

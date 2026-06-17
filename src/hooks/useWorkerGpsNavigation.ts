@@ -16,8 +16,8 @@ import {
   type WorkerRouteMetrics,
 } from 'utils/workerNavigation';
 
-/** Top-down car asset faces east in PNG — adjust if icon still looks off. */
-const CAR_MARKER_HEADING_OFFSET = -90;
+/** Top-down car PNG nose points east; +90° maps travel bearing to marker rotation. */
+const CAR_MARKER_HEADING_OFFSET = 90;
 const BIKE_MARKER_HEADING_OFFSET = 0;
 const MIN_MOVE_FOR_BEARING = 0.000012;
 const MOVING_SPEED_MPS = 0.8;
