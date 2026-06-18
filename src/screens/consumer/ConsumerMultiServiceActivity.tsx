@@ -19,6 +19,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, COLORS, screenWidth } from 'utils/index';
 import { ENV_CONSTANTS } from 'constants/common';
 import { getAlphaConsumerBookings } from 'constants/consumerBookingMock';
+import { getAlphaSessionBookings } from 'constants/alphaBookingMocks';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import {
   isActiveBookingStatus,
@@ -103,7 +104,7 @@ const activitySkeletonItem = () => (
       <SkeletonPlaceholder.Item width={44} height={44} borderRadius={12} />
       <View style={{ flex: 1 }}>
         <SkeletonPlaceholder.Item
-          width={screenWidth(76)}
+          width={screenWidth(70)}
           height={16}
           borderRadius={6}
           marginBottom={10}
@@ -123,7 +124,7 @@ const activitySkeletonItem = () => (
         <SkeletonPlaceholder.Item width='100%' height={1} borderRadius={2} marginBottom={12} />
         <SkeletonPlaceholder.Item width='34%' height={12} borderRadius={6} marginBottom={8} />
         <SkeletonPlaceholder.Item
-          width={screenWidth(88)}
+          width={screenWidth(70)}
           height={12}
           borderRadius={6}
           marginBottom={14}
@@ -134,7 +135,7 @@ const activitySkeletonItem = () => (
           borderRadius={6}
           marginBottom={8}
         />
-        <SkeletonPlaceholder.Item width={screenWidth(86)} height={12} borderRadius={6} />
+        <SkeletonPlaceholder.Item width={screenWidth(70)} height={12} borderRadius={6} />
       </View>
       <View style={{ alignItems: 'flex-end' }}>
         <SkeletonPlaceholder.Item width={56} height={16} borderRadius={6} marginBottom={12} />
@@ -239,7 +240,11 @@ function ActivityPane({
     <View style={styles.pane}>
       <CategoryTabs value={cat} onChange={setCat} />
 
-      <SkeletonWrapper isLoading={loading && !refreshing} count={4} renderItem={activitySkeletonItem}>
+      <SkeletonWrapper
+        isLoading={loading && !refreshing}
+        count={4}
+        renderItem={activitySkeletonItem}
+      >
         {filtered.length === 0 && !loading ? (
           <ScrollView
             contentContainerStyle={styles.emptyScroll}
@@ -298,7 +303,8 @@ function ActivePane() {
     else setLoading(true);
     try {
       if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        const active = getAlphaConsumerBookings().filter(b => isActiveBookingStatus(b.status));
+        const all = [...getAlphaSessionBookings(), ...getAlphaConsumerBookings()];
+        const active = all.filter(b => isActiveBookingStatus(b.status));
         setItems(active.map(mapBookingToActivityItem));
         return;
       }
@@ -338,7 +344,8 @@ function HistoryPane() {
     else setLoading(true);
     try {
       if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        const history = getAlphaConsumerBookings().filter(b => !isActiveBookingStatus(b.status));
+        const all = [...getAlphaSessionBookings(), ...getAlphaConsumerBookings()];
+        const history = all.filter(b => !isActiveBookingStatus(b.status));
         setItems(history.map(mapBookingToActivityItem));
         return;
       }
@@ -514,6 +521,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 12,
     borderWidth: 1,
+    marginHorizontal: 20,
     borderColor: COLORS.APP_LINE,
     backgroundColor: COLORS.WHITE,
   },

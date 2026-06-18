@@ -14,7 +14,7 @@ export function useRestaurantCatalog() {
   const [restaurants, setRestaurants] = useState<RestaurantItem[]>(
     ENV_CONSTANTS.IS_ALPHA_PHASE ? FOOD_RESTAURANTS : [],
   );
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!ENV_CONSTANTS.IS_ALPHA_PHASE);
   const [refreshing, setRefreshing] = useState(false);
   const [locationMissing, setLocationMissing] = useState(false);
 
@@ -24,6 +24,14 @@ export function useRestaurantCatalog() {
 
   const loadRestaurants = useCallback(
     async (isRefresh = false) => {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        setRestaurants(FOOD_RESTAURANTS);
+        setLocationMissing(false);
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+
       if (!latitude || !longitude) {
         setLocationMissing(true);
         setLoading(false);
@@ -38,9 +46,7 @@ export function useRestaurantCatalog() {
       try {
         const res = await listRestaurants({ latitude, longitude });
         const list = extractRestaurants(res);
-        if (list.length > 0) {
-          setRestaurants(list.map(mapApiRestaurantToItem));
-        }
+        setRestaurants(list.map(mapApiRestaurantToItem));
       } catch (e) {
         logger.error('listRestaurants failed', e);
       } finally {

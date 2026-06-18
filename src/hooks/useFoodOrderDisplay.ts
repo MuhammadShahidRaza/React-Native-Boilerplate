@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { MOCK_FOOD_ORDER } from 'components/common/food/foodOrderMock';
 import { ENV_CONSTANTS } from 'constants/common';
+import { getAlphaBookingById } from 'constants/alphaBookingMocks';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
+import { formatRestaurantEstimatedTime } from 'api/functions/snlift/restaurants';
+import type { SnliftBooking } from 'types/snliftApi';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
 export type FoodOrderDisplay = {
@@ -28,16 +31,27 @@ function toCoord(
   return { latitude: la, longitude: lo };
 }
 
+function resolveBookingEstimatedTimeLabel(booking: SnliftBooking): string | undefined {
+  return formatRestaurantEstimatedTime(
+    booking.estimated_time ??
+      booking.restaurant?.estimated_time ??
+      booking.restaurant?.delivery_time,
+  );
+}
+
 function mapBookingToFoodOrder(
   booking: NonNullable<ReturnType<typeof extractBookingFromResponse>>,
 ): FoodOrderDisplay {
   const provider = booking.provider;
   const pickup = toCoord(booking.pickup_latitude, booking.pickup_longitude, MOCK_FOOD_ORDER.pickup);
   const dropoff = toCoord(booking.dropoff_latitude, booking.dropoff_longitude, MOCK_FOOD_ORDER.dropoff);
+  const etaLabel = ENV_CONSTANTS.IS_ALPHA_PHASE
+    ? MOCK_FOOD_ORDER.etaLabel
+    : resolveBookingEstimatedTimeLabel(booking);
 
   return {
     restaurantName: booking.restaurant?.name ?? 'Restaurant',
-    etaLabel: '30 minutes',
+    etaLabel,
     courierName: provider?.full_name ?? 'Courier',
     courierPhone: provider?.phone ?? '',
     vehicleType: provider?.vehicle_type ?? provider?.vehicle_model ?? '—',
@@ -60,6 +74,14 @@ export function useFoodOrderDisplay(bookingId?: number | string) {
 
   useEffect(() => {
     if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      if (bookingId) {
+        const booking = getAlphaBookingById(bookingId);
+        if (booking) {
+          setOrder(mapBookingToFoodOrder(booking));
+          setLoading(false);
+          return;
+        }
+      }
       setOrder(alphaOrder);
       setLoading(false);
       return;

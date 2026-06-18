@@ -79,15 +79,8 @@ function FoodOrderPhaseModal({
   return (
     <View style={styles.phaseModalScrim} pointerEvents='box-none'>
       <View style={styles.overlayCard} pointerEvents='auto'>
-        {heading ? (
-          <Typography style={styles.overlayHeading}>{heading}</Typography>
-        ) : null}
-        <GradientIcon
-          {...icon}
-          color={COLORS.WHITE}
-          containerSize={72}
-          borderRadius={36}
-        />
+        {heading ? <Typography style={styles.overlayHeading}>{heading}</Typography> : null}
+        <GradientIcon {...icon} color={COLORS.WHITE} containerSize={72} borderRadius={36} />
         <Typography style={styles.overlayTitle}>{title}</Typography>
         <Typography style={styles.overlaySubtitle}>{subtitle}</Typography>
         {timerElement ?? null}
@@ -105,7 +98,9 @@ export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
   const bookingId = route.params?.bookingId;
   const timerDurationSeconds = route.params?.timerDurationSeconds;
-  const [localPhase, setLocalPhase] = useState<FoodOrderPhase>(route.params?.phase ?? 'order_placed');
+  const [localPhase, setLocalPhase] = useState<FoodOrderPhase>(
+    route.params?.phase ?? 'order_placed',
+  );
   const { order } = useFoodOrderDisplay(bookingId);
   const track = useConsumerBookingTrack(bookingId, undefined, 'bike');
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -179,12 +174,8 @@ export const TrackFoodOrderScreen = () => {
     longitudeDelta: 0.04,
   };
 
-  const showMap = phase === 'on_the_way';
-  const directionsOrigin = useThrottledMapCoord(
-    showMap ? track.providerCoord : null,
-    8000,
-    0.05,
-  );
+  const showMap = phase === 'in_transit';
+  const directionsOrigin = useThrottledMapCoord(showMap ? track.providerCoord : null, 8000, 0.05);
   const directionsLeg = useMemo(
     () => (showMap ? resolveCourierToDropoffLeg(dropoff, directionsOrigin) : null),
     [showMap, dropoff, directionsOrigin],
@@ -194,19 +185,23 @@ export const TrackFoodOrderScreen = () => {
     [routeCoords, track.providerCoord, track.providerBearing],
   );
   const showPreparingHero = phase === 'preparing';
-  const showOverlayCard = IS_ALPHA
-    ? OVERLAY_PHASES.includes(phase)
-    : phase === 'order_placed';
+  const showOverlayCard = IS_ALPHA ? OVERLAY_PHASES.includes(phase) : phase === 'order_placed';
   const showTrackingUi = !showOverlayCard;
   const activeSegment = Math.max(0, FOOD_ORDER_PHASE_INDEX[phase]);
   const isDelivered = phase === 'delivered';
-  const canCancel = phase !== 'on_the_way' && phase !== 'delivered';
+  const canCancel = phase !== 'in_transit' && phase !== 'delivered' && phase !== 'picked_up';
 
   const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
     setRouteCoords(coordinates);
   }, []);
 
   const status = useMemo((): PhaseStatus => {
+    const preparingSubtitle = order?.etaLabel
+      ? `Your order is being prepared. It takes up to ${order.etaLabel} to prepare the order.`
+      : IS_ALPHA
+        ? 'Your order is being prepared. It takes upto 20 - 30 minutes to prepare the order.'
+        : 'Your order is being prepared.';
+
     switch (phase) {
       case 'placing_order':
         return {
@@ -235,19 +230,37 @@ export const TrackFoodOrderScreen = () => {
       case 'preparing':
         return {
           key: 'prep',
-          icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'room-service', size: 36 },
+          icon: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'room-service',
+            size: 36,
+          },
           title: 'Preparing Order',
-          subtitle:
-            'Your order is being prepared. It takes upto 20 - 30 minutes to prepare the order.',
+          subtitle: preparingSubtitle,
+        };
+      case 'ready_for_pickup':
+        return {
+          key: 'ready',
+          icon: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'clock-check',
+            size: 36,
+          },
+          title: 'Ready for Pickup',
+          subtitle: 'Your order is ready. A courier will pick it up shortly.',
         };
       case 'picked_up':
         return {
           key: 'picked',
-          icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'package-variant', size: 36 },
+          icon: {
+            componentName: VARIABLES.MaterialCommunityIcons,
+            iconName: 'package-variant',
+            size: 36,
+          },
           title: 'Picked Up',
           subtitle: 'Your order has been picked up',
         };
-      case 'on_the_way':
+      case 'in_transit':
         return {
           key: 'way',
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'bike', size: 36 },
@@ -262,7 +275,7 @@ export const TrackFoodOrderScreen = () => {
           subtitle: 'Parcel has been delivered',
         };
     }
-  }, [phase]);
+  }, [phase, order?.etaLabel]);
 
   return (
     <Wrapper
@@ -274,152 +287,157 @@ export const TrackFoodOrderScreen = () => {
       darkMode={false}
     >
       <View style={styles.screenRoot}>
-      <View style={styles.screen}>
-        {showMap ? (
-          <View style={styles.mapWrap}>
-            <ParcelRouteMap
-              pickup={pickup}
-              dropoff={dropoff}
-              mapRegion={mapRegion}
-              mapRef={mapRef}
-              directionsLeg={directionsLeg}
-              extraRecenterPoints={[track.providerCoord]}
-              onDirectionsReady={onDirectionsReady}
-            >
-              {track.providerCoord && !isDelivered ? (
-                <LiveVehicleMapMarker
-                  coordinate={track.providerCoord}
-                  bearing={vehicleBearing}
-                  kind='bike'
-                />
-              ) : null}
-            </ParcelRouteMap>
-          </View>
-        ) : showPreparingHero ? (
-          <FoodPreparingAnimation />
-        ) : (
-          <View style={styles.heroPlaceholder} />
-        )}
+        <View style={styles.screen}>
+          {showMap ? (
+            <View style={styles.mapWrap}>
+              <ParcelRouteMap
+                pickup={pickup}
+                dropoff={dropoff}
+                mapRegion={mapRegion}
+                mapRef={mapRef}
+                directionsLeg={directionsLeg}
+                extraRecenterPoints={[track.providerCoord]}
+                onDirectionsReady={onDirectionsReady}
+              >
+                {track.providerCoord && !isDelivered ? (
+                  <LiveVehicleMapMarker
+                    coordinate={track.providerCoord}
+                    bearing={vehicleBearing}
+                    kind='bike'
+                  />
+                ) : null}
+              </ParcelRouteMap>
+            </View>
+          ) : showPreparingHero ? (
+            <FoodPreparingAnimation />
+          ) : (
+            // <View style={styles.heroPlaceholder} />
+            <View />
+          )}
 
-        <ScrollView
-          style={styles.bodyScroll}
-          contentContainerStyle={styles.bodyScrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-          {showTrackingUi ? (
-            <>
-              <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
-              <View style={styles.etaPill}>
-                <Typography style={styles.etaTxt}>
-                  {`Estimated delivery: ${order?.etaLabel ?? '30 minutes'}`}
-                </Typography>
-              </View>
-            </>
-          ) : null}
+          <ScrollView
+            style={styles.bodyScroll}
+            contentContainerStyle={styles.bodyScrollContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            {showTrackingUi ? (
+              <>
+                <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
+                <View style={styles.etaPill}>
+                  <Typography style={styles.etaTxt}>
+                    {order?.etaLabel
+                      ? `Estimated delivery: ${order.etaLabel}`
+                      : IS_ALPHA
+                        ? 'Estimated delivery: 30 minutes'
+                        : 'Estimated delivery: —'}
+                  </Typography>
+                </View>
+              </>
+            ) : null}
 
-          {showTrackingUi && !isDelivered ? (
-            <RideAnimatedStatusBlock
-              animationKey={status.key}
-              iconProps={status.icon}
-              title={status.title}
-              subtitle={status.subtitle}
-            />
-          ) : null}
-
-          {showMap && !isDelivered && order ? (
-            <ParcelCourierCard
-              courierName={order.courierName}
-              phone={order.courierPhone}
-              avatarSource={IMAGES.USER}
-              onPhonePress={() => {
-                if (order.courierPhone) {
-                  openPhoneNumber(order.courierPhone);
-                  return;
-                }
-                showToast({ message: 'Courier phone number is not available.' });
-              }}
-              onMessagePress={() =>
-                navigateToBookingFirebaseChat({
-                  otherUser: {
-                    id: order.providerId,
-                    full_name: order.courierName,
-                  },
-                  bookingId,
-                })
-              }
-            />
-          ) : null}
-
-          {showMap && !isDelivered && order ? (
-            <RideVehicleStatsRow
-              items={[
-                { icon: 'motorbike', label: 'Vehicle Type', value: order.vehicleType },
-                { icon: 'card-text', label: 'License Plate', value: order.licensePlate },
-                { icon: 'water', label: 'Color', value: order.vehicleColor },
-              ]}
-              marginHorizontal={0}
-            />
-          ) : null}
-
-          {isDelivered ? (
-            <>
+            {showTrackingUi && !isDelivered ? (
               <RideAnimatedStatusBlock
                 animationKey={status.key}
                 iconProps={status.icon}
                 title={status.title}
                 subtitle={status.subtitle}
               />
-              <View style={styles.rateBlock}>
-                <Typography style={styles.rateTitle}>Rate your ride</Typography>
-                <View style={styles.stars}>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <Pressable key={star} onPress={() => setRating(star)}>
-                      <Icon
-                        componentName={VARIABLES.Ionicons}
-                        iconName={star <= rating ? 'star' : 'star-outline'}
-                        size={55}
-                        color={COLORS.APP_STAR}
-                      />
-                    </Pressable>
-                  ))}
+            ) : null}
+
+            {showMap && !isDelivered && order ? (
+              <ParcelCourierCard
+                courierName={order.courierName}
+                phone={order.courierPhone}
+                avatarSource={IMAGES.USER}
+                onPhonePress={() => {
+                  if (order.courierPhone) {
+                    openPhoneNumber(order.courierPhone);
+                    return;
+                  }
+                  showToast({ message: 'Courier phone number is not available.' });
+                }}
+                onMessagePress={() =>
+                  navigateToBookingFirebaseChat({
+                    otherUser: {
+                      id: order.providerId,
+                      full_name: order.courierName,
+                    },
+                    bookingId,
+                  })
+                }
+              />
+            ) : null}
+
+            {showMap && !isDelivered && order ? (
+              <RideVehicleStatsRow
+                items={[
+                  { icon: 'motorbike', label: 'Vehicle Type', value: order.vehicleType },
+                  { icon: 'card-text', label: 'License Plate', value: order.licensePlate },
+                  { icon: 'water', label: 'Color', value: order.vehicleColor },
+                ]}
+                marginHorizontal={0}
+              />
+            ) : null}
+
+            {isDelivered ? (
+              <>
+                <RideAnimatedStatusBlock
+                  animationKey={status.key}
+                  iconProps={status.icon}
+                  title={status.title}
+                  subtitle={status.subtitle}
+                />
+                <View style={styles.rateBlock}>
+                  <Typography style={styles.rateTitle}>Rate your ride</Typography>
+                  <View style={styles.stars}>
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <Pressable key={star} onPress={() => setRating(star)}>
+                        <Icon
+                          componentName={VARIABLES.Ionicons}
+                          iconName={star <= rating ? 'star' : 'star-outline'}
+                          size={55}
+                          color={COLORS.APP_STAR}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
                 </View>
-              </View>
-            </>
-          ) : null}
-        </ScrollView>
+              </>
+            ) : null}
+          </ScrollView>
 
-        <View style={styles.footer}>
-          {isDelivered ? (
-            <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
-              <Typography style={styles.doneTxt}>Done</Typography>
-            </Pressable>
-          ) : canCancel ? (
-            <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
-              <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
-            </Pressable>
-          ) : null}
+          <View style={styles.footer}>
+            {isDelivered ? (
+              <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
+                <Typography style={styles.doneTxt}>Done</Typography>
+              </Pressable>
+            ) : canCancel ? (
+              <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
+                <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
+              </Pressable>
+            ) : null}
+          </View>
         </View>
-      </View>
 
-      <FoodOrderPhaseModal
-        visible={showOverlayCard && !expiredVisible}
-        heading={status.overlayHeading}
-        title={status.title}
-        subtitle={status.subtitle}
-        icon={status.icon}
-        showCancel={phase === 'order_placed'}
-        onCancelPress={() => setCancelOpen(true)}
-        timerElement={
-          phase === 'order_placed' && ready && expiresAt ? (
-            <WorkerRequestTimer
-              expiresAt={expiresAt}
-              onExpire={handleTimerExpire}
-              active={!expiredVisible}
-            />
-          ) : null
-        }
-      />
+        <FoodOrderPhaseModal
+          visible={showOverlayCard && !expiredVisible}
+          heading={status.overlayHeading}
+          title={status.title}
+          subtitle={status.subtitle}
+          icon={status.icon}
+          showCancel={phase === 'order_placed'}
+          onCancelPress={() => setCancelOpen(true)}
+          timerElement={
+            phase === 'order_placed' && ready && expiresAt ? (
+              <WorkerRequestTimer
+                expiresAt={expiresAt}
+                onExpire={handleTimerExpire}
+                active={!expiredVisible}
+              />
+            ) : null
+          }
+        />
       </View>
 
       <JobTimerExpiredModal

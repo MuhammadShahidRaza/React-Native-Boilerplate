@@ -41,7 +41,16 @@ export const RestaurantMenuScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.RESTAURANT_MENU>>();
   const name = route.params?.name ?? 'Restaurant';
   const restaurantId = route?.params?.restaurantId;
-  const deliveryFee = route.params?.deliveryFee ?? 50;
+  const cuisine = route.params?.cuisine;
+  const time = route.params?.time;
+  const rating = route.params?.rating;
+  const distanceLabel = route.params?.distanceLabel;
+  const distanceKm = route.params?.distanceKm;
+  const heroImage = route.params?.imageUri
+    ? { uri: route.params.imageUri }
+    : IMAGES.RESTAURANT_ITEM_3;
+
+  const metaParts = [rating, time, distanceLabel].filter(Boolean);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
@@ -61,12 +70,24 @@ export const RestaurantMenuScreen = () => {
             text: 'Switch',
             style: 'destructive',
             onPress: () =>
-              dispatch(setCartRestaurant({ restaurantId, restaurantName: name, deliveryFee })),
+              dispatch(
+                setCartRestaurant({
+                  restaurantId,
+                  restaurantName: name,
+                  restaurantDistanceKm: distanceKm,
+                }),
+              ),
           },
         ],
       );
     } else {
-      dispatch(setCartRestaurant({ restaurantId, restaurantName: name, deliveryFee }));
+      dispatch(
+        setCartRestaurant({
+          restaurantId,
+          restaurantName: name,
+          restaurantDistanceKm: distanceKm,
+        }),
+      );
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
@@ -162,7 +183,7 @@ export const RestaurantMenuScreen = () => {
               onPress={() => onBack()}
               style={[{ position: 'absolute', top: 50, left: 16, zIndex: 1 }]}
             />
-            <Photo source={IMAGES.RESTAURANT_ITEM_3} imageStyle={styles.heroImg} />
+            <Photo source={heroImage} imageStyle={styles.heroImg} />
             {/* <LinearGradient colors={['transparent', 'rgba(0,0,0,0.75)']} style={styles.heroGrad} /> */}
             <View
               style={{
@@ -174,18 +195,22 @@ export const RestaurantMenuScreen = () => {
               }}
             >
               <Typography style={styles.heroTitle}>{name}</Typography>
-              <Typography style={styles.heroSubtitle}>Fast Food</Typography>
-              <View style={styles.metaRow}>
-                <Icon
-                  componentName={VARIABLES.Ionicons}
-                  iconName='star'
-                  size={14}
-                  color={COLORS.APP_STAR}
-                />
-                <Typography
-                  style={styles.metaTxt}
-                >{`4.9 · 15-25 min · ${formatMoney(deliveryFee)} Delivery`}</Typography>
-              </View>
+              {cuisine ? (
+                <Typography style={styles.heroSubtitle}>{cuisine}</Typography>
+              ) : null}
+              {metaParts.length > 0 ? (
+                <View style={styles.metaRow}>
+                  {rating ? (
+                    <Icon
+                      componentName={VARIABLES.Ionicons}
+                      iconName='star'
+                      size={14}
+                      color={COLORS.APP_STAR}
+                    />
+                  ) : null}
+                  <Typography style={styles.metaTxt}>{metaParts.join(' · ')}</Typography>
+                </View>
+              ) : null}
             </View>
           </View>
 

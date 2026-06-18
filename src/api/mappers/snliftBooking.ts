@@ -6,10 +6,55 @@ import type {
   WorkerTripRecord,
 } from 'components/common/worker/workerMockData';
 import type { SnliftBooking, SnliftBookingStatus } from 'types/snliftApi';
-import { formatMoney } from 'utils/currency';
+import { formatMoney, parseMoneyAmount } from 'utils/currency';
 import { formatDistanceKm } from 'utils/distance';
 import { parseMapCoord } from 'utils/coordinateAlongPolyline';
 import { COLORS } from 'utils/colors';
+import { getBookingStatusLabel, isActiveBookingStatus as isBookingActive } from 'utils/bookingStatuses';
+
+export { getBookingStatusLabel } from 'utils/bookingStatuses';
+
+export type ConsumerFoodOrderLine = {
+  key: string;
+  label: string;
+  quantity: number;
+  unitPrice?: string;
+  lineTotal?: string;
+};
+
+/** Food line items — prefers API `bookingDetails`, falls back to `items`. */
+export function resolveFoodOrderLines(booking: SnliftBooking): ConsumerFoodOrderLine[] {
+  const details = booking.bookingDetails ?? [];
+  if (details.length > 0) {
+    return details.map((item, index) => ({
+      key: String(item.id ?? item.menu_item_id ?? index),
+      label:
+        item.item_name ??
+        item.menuItem?.name ??
+        item.menuItem?.title ??
+        `Item #${item.menu_item_id ?? index + 1}`,
+      quantity: item.quantity ?? 1,
+      unitPrice: item.unit_price != null ? formatMoney(item.unit_price) : undefined,
+      lineTotal: item.total_price != null ? formatMoney(item.total_price) : undefined,
+    }));
+  }
+
+  const items = booking.items ?? [];
+  return items.map((item, index) => {
+    const qty = item.quantity ?? 1;
+    const label = item.name ?? item.title ?? `Item #${item.menu_item_id ?? index + 1}`;
+    const unitPrice =
+      typeof item.price === 'number' ? item.price : parseFloat(String(item.price ?? ''));
+    const lineTotalRaw = item.total_price ?? (Number.isFinite(unitPrice) ? unitPrice * qty : null);
+    return {
+      key: `${item.menu_item_id ?? index}-${label}`,
+      label,
+      quantity: qty,
+      unitPrice: Number.isFinite(unitPrice) ? formatMoney(unitPrice) : undefined,
+      lineTotal: lineTotalRaw != null ? formatMoney(lineTotalRaw) : undefined,
+    };
+  });
+}
 
 export type ConsumerActivityItem = {
   id: string;
@@ -42,20 +87,7 @@ export function mapBookingToWorkerRequest(booking: SnliftBooking): WorkerRequest
 }
 
 function statusLabel(status: SnliftBookingStatus | undefined): string {
-  const map: Record<string, string> = {
-    pending: 'Pending',
-    accepted: 'In Progress',
-    in_transit: 'On The Way',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
-    order_placed: 'Order Placed',
-    order_accepted: 'Order Accepted',
-    preparing: 'Preparing',
-    picked_up: 'Picked Up',
-    on_the_way: 'On The Way',
-    delivered: 'Delivered',
-  };
-  return map[status ?? ''] ?? (status ?? 'Pending');
+  return getBookingStatusLabel(status);
 }
 
 function formatDate(d: string | null | undefined): string {
@@ -85,13 +117,14 @@ function estimateEtaMinutes(distanceKm: number | string | null | undefined): str
   return `${Math.max(1, Math.ceil(n * 2.5))} min`;
 }
 
-export function getBookingStatusLabel(status: SnliftBookingStatus | undefined): string {
-  return statusLabel(status);
-}
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#F59E0B',
   accepted: COLORS.APP_PRIMARY,
+  arrived: COLORS.APP_PRIMARY,
+  preparing: COLORS.APP_PRIMARY,
+  ready_for_pickup: COLORS.APP_SECONDARY,
+  picked_up: COLORS.APP_SECONDARY,
   in_transit: COLORS.APP_SECONDARY,
   completed: '#16A34A',
   complete: '#16A34A',
@@ -152,6 +185,19 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
   const b = normalizeSniftBooking(booking as SnliftBooking & Record<string, unknown>);
   const pickup = b.pickup_address ?? 'Pickup';
   const drop = b.dropoff_address ?? b.delivery_address ?? 'Drop-off';
+
+  const baseFareNum =
+    parseMoneyAmount(b.base_fare) ??
+    parseMoneyAmount(b.total_amount) ??
+    parseMoneyAmount(b.estimated_amount) ??
+    0;
+  const commissionNum =
+    parseMoneyAmount(b.commission) ?? parseMoneyAmount(b.commission_amount) ?? 0;
+  const commissionPct = parseMoneyAmount(b.commission_percentage);
+  const earnedNum = Math.max(0, baseFareNum - commissionNum);
+  const prevWallet = parseMoneyAmount(b.wallet_prev_balance);
+  const newWallet = parseMoneyAmount(b.wallet_new_balance);
+
   return {
     ...base,
     customerId: b.customer?.id ?? b.customer_id,
@@ -165,13 +211,12 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
     distance: formatDistanceKm(b.distance_km),
     eta: estimateEtaMinutes(b.distance_km),
     payment: 'Cash',
-    baseFare: formatMoney(b.sub_total ?? b.estimated_amount),
-    commission: formatMoney(
-      b.commission_amount ? -Number(b.commission_amount) : 0,
-    ),
-    earned: formatMoney(b.total_amount ?? b.estimated_amount),
-    previousWallet: formatMoney(0),
-    newWallet: formatMoney(0),
+    baseFare: formatMoney(baseFareNum),
+    commission: formatMoney(commissionNum > 0 ? -commissionNum : 0),
+    commissionPercentage: commissionPct != null && commissionPct > 0 ? commissionPct : undefined,
+    earned: formatMoney(earnedNum),
+    previousWallet: formatMoney(prevWallet ?? 0),
+    newWallet: formatMoney(newWallet ?? 0),
     pickupLat: parseMapCoord(b.pickup_latitude) ?? 0,
     pickupLng: parseMapCoord(b.pickup_longitude) ?? 0,
     dropoffLat: parseMapCoord(b.dropoff_latitude) ?? 0,
@@ -180,8 +225,7 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
 }
 
 export function isActiveBookingStatus(status: SnliftBookingStatus | undefined): boolean {
-  const s = (status ?? '').toLowerCase();
-  return s !== 'completed' && s !== 'cancelled' && s !== 'complete' && s !== 'delivered';
+  return isBookingActive(status);
 }
 
 /** Worker ride history — completed/delivered jobs (API status aliases). */

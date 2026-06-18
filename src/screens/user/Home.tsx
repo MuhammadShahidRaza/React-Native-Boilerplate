@@ -96,16 +96,16 @@ export const Home = () => {
 
   const [banners, setBanners] = useState<SnliftHomeBanner[]>([]);
   const [promoCodes, setPromoCodes] = useState<HomePromoDisplay[]>([]);
-  const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
+  // const [hotOffers, setHotOffers] = useState<SnliftHomeHotOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const applyHomeData = useCallback((data: SnliftHomeData) => {
     setBanners(data.banners);
     setPromoCodes(homePromosForDisplay(data.promo_codes));
-    setHotOffers(
-      IS_SENGO ? homeHotOffersForDisplay(data.hot_offers, data.promo_codes) : data.hot_offers,
-    );
+    // setHotOffers(
+    //   IS_SENGO ? homeHotOffersForDisplay(data.hot_offers, data.promo_codes) : data.hot_offers,
+    // );
   }, []);
 
   const loadHome = useCallback(
@@ -274,7 +274,7 @@ export const Home = () => {
           </View>
         </View>
 
-        {IS_SENGO ? (
+        {/* {IS_SENGO ? (
           <View
             style={[
               styles.bodySection,
@@ -297,45 +297,41 @@ export const Home = () => {
               hotOffers?.map(offer => <HotOfferCard key={offer.id} offer={offer} />)
             )}
           </View>
-        ) : (
-          <View
-            style={[
-              styles.bodySection,
-              styles.promoSection,
-              { backgroundColor: COLORS.BACKGROUND },
-            ]}
-          >
-            <View style={styles.promoHeader}>
-              <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
-                Promo Codes
-              </Typography>
-            </View>
-            {loading && !refreshing ? (
-              <HomePromoSkeleton />
-            ) : promoCodes.length === 0 ? (
-              <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
-            ) : (
-              promoCodes.map(p => (
-                <View key={p.id} style={[styles.promoCard]}>
-                  <SvgComponent
-                    Svg={SVG.COUPON}
-                    svgWidth={40}
-                    svgHeight={40}
-                    containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
-                  />
-                  <View style={styles.promoBody}>
-                    <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
-                      {p.code}
-                    </Typography>
-                    <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
-                      {p.desc}
-                    </Typography>
-                  </View>
-                </View>
-              ))
-            )}
+        ) : ( */}
+        <View
+          style={[styles.bodySection, styles.promoSection, { backgroundColor: COLORS.BACKGROUND }]}
+        >
+          <View style={styles.promoHeader}>
+            <Typography style={[styles.sectionTitle, { color: COLORS.TEXT }]}>
+              Promo Codes
+            </Typography>
           </View>
-        )}
+          {loading && !refreshing ? (
+            <HomePromoSkeleton />
+          ) : promoCodes.length === 0 ? (
+            <Typography style={{ color: COLORS.TEXT_SECONDARY }}>No promos available</Typography>
+          ) : (
+            promoCodes.map(p => (
+              <View key={p.id} style={[styles.promoCard]}>
+                <SvgComponent
+                  Svg={SVG.COUPON}
+                  svgWidth={40}
+                  svgHeight={40}
+                  containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
+                />
+                <View style={styles.promoBody}>
+                  <Typography style={[styles.promoCode, { color: COLORS.APP_SECONDARY }]}>
+                    {p.code}
+                  </Typography>
+                  <Typography style={[styles.promoDesc, { color: COLORS.TEXT_SECONDARY }]}>
+                    {p.desc}
+                  </Typography>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+        {/* )} */}
 
         <View style={styles.scrollFooter} />
       </ScrollView>

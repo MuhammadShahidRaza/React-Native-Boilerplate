@@ -12,15 +12,14 @@ export type FoodCartItem = {
 export type FoodCartState = {
   restaurantId: string | null;
   restaurantName: string;
+  restaurantDistanceKm?: number;
   items: FoodCartItem[];
-  deliveryFee: number;
 };
 
 const initialState: FoodCartState = {
   restaurantId: null,
   restaurantName: '',
   items: [],
-  deliveryFee: 50,
 };
 
 const foodCartSlice = createSlice({
@@ -29,11 +28,15 @@ const foodCartSlice = createSlice({
   reducers: {
     setCartRestaurant(
       state,
-      action: PayloadAction<{ restaurantId: string; restaurantName: string; deliveryFee?: number }>,
+      action: PayloadAction<{
+        restaurantId: string;
+        restaurantName: string;
+        restaurantDistanceKm?: number;
+      }>,
     ) {
       state.restaurantId = action.payload.restaurantId;
       state.restaurantName = action.payload.restaurantName;
-      state.deliveryFee = action.payload.deliveryFee ?? 50;
+      state.restaurantDistanceKm = action.payload.restaurantDistanceKm;
       state.items = [];
     },
     upsertItem(state, action: PayloadAction<Omit<FoodCartItem, 'qty'>>) {
@@ -60,6 +63,7 @@ const foodCartSlice = createSlice({
     clearCart(state) {
       state.restaurantId = null;
       state.restaurantName = '';
+      state.restaurantDistanceKm = undefined;
       state.items = [];
     },
     resetFoodCartState() {

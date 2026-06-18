@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
 import {
   AppGradient,
+  BookingRatingStars,
   Button,
   Icon,
   Typography,
@@ -15,9 +16,9 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { onBack, pushRootScreen } from 'navigation/Navigators';
 import { ENV_CONSTANTS } from 'constants/common';
-import { getAlphaConsumerBookingById } from 'constants/consumerBookingMock';
+import { getAlphaBookingById } from 'constants/alphaBookingMocks';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
-import { getBookingStatusLabel } from 'api/mappers/snliftBooking';
+import { getBookingStatusLabel, resolveFoodOrderLines } from 'api/mappers/snliftBooking';
 import type { SnliftBooking } from 'types/snliftApi';
 import { COLORS, formatMoney, formatDistanceKm } from 'utils/index';
 import {
@@ -25,16 +26,20 @@ import {
   canCancelConsumerBooking,
   getConsumerTrackButtonLabel,
 } from 'utils/consumerBookingNavigation';
+import { BOOKING_STATUS } from 'utils/bookingStatuses';
 import { isTerminalBookingStatus } from 'utils/bookingTrackPhases';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
+import { useBookingRating } from 'hooks/useBookingRating';
 import { CancelReasonModal } from './CancelReasonModal';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#F59E0B',
   accepted: COLORS.APP_PRIMARY,
+  arrived: COLORS.APP_PRIMARY,
   preparing: COLORS.APP_PRIMARY,
+  ready_for_pickup: COLORS.APP_SECONDARY,
   picked_up: COLORS.APP_SECONDARY,
-  on_the_way: COLORS.APP_SECONDARY,
+  in_transit: COLORS.APP_SECONDARY,
   completed: '#16A34A',
   cancelled: COLORS.RED,
 };
@@ -66,6 +71,15 @@ export const ConsumerBookingDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [cancelVisible, setCancelVisible] = useState(false);
 
+  const {
+    rating,
+    setRating,
+    hasRated,
+    submitting: ratingSubmitting,
+    submit: submitRating,
+    reload: reloadRating,
+  } = useBookingRating(bookingId, booking?.booking_type);
+
   const loadBooking = useCallback(async () => {
     if (bookingId == null) {
       setLoading(false);
@@ -73,7 +87,7 @@ export const ConsumerBookingDetailScreen = () => {
     }
     setLoading(true);
     if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-      setBooking(getAlphaConsumerBookingById(bookingId) ?? null);
+      setBooking(getAlphaBookingById(bookingId) ?? null);
       setLoading(false);
       return;
     }
@@ -86,12 +100,36 @@ export const ConsumerBookingDetailScreen = () => {
     loadBooking();
   }, [loadBooking]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void loadBooking();
+      void reloadRating();
+    }, [loadBooking, reloadRating]),
+  );
+
   const statusKey = (booking?.status ?? 'pending').toLowerCase();
   const statusColor = STATUS_COLORS[statusKey] ?? COLORS.APP_PRIMARY;
   const trackTarget = booking ? buildConsumerBookingTrackTarget(booking) : null;
   const showCancel = canCancelConsumerBooking(booking?.status, booking?.booking_type);
   const isTerminal = isTerminalBookingStatus(booking?.status);
+  const isCompleted = statusKey === BOOKING_STATUS.COMPLETED;
+  const isCancelled = statusKey === BOOKING_STATUS.CANCELLED;
   const trackButtonLabel = booking ? getConsumerTrackButtonLabel(booking) : null;
+
+  const foodOrderLines = useMemo(
+    () => (booking?.booking_type === 'food' ? resolveFoodOrderLines(booking) : []),
+    [booking],
+  );
+
+  const showParcelContacts =
+    booking?.booking_type === 'parcel' &&
+    Boolean(
+      booking.sender_name ||
+        booking.sender_phone ||
+        booking.receiver_name ||
+        booking.receiver_phone ||
+        booking.item_description,
+    );
 
   const handleTrack = () => {
     if (!trackTarget) return;
@@ -99,6 +137,11 @@ export const ConsumerBookingDetailScreen = () => {
       trackTarget.screen as keyof RootStackParamList,
       trackTarget.params as RootStackParamList[keyof RootStackParamList],
     );
+  };
+
+  const handleSubmitRating = async () => {
+    const ok = await submitRating();
+    if (ok) await loadBooking();
   };
 
   return (
@@ -164,6 +207,61 @@ export const ConsumerBookingDetailScreen = () => {
             dropoffAddress={booking.dropoff_address ?? booking.delivery_address ?? 'Drop-off'}
           />
 
+          {showParcelContacts ? (
+            <View style={styles.infoCard}>
+              <Typography style={styles.sectionTitle}>Parcel details</Typography>
+              {booking.item_description ? (
+                <Typography style={styles.infoLine}>
+                  {`Package: ${booking.item_description}`}
+                </Typography>
+              ) : null}
+              {booking.sender_name || booking.sender_phone ? (
+                <View style={styles.contactBlock}>
+                  <Typography style={styles.contactRole}>Sender</Typography>
+                  <Typography style={styles.contactName}>{booking.sender_name ?? '—'}</Typography>
+                  {booking.sender_phone ? (
+                    <Typography style={styles.contactMeta}>{booking.sender_phone}</Typography>
+                  ) : null}
+                </View>
+              ) : null}
+              {booking.receiver_name || booking.receiver_phone ? (
+                <View style={styles.contactBlock}>
+                  <Typography style={styles.contactRole}>Recipient</Typography>
+                  <Typography style={styles.contactName}>
+                    {booking.receiver_name ?? '—'}
+                  </Typography>
+                  {booking.receiver_phone ? (
+                    <Typography style={styles.contactMeta}>{booking.receiver_phone}</Typography>
+                  ) : null}
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+
+          {foodOrderLines.length > 0 ? (
+            <View style={styles.infoCard}>
+              <Typography style={styles.sectionTitle}>Ordered items</Typography>
+              {booking.restaurant?.name ? (
+                <Typography style={styles.restaurantName}>{booking.restaurant.name}</Typography>
+              ) : null}
+              {foodOrderLines.map(line => (
+                <View key={line.key} style={styles.orderRow}>
+                  <View style={styles.orderMeta}>
+                    <Typography style={styles.orderName}>{line.label}</Typography>
+                    <Typography style={styles.orderQty}>
+                      {line.unitPrice
+                        ? `${line.unitPrice} × ${line.quantity}`
+                        : `Qty: ${line.quantity}`}
+                    </Typography>
+                  </View>
+                  {line.lineTotal ? (
+                    <Typography style={styles.orderPrice}>{line.lineTotal}</Typography>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
+
           {booking.provider?.full_name ? (
             <View style={styles.providerCard}>
               <Typography style={styles.sectionTitle}>Provider</Typography>
@@ -185,6 +283,29 @@ export const ConsumerBookingDetailScreen = () => {
             </View>
           ) : null}
 
+          {isCompleted ? (
+            <View style={styles.ratingCard}>
+              <BookingRatingStars
+                title={hasRated ? 'Your rating' : 'Rate your experience'}
+                subtitle={
+                  hasRated ? 'Thanks for your feedback' : 'How was your booking?'
+                }
+                value={rating}
+                onChange={hasRated ? undefined : setRating}
+                readonly={hasRated}
+                size={42}
+              />
+              {!hasRated ? (
+                <Button
+                  title={ratingSubmitting ? 'Submitting...' : 'Submit Rating'}
+                  disabled={ratingSubmitting}
+                  onPress={() => void handleSubmitRating()}
+                  style={styles.primaryBtn}
+                />
+              ) : null}
+            </View>
+          ) : null}
+
           {!isTerminal && trackTarget && trackButtonLabel ? (
             <Button title={trackButtonLabel} onPress={handleTrack} style={styles.primaryBtn} />
           ) : null}
@@ -195,12 +316,8 @@ export const ConsumerBookingDetailScreen = () => {
             </Pressable>
           ) : null}
 
-          {isTerminal ? (
-            <Typography style={styles.terminalNote}>
-              {statusKey === 'completed'
-                ? 'This booking has been completed.'
-                : 'This booking was cancelled.'}
-            </Typography>
+          {isCancelled ? (
+            <Typography style={styles.terminalNote}>This booking was cancelled.</Typography>
           ) : null}
         </View>
       )}
@@ -292,6 +409,67 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
     marginTop: 4,
   },
+  infoCard: {
+    backgroundColor: COLORS.APP_SURFACE,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
+    gap: 10,
+  },
+  infoLine: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT,
+  },
+  contactBlock: {
+    gap: 2,
+  },
+  contactRole: {
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT_MUTED,
+  },
+  contactName: {
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.Bold,
+    color: COLORS.APP_TEXT,
+  },
+  contactMeta: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+  },
+  restaurantName: {
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  orderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.APP_LINE,
+  },
+  orderMeta: {
+    flex: 1,
+    gap: 2,
+  },
+  orderName: {
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  orderQty: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+  },
+  orderPrice: {
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.Bold,
+    color: COLORS.APP_TEXT,
+  },
   providerCard: {
     backgroundColor: '#F5F9FF',
     borderRadius: 16,
@@ -324,8 +502,16 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Small,
     color: COLORS.APP_TEXT,
   },
+  ratingCard: {
+    backgroundColor: COLORS.APP_SURFACE,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
+    gap: 12,
+  },
   primaryBtn: {
-    marginTop: 8,
+    marginTop: 4,
   },
   cancelBtn: {
     alignItems: 'center',

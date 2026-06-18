@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 import { Marker } from 'react-native-maps';
-import { IMAGES } from 'constants/assets';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { MapVehicleMarker, type MapVehicleMarkerKind } from './MapVehicleMarker';
 
@@ -11,17 +10,12 @@ type LiveVehicleMapMarkerProps = {
   kind: MapVehicleMarkerKind;
 };
 
-const MARKER_IMAGE: Record<MapVehicleMarkerKind, number> = {
-  car: IMAGES.MAP_DRIVER_CAR,
-  bike: IMAGES.MAP_COURIER_BIKE,
-};
-
 function shortestBearingDelta(from: number, to: number): number {
   const delta = ((to - from + 540) % 360) - 180;
   return from + delta;
 }
 
-/** Live vehicle marker — coordinate updates directly (avoids Android animateMarkerToCoordinate NPE). */
+/** Live vehicle marker — sized view on all platforms (Android `image` prop ignores dimensions). */
 export const LiveVehicleMapMarker = ({
   coordinate,
   bearing = 0,
@@ -51,19 +45,6 @@ export const LiveVehicleMapMarker = ({
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
   }, [bearing]);
-
-  if (Platform.OS === 'android') {
-    return (
-      <Marker
-        coordinate={coordinate}
-        anchor={{ x: 0.5, y: 0.5 }}
-        rotation={displayBearing}
-        flat
-        image={MARKER_IMAGE[kind]}
-        tracksViewChanges={false}
-      />
-    );
-  }
 
   return (
     <Marker coordinate={coordinate} anchor={{ x: 0.5, y: 0.5 }} flat tracksViewChanges={false}>

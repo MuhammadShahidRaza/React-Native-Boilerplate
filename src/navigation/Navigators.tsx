@@ -10,7 +10,9 @@ import { SCREENS } from 'constants/routes';
 import i18n from 'i18n/index';
 import { LANGUAGES, VARIABLES } from 'constants/common';
 import { JobStatus } from 'screens/user/MyJobs';
-import { Address, Booking, Service, FontSize, FontWeight, User } from 'types/index';
+import type { Address, Booking, Service, User } from 'types/index';
+import { FontSize, FontWeight } from 'types/fontTypes';
+import type { SnliftBooking } from 'types/snliftApi';
 import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import type { ParcelTrackPhase, ParcelTripCoords } from 'types/parcelTrip';
 import type { RideTrackPhase } from 'types/rideTracking';
@@ -204,7 +206,16 @@ export type RootStackParamList = {
   [SCREENS.COURIER_MATCHED]: ParcelTripCoords | undefined;
   [SCREENS.TRACK_PARCEL]: (ParcelTripCoords & { phase?: ParcelTrackPhase }) | undefined;
   [SCREENS.ORDER_FOOD]: undefined;
-  [SCREENS.RESTAURANT_MENU]: { restaurantId?: string; name?: string; deliveryFee?: number } | undefined;
+  [SCREENS.RESTAURANT_MENU]: {
+    restaurantId?: string;
+    name?: string;
+    cuisine?: string;
+    time?: string;
+    rating?: string;
+    distanceLabel?: string;
+    distanceKm?: number;
+    imageUri?: string;
+  } | undefined;
   [SCREENS.FOOD_DELIVERY_CART]: undefined;
   [SCREENS.TRACK_FOOD_ORDER]: { phase?: FoodOrderPhase; bookingId?: number; timerAnchorAt?: string; timerDurationSeconds?: number } | undefined;
   [SCREENS.CONSUMER_BOOKING_DETAIL]: { bookingId: number };
@@ -214,7 +225,7 @@ export type RootStackParamList = {
   [SCREENS.WORKER_REQUESTS]: undefined;
   [SCREENS.WORKER_REQUEST_DETAIL]: { requestId: string };
   [SCREENS.WORKER_JOB_NAVIGATION]: { requestId: string; phase?: 'pickup' | 'dropoff' };
-  [SCREENS.WORKER_JOB_COMPLETED]: { requestId: string };
+  [SCREENS.WORKER_JOB_COMPLETED]: { requestId: string; completedBooking?: SnliftBooking };
 
   // Auth Screens
   [SCREENS.GET_STARTED]: undefined;

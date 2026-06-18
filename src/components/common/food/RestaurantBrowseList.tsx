@@ -1,17 +1,17 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import {
   Button,
   FilterChipRow,
   FlatListComponent,
-  FOOD_CATEGORIES,
   Icon,
   Input,
   RestaurantCard,
   Typography,
+  ALL_RESTAURANT_CATEGORY,
+  buildRestaurantCategoryOptions,
   filterRestaurants,
-  type FoodCategory,
   type RestaurantItem,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
@@ -19,7 +19,6 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS } from 'utils/index';
-import { parseMoneyAmount } from 'utils/currency';
 import { useFavoriteRestaurants } from 'hooks/useFavoriteRestaurants';
 import { useRestaurantCatalog } from 'hooks/useRestaurantCatalog';
 import { getCurrentLocation } from 'utils/location';
@@ -33,7 +32,7 @@ type RestaurantBrowseListProps = {
 };
 
 export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowseListProps) => {
-  const [category, setCategory] = useState<FoodCategory>('All');
+  const [category, setCategory] = useState(ALL_RESTAURANT_CATEGORY);
   const [query, setQuery] = useState('');
   const [locating, setLocating] = useState(false);
   const { restaurants, loading, refreshing, refresh, locationMissing } = useRestaurantCatalog();
@@ -57,14 +56,34 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
     return restaurants.filter(r => likedIds.has(r.id));
   }, [favoritesOnly, restaurants, likedIds]);
 
+  const categoryOptions = useMemo(
+    () => buildRestaurantCategoryOptions(sourceList),
+    [sourceList],
+  );
+
+  useEffect(() => {
+    if (!categoryOptions.includes(category)) {
+      setCategory(ALL_RESTAURANT_CATEGORY);
+    }
+  }, [categoryOptions, category]);
+
   const filtered = useMemo(
     () => filterRestaurants(sourceList, category, query),
     [sourceList, category, query],
   );
 
   const openRestaurant = useCallback((r: RestaurantItem) => {
-    const deliveryFee = parseMoneyAmount(r.fee) ?? 50;
-    navigate(SCREENS.RESTAURANT_MENU, { restaurantId: r.id, name: r.name, deliveryFee });
+    const imageUri = typeof r.image === 'object' && r.image && 'uri' in r.image ? r.image.uri : undefined;
+    navigate(SCREENS.RESTAURANT_MENU, {
+      restaurantId: r.id,
+      name: r.name,
+      cuisine: r.cuisine,
+      time: r.time,
+      rating: r.rating,
+      distanceLabel: r.distanceLabel,
+      distanceKm: r.distanceKm,
+      imageUri,
+    });
   }, []);
 
   const renderItem = useCallback(
@@ -148,7 +167,7 @@ export const RestaurantBrowseList = ({ favoritesOnly = false }: RestaurantBrowse
 
       <View style={styles.filterWrap}>
         <FilterChipRow
-          options={FOOD_CATEGORIES}
+          options={categoryOptions}
           value={category}
           onChange={next => {
             setCategory(next);

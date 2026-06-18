@@ -1,22 +1,23 @@
 import { API_ROUTES } from 'api/routes';
 import { handlePostApiRequest } from '../app';
 
-export type CreateRatingPayload = {
-  module: 'ride' | 'food' | 'parcel' | string;
-  module_id: number;
+export type CreateBookingRatingPayload = {
+  booking_id: number;
   rating: number;
   review?: string;
 };
 
-export async function createRating(data: CreateRatingPayload) {
-  const primary = await handlePostApiRequest<{ message?: string }, CreateRatingPayload>({
+export async function createBookingRating(data: CreateBookingRatingPayload) {
+  return handlePostApiRequest<{ message?: string }, CreateBookingRatingPayload>({
     url: API_ROUTES.RATINGS_CREATE,
     data,
-    showError: false,
+    showError: true,
   });
-  if (primary) return primary;
-  return handlePostApiRequest<{ message?: string }, CreateRatingPayload>({
-    url: API_ROUTES.SNLIFT_REVIEW_CREATE,
-    data,
-  });
+}
+
+/** @deprecated Use createBookingRating — kept for any legacy callers. */
+export type CreateRatingPayload = CreateBookingRatingPayload;
+
+export async function createRating(data: CreateBookingRatingPayload) {
+  return createBookingRating(data);
 }

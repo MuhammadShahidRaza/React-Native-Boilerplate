@@ -19,7 +19,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { CustomBackIcon, navigate } from 'navigation/index';
+import { CustomBackIcon, navigate, resetToHomeAndScreen } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import {
   APP_GRADIENT_HORIZONTAL,
@@ -39,6 +39,12 @@ import { isValidMapCoord } from 'utils/coordinateAlongPolyline';
 import { resolveWorkerDirectionsLeg } from 'utils/trackingDirections';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import {
+  getWorkerPickupStatusAdvance,
+  resolveWorkerPickupStep,
+  type WorkerPickupStep,
+  type WorkerServiceType,
+} from 'utils/bookingStatuses';
+import {
   isWorkerNearCoord,
   parseDirectionSteps,
   workerProximityBlockedMessage,
@@ -47,7 +53,7 @@ import {
 } from 'utils/workerNavigation';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
 import { showToast } from 'utils/toast';
-import { updateBookingStatus } from 'api/functions/snlift/bookings';
+import { updateBookingStatus, extractBookingFromResponse } from 'api/functions/snlift/bookings';
 import {
   ensureWorkerActiveJobTracking,
   stopWorkerActiveJobTracking,
@@ -64,9 +70,10 @@ export const WorkerJobNavigationScreen = () => {
   const userDetails = useAppSelector(state => state.user?.userDetails);
   const copy = getWorkerRoleCopy(role);
   const requestId = route.params?.requestId ?? '1';
-  const { detail, loading } = useWorkerRequestDetail(requestId, role);
+  const { detail, loading, bookingStatus } = useWorkerRequestDetail(requestId, role);
+  const serviceType = (detail?.serviceType ?? 'ride') as WorkerServiceType;
   const [phase, setPhase] = useState<JobPhase>(route.params?.phase ?? 'pickup');
-  const [pickupConfirmed, setPickupConfirmed] = useState(false);
+  const [pickupStep, setPickupStep] = useState<WorkerPickupStep>('en_route');
   const mapRef = useRef<MapView>(null);
   const fittedLegRef = useRef<string | null>(null);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
@@ -75,6 +82,10 @@ export const WorkerJobNavigationScreen = () => {
     distanceKm: 0,
     durationMin: 5,
   });
+
+  useEffect(() => {
+    setPickupStep(resolveWorkerPickupStep(serviceType, bookingStatus));
+  }, [serviceType, bookingStatus]);
 
   const pickupCoord = useMemo(
     () => ({
@@ -225,9 +236,11 @@ export const WorkerJobNavigationScreen = () => {
 
   const primaryCta =
     phase === 'pickup'
-      ? pickupConfirmed
-        ? copy.startJob
-        : copy.arrivedAtPickup
+      ? pickupStep === 'en_route'
+        ? copy.arrivedAtPickup
+        : pickupStep === 'arrived' && serviceType === 'parcel'
+          ? 'Ready for Pickup'
+          : copy.startJob
       : copy.completeJob;
 
   const onPrimaryPress = async () => {
@@ -238,30 +251,45 @@ export const WorkerJobNavigationScreen = () => {
         showToast({ message: 'Waiting for GPS location…' });
         return;
       }
-      // if (!isNearTarget) {
-      //   showToast({ message: workerProximityBlockedMessage(phase) });
-      //   return;
-      // }
     }
 
     if (phase === 'pickup') {
-      if (!pickupConfirmed) {
-        setPickupConfirmed(true);
+      const advance = getWorkerPickupStatusAdvance(serviceType, pickupStep);
+      if (!advance) return;
+
+      if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        await updateBookingStatus(detail.id, advance.nextStatus, role);
+        if (advance.startDropoff && advance.followUpStatus) {
+          await updateBookingStatus(detail.id, advance.followUpStatus, role);
+        }
+      }
+
+      if (advance.nextStep) {
+        setPickupStep(advance.nextStep);
         return;
       }
-      if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        await updateBookingStatus(detail.id, 'in_transit', role);
+
+      if (advance.startDropoff) {
+        setPickupStep('en_route');
+        setPhase('dropoff');
       }
-      setPickupConfirmed(false);
-      setPhase('dropoff');
       return;
     }
+
     if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
-      await updateBookingStatus(detail.id, 'completed', role);
+      const res = await updateBookingStatus(detail.id, 'completed', role);
+      const completedBooking = extractBookingFromResponse(res);
+      await stopWorkerActiveJobTracking();
+      refreshWorkerHomeStats();
+      resetToHomeAndScreen(SCREENS.WORKER_JOB_COMPLETED, {
+        requestId: detail.id,
+        completedBooking: completedBooking ?? undefined,
+      });
+      return;
     }
     await stopWorkerActiveJobTracking();
     refreshWorkerHomeStats();
-    navigate(SCREENS.WORKER_JOB_COMPLETED, { requestId: detail.id });
+    resetToHomeAndScreen(SCREENS.WORKER_JOB_COMPLETED, { requestId: detail.id });
   };
 
   const onPhonePress = () => {

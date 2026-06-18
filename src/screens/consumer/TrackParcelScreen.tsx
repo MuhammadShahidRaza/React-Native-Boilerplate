@@ -39,9 +39,12 @@ import { showToast } from 'utils/toast';
 const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
-  picked_up: 0,
-  in_transit: 1,
-  delivered: 2,
+  accepted: 0,
+  arrived: 0,
+  ready_for_pickup: 0,
+  picked_up: 1,
+  in_transit: 2,
+  delivered: 3,
 };
 
 function fallbackCoord(lat?: number, lng?: number, latOff = 0.008, lngOff = 0): MapCoord {
@@ -99,6 +102,42 @@ export const TrackParcelScreen = () => {
 
   const status = useMemo(() => {
     switch (phase) {
+      case 'accepted':
+        return {
+          animationKey: 'accepted',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'user-check',
+            size: 36,
+            color: COLORS.WHITE,
+          },
+          title: 'Courier Assigned',
+          subtitle: 'Courier has accepted your delivery',
+        } as const;
+      case 'arrived':
+        return {
+          animationKey: 'arrived',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'map-pin',
+            size: 36,
+            color: COLORS.WHITE,
+          },
+          title: 'Courier Arrived',
+          subtitle: 'Courier has arrived at the pickup location',
+        } as const;
+      case 'ready_for_pickup':
+        return {
+          animationKey: 'ready',
+          iconProps: {
+            componentName: VARIABLES.Feather,
+            iconName: 'package',
+            size: 36,
+            color: COLORS.WHITE,
+          },
+          title: 'Ready for Pickup',
+          subtitle: 'Parcel is ready to be collected',
+        } as const;
       case 'picked_up':
         return {
           animationKey: 'picked',

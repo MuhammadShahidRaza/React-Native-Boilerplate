@@ -1,4 +1,10 @@
-export type ParcelTrackPhase = 'picked_up' | 'in_transit' | 'delivered';
+export type ParcelTrackPhase =
+  | 'accepted'
+  | 'arrived'
+  | 'ready_for_pickup'
+  | 'picked_up'
+  | 'in_transit'
+  | 'delivered';
 
 export type ParcelTripCoords = {
   pickupAddress?: string;

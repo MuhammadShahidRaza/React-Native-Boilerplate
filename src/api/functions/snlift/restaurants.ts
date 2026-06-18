@@ -2,8 +2,11 @@ import { API_ROUTES } from 'api/routes';
 import { extractApiList, pickString } from 'api/normalizers/snlift';
 import { handleGetApiRequest } from '../app';
 import type { SnliftRestaurant } from 'types/snliftApi';
+import { ENV_CONSTANTS } from 'constants/common';
+import { getAlphaRestaurantMenu } from 'constants/alphaBookingMocks';
+import { FOOD_RESTAURANTS } from 'components/common/food/foodRestaurants';
 import { IMAGES } from 'constants/assets';
-import type { RestaurantItem, FoodTag } from 'components/common/food/foodRestaurants';
+import type { RestaurantItem } from 'components/common/food/foodRestaurants';
 import { formatMoney } from 'utils/currency';
 
 export type SnliftMenuCategory = {
@@ -67,6 +70,9 @@ export async function getRestaurantMenuAll(
   restaurantId: number | string,
   options?: { showLoader?: boolean },
 ): Promise<SnliftMenuItem[]> {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return getAlphaRestaurantMenu(restaurantId);
+  }
   const items: SnliftMenuItem[] = [];
   let page = 1;
   let lastPage = 1;
@@ -95,6 +101,15 @@ export async function listRestaurants(
   params?: { latitude?: number; longitude?: number },
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return FOOD_RESTAURANTS.map(r => ({
+      id: Number(r.id),
+      name: r.name,
+      cuisine: r.cuisine,
+      delivery_fee: parseFloat((r.fee ?? '').replace(/[^0-9.]/g, '')) || 30,
+      is_featured: r.featured,
+    }));
+  }
   return handleGetApiRequest<SnliftRestaurant[] | { restaurants: SnliftRestaurant[] }>({
     url: API_ROUTES.RESTAURANTS,
     showError: false,
@@ -109,47 +124,104 @@ export function extractRestaurants(
   return extractApiList<SnliftRestaurant>(res, ['restaurants', 'data', 'items']);
 }
 
-export function mapApiRestaurantToItem(r: SnliftRestaurant): RestaurantItem {
-  const raw = r as SnliftRestaurant & Record<string, unknown>;
-  const name = pickString(raw, ['name', 'title', 'restaurant_name']) || 'Restaurant';
-  const cuisine = pickString(raw, ['cuisine', 'description', 'category', 'subtitle']) || '';
-  const tags: FoodTag[] = [];
-  const apiTags = raw.tags;
-  if (Array.isArray(apiTags)) {
-    for (const t of apiTags) {
-      const s = String(t).trim();
-      if (!s) continue;
-      const normalized =
-        s.toLowerCase() === 'burgers' ? 'Burgers'
-        : s.toLowerCase() === 'pizza' ? 'Pizza'
-        : s.toLowerCase() === 'chinese' ? 'Chinese'
-        : null;
-      if (normalized && !tags.includes(normalized)) tags.push(normalized);
-    }
-  }
-  const lower = `${name} ${cuisine}`.toLowerCase();
-  if (tags.length === 0) {
-    if (lower.includes('burger')) tags.push('Burgers');
-    if (lower.includes('pizza')) tags.push('Pizza');
-    if (lower.includes('chinese') || lower.includes('noodle')) tags.push('Chinese');
-    if (tags.length === 0) tags.push('Burgers');
+function extractCategoryLabels(raw: Record<string, unknown>): string[] {
+  const categories = raw.categories;
+  if (!Array.isArray(categories)) return [];
+  return categories
+    .map(entry => {
+      const row = entry as Record<string, unknown>;
+      const nested =
+        row.category && typeof row.category === 'object'
+          ? (row.category as Record<string, unknown>)
+          : row;
+      return pickString(nested, ['title', 'name']);
+    })
+    .filter(Boolean);
+}
+
+function formatMinutesDuration(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours > 0 && mins > 0) return `${hours} hr ${mins} min`;
+  if (hours > 0) return `${hours} hr`;
+  return `${mins} min`;
+}
+
+/** Backend duration — `00:30:00`, minutes, or preformatted label → `30 min`. */
+export function formatRestaurantEstimatedTime(raw: unknown): string | undefined {
+  if (raw == null || raw === '') return undefined;
+
+  if (typeof raw === 'number' && Number.isFinite(raw) && raw > 0) {
+    return formatMinutesDuration(Math.round(raw));
   }
 
+  const str = String(raw).trim();
+  if (!str) return undefined;
+
+  const segments = str.split(':');
+  if (segments.length >= 2 && segments.every(s => /^\d+$/.test(s))) {
+    const hours = parseInt(segments[0], 10) || 0;
+    const minutes = parseInt(segments[1], 10) || 0;
+    const seconds = segments.length >= 3 ? parseInt(segments[2], 10) || 0 : 0;
+    const totalMinutes = hours * 60 + minutes + (seconds >= 30 ? 1 : 0);
+    if (totalMinutes <= 0) return undefined;
+    return formatMinutesDuration(totalMinutes);
+  }
+
+  const asNum = parseInt(str, 10);
+  if (!Number.isNaN(asNum) && String(asNum) === str && asNum > 0) {
+    return formatMinutesDuration(asNum);
+  }
+
+  return str;
+}
+
+export function mapApiRestaurantToItem(r: SnliftRestaurant): RestaurantItem {
+  const raw = r as SnliftRestaurant & Record<string, unknown>;
+  const name = pickString(raw, ['title', 'name', 'restaurant_name']) || 'Restaurant';
+  const categoryLabels = extractCategoryLabels(raw);
+
+  const cuisine =
+    categoryLabels.join(' · ') ||
+    pickString(raw, ['location', 'address', 'street']) ||
+    pickString(raw, ['city', 'cuisine', 'description']) ||
+    '';
+
+  const time = formatRestaurantEstimatedTime(raw.estimated_time ?? raw.delivery_time);
+
+  const feeRaw = raw.delivery_fee;
   const feeNum =
-    typeof r.delivery_fee === 'number' ? r.delivery_fee : parseFloat(String(r.delivery_fee ?? '30'));
-  const fee = formatMoney(Number.isNaN(feeNum) ? 30 : feeNum);
+    typeof feeRaw === 'number' ? feeRaw : parseFloat(String(feeRaw ?? '').replace(/[^0-9.-]/g, ''));
+  const fee = Number.isFinite(feeNum) && feeNum >= 0 ? formatMoney(feeNum) : undefined;
+
+  const distanceRaw = raw.distance_km;
+  const distanceNum =
+    typeof distanceRaw === 'number'
+      ? distanceRaw
+      : parseFloat(String(distanceRaw ?? '').replace(/[^0-9.-]/g, ''));
+  const distanceKm = Number.isFinite(distanceNum) ? distanceNum : undefined;
+  const distanceLabel = distanceKm != null ? `${distanceKm.toFixed(1)} km away` : undefined;
+
+  const ratingRaw = raw.average_rating ?? raw.rating;
+  const ratingNum =
+    typeof ratingRaw === 'number'
+      ? ratingRaw
+      : parseFloat(String(ratingRaw ?? '').replace(/[^0-9.-]/g, ''));
+  const rating = Number.isFinite(ratingNum) && ratingNum > 0 ? ratingNum.toFixed(1) : undefined;
+
+  const logo = pickString(raw, ['logo', 'image', 'photo', 'thumbnail', 'cover_image']);
 
   return {
     id: String(r.id),
     name,
-    cuisine: cuisine || 'Restaurant',
-    tags,
-    time: pickString(raw, ['delivery_time', 'time', 'eta', 'duration']) || '15-25 min',
+    cuisine,
+    categoryLabels,
+    time,
     fee,
-    featured: Boolean(r.is_featured ?? raw.featured),
-    image:
-      pickString(raw, ['image', 'logo', 'photo', 'thumbnail', 'cover_image']) ?
-        { uri: pickString(raw, ['image', 'logo', 'photo', 'thumbnail', 'cover_image']) }
-      : IMAGES.RESTAURANT_ONE,
+    distanceKm,
+    distanceLabel,
+    rating,
+    featured: Boolean(r.is_featured ?? raw.is_approved ?? raw.featured),
+    image: logo ? { uri: logo } : IMAGES.RESTAURANT_ONE,
   };
 }

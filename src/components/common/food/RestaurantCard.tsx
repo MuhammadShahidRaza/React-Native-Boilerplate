@@ -52,34 +52,44 @@ export const RestaurantCard = ({
           color={isLiked ? COLORS.APP_DANGER_TEXT : COLORS.WHITE}
         />
       </Pressable>
-      <View style={styles.timeBadge} pointerEvents='none'>
-        <Icon
-          componentName={VARIABLES.Feather}
-          iconName='clock'
-          size={FontSize.ExtraSmall}
-          color={COLORS.APP_TEXT}
-        />
-        <Typography style={styles.timeTxt}>{restaurant.time}</Typography>
-      </View>
+      {restaurant.time ? (
+        <View style={styles.timeBadge} pointerEvents='none'>
+          <Icon
+            componentName={VARIABLES.Feather}
+            iconName='clock'
+            size={FontSize.ExtraSmall}
+            color={COLORS.APP_TEXT}
+          />
+          <Typography style={styles.timeTxt}>{restaurant.time}</Typography>
+        </View>
+      ) : null}
     </View>
     <View style={styles.body}>
       <View style={styles.rowBetween}>
         <Typography style={styles.name}>{restaurant.name}</Typography>
-        <View style={styles.rating}>
-          <Icon
-            componentName={VARIABLES.Ionicons}
-            iconName='star'
-            size={FontSize.ExtraSmall}
-            color={COLORS.APP_STAR}
-          />
-          <Typography style={styles.ratingTxt}>4.9</Typography>
+        {restaurant.rating ? (
+          <View style={styles.rating}>
+            <Icon
+              componentName={VARIABLES.Ionicons}
+              iconName='star'
+              size={FontSize.ExtraSmall}
+              color={COLORS.APP_STAR}
+            />
+            <Typography style={styles.ratingTxt}>{restaurant.rating}</Typography>
+          </View>
+        ) : null}
+      </View>
+      {restaurant.cuisine ? (
+        <Typography style={styles.cuisine}>{restaurant.cuisine}</Typography>
+      ) : null}
+      {restaurant.fee ? (
+        <View style={styles.feeRow}>
+          <Image source={IMAGES.DELIVERY_BIKE} style={styles.feeBikeIcon} resizeMode='contain' />
+          <Typography style={styles.fee}>{`${restaurant.fee} Delivery`}</Typography>
         </View>
-      </View>
-      <Typography style={styles.cuisine}>{restaurant.cuisine}</Typography>
-      <View style={styles.feeRow}>
-        <Image source={IMAGES.DELIVERY_BIKE} style={styles.feeBikeIcon} resizeMode='contain' />
-        <Typography style={styles.fee}>{`${restaurant.fee} Delivery`}</Typography>
-      </View>
+      ) : restaurant.distanceLabel ? (
+        <Typography style={styles.distance}>{restaurant.distanceLabel}</Typography>
+      ) : null}
     </View>
   </Pressable>
 );
@@ -191,5 +201,10 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     tintColor: COLORS.APP_TEXT_MUTED,
+  },
+  distance: {
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
+    marginTop: 8,
   },
 });

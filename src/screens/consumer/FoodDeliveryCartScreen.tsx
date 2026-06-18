@@ -40,6 +40,12 @@ import {
 
 const DEFAULT_DISTANCE_KM = 4.2;
 
+const formatEstimateAmount = (value: number | null | undefined, loading: boolean): string => {
+  if (loading) return '...';
+  if (value == null) return '—';
+  return formatMoney(value);
+};
+
 const formatDeliveryAddress = (addr: Address): string =>
   addr.full_address?.trim() ||
   [addr.street, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ') ||
@@ -54,11 +60,12 @@ const parseAddressCoord = (raw: string): number | null => {
 export const FoodDeliveryCartScreen = () => {
   const [promo, setPromo] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
+  const [estimateLoading, setEstimateLoading] = useState(false);
   const [foodEstimate, setFoodEstimate] = useState<EstimateBookingResult | null>(null);
   const [note, setNote] = useState('');
   const [placing, setPlacing] = useState(false);
   const dispatch = useAppDispatch();
-  const { restaurantId, restaurantName, items, deliveryFee } = useAppSelector(
+  const { restaurantId, restaurantName, restaurantDistanceKm, items } = useAppSelector(
     s => s.foodCart,
   );
   const { addressList, loadingAddresses, selectedId, refetch } = useAddressList();
@@ -80,10 +87,16 @@ export const FoodDeliveryCartScreen = () => {
     return { label, lat, lng };
   }, [addressList, selectedId]);
 
-  const resolveDistanceKm = useCallback(
-    () => extractEstimateDistanceKm(foodEstimate) ?? DEFAULT_DISTANCE_KM,
-    [foodEstimate],
-  );
+  const estimateRequestDistanceKm =
+    restaurantDistanceKm != null && Number.isFinite(restaurantDistanceKm)
+      ? restaurantDistanceKm
+      : DEFAULT_DISTANCE_KM;
+
+  const resolveDistanceKm = useCallback(() => {
+    const fromEstimate = extractEstimateDistanceKm(foodEstimate);
+    if (fromEstimate != null) return fromEstimate;
+    return estimateRequestDistanceKm;
+  }, [estimateRequestDistanceKm, foodEstimate]);
 
   const localSubtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
@@ -94,24 +107,62 @@ export const FoodDeliveryCartScreen = () => {
     () =>
       resolveFoodEstimateTotals(foodEstimate, {
         subTotal: localSubtotal,
-        deliveryFee,
+        deliveryFee: 0,
       }),
-    [foodEstimate, localSubtotal, deliveryFee],
+    [foodEstimate, localSubtotal],
+  );
+
+  const hasEstimate = foodEstimate != null;
+  const summaryDeliveryFee = hasEstimate ? totals.deliveryFee : null;
+  const summaryTotal = hasEstimate ? totals.totalAmount : null;
+
+  const buildFoodEstimatePayload = useCallback(
+    (promoCode?: string) => ({
+      booking_type: 'food' as const,
+      restaurant_id: Number(restaurantId) || 1,
+      delivery_latitude: deliveryAddress?.lat ?? 0,
+      delivery_longitude: deliveryAddress?.lng ?? 0,
+      distance_km: estimateRequestDistanceKm,
+      items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
+      ...(promoCode ? { promo_code: promoCode } : {}),
+    }),
+    [deliveryAddress?.lat, deliveryAddress?.lng, estimateRequestDistanceKm, items, restaurantId],
+  );
+
+  const fetchFoodEstimate = useCallback(
+    async (promoCode?: string) => {
+      if (items.length === 0 || !deliveryAddress || !restaurantId) return null;
+
+      setEstimateLoading(true);
+      try {
+        const result = await estimateBooking(buildFoodEstimatePayload(promoCode));
+        setFoodEstimate(result ?? null);
+        return result ?? null;
+      } catch (error) {
+        logger.error('food estimateBooking failed', error);
+        setFoodEstimate(null);
+        return null;
+      } finally {
+        setEstimateLoading(false);
+      }
+    },
+    [buildFoodEstimatePayload, deliveryAddress, items.length, restaurantId],
   );
 
   useEffect(() => {
     setFoodEstimate(null);
   }, [items, restaurantId, deliveryAddress?.lat, deliveryAddress?.lng]);
 
-  const buildFoodEstimatePayload = (promoCode?: string) => ({
-    booking_type: 'food' as const,
-    restaurant_id: Number(restaurantId) || 1,
-    delivery_latitude: deliveryAddress?.lat ?? 0,
-    delivery_longitude: deliveryAddress?.lng ?? 0,
-    distance_km: resolveDistanceKm(),
-    items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
-    ...(promoCode ? { promo_code: promoCode } : {}),
-  });
+  useEffect(() => {
+    if (items.length === 0 || !deliveryAddress || !restaurantId) return;
+    void fetchFoodEstimate();
+  }, [
+    deliveryAddress?.lat,
+    deliveryAddress?.lng,
+    fetchFoodEstimate,
+    items.length,
+    restaurantId,
+  ]);
 
   const handleApplyPromo = async () => {
     const promoTrimmed = promo.trim();
@@ -126,7 +177,7 @@ export const FoodDeliveryCartScreen = () => {
 
     setPromoLoading(true);
     try {
-      const result = await estimateBooking(buildFoodEstimatePayload(promoTrimmed));
+      const result = await fetchFoodEstimate(promoTrimmed);
       if (!result) {
         showToast({ message: 'Could not validate promo. Try again.', isError: true });
         return;
@@ -138,11 +189,9 @@ export const FoodDeliveryCartScreen = () => {
         return;
       }
 
-      setFoodEstimate(result);
-
       const applied = resolveFoodEstimateTotals(result, {
         subTotal: localSubtotal,
-        deliveryFee,
+        deliveryFee: 0,
       });
 
       if (applied.promoApplied || applied.discountAmount > 0) {
@@ -167,6 +216,10 @@ export const FoodDeliveryCartScreen = () => {
     if (!deliveryAddress) {
       showToast({ message: 'Please add a delivery address first.', isError: true });
       navigate(SCREENS.LOCATION);
+      return;
+    }
+    if (!hasEstimate) {
+      showToast({ message: 'Calculating delivery fee. Please wait.', isError: true });
       return;
     }
     setPlacing(true);
@@ -342,13 +395,18 @@ export const FoodDeliveryCartScreen = () => {
         <Typography style={styles.section}>Order Summary</Typography>
         <View style={styles.summary}>
           <Row label='Subtotal' value={formatMoney(totals.subTotal)} />
-          <Row label='Delivery Fee' value={formatMoney(totals.deliveryFee)} />
+          <Row
+            label='Delivery Fee'
+            value={formatEstimateAmount(summaryDeliveryFee, estimateLoading)}
+          />
           {totals.discountAmount > 0 ? (
             <Row label='Discount' value={formatMoney(-totals.discountAmount)} valueStyle={styles.discountVal} />
           ) : null}
           <RowComponent style={styles.totalRow}>
             <Typography style={styles.totalLabel}>Total</Typography>
-            <Typography style={styles.total}>{formatMoney(totals.totalAmount)}</Typography>
+            <Typography style={styles.total}>
+              {formatEstimateAmount(summaryTotal, estimateLoading)}
+            </Typography>
           </RowComponent>
           <View style={styles.payBadge}>
             <Icon
@@ -377,13 +435,19 @@ export const FoodDeliveryCartScreen = () => {
           onPress={handlePlaceOrder}
           style={[
             styles.placeWrap,
-            (placing || items.length === 0 || !deliveryAddress) && { opacity: 0.6 },
+            (placing || items.length === 0 || !deliveryAddress || estimateLoading || !hasEstimate) && {
+              opacity: 0.6,
+            },
           ]}
-          disabled={placing || items.length === 0 || !deliveryAddress}
+          disabled={placing || items.length === 0 || !deliveryAddress || estimateLoading || !hasEstimate}
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>
             <Typography style={styles.placeTxt}>
-              {placing ? 'Placing Order...' : `Place Order · ${formatMoney(totals.totalAmount)}`}
+              {placing
+                ? 'Placing Order...'
+                : estimateLoading
+                  ? 'Calculating total...'
+                  : `Place Order · ${formatEstimateAmount(summaryTotal, false)}`}
             </Typography>
           </AppGradient>
         </Pressable>

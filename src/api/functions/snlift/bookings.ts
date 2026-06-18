@@ -11,7 +11,19 @@ import {
   handlePatchApiRequest,
 } from '../app';
 import type { SnliftBooking, SnliftBookingsListResponse } from 'types/snliftApi';
+import { ENV_CONSTANTS } from 'constants/common';
+import {
+  alphaAcceptBooking,
+  alphaCreateFoodBooking,
+  alphaCreateParcelBooking,
+  alphaCreateRideBooking,
+  alphaEstimateBooking,
+  getAlphaBookingById,
+  removeAlphaSessionBooking,
+  updateAlphaSessionBookingStatus,
+} from 'constants/alphaBookingMocks';
 import { extractEstimateDistanceKm, resolveBookingDistanceKm } from 'utils/distance';
+import { BOOKING_STATUS } from 'utils/bookingStatuses';
 
 export type BookingRole = 'driver' | 'courier' | 'user' | string | null | undefined;
 
@@ -151,6 +163,9 @@ export function resolveFoodEstimateTotals(
 }
 
 export async function estimateBooking(data: EstimateBookingPayload) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return alphaEstimateBooking(data);
+  }
   const result = await handlePostApiRequest<EstimateBookingResult, EstimateBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS_ESTIMATE,
     data,
@@ -258,9 +273,15 @@ export function buildParcelBookingPayload(input: {
 }
 
 export function extractBookingFromResponse(
-  res: { booking: SnliftBooking } | SnliftBooking | null | undefined,
+  res: { booking?: SnliftBooking; data?: { booking?: SnliftBooking } } | SnliftBooking | null | undefined,
 ): SnliftBooking | null {
   if (!res) return null;
+
+  const fromData = (res as { data?: { booking?: SnliftBooking } }).data?.booking;
+  if (fromData) {
+    return normalizeSniftBooking(fromData as SnliftBooking & Record<string, unknown>);
+  }
+
   if ('booking' in res && res.booking) {
     return normalizeSniftBooking(res.booking as SnliftBooking & Record<string, unknown>);
   }
@@ -297,6 +318,10 @@ export async function getBookingById(
   role?: BookingRole,
   options?: BookingRequestOptions,
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    const booking = getAlphaBookingById(id);
+    return booking ? { booking } : null;
+  }
   return handleGetApiRequest<{ booking: SnliftBooking } | SnliftBooking>({
     url: bookingUrls(role).byId(id),
     showLoader: options?.showLoader ?? true,
@@ -361,6 +386,23 @@ export async function pollBookingAcceptStatus(
   role?: BookingRole,
   options?: BookingRequestOptions,
 ): Promise<BookingAcceptPollResult | null> {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    const existing = getAlphaBookingById(id);
+    if (!existing?.status) return null;
+    const pending = new Set<string>([
+      BOOKING_STATUS.PENDING,
+      BOOKING_STATUS.ORDER_PLACED,
+      BOOKING_STATUS.PLACING_ORDER,
+    ]);
+    if (pending.has(existing.status)) {
+      const accepted = alphaAcceptBooking(id);
+      if (accepted) {
+        return { status: accepted.booking.status!, pollAfterSeconds: 5 };
+      }
+    }
+    return { status: existing.status, pollAfterSeconds: 5 };
+  }
+
   const silent: BookingRequestOptions = {
     showLoader: false,
     showError: false,
@@ -390,6 +432,9 @@ export async function createRideBooking(
   data: CreateRideBookingPayload,
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return alphaCreateRideBooking(data);
+  }
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateRideBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS,
     data,
@@ -398,6 +443,9 @@ export async function createRideBooking(
 }
 
 export async function createFoodBooking(data: CreateFoodBookingPayload) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return alphaCreateFoodBooking(data);
+  }
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateFoodBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS,
     data,
@@ -409,6 +457,9 @@ export async function createParcelBooking(
   data: CreateParcelBookingPayload,
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return alphaCreateParcelBooking(data);
+  }
   return handlePostApiRequest<{ booking: SnliftBooking }, CreateParcelBookingPayload>({
     url: API_ROUTES.USER_BOOKINGS,
     data,
@@ -417,6 +468,9 @@ export async function createParcelBooking(
 }
 
 export async function acceptBooking(id: number | string, role: BookingRole) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return alphaAcceptBooking(id);
+  }
   const urls = bookingUrls(role);
   if (!urls.accept) return null;
   return handlePostApiRequest<{ booking: SnliftBooking }, Record<string, never>>({
@@ -445,6 +499,10 @@ export async function updateBookingStatus(
   status: string,
   role: BookingRole,
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    const booking = updateAlphaSessionBookingStatus(id, status);
+    return booking ? { booking } : null;
+  }
   const urls = bookingUrls(role);
   if (!urls.status) return null;
   return handlePatchApiRequest<{ booking: SnliftBooking }, { status: string }>({
@@ -459,6 +517,10 @@ export async function cancelBooking(
   role?: BookingRole,
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    const booking = updateAlphaSessionBookingStatus(id, BOOKING_STATUS.CANCELLED);
+    return booking ? { booking } : { booking: { id: Number(id), status: BOOKING_STATUS.CANCELLED } as SnliftBooking };
+  }
   return handlePostApiRequest<{ booking: SnliftBooking }, { cancellation_reason: string }>({
     url: bookingUrls(role).cancel(id),
     data: { cancellation_reason },
@@ -470,6 +532,10 @@ export async function deleteBooking(
   id: number | string,
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    removeAlphaSessionBooking(id);
+    return { message: 'deleted' };
+  }
   return handleDeleteApiRequest<{ message?: string }, Record<string, never>>({
     url: API_ROUTES.USER_BOOKING_BY_ID(id),
     data: {},

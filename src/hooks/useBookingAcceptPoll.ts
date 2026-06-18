@@ -1,9 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { pollBookingAcceptStatus } from 'api/functions/snlift/bookings';
 
+import { BOOKING_STATUS, normalizeBookingStatus } from 'utils/bookingStatuses';
+
 const DEFAULT_POLL_MS = 8000;
 
-const ACCEPTED_STATUSES = new Set(['accepted', 'in_transit']);
+const PROVIDER_MATCHED_STATUSES = new Set([
+  BOOKING_STATUS.ACCEPTED,
+  BOOKING_STATUS.ARRIVED,
+  BOOKING_STATUS.PREPARING,
+  BOOKING_STATUS.READY_FOR_PICKUP,
+  BOOKING_STATUS.PICKED_UP,
+  BOOKING_STATUS.IN_TRANSIT,
+]);
 
 /** Poll until provider accepts. Falls back to booking detail when tracking API is unavailable. */
 export function useBookingAcceptPoll(
@@ -33,8 +42,8 @@ export function useBookingAcceptPoll(
       const result = await pollBookingAcceptStatus(bookingId, 'user');
       if (cancelled) return;
 
-      const status = (result?.status ?? '').toLowerCase();
-      if (ACCEPTED_STATUSES.has(status)) {
+      const status = normalizeBookingStatus(result?.status);
+      if (PROVIDER_MATCHED_STATUSES.has(status)) {
         onAcceptedRef.current();
         return;
       }

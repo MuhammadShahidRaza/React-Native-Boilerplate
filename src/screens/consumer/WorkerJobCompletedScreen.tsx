@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   AppGradient,
@@ -28,7 +28,10 @@ export const WorkerJobCompletedScreen = () => {
   const role = useAppSelector(state => state.user?.role);
   const copy = getWorkerRoleCopy(role);
   const requestId = route.params?.requestId ?? '1';
-  const { detail, loading } = useWorkerRequestDetail(requestId, role);
+  const completedBooking = route.params?.completedBooking;
+  const { detail, loading } = useWorkerRequestDetail(requestId, role, {
+    initialBooking: completedBooking,
+  });
 
   useEffect(() => {
     void stopWorkerActiveJobTracking();
@@ -87,7 +90,15 @@ export const WorkerJobCompletedScreen = () => {
         <View style={styles.card}>
           <Typography style={styles.cardTitle}>Fare Breakdown</Typography>
           <Row label='Base Fare' value={detail.baseFare} />
-          <Row label='Commission (15%)' value={detail.commission} valueStyle={styles.commission} />
+          <Row
+            label={
+              detail.commissionPercentage
+                ? `Commission (${detail.commissionPercentage}%)`
+                : 'Commission'
+            }
+            value={detail.commission}
+            valueStyle={styles.commission}
+          />
           <View style={styles.earnedRow}>
             <Typography style={styles.earnedLabel}>You Earned</Typography>
             <Typography style={styles.earnedValue}>{detail.earned}</Typography>
@@ -99,7 +110,16 @@ export const WorkerJobCompletedScreen = () => {
           <View style={styles.walletRow}>
             <View style={styles.walletCol}>
               <Typography style={styles.walletLabel}>Previous balance</Typography>
-              <Typography style={styles.walletAmount}>{detail.previousWallet}</Typography>
+              <Typography
+                style={[
+                  styles.walletAmount,
+                  {
+                    color: COLORS.ERROR,
+                  },
+                ]}
+              >
+                {detail.previousWallet}
+              </Typography>
             </View>
             <Icon
               componentName={VARIABLES.FontAwesome}
@@ -110,7 +130,16 @@ export const WorkerJobCompletedScreen = () => {
             />
             <View style={[styles.walletCol, styles.walletColEnd]}>
               <Typography style={styles.walletLabel}>New Balance</Typography>
-              <Typography style={styles.walletAmount}>{detail.newWallet}</Typography>
+              <Typography
+                style={[
+                  styles.walletAmount,
+                  {
+                    color: COLORS.APP_PRIMARY,
+                  },
+                ]}
+              >
+                {detail.newWallet}
+              </Typography>
             </View>
           </View>
         </View>
@@ -243,7 +272,7 @@ const styles = StyleSheet.create({
     color: COLORS.APP_TEXT_MUTED,
   },
   walletAmount: {
-    fontSize: FontSize.ExtraLarge,
+    fontSize: FontSize.Large,
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,
   },

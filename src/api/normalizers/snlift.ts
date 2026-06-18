@@ -2,6 +2,8 @@ import type { Activity } from 'types/responseTypes';
 import type { User } from 'types/responseTypes';
 import type {
   SnliftBooking,
+  SnliftBookingDetailLine,
+  SnliftBookingRating,
   SnliftProvider,
   SnliftWalletSummary,
   SnliftWalletTransaction,
@@ -469,7 +471,77 @@ export function mergeBookingWithTrackingProvider(
   return merged ? { ...booking, provider: merged } : booking;
 }
 
+function pickMoneyField(
+  raw: Record<string, unknown> | undefined,
+  keys: string[],
+): number | string | undefined {
+  if (!raw) return undefined;
+  for (const key of keys) {
+    const v = raw[key];
+    if (v === undefined || v === null || v === '') continue;
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    if (typeof v === 'string' && v.trim()) return v.trim();
+  }
+  return undefined;
+}
+
+function normalizeBookingRating(raw: Record<string, unknown>): SnliftBookingRating | undefined {
+  const ratingRaw = raw.rating;
+  if (!ratingRaw || typeof ratingRaw !== 'object') return undefined;
+  const record = ratingRaw as Record<string, unknown>;
+  const score = pickNumber(record, ['rating', 'score']);
+  if (score == null) return undefined;
+
+  return {
+    id: pickNumber(record, ['id']) ?? undefined,
+    customer_id: pickNumber(record, ['customer_id']) ?? undefined,
+    rateable_type: pickString(record, ['rateable_type']) || undefined,
+    rateable_id: pickNumber(record, ['rateable_id']) ?? undefined,
+    rating: score,
+    review: pickString(record, ['review', 'comment']) || null,
+    created_at: pickString(record, ['created_at']) || null,
+    updated_at: pickString(record, ['updated_at']) || null,
+  };
+}
+
 /** Booking — provider/customer/restaurant aliases on nested objects. */
+function normalizeBookingDetails(raw: Record<string, unknown>): SnliftBookingDetailLine[] {
+  const detailsRaw = raw.bookingDetails ?? raw.booking_details ?? raw.details;
+  if (!Array.isArray(detailsRaw)) return [];
+
+  return detailsRaw.map(entry => {
+    const row = entry as Record<string, unknown>;
+    const menuItemRaw =
+      row.menuItem && typeof row.menuItem === 'object'
+        ? (row.menuItem as Record<string, unknown>)
+        : row.menu_item && typeof row.menu_item === 'object'
+          ? (row.menu_item as Record<string, unknown>)
+          : undefined;
+
+    const itemName =
+      pickString(row, ['item_name', 'name', 'title']) ||
+      pickString(menuItemRaw ?? {}, ['name', 'title', 'item_name']);
+
+    return {
+      id: pickNumber(row, ['id']) ?? undefined,
+      booking_id: pickNumber(row, ['booking_id']) ?? undefined,
+      menu_item_id: pickNumber(row, ['menu_item_id']) ?? undefined,
+      item_name: itemName,
+      quantity: pickNumber(row, ['quantity']) ?? 1,
+      unit_price:
+        pickMoneyField(row, ['unit_price', 'price']) ??
+        pickMoneyField(menuItemRaw, ['price']),
+      total_price: pickMoneyField(row, ['total_price', 'line_total']),
+      menuItem: menuItemRaw
+        ? {
+            ...(menuItemRaw as SnliftBookingDetailLine['menuItem']),
+            name: pickString(menuItemRaw, ['name', 'title', 'item_name']) || itemName,
+          }
+        : undefined,
+    };
+  });
+}
+
 export function normalizeSniftBooking(raw: SnliftBooking & Record<string, unknown>): SnliftBooking {
   const customerRaw = (raw.customer ?? {}) as Record<string, unknown>;
   const providerRaw = (raw.provider ?? {}) as Record<string, unknown>;
@@ -483,9 +555,38 @@ export function normalizeSniftBooking(raw: SnliftBooking & Record<string, unknow
     'order_type',
   ]) as SnliftBooking['booking_type'];
 
+  const bookingDetails = normalizeBookingDetails(raw);
+  const bookingRating = normalizeBookingRating(raw);
+  const reviewRaw =
+    raw.review && typeof raw.review === 'object'
+      ? (raw.review as Record<string, unknown>)
+      : null;
+  const customerRating =
+    pickNumber(raw, ['customer_rating', 'user_rating']) ??
+    (bookingRating?.rating != null ? pickNumber({ rating: bookingRating.rating }, ['rating']) : null) ??
+    pickNumber(reviewRaw ?? {}, ['rating']);
+  const reviewComment =
+    pickString(raw, ['review_comment']) ||
+    pickString(reviewRaw ?? {}, ['comment', 'review']) ||
+    (typeof bookingRating?.review === 'string' ? bookingRating.review : '') ||
+    (typeof raw.review_comment === 'string' ? raw.review_comment : '');
+
+  const items =
+    bookingDetails.length > 0
+      ? bookingDetails.map(detail => ({
+          menu_item_id: detail.menu_item_id,
+          quantity: detail.quantity,
+          name: detail.item_name,
+          price: detail.unit_price,
+          total_price: detail.total_price,
+        }))
+      : raw.items;
+
   return {
     ...raw,
     booking_type: bookingType || raw.booking_type,
+    bookingDetails: bookingDetails.length > 0 ? bookingDetails : raw.bookingDetails,
+    items,
     pickup_address:
       pickString(raw, ['pickup_address', 'pickup', 'from_address', 'origin_address']) ||
       raw.pickup_address,
@@ -510,11 +611,40 @@ export function normalizeSniftBooking(raw: SnliftBooking & Record<string, unknow
           ...(raw.restaurant as object),
           name: pickString(restaurantRaw, ['name', 'title']),
           image: pickString(restaurantRaw, ['image', 'logo', 'photo']) || null,
+          estimated_time:
+            pickString(restaurantRaw, ['estimated_time', 'delivery_time']) || undefined,
         }
       : raw.restaurant,
+    estimated_time:
+      pickString(raw, ['estimated_time', 'estimated_delivery_time']) ||
+      pickString(restaurantRaw, ['estimated_time', 'delivery_time']) ||
+      raw.estimated_time,
     total_amount:
       raw.total_amount ?? raw.estimated_amount ?? raw.fare ?? raw.amount ?? raw.price,
     estimated_amount: raw.estimated_amount ?? raw.total_amount ?? raw.fare ?? raw.sub_total,
+    sub_total: pickMoneyField(raw, ['sub_total', 'subtotal']) ?? raw.sub_total,
+    delivery_fee: pickMoneyField(raw, ['delivery_fee', 'delivery_charge', 'delivery_price']) ?? raw.delivery_fee,
+    discount_amount: pickMoneyField(raw, ['discount_amount', 'discount']) ?? raw.discount_amount,
+    base_fare: raw.base_fare ?? raw.total_amount ?? raw.estimated_amount,
+    commission: raw.commission ?? raw.commission_amount,
+    commission_amount: raw.commission_amount ?? raw.commission,
+    commission_percentage: raw.commission_percentage,
+    wallet_prev_balance: raw.wallet_prev_balance,
+    wallet_new_balance: raw.wallet_new_balance,
+    rating: bookingRating ?? (raw.rating as SnliftBooking['rating']),
+    customer_rating: customerRating ?? (raw.customer_rating as SnliftBooking['customer_rating']),
+    review_comment: reviewComment ?? raw.review_comment,
+    review: reviewRaw
+      ? {
+          rating: pickNumber(reviewRaw, ['rating']) ?? undefined,
+          comment: pickString(reviewRaw, ['comment', 'review']) ?? undefined,
+        }
+      : bookingRating
+        ? {
+            rating: bookingRating.rating,
+            comment: bookingRating.review ?? undefined,
+          }
+        : raw.review,
   };
 }
 

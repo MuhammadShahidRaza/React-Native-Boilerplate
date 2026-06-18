@@ -82,6 +82,7 @@ export type WorkerRequestDetail = WorkerRequestRecord & {
   payment: string;
   baseFare: string;
   commission: string;
+  commissionPercentage?: number;
   earned: string;
   previousWallet: string;
   newWallet: string;
@@ -116,6 +117,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     payment: 'Cash',
     baseFare: 'CFA 550',
     commission: '-CFA 82',
+    commissionPercentage: 15,
     earned: 'CFA 468',
     previousWallet: 'CFA 500',
     newWallet: 'CFA 418',
@@ -142,6 +144,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     payment: 'Cash',
     baseFare: 'CFA 550',
     commission: '-CFA 82',
+    commissionPercentage: 15,
     earned: 'CFA 468',
     previousWallet: 'CFA 500',
     newWallet: 'CFA 418',
@@ -168,6 +171,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     payment: 'Cash',
     baseFare: 'CFA 550',
     commission: '-CFA 82',
+    commissionPercentage: 15,
     earned: 'CFA 468',
     previousWallet: 'CFA 500',
     newWallet: 'CFA 418',

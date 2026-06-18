@@ -26,6 +26,34 @@ export type SnliftBookingsListResponse =
   | SnliftPaginated<SnliftBooking>
   | { bookings: SnliftBooking[] };
 
+export interface SnliftBookingRating {
+  id?: number;
+  customer_id?: number;
+  rateable_type?: string;
+  rateable_id?: number;
+  rating?: number | string;
+  review?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface SnliftBookingDetailLine {
+  id?: number;
+  booking_id?: number;
+  menu_item_id?: number;
+  item_name?: string;
+  quantity?: number;
+  unit_price?: number | string;
+  total_price?: number | string;
+  menuItem?: {
+    id?: number;
+    name?: string;
+    title?: string;
+    price?: number | string;
+    [key: string]: unknown;
+  };
+}
+
 export interface SnliftBooking {
   id: number;
   booking_type: SnliftBookingType;
@@ -50,18 +78,44 @@ export interface SnliftBooking {
   amount?: number | string;
   price?: number | string;
   commission_amount?: number | string;
+  base_fare?: number | string;
+  commission?: number | string;
+  commission_percentage?: number | string;
+  wallet_prev_balance?: number | string;
+  wallet_new_balance?: number | string;
   status?: SnliftBookingStatus;
   created_at?: string | null;
   cancellation_reason?: string | null;
   completed_at?: string | null;
-  items?: { menu_item_id?: number; quantity?: number }[];
+  customer_rating?: number | string | null;
+  review_comment?: string | null;
+  review?: { rating?: number | string; comment?: string };
+  /** Backend booking rating object (`rating.rating` = score). */
+  rating?: SnliftBookingRating | null;
+  item_description?: string | null;
+  sender_name?: string | null;
+  sender_phone?: string | null;
+  receiver_name?: string | null;
+  receiver_phone?: string | null;
+  items?: {
+    menu_item_id?: number;
+    quantity?: number;
+    name?: string;
+    title?: string;
+    price?: number | string;
+    total_price?: number | string;
+  }[];
+  bookingDetails?: SnliftBookingDetailLine[];
   restaurant_id?: number | null;
   restaurant?: {
     id?: number;
     name?: string;
     image?: string | null;
     logo?: string | null;
+    estimated_time?: string;
+    delivery_time?: string;
   };
+  estimated_time?: string;
   customer?: {
     id?: number;
     full_name?: string;
@@ -91,6 +145,7 @@ export interface SnliftRestaurant {
   cuisine?: string;
   description?: string;
   delivery_time?: string;
+  estimated_time?: string;
   delivery_fee?: number | string;
   image?: string | null;
   logo?: string | null;

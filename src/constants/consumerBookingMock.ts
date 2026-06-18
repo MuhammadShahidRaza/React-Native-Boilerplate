@@ -1,4 +1,5 @@
 import { INITIAL_REGION } from 'constants/common';
+import { BOOKING_STATUS } from 'utils/bookingStatuses';
 import type { SnliftBooking } from 'types/snliftApi';
 
 const LAT = INITIAL_REGION.latitude;
@@ -12,6 +13,15 @@ const MOCK_PROVIDER = {
   vehicle_color: 'Black',
   vehicle_license_plate: 'AA-001-AA',
 };
+
+const FOOD_NO_COURIER = new Set<string>([
+  BOOKING_STATUS.PENDING,
+  BOOKING_STATUS.ORDER_PLACED,
+  BOOKING_STATUS.PLACING_ORDER,
+  BOOKING_STATUS.ACCEPTED,
+  BOOKING_STATUS.PREPARING,
+  BOOKING_STATUS.READY_FOR_PICKUP,
+]);
 
 function daysAgo(days: number): string {
   const d = new Date();
@@ -39,8 +49,8 @@ function rideBooking(
     distance_km: 4.2,
     total_amount: 330,
     estimated_amount: 330,
-    provider_id: status === 'pending' ? null : MOCK_PROVIDER.id,
-    provider: status === 'pending' ? undefined : MOCK_PROVIDER,
+    provider_id: status === BOOKING_STATUS.PENDING ? null : MOCK_PROVIDER.id,
+    provider: status === BOOKING_STATUS.PENDING ? undefined : MOCK_PROVIDER,
     ...extra,
   };
 }
@@ -69,8 +79,12 @@ function foodBooking(
     total_amount: 1850,
     estimated_amount: 1850,
     delivery_fee: 50,
-    provider_id: ['order_placed', 'placing_order', 'pending'].includes(status) ? null : MOCK_PROVIDER.id,
-    provider: ['order_placed', 'placing_order', 'pending'].includes(status) ? undefined : MOCK_PROVIDER,
+    items: [
+      { menu_item_id: 1001, quantity: 2, name: 'Classic Burger', price: 450 },
+      { menu_item_id: 1003, quantity: 1, name: 'Crispy Fries', price: 180 },
+    ],
+    provider_id: FOOD_NO_COURIER.has(status) ? null : MOCK_PROVIDER.id,
+    provider: FOOD_NO_COURIER.has(status) ? undefined : MOCK_PROVIDER,
     ...extra,
   };
 }
@@ -95,34 +109,48 @@ function parcelBooking(
     distance_km: 12.3,
     total_amount: 2450,
     estimated_amount: 2450,
-    provider_id: status === 'pending' ? null : MOCK_PROVIDER.id,
-    provider: status === 'pending' ? undefined : MOCK_PROVIDER,
+    item_description: 'Documents envelope',
+    sender_name: 'Alex Morgan',
+    sender_phone: '+1 555 0101',
+    receiver_name: 'Jamie Lee',
+    receiver_phone: '+1 555 0102',
+    provider_id: status === BOOKING_STATUS.PENDING ? null : MOCK_PROVIDER.id,
+    provider: status === BOOKING_STATUS.PENDING ? undefined : MOCK_PROVIDER,
     ...extra,
   };
 }
 
-/** Alpha-phase consumer bookings — all service types and statuses for Activity / detail screens. */
+/** Alpha-phase consumer bookings — canonical status flows for ride, food, parcel. */
 export const ALPHA_CONSUMER_BOOKINGS: SnliftBooking[] = [
-  // —— Active: Ride ——
-  rideBooking(1001, 'pending', daysAgo(0)),
-  rideBooking(1002, 'accepted', daysAgo(0)),
-  rideBooking(1003, 'in_transit', daysAgo(0)),
-  // —— Active: Food ——
-  foodBooking(2001, 'order_placed', daysAgo(0)),
-  foodBooking(2002, 'preparing', daysAgo(0)),
-  foodBooking(2003, 'order_accepted', daysAgo(0)),
-  foodBooking(2004, 'picked_up', daysAgo(0)),
-  foodBooking(2005, 'on_the_way', daysAgo(0)),
-  foodBooking(2006, 'accepted', daysAgo(0)),
-  // —— Active: Parcel ——
-  parcelBooking(3001, 'pending', daysAgo(0)),
-  parcelBooking(3002, 'accepted', daysAgo(0)),
-  parcelBooking(3003, 'in_transit', daysAgo(0)),
-  // —— History ——
-  rideBooking(1004, 'completed', daysAgo(2), { completed_at: daysAgo(2) }),
-  foodBooking(2007, 'delivered', daysAgo(3), { completed_at: daysAgo(3) }),
-  parcelBooking(3004, 'completed', daysAgo(5), { completed_at: daysAgo(5) }),
-  rideBooking(1005, 'cancelled', daysAgo(7), {
+  // Ride: pending → accept → arrived → picked_up → in_transit → completed
+  rideBooking(1001, BOOKING_STATUS.PENDING, daysAgo(0)),
+  rideBooking(1002, BOOKING_STATUS.ACCEPTED, daysAgo(0)),
+  rideBooking(1003, BOOKING_STATUS.ARRIVED, daysAgo(0)),
+  rideBooking(1004, BOOKING_STATUS.PICKED_UP, daysAgo(0)),
+  rideBooking(1005, BOOKING_STATUS.IN_TRANSIT, daysAgo(0)),
+  // Food: accept → preparing → ready_for_pickup → picked_up → in_transit → completed
+  foodBooking(2001, BOOKING_STATUS.ORDER_PLACED, daysAgo(0)),
+  foodBooking(2002, BOOKING_STATUS.ACCEPTED, daysAgo(0)),
+  foodBooking(2003, BOOKING_STATUS.PREPARING, daysAgo(0)),
+  foodBooking(2004, BOOKING_STATUS.READY_FOR_PICKUP, daysAgo(0)),
+  foodBooking(2005, BOOKING_STATUS.PICKED_UP, daysAgo(0)),
+  foodBooking(2006, BOOKING_STATUS.IN_TRANSIT, daysAgo(0)),
+  // Parcel: accept → arrived → ready_for_pickup → picked_up → in_transit → completed
+  parcelBooking(3001, BOOKING_STATUS.PENDING, daysAgo(0)),
+  parcelBooking(3002, BOOKING_STATUS.ACCEPTED, daysAgo(0)),
+  parcelBooking(3003, BOOKING_STATUS.ARRIVED, daysAgo(0)),
+  parcelBooking(3004, BOOKING_STATUS.READY_FOR_PICKUP, daysAgo(0)),
+  parcelBooking(3005, BOOKING_STATUS.PICKED_UP, daysAgo(0)),
+  parcelBooking(3006, BOOKING_STATUS.IN_TRANSIT, daysAgo(0)),
+  // History
+  rideBooking(1010, BOOKING_STATUS.COMPLETED, daysAgo(2), {
+    completed_at: daysAgo(2),
+    rating: { id: 1, rating: 5, review: null },
+    customer_rating: 5,
+  }),
+  foodBooking(2010, BOOKING_STATUS.COMPLETED, daysAgo(3), { completed_at: daysAgo(3) }),
+  parcelBooking(3010, BOOKING_STATUS.COMPLETED, daysAgo(5), { completed_at: daysAgo(5) }),
+  rideBooking(1011, BOOKING_STATUS.CANCELLED, daysAgo(7), {
     cancellation_reason: 'Changed plans',
   }),
 ];
