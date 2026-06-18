@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   AppGradient,
   Button,
@@ -13,8 +14,9 @@ import {
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
-import { resetToHomeAndScreen } from 'navigation/index';
+import { navigate, resetToHomeAndScreen } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
+import { extractEstimateDistanceKm } from 'utils/distance';
 import { formatMoney } from 'utils/currency';
 import { SCREENS } from 'constants/routes';
 import {
@@ -27,6 +29,8 @@ import { getJobDisplayTimerSeconds } from 'api/functions/snlift/settings';
 import { showToast } from 'utils/toast';
 import { logger } from 'utils/logger';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
+import { useAddressList } from 'hooks/useAddressList';
+import type { Address } from 'types/responseTypes';
 import {
   clearCart,
   decrementItem,
@@ -35,6 +39,17 @@ import {
 } from 'store/slices/foodCart';
 
 const DEFAULT_DISTANCE_KM = 4.2;
+
+const formatDeliveryAddress = (addr: Address): string =>
+  addr.full_address?.trim() ||
+  [addr.street, addr.city, addr.state, addr.postal_code, addr.country].filter(Boolean).join(', ') ||
+  addr.street?.trim() ||
+  '';
+
+const parseAddressCoord = (raw: string): number | null => {
+  const n = parseFloat(raw);
+  return Number.isFinite(n) ? n : null;
+};
 
 export const FoodDeliveryCartScreen = () => {
   const [promo, setPromo] = useState('');
@@ -45,6 +60,29 @@ export const FoodDeliveryCartScreen = () => {
   const dispatch = useAppDispatch();
   const { restaurantId, restaurantName, items, deliveryFee } = useAppSelector(
     s => s.foodCart,
+  );
+  const { addressList, loadingAddresses, selectedId, refetch } = useAddressList();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
+  const deliveryAddress = useMemo(() => {
+    if (!selectedId) return null;
+    const addr = addressList.find(a => a.id === selectedId);
+    if (!addr) return null;
+    const lat = parseAddressCoord(addr.latitude);
+    const lng = parseAddressCoord(addr.longitude);
+    const label = formatDeliveryAddress(addr);
+    if (!label || lat == null || lng == null) return null;
+    return { label, lat, lng };
+  }, [addressList, selectedId]);
+
+  const resolveDistanceKm = useCallback(
+    () => extractEstimateDistanceKm(foodEstimate) ?? DEFAULT_DISTANCE_KM,
+    [foodEstimate],
   );
 
   const localSubtotal = useMemo(
@@ -63,14 +101,14 @@ export const FoodDeliveryCartScreen = () => {
 
   useEffect(() => {
     setFoodEstimate(null);
-  }, [items, restaurantId]);
+  }, [items, restaurantId, deliveryAddress?.lat, deliveryAddress?.lng]);
 
   const buildFoodEstimatePayload = (promoCode?: string) => ({
     booking_type: 'food' as const,
     restaurant_id: Number(restaurantId) || 1,
-    delivery_latitude: 0,
-    delivery_longitude: 0,
-    distance_km: DEFAULT_DISTANCE_KM,
+    delivery_latitude: deliveryAddress?.lat ?? 0,
+    delivery_longitude: deliveryAddress?.lng ?? 0,
+    distance_km: resolveDistanceKm(),
     items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
     ...(promoCode ? { promo_code: promoCode } : {}),
   });
@@ -126,16 +164,21 @@ export const FoodDeliveryCartScreen = () => {
       showToast({ message: 'Add at least one item to your cart.' });
       return;
     }
+    if (!deliveryAddress) {
+      showToast({ message: 'Please add a delivery address first.', isError: true });
+      navigate(SCREENS.LOCATION);
+      return;
+    }
     setPlacing(true);
     try {
       const promoTrimmed = promo.trim();
       const res = await createFoodBooking({
         booking_type: 'food',
         restaurant_id: Number(restaurantId) || 1,
-        delivery_address: 'Delivery address',
-        delivery_latitude: 0,
-        delivery_longitude: 0,
-        distance_km: DEFAULT_DISTANCE_KM,
+        delivery_address: deliveryAddress.label,
+        delivery_latitude: deliveryAddress.lat,
+        delivery_longitude: deliveryAddress.lng,
+        distance_km: resolveDistanceKm(),
         items: items.map(i => ({ menu_item_id: i.menuItemId, quantity: i.qty })),
         ...(promoTrimmed ? { promo_code: promoTrimmed } : {}),
       });
@@ -233,6 +276,49 @@ export const FoodDeliveryCartScreen = () => {
           ))
         )}
 
+        <Typography style={styles.section}>Delivery Address</Typography>
+        {loadingAddresses ? (
+          <View style={styles.addressLoading}>
+            <ActivityIndicator color={COLORS.APP_PRIMARY} />
+          </View>
+        ) : deliveryAddress ? (
+          <Pressable style={styles.deliveryCard} onPress={() => navigate(SCREENS.LOCATION)}>
+            <Icon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName='map-marker'
+              size={FontSize.Large}
+              color={COLORS.APP_PRIMARY}
+            />
+            <View style={styles.deliveryInfo}>
+              <Typography style={styles.deliveryLabel} numberOfLines={2}>
+                {deliveryAddress.label}
+              </Typography>
+              <Typography style={styles.deliveryChange}>Change address</Typography>
+            </View>
+            <Icon
+              componentName={VARIABLES.Feather}
+              iconName='chevron-right'
+              size={FontSize.Medium}
+              color={COLORS.APP_TEXT_MUTED}
+            />
+          </Pressable>
+        ) : (
+          <Pressable style={styles.addAddressCard} onPress={() => navigate(SCREENS.LOCATION)}>
+            <Icon
+              componentName={VARIABLES.MaterialIcons}
+              iconName='add-location'
+              size={FontSize.Large}
+              color={COLORS.APP_PRIMARY}
+            />
+            <View style={styles.deliveryInfo}>
+              <Typography style={styles.addAddressTitle}>Add Delivery Address</Typography>
+              <Typography style={styles.addAddressSub}>
+                Save your address to place a food order
+              </Typography>
+            </View>
+          </Pressable>
+        )}
+
         <Typography style={styles.section}>Promo Code</Typography>
         <View style={styles.promoRow}>
           <Input
@@ -289,8 +375,11 @@ export const FoodDeliveryCartScreen = () => {
 
         <Pressable
           onPress={handlePlaceOrder}
-          style={[styles.placeWrap, (placing || items.length === 0) && { opacity: 0.6 }]}
-          disabled={placing || items.length === 0}
+          style={[
+            styles.placeWrap,
+            (placing || items.length === 0 || !deliveryAddress) && { opacity: 0.6 },
+          ]}
+          disabled={placing || items.length === 0 || !deliveryAddress}
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>
             <Typography style={styles.placeTxt}>
@@ -395,6 +484,55 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.APP_DANGER_BG,
     borderRadius: 20,
     alignSelf: 'flex-start',
+  },
+  addressLoading: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  deliveryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 4,
+  },
+  addAddressCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: COLORS.APP_PRIMARY,
+    borderStyle: 'dashed',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 4,
+    backgroundColor: '#F0FDF4',
+  },
+  deliveryInfo: {
+    flex: 1,
+  },
+  deliveryLabel: {
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+    fontSize: FontSize.MediumSmall,
+  },
+  deliveryChange: {
+    marginTop: 4,
+    color: COLORS.APP_PRIMARY,
+    fontSize: FontSize.Small,
+  },
+  addAddressTitle: {
+    fontWeight: FontWeight.Bold,
+    color: COLORS.APP_TEXT,
+    fontSize: FontSize.MediumSmall,
+  },
+  addAddressSub: {
+    marginTop: 4,
+    color: COLORS.APP_TEXT_MUTED,
+    fontSize: FontSize.Small,
   },
   promoRow: {
     flexDirection: 'row',

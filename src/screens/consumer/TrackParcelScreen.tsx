@@ -29,8 +29,10 @@ import { CancelReasonModal } from './CancelReasonModal';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { mapParcelTrackPhase } from 'utils/bookingTrackPhases';
 import { resolveParcelDirectionsLeg } from 'utils/trackingDirections';
+import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
 import { showToast } from 'utils/toast';
 
@@ -62,6 +64,7 @@ export const TrackParcelScreen = () => {
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [rating, setRating] = useState(0);
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const mapRef = useRef<MapView>(null);
 
   const pickup = track.pickup ?? fallbackCoord(pickupLat, pickupLng);
@@ -78,12 +81,21 @@ export const TrackParcelScreen = () => {
     return mapParcelTrackPhase(track.status);
   }, [track.status]);
 
+  const directionsOrigin = useThrottledMapCoord(track.providerCoord, 8000, 0.05);
+
   const directionsLeg = useMemo(
-    () => resolveParcelDirectionsLeg(phase, pickup, dropoff, track.providerCoord),
-    [phase, pickup, dropoff, track.providerCoord],
+    () => resolveParcelDirectionsLeg(phase, pickup, dropoff, directionsOrigin),
+    [phase, pickup, dropoff, directionsOrigin],
   );
 
-  const onDirectionsReady = useCallback(() => {}, []);
+  const vehicleBearing = useMemo(
+    () => resolveVehicleMapBearing(track.providerCoord, routeCoords, track.providerBearing, 'bike'),
+    [routeCoords, track.providerCoord, track.providerBearing],
+  );
+
+  const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
+    setRouteCoords(coordinates);
+  }, []);
 
   const status = useMemo(() => {
     switch (phase) {
@@ -146,7 +158,7 @@ export const TrackParcelScreen = () => {
         {showCourier && track.providerCoord ? (
           <LiveVehicleMapMarker
             coordinate={track.providerCoord}
-            bearing={track.providerBearing}
+            bearing={vehicleBearing}
             kind='bike'
           />
         ) : null}

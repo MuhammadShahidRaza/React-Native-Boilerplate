@@ -73,3 +73,18 @@ export function resolveCourierToDropoffLeg(
     legKey: 'dropoff-leg',
   };
 }
+
+/** Worker navigation — route from live GPS (throttled) to pickup or dropoff. */
+export function resolveWorkerDirectionsLeg(
+  phase: 'pickup' | 'dropoff',
+  destination: MapCoord,
+  vehicleCoord: MapCoord | null,
+): TrackingDirectionsLeg | null {
+  if (!vehicleCoord) return null;
+
+  return {
+    origin: vehicleCoord,
+    destination,
+    legKey: phase === 'pickup' ? 'pickup-leg' : 'dropoff-leg',
+  };
+}

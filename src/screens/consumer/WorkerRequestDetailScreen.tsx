@@ -25,8 +25,13 @@ import { showToast } from 'utils/toast';
 import { ENV_CONSTANTS } from 'constants/common';
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useWorkerRequestDetail } from 'hooks/useWorkerRequestDetail';
-import { logger } from 'utils/logger';
 import { startWorkerActiveJobTracking } from 'services/location/workerActiveJobTracking';
+import {
+  isWorkerActiveJob,
+  isWorkerRequestPending,
+  isWorkerTerminalBookingStatus,
+  workerJobNavigationPhase,
+} from 'utils/workerBookingNavigation';
 
 const AVATAR_SIZE = 56;
 
@@ -51,8 +56,6 @@ export const WorkerRequestDetailScreen = () => {
   const [timerActive, setTimerActive] = useState(true);
   const [rejecting, setRejecting] = useState(false);
   const hasAcceptedRef = useRef(false);
-
-  logger.log('detail', detail);
 
   useFocusEffect(
     useCallback(() => {
@@ -99,9 +102,10 @@ export const WorkerRequestDetailScreen = () => {
     });
   };
 
-  const isPending = bookingStatus === 'pending';
-  const isActiveJob = bookingStatus === 'accepted' || bookingStatus === 'in_transit';
-  const isTerminal = bookingStatus === 'completed' || bookingStatus === 'cancelled';
+  const serviceType = detail?.serviceType;
+  const isPending = isWorkerRequestPending(bookingStatus, serviceType);
+  const isActiveJob = isWorkerActiveJob(bookingStatus, serviceType);
+  const isTerminal = isWorkerTerminalBookingStatus(bookingStatus);
 
   const reject = async () => {
     if (!detail || rejecting || hasAcceptedRef.current) return;
@@ -134,7 +138,7 @@ export const WorkerRequestDetailScreen = () => {
     if (!detail) return;
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
-      phase: bookingStatus === 'in_transit' ? 'dropoff' : 'pickup',
+      phase: workerJobNavigationPhase(bookingStatus, detail.serviceType),
     });
   };
 

@@ -17,6 +17,8 @@ import { SkeletonWrapper } from 'components/common';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { APP_GRADIENT_HORIZONTAL, COLORS, screenWidth } from 'utils/index';
+import { ENV_CONSTANTS } from 'constants/common';
+import { getAlphaConsumerBookings } from 'constants/consumerBookingMock';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import {
   isActiveBookingStatus,
@@ -295,6 +297,11 @@ function ActivePane() {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        const active = getAlphaConsumerBookings().filter(b => isActiveBookingStatus(b.status));
+        setItems(active.map(mapBookingToActivityItem));
+        return;
+      }
       const res = await listBookings(undefined, 'user', { showLoader: false });
       const active = extractBookingsList(res).filter(b => isActiveBookingStatus(b.status));
       setItems(active.map(mapBookingToActivityItem));
@@ -330,6 +337,11 @@ function HistoryPane() {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        const history = getAlphaConsumerBookings().filter(b => !isActiveBookingStatus(b.status));
+        setItems(history.map(mapBookingToActivityItem));
+        return;
+      }
       const res = await listBookings(undefined, 'user', { showLoader: false });
       const history = extractBookingsList(res).filter(b => !isActiveBookingStatus(b.status));
       setItems(history.map(mapBookingToActivityItem));

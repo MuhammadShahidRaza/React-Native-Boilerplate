@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
@@ -36,8 +36,10 @@ import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
 import { useFoodOrderDisplay } from 'hooks/useFoodOrderDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { mapFoodOrderPhase } from 'utils/bookingTrackPhases';
 import { resolveCourierToDropoffLeg } from 'utils/trackingDirections';
+import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
 import { showToast } from 'utils/toast';
 
@@ -60,6 +62,8 @@ function FoodOrderPhaseModal({
   subtitle,
   icon,
   timerElement,
+  showCancel,
+  onCancelPress,
 }: {
   visible: boolean;
   heading?: string;
@@ -67,32 +71,33 @@ function FoodOrderPhaseModal({
   subtitle: string;
   icon: PhaseStatus['icon'];
   timerElement?: React.ReactNode;
+  showCancel?: boolean;
+  onCancelPress?: () => void;
 }) {
+  if (!visible) return null;
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType='fade'
-      statusBarTranslucent
-      presentationStyle='overFullScreen'
-    >
-      <View style={styles.phaseModalScrim}>
-        <View style={styles.overlayCard}>
-          {heading ? (
-            <Typography style={styles.overlayHeading}>{heading}</Typography>
-          ) : null}
-          <GradientIcon
-            {...icon}
-            color={COLORS.WHITE}
-            containerSize={72}
-            borderRadius={36}
-          />
-          <Typography style={styles.overlayTitle}>{title}</Typography>
-          <Typography style={styles.overlaySubtitle}>{subtitle}</Typography>
-          {timerElement ?? null}
-        </View>
+    <View style={styles.phaseModalScrim} pointerEvents='box-none'>
+      <View style={styles.overlayCard} pointerEvents='auto'>
+        {heading ? (
+          <Typography style={styles.overlayHeading}>{heading}</Typography>
+        ) : null}
+        <GradientIcon
+          {...icon}
+          color={COLORS.WHITE}
+          containerSize={72}
+          borderRadius={36}
+        />
+        <Typography style={styles.overlayTitle}>{title}</Typography>
+        <Typography style={styles.overlaySubtitle}>{subtitle}</Typography>
+        {timerElement ?? null}
+        {showCancel && onCancelPress ? (
+          <Pressable style={styles.overlayCancelBtn} onPress={onCancelPress}>
+            <Typography style={styles.overlayCancelTxt}>Cancel Order</Typography>
+          </Pressable>
+        ) : null}
       </View>
-    </Modal>
+    </View>
   );
 }
 
@@ -106,6 +111,7 @@ export const TrackFoodOrderScreen = () => {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
   const [rating, setRating] = useState(0);
+  const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const mapRef = useRef<MapView>(null);
   const freshTimerRef = useRef(isFreshJobTimer(route.params));
   const timerHandledRef = useRef(false);
@@ -156,16 +162,13 @@ export const TrackFoodOrderScreen = () => {
     setExpiredVisible(true);
   };
 
-  const handleSearchAgain = async () => {
+  const handlePlaceNewOrder = async () => {
     setExpiredVisible(false);
     const ok = await deleteSniftBooking(bookingId);
     if (ok) navigate(SCREENS.ORDER_FOOD);
   };
 
-  const handleBackPress = async () => {
-    if (phase === 'order_placed') {
-      await deleteSniftBooking(bookingId);
-    }
+  const handleBackPress = () => {
     onBack();
   };
 
@@ -177,9 +180,18 @@ export const TrackFoodOrderScreen = () => {
   };
 
   const showMap = phase === 'on_the_way';
+  const directionsOrigin = useThrottledMapCoord(
+    showMap ? track.providerCoord : null,
+    8000,
+    0.05,
+  );
   const directionsLeg = useMemo(
-    () => (showMap ? resolveCourierToDropoffLeg(dropoff, track.providerCoord) : null),
-    [showMap, dropoff, track.providerCoord],
+    () => (showMap ? resolveCourierToDropoffLeg(dropoff, directionsOrigin) : null),
+    [showMap, dropoff, directionsOrigin],
+  );
+  const vehicleBearing = useMemo(
+    () => resolveVehicleMapBearing(track.providerCoord, routeCoords, track.providerBearing, 'bike'),
+    [routeCoords, track.providerCoord, track.providerBearing],
   );
   const showPreparingHero = phase === 'preparing';
   const showOverlayCard = IS_ALPHA
@@ -190,7 +202,9 @@ export const TrackFoodOrderScreen = () => {
   const isDelivered = phase === 'delivered';
   const canCancel = phase !== 'on_the_way' && phase !== 'delivered';
 
-  const onDirectionsReady = useCallback((_coordinates: MapCoord[]) => {}, []);
+  const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
+    setRouteCoords(coordinates);
+  }, []);
 
   const status = useMemo((): PhaseStatus => {
     switch (phase) {
@@ -224,7 +238,7 @@ export const TrackFoodOrderScreen = () => {
           icon: { componentName: VARIABLES.MaterialCommunityIcons, iconName: 'room-service', size: 36 },
           title: 'Preparing Order',
           subtitle:
-            'Your order is being prepared. It takes upto 2 - 3 minutes to prepare the order.',
+            'Your order is being prepared. It takes upto 20 - 30 minutes to prepare the order.',
         };
       case 'picked_up':
         return {
@@ -259,6 +273,7 @@ export const TrackFoodOrderScreen = () => {
       backgroundColor={COLORS.WHITE}
       darkMode={false}
     >
+      <View style={styles.screenRoot}>
       <View style={styles.screen}>
         {showMap ? (
           <View style={styles.mapWrap}>
@@ -274,7 +289,7 @@ export const TrackFoodOrderScreen = () => {
               {track.providerCoord && !isDelivered ? (
                 <LiveVehicleMapMarker
                   coordinate={track.providerCoord}
-                  bearing={track.providerBearing}
+                  bearing={vehicleBearing}
                   kind='bike'
                 />
               ) : null}
@@ -297,7 +312,7 @@ export const TrackFoodOrderScreen = () => {
               <RideProgressSegments stepCount={4} activeSegmentIndex={activeSegment} />
               <View style={styles.etaPill}>
                 <Typography style={styles.etaTxt}>
-                  {`Estimated delivery: ${order?.etaLabel ?? '—'}`}
+                  {`Estimated delivery: ${order?.etaLabel ?? '30 minutes'}`}
                 </Typography>
               </View>
             </>
@@ -393,6 +408,8 @@ export const TrackFoodOrderScreen = () => {
         title={status.title}
         subtitle={status.subtitle}
         icon={status.icon}
+        showCancel={phase === 'order_placed'}
+        onCancelPress={() => setCancelOpen(true)}
         timerElement={
           phase === 'order_placed' && ready && expiresAt ? (
             <WorkerRequestTimer
@@ -403,12 +420,15 @@ export const TrackFoodOrderScreen = () => {
           ) : null
         }
       />
+      </View>
 
       <JobTimerExpiredModal
         visible={expiredVisible}
-        title='No Restaurant Found'
-        description='We could not find a restaurant to accept your order. Search again or cancel.'
-        onSearchAgain={handleSearchAgain}
+        title='Order Not Accepted'
+        description='The restaurant did not accept your order in time. Place a new order or delete this one.'
+        primaryButtonTitle='Place New Order'
+        secondaryButtonTitle='Delete Order'
+        onSearchAgain={handlePlaceNewOrder}
         onCancel={async () => {
           setExpiredVisible(false);
           const ok = await deleteSniftBooking(bookingId);
@@ -419,13 +439,24 @@ export const TrackFoodOrderScreen = () => {
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        onContinue={reason => cancelSniftBooking(bookingId, reason)}
+        onContinue={async reason => {
+          const ok = await cancelSniftBooking(bookingId, reason);
+          if (ok) {
+            timerHandledRef.current = true;
+            replace(SCREENS.BOTTOM_STACK);
+          }
+          return ok;
+        }}
       />
     </Wrapper>
   );
 };
 
 const styles = StyleSheet.create({
+  screenRoot: {
+    flex: 1,
+    position: 'relative',
+  },
   screen: {
     flex: 1,
   },
@@ -505,12 +536,16 @@ const styles = StyleSheet.create({
     fontSize: FontSize.Medium,
   },
   phaseModalScrim: {
-    flex: 1,
-    width: '100%',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
+    zIndex: 50,
   },
   overlayCard: {
     backgroundColor: COLORS.WHITE,
@@ -546,5 +581,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     paddingHorizontal: 4,
+  },
+  overlayCancelBtn: {
+    marginTop: 8,
+    backgroundColor: '#FFEDD5',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+  },
+  overlayCancelTxt: {
+    color: COLORS.APP_DANGER_TEXT,
+    fontWeight: FontWeight.SemiBold,
+    fontSize: FontSize.Medium,
   },
 });

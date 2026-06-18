@@ -32,11 +32,11 @@ import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { mapBookingToRideTrip } from 'hooks/useRideTripDisplay';
 import { MOCK_RIDE_TRIP } from 'components/common/ride/rideMockTrip';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
-import { getVehicleMarkerHeading } from 'hooks/useWorkerGpsNavigation';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { mapRideTrackPhase } from 'utils/bookingTrackPhases';
 import { resolveRideDirectionsLeg, rideStatusLabel } from 'utils/rideTrackMap';
-import { bearingAlongPolyline, type MapCoord } from 'utils/coordinateAlongPolyline';
+import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
+import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
 const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
@@ -124,15 +124,10 @@ export const TrackRideScreen = () => {
     [directionsLeg?.legKey],
   );
 
-  const vehicleBearing = useMemo(() => {
-    if (routeCoords.length >= 2 && track.providerCoord) {
-      const routeBearing = bearingAlongPolyline(routeCoords, track.providerCoord);
-      if (routeBearing != null) {
-        return getVehicleMarkerHeading(routeBearing, 'car');
-      }
-    }
-    return track.providerBearing;
-  }, [routeCoords, track.providerCoord, track.providerBearing]);
+  const vehicleBearing = useMemo(
+    () => resolveVehicleMapBearing(track.providerCoord, routeCoords, track.providerBearing, 'car'),
+    [routeCoords, track.providerCoord, track.providerBearing],
+  );
 
   const recenterPoints = useMemo(() => {
     const points: MapCoord[] = [...routeCoords, pickupCoord, dropoffCoord];

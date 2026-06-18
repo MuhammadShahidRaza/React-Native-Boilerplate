@@ -1,10 +1,10 @@
 import { SCREENS } from 'constants/routes';
 import type { SnliftBooking } from 'types/snliftApi';
-import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import type { ParcelTrackPhase } from 'types/parcelTrip';
 import type { RideTrackPhase } from 'types/rideTracking';
 
 import { parseMapCoord } from 'utils/bookingCoords';
+import { isTerminalBookingStatus, mapFoodOrderPhase } from 'utils/bookingTrackPhases';
 
 function bookingCoords(booking: SnliftBooking) {
   const pickupLat = parseMapCoord(booking.pickup_latitude, booking.pickup_longitude)?.latitude;
@@ -68,20 +68,37 @@ export function buildConsumerBookingTrackTarget(booking: SnliftBooking): {
   }
 
   if (type === 'food') {
-    if (status === 'pending' || status === 'accepted' || status === 'in_transit') {
-      let phase: FoodOrderPhase = 'order_placed';
-      if (status === 'accepted') phase = 'preparing';
-      if (status === 'in_transit') phase = 'on_the_way';
-      return { screen: SCREENS.TRACK_FOOD_ORDER, params: { bookingId: booking.id, phase } };
-    }
-    return null;
+    if (isTerminalBookingStatus(status)) return null;
+    const phase = mapFoodOrderPhase(booking.status);
+    return { screen: SCREENS.TRACK_FOOD_ORDER, params: { bookingId: booking.id, phase } };
   }
 
   return null;
 }
 
-export function canCancelConsumerBooking(status: string | undefined): boolean {
+export function getConsumerTrackButtonLabel(booking: SnliftBooking): string | null {
+  if (!buildConsumerBookingTrackTarget(booking)) return null;
+  const status = (booking.status ?? 'pending').toLowerCase();
+  const pendingLike =
+    status === 'pending' || status === 'order_placed' || status === 'placing_order';
+  return pendingLike ? 'View Live Status' : 'Track Order';
+}
+
+export function canCancelConsumerBooking(
+  status: string | undefined,
+  bookingType?: SnliftBooking['booking_type'],
+): boolean {
   const s = (status ?? '').toLowerCase();
+  if (bookingType === 'food') {
+    return (
+      s === 'pending' ||
+      s === 'order_placed' ||
+      s === 'placing_order' ||
+      s === 'accepted' ||
+      s === 'order_accepted' ||
+      s === 'preparing'
+    );
+  }
   return s === 'pending' || s === 'accepted';
 }
 

@@ -48,6 +48,12 @@ function statusLabel(status: SnliftBookingStatus | undefined): string {
     in_transit: 'On The Way',
     completed: 'Completed',
     cancelled: 'Cancelled',
+    order_placed: 'Order Placed',
+    order_accepted: 'Order Accepted',
+    preparing: 'Preparing',
+    picked_up: 'Picked Up',
+    on_the_way: 'On The Way',
+    delivered: 'Delivered',
   };
   return map[status ?? ''] ?? (status ?? 'Pending');
 }

@@ -14,6 +14,8 @@ import { SCREENS } from 'constants/routes';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { onBack, pushRootScreen } from 'navigation/Navigators';
+import { ENV_CONSTANTS } from 'constants/common';
+import { getAlphaConsumerBookingById } from 'constants/consumerBookingMock';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { getBookingStatusLabel } from 'api/mappers/snliftBooking';
 import type { SnliftBooking } from 'types/snliftApi';
@@ -21,14 +23,18 @@ import { COLORS, formatMoney, formatDistanceKm } from 'utils/index';
 import {
   buildConsumerBookingTrackTarget,
   canCancelConsumerBooking,
+  getConsumerTrackButtonLabel,
 } from 'utils/consumerBookingNavigation';
+import { isTerminalBookingStatus } from 'utils/bookingTrackPhases';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { CancelReasonModal } from './CancelReasonModal';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#F59E0B',
   accepted: COLORS.APP_PRIMARY,
-  in_transit: COLORS.APP_SECONDARY,
+  preparing: COLORS.APP_PRIMARY,
+  picked_up: COLORS.APP_SECONDARY,
+  on_the_way: COLORS.APP_SECONDARY,
   completed: '#16A34A',
   cancelled: COLORS.RED,
 };
@@ -66,6 +72,11 @@ export const ConsumerBookingDetailScreen = () => {
       return;
     }
     setLoading(true);
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      setBooking(getAlphaConsumerBookingById(bookingId) ?? null);
+      setLoading(false);
+      return;
+    }
     const res = await getBookingById(bookingId, 'user');
     setBooking(extractBookingFromResponse(res));
     setLoading(false);
@@ -78,8 +89,9 @@ export const ConsumerBookingDetailScreen = () => {
   const statusKey = (booking?.status ?? 'pending').toLowerCase();
   const statusColor = STATUS_COLORS[statusKey] ?? COLORS.APP_PRIMARY;
   const trackTarget = booking ? buildConsumerBookingTrackTarget(booking) : null;
-  const showCancel = canCancelConsumerBooking(booking?.status);
-  const isTerminal = statusKey === 'completed' || statusKey === 'cancelled';
+  const showCancel = canCancelConsumerBooking(booking?.status, booking?.booking_type);
+  const isTerminal = isTerminalBookingStatus(booking?.status);
+  const trackButtonLabel = booking ? getConsumerTrackButtonLabel(booking) : null;
 
   const handleTrack = () => {
     if (!trackTarget) return;
@@ -88,13 +100,6 @@ export const ConsumerBookingDetailScreen = () => {
       trackTarget.params as RootStackParamList[keyof RootStackParamList],
     );
   };
-
-  const trackButtonLabel =
-    statusKey === 'pending'
-      ? 'View Live Status'
-      : statusKey === 'accepted' || statusKey === 'in_transit'
-        ? 'Track Order'
-        : null;
 
   return (
     <Wrapper

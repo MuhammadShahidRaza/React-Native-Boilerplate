@@ -37,9 +37,23 @@ export function mapParcelTrackPhase(status: string | undefined): ParcelTrackPhas
 
 export function mapFoodOrderPhase(status: string | undefined): FoodOrderPhase {
   const s = (status ?? '').toLowerCase();
-  if (s === 'completed') return 'delivered';
-  if (s === 'in_transit') return 'on_the_way';
+  if (s === 'completed' || s === 'delivered' || s === 'complete') return 'delivered';
+  if (s === 'in_transit' || s === 'on_the_way') return 'on_the_way';
+  if (s === 'picked_up') return 'picked_up';
+  if (s === 'preparing' || s === 'order_accepted') return 'preparing';
   if (s === 'accepted') return 'preparing';
-  if (s === 'pending') return 'order_placed';
+  if (s === 'placing_order') return 'placing_order';
+  if (s === 'pending' || s === 'order_placed') return 'order_placed';
   return 'order_placed';
+}
+
+export function isTerminalBookingStatus(status: string | undefined): boolean {
+  const s = (status ?? '').toLowerCase();
+  return (
+    s === 'completed' ||
+    s === 'complete' ||
+    s === 'delivered' ||
+    s === 'cancelled' ||
+    s === 'canceled'
+  );
 }

@@ -21,14 +21,23 @@ import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CustomBackIcon, navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import { APP_GRADIENT_HORIZONTAL, COLORS, openPhoneNumber, screenHeight } from 'utils/index';
+import {
+  APP_GRADIENT_HORIZONTAL,
+  COLORS,
+  fitMapToDirectionCoordinates,
+  openPhoneNumber,
+  screenHeight,
+} from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { useWorkerRequestDetail } from 'hooks/useWorkerRequestDetail';
 import { useWorkerGpsNavigation } from 'hooks/useWorkerGpsNavigation';
 import { useMapDriveFollow } from 'hooks/useMapDriveFollow';
+import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
 import { isValidMapCoord } from 'utils/coordinateAlongPolyline';
+import { resolveWorkerDirectionsLeg } from 'utils/trackingDirections';
+import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import {
   isWorkerNearCoord,
   parseDirectionSteps,
@@ -59,13 +68,13 @@ export const WorkerJobNavigationScreen = () => {
   const [phase, setPhase] = useState<JobPhase>(route.params?.phase ?? 'pickup');
   const [pickupConfirmed, setPickupConfirmed] = useState(false);
   const mapRef = useRef<MapView>(null);
+  const fittedLegRef = useRef<string | null>(null);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const [navSteps, setNavSteps] = useState<NavStep[]>([]);
   const [routeMetrics, setRouteMetrics] = useState<WorkerRouteMetrics>({
     distanceKm: 0,
     durationMin: 5,
   });
-  const [directionsOrigin, setDirectionsOrigin] = useState<MapCoord | null>(null);
 
   const pickupCoord = useMemo(
     () => ({
@@ -102,19 +111,38 @@ export const WorkerJobNavigationScreen = () => {
     vehicleKind: vehicleMarkerKind,
   });
 
+  const directionsOrigin = useThrottledMapCoord(live.vehicleCoord, 8000, 0.05);
+
+  const directionsLeg = useMemo(
+    () => resolveWorkerDirectionsLeg(phase, directionsDestination, directionsOrigin),
+    [phase, directionsDestination, directionsOrigin],
+  );
+
+  const vehicleBearing = useMemo(
+    () =>
+      resolveVehicleMapBearing(
+        live.vehicleCoord,
+        routeCoords,
+        live.vehicleBearing,
+        vehicleMarkerKind,
+      ),
+    [live.vehicleCoord, routeCoords, live.vehicleBearing, vehicleMarkerKind],
+  );
+
   const isNearTarget = useMemo(
     () => isWorkerNearCoord(live.vehicleCoord, directionsDestination),
     [live.vehicleCoord, directionsDestination],
   );
 
   const proximityRequired = !ENV_CONSTANTS.IS_ALPHA_PHASE;
-  const proximityBlocked =
-    proximityRequired && (!live.vehicleCoord || !isNearTarget);
+  // const proximityBlocked =
+  //   proximityRequired && (!live.vehicleCoord || !isNearTarget);
+  const proximityBlocked = false;
 
   const { onMapUserInteraction, resumeFollow } = useMapDriveFollow(
     mapRef,
     live.vehicleCoord,
-    live.vehicleBearing,
+    vehicleBearing,
     live.isMoving,
   );
 
@@ -134,22 +162,10 @@ export const WorkerJobNavigationScreen = () => {
   }, [detail?.id, userDetails?.id, role]);
 
   useEffect(() => {
-    if (phase === 'dropoff') {
-      setDirectionsOrigin(pickupCoord);
-      setRouteCoords([]);
-      setNavSteps([]);
-      return;
-    }
-    setDirectionsOrigin(null);
-  }, [phase, pickupCoord]);
-
-  useEffect(() => {
-    if (phase !== 'pickup' || directionsOrigin) return;
-    const coord = live.vehicleCoord;
-    if (coord && isValidMapCoord(coord.latitude, coord.longitude)) {
-      setDirectionsOrigin(coord);
-    }
-  }, [phase, directionsOrigin, live.vehicleCoord]);
+    fittedLegRef.current = null;
+    setRouteCoords([]);
+    setNavSteps([]);
+  }, [phase]);
 
   const mapRegion = useMemo(() => {
     const points = [pickupCoord, dropoffCoord, directionsDestination];
@@ -198,8 +214,13 @@ export const WorkerJobNavigationScreen = () => {
         durationMin: Math.max(1, Math.round(result.duration)),
       });
       setNavSteps(parseDirectionSteps(result.legs));
+      const legKey = directionsLeg?.legKey ?? '';
+      if (fittedLegRef.current !== legKey) {
+        fittedLegRef.current = legKey;
+        fitMapToDirectionCoordinates(mapRef, result.coordinates, { animated: true });
+      }
     },
-    [],
+    [directionsLeg?.legKey],
   );
 
   const primaryCta =
@@ -217,10 +238,10 @@ export const WorkerJobNavigationScreen = () => {
         showToast({ message: 'Waiting for GPS location…' });
         return;
       }
-      if (!isNearTarget) {
-        showToast({ message: workerProximityBlockedMessage(phase) });
-        return;
-      }
+      // if (!isNearTarget) {
+      //   showToast({ message: workerProximityBlockedMessage(phase) });
+      //   return;
+      // }
     }
 
     if (phase === 'pickup') {
@@ -295,7 +316,7 @@ export const WorkerJobNavigationScreen = () => {
     );
   }
 
-  const awaitingGpsForDirections = phase === 'pickup' && !directionsOrigin;
+  const awaitingGpsForDirections = !directionsOrigin;
 
   return (
     <Wrapper
@@ -323,18 +344,16 @@ export const WorkerJobNavigationScreen = () => {
                 Getting your location for directions…
               </Typography>
             </View>
-          ) : directionsOrigin ? (
+          ) : directionsLeg ? (
             <WorkerJobRouteMap
-              directionsOrigin={directionsOrigin}
-              directionsDestination={directionsDestination}
-              routeLegKey={phase}
+              directionsLeg={directionsLeg}
               pickupCoord={pickupCoord}
               dropoffCoord={dropoffCoord}
               phase={phase}
               mapRegion={mapRegion}
               mapRef={mapRef}
               vehicleCoord={live.vehicleCoord}
-              vehicleBearing={live.vehicleBearing}
+              vehicleBearing={vehicleBearing}
               vehicleMarkerKind={vehicleMarkerKind}
               recenterPoints={recenterPoints}
               onMapUserInteraction={onMapUserInteraction}

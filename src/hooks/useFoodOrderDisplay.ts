@@ -6,7 +6,7 @@ import type { MapCoord } from 'utils/coordinateAlongPolyline';
 
 export type FoodOrderDisplay = {
   restaurantName: string;
-  etaLabel: string;
+  etaLabel?: string;
   courierName: string;
   courierPhone: string;
   vehicleType: string;
@@ -37,7 +37,7 @@ function mapBookingToFoodOrder(
 
   return {
     restaurantName: booking.restaurant?.name ?? 'Restaurant',
-    etaLabel: '—',
+    etaLabel: '30 minutes',
     courierName: provider?.full_name ?? 'Courier',
     courierPhone: provider?.phone ?? '',
     vehicleType: provider?.vehicle_type ?? provider?.vehicle_model ?? '—',
