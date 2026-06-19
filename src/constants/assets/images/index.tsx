@@ -19,6 +19,9 @@ export const IMAGES = {
   MAP_COURIER_BIKE: require('assets/images/common/map_courier_scooter.png'),
   /** Top-down car — map marker for ride drivers */
   MAP_DRIVER_CAR: require('assets/images/common/map_driver_car.png'),
+  /** ~40px assets for Android native map markers (full PNGs are ~160px and render oversized). */
+  MAP_COURIER_BIKE_MARKER: require('assets/images/common/map_courier_bike_marker.png'),
+  MAP_DRIVER_CAR_MARKER: require('assets/images/common/map_driver_car_marker.png'),
 
 
 

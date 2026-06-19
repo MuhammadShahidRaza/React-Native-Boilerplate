@@ -10,6 +10,12 @@ const MARKER_IMAGES = {
   bike: IMAGES.MAP_COURIER_BIKE,
 } as const;
 
+/** Android `Marker.image` uses bitmap pixel size — keep near 36–40dp. */
+const ANDROID_MARKER_IMAGES = {
+  car: IMAGES.MAP_DRIVER_CAR_MARKER,
+  bike: IMAGES.MAP_COURIER_BIKE_MARKER,
+} as const;
+
 const MARKER_SIZE = {
   car: 36,
   bike: 40,
@@ -76,7 +82,7 @@ export const LiveVehicleMapMarker = ({
         anchor={{ x: 0.5, y: 0.5 }}
         flat
         rotation={displayBearing}
-        image={MARKER_IMAGES[kind]}
+        image={ANDROID_MARKER_IMAGES[kind]}
         zIndex={1000}
       />
     );
