@@ -122,6 +122,12 @@ export function useConsumerBookingTrack(
     );
   }, [booking, dropoff, isAlpha, options?.alphaStatusOverride, pickup]);
 
+  const fallbackProviderCoord = useMemo(() => {
+    if (!booking || !pickup || !dropoff) return null;
+    const status = options?.alphaStatusOverride ?? live.status ?? booking.status ?? '';
+    return resolveAlphaProviderCoord(booking, pickup, dropoff, status);
+  }, [booking, dropoff, live.status, options?.alphaStatusOverride, pickup]);
+
   const alphaProviderBearing = useMemo(() => {
     if (!isAlpha || !booking || !pickup || !dropoff || !alphaProviderCoord) return 0;
     return resolveAlphaProviderBearing(
@@ -159,13 +165,40 @@ export function useConsumerBookingTrack(
     [booking, live.tracking?.provider, live.tracking?.provider_id],
   );
 
+  const fallbackProviderBearing = useMemo(() => {
+    if (!booking || !pickup || !dropoff || !fallbackProviderCoord) return live.providerBearing;
+    return resolveAlphaProviderBearing(
+      booking,
+      pickup,
+      dropoff,
+      fallbackProviderCoord,
+      vehicleKind,
+      options?.alphaStatusOverride ?? live.status ?? booking.status,
+    );
+  }, [
+    booking,
+    dropoff,
+    fallbackProviderCoord,
+    live.providerBearing,
+    live.status,
+    options?.alphaStatusOverride,
+    pickup,
+    vehicleKind,
+  ]);
+
   return {
     booking: mergedBooking,
     bookingLoading,
     tracking: live.tracking,
     status,
-    providerCoord: isAlpha ? alphaProviderCoord : live.providerCoord,
-    providerBearing: isAlpha ? alphaProviderBearing : live.providerBearing,
+    providerCoord: isAlpha
+      ? alphaProviderCoord
+      : live.providerCoord ?? fallbackProviderCoord,
+    providerBearing: isAlpha
+      ? alphaProviderBearing
+      : live.providerCoord
+        ? live.providerBearing
+        : fallbackProviderBearing,
     pickup,
     dropoff,
     mapRegion,

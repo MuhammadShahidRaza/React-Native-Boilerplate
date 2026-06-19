@@ -87,7 +87,16 @@ function clearLocationWatch(): void {
 
 function startLocationWatch(state: ActiveJobTrackingState): void {
   clearLocationWatch();
-  watchId = Geolocation.watchPosition(
+  void (async () => {
+    const fine = await check(
+      isIOS() ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+    );
+    if (fine !== RESULTS.GRANTED) {
+      logger.log('workerActiveJobTracking: fine location not granted, skipping GPS watch');
+      return;
+    }
+
+    watchId = Geolocation.watchPosition(
     position => {
       const { latitude, longitude } = position.coords;
       void updateWorkerFirestoreLocation(
@@ -114,6 +123,7 @@ function startLocationWatch(state: ActiveJobTrackingState): void {
         : {}),
     },
   );
+  })();
 }
 
 async function startAndroidForegroundNotification(): Promise<void> {

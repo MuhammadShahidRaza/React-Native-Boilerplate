@@ -22,6 +22,50 @@ export type ConsumerFoodOrderLine = {
   lineTotal?: string;
 };
 
+export type FoodOrderSummary = {
+  subTotal: number;
+  deliveryFee: number;
+  discountAmount: number;
+  totalAmount: number;
+};
+
+/** Subtotal / delivery / discount / total — derives delivery fee when API omits it. */
+export function resolveFoodOrderSummary(booking: SnliftBooking): FoodOrderSummary | null {
+  if (booking.booking_type !== 'food') return null;
+
+  const discountAmount = parseMoneyAmount(booking.discount_amount) ?? 0;
+  const totalAmount = parseMoneyAmount(booking.total_amount ?? booking.estimated_amount);
+  let subTotal = parseMoneyAmount(booking.sub_total);
+
+  if (subTotal == null) {
+    const fromLines = (booking.bookingDetails ?? []).reduce((sum, item) => {
+      const lineTotal = parseMoneyAmount(item.total_price);
+      if (lineTotal != null) return sum + lineTotal;
+      const unit = parseMoneyAmount(item.unit_price);
+      const qty = item.quantity ?? 1;
+      return unit != null ? sum + unit * qty : sum;
+    }, 0);
+    if (fromLines > 0) subTotal = fromLines;
+  }
+
+  if (subTotal == null && totalAmount == null) return null;
+
+  const resolvedSubTotal = subTotal ?? totalAmount ?? 0;
+  const resolvedTotal = totalAmount ?? resolvedSubTotal;
+  let deliveryFee = parseMoneyAmount(booking.delivery_fee);
+
+  if (deliveryFee == null) {
+    deliveryFee = Math.max(0, resolvedTotal - resolvedSubTotal + discountAmount);
+  }
+
+  return {
+    subTotal: resolvedSubTotal,
+    deliveryFee,
+    discountAmount,
+    totalAmount: resolvedTotal,
+  };
+}
+
 /** Food line items — prefers API `bookingDetails`, falls back to `items`. */
 export function resolveFoodOrderLines(booking: SnliftBooking): ConsumerFoodOrderLine[] {
   const details = booking.bookingDetails ?? [];

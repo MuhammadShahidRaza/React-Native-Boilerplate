@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import Geolocation, { type GeolocationResponse } from '@react-native-community/geolocation';
+import { isLocationPermissionGranted } from 'utils/location';
 import {
   bearingBetweenCoords,
   mapCoordDistanceApprox,
@@ -117,31 +117,46 @@ export function useWorkerGpsNavigation({
   useEffect(() => {
     if (!enabled) return undefined;
 
-    Geolocation.getCurrentPosition(
-      position => {
-        handlePosition(position);
-      },
-      error => logger.error('useWorkerGpsNavigation initial position error:', error),
-      { timeout: 15000, maximumAge: 5000 },
-    );
+    let cancelled = false;
+    let watchId: number | null = null;
 
-    watchIdRef.current = Geolocation.watchPosition(
-      position => {
-        handlePosition(position);
-      },
-      error => {
-        logger.error('useWorkerGpsNavigation watch error:', error);
-      },
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 5,
-        interval: 4000,
-        fastestInterval: 2000,
-        useSignificantChanges: false,
-      },
-    );
+    (async () => {
+      const granted = await isLocationPermissionGranted();
+      if (cancelled || !granted) {
+        if (!granted) {
+          logger.warn('useWorkerGpsNavigation: location permission not granted');
+        }
+        return;
+      }
+
+      Geolocation.getCurrentPosition(
+        position => {
+          handlePosition(position);
+        },
+        error => logger.error('useWorkerGpsNavigation initial position error:', error),
+        { timeout: 15000, maximumAge: 5000 },
+      );
+
+      watchId = Geolocation.watchPosition(
+        position => {
+          handlePosition(position);
+        },
+        error => {
+          logger.error('useWorkerGpsNavigation watch error:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          distanceFilter: 5,
+          interval: 4000,
+          fastestInterval: 2000,
+          useSignificantChanges: false,
+        },
+      );
+      watchIdRef.current = watchId;
+    })();
 
     return () => {
+      cancelled = true;
       if (watchIdRef.current != null) {
         Geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;

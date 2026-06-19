@@ -58,9 +58,9 @@ export function useBookingRating(
       const ok = await submitBookingRating({ bookingId, module, rating });
       if (ok) {
         setSavedRating(rating);
-        showToast({ message: 'Thank you for your rating!' });
+        showToast({ message: 'Thank you for your rating!' , isError: false});
       } else {
-        showToast({ message: 'Could not submit rating. Try again.' });
+        showToast({ message: 'Could not submit rating. Try again.', isError: true });
       }
       return ok;
     } finally {

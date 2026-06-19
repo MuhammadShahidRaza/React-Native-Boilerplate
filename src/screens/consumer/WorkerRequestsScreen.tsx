@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { Typography, Wrapper, WorkerRequestCard } from 'components/index';
 import { FontSize } from 'types/fontTypes';
@@ -21,6 +21,7 @@ export const WorkerRequestsScreen = () => {
   const copy = getWorkerRoleCopy(role);
   const [requests, setRequests] = useState<WorkerRequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     dispatch(setLookingForDeliveries(true));
@@ -29,8 +30,12 @@ export const WorkerRequestsScreen = () => {
     };
   }, [dispatch]);
 
-  const loadRequests = useCallback(async () => {
-    setLoading(true);
+  const loadRequests = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
     try {
       const res = await listBookings(
         { scope: 'available' },
@@ -40,9 +45,10 @@ export const WorkerRequestsScreen = () => {
       const bookings = extractBookingsList(res);
       setRequests(bookings.map(mapBookingToWorkerRequest));
     } catch {
-      setRequests([]);
+      if (!isRefresh) setRequests([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [role]);
 
@@ -68,6 +74,14 @@ export const WorkerRequestsScreen = () => {
           keyExtractor={item => item.id}
           contentContainerStyle={requests.length === 0 ? styles.emptyList : styles.list}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => loadRequests(true)}
+              colors={[COLORS.PRIMARY]}
+              tintColor={COLORS.PRIMARY}
+            />
+          }
           ListEmptyComponent={
             <Typography style={styles.emptyText}>No available requests right now.</Typography>
           }

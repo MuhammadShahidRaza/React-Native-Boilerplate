@@ -4,7 +4,7 @@ import type MapView from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   GradientIcon,
-  Icon,
+  BookingRatingStars,
   LiveVehicleMapMarker,
   type IconComponentProps,
   FoodPreparingAnimation,
@@ -36,12 +36,15 @@ import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
 import { useFoodOrderDisplay } from 'hooks/useFoodOrderDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { useBookingRating } from 'hooks/useBookingRating';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapFoodOrderPhase } from 'utils/bookingTrackPhases';
 import { resolveCourierToDropoffLeg } from 'utils/trackingDirections';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
+import { resolveFoodOrderLines, resolveFoodOrderSummary } from 'api/mappers/snliftBooking';
+import { FoodOrderSummaryCard } from 'components/common/food/FoodOrderSummary';
 import { showToast } from 'utils/toast';
 
 const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
@@ -116,8 +119,14 @@ export const TrackFoodOrderScreen = () => {
 
   const [cancelOpen, setCancelOpen] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
-  const [rating, setRating] = useState(0);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const {
+    rating,
+    setRating,
+    hasRated,
+    submitting: ratingSubmitting,
+    submit: submitRating,
+  } = useBookingRating(bookingId, track.booking?.booking_type ?? 'food');
   const mapRef = useRef<MapView>(null);
   const freshTimerRef = useRef(isFreshJobTimer(route.params));
   const timerHandledRef = useRef(false);
@@ -201,6 +210,16 @@ export const TrackFoodOrderScreen = () => {
   const onDirectionsReady = useCallback((coordinates: MapCoord[]) => {
     setRouteCoords(coordinates);
   }, []);
+
+  const foodOrderSummary = useMemo(
+    () => (track.booking ? resolveFoodOrderSummary(track.booking) : null),
+    [track.booking],
+  );
+
+  const foodOrderLines = useMemo(
+    () => (track.booking ? resolveFoodOrderLines(track.booking) : []),
+    [track.booking],
+  );
 
   const status = useMemo((): PhaseStatus => {
     const preparingSubtitle = order?.etaLabel
@@ -395,20 +414,37 @@ export const TrackFoodOrderScreen = () => {
                   title={status.title}
                   subtitle={status.subtitle}
                 />
-                <View style={styles.rateBlock}>
-                  <Typography style={styles.rateTitle}>Rate your ride</Typography>
-                  <View style={styles.stars}>
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <Pressable key={star} onPress={() => setRating(star)}>
-                        <Icon
-                          componentName={VARIABLES.Ionicons}
-                          iconName={star <= rating ? 'star' : 'star-outline'}
-                          size={55}
-                          color={COLORS.APP_STAR}
-                        />
-                      </Pressable>
+                {foodOrderLines.length > 0 ? (
+                  <View style={styles.itemsCard}>
+                    <Typography style={styles.itemsTitle}>Ordered items</Typography>
+                    {foodOrderLines.map(line => (
+                      <View key={line.key} style={styles.itemRow}>
+                        <View style={styles.itemMeta}>
+                          <Typography style={styles.itemName}>{line.label}</Typography>
+                          <Typography style={styles.itemQty}>
+                            {line.unitPrice
+                              ? `${line.unitPrice} × ${line.quantity}`
+                              : `Qty: ${line.quantity}`}
+                          </Typography>
+                        </View>
+                        {line.lineTotal ? (
+                          <Typography style={styles.itemPrice}>{line.lineTotal}</Typography>
+                        ) : null}
+                      </View>
                     ))}
                   </View>
+                ) : null}
+                {foodOrderSummary ? (
+                  <FoodOrderSummaryCard summary={foodOrderSummary} />
+                ) : null}
+                <View style={styles.rateBlock}>
+                  <BookingRatingStars
+                    title={hasRated ? 'Your rating' : 'Rate your order'}
+                    value={rating}
+                    onChange={hasRated ? undefined : setRating}
+                    readonly={hasRated}
+                    size={55}
+                  />
                 </View>
               </>
             ) : null}
@@ -416,8 +452,20 @@ export const TrackFoodOrderScreen = () => {
 
           <View style={styles.footer}>
             {isDelivered ? (
-              <Pressable style={styles.doneBtn} onPress={() => reset(SCREENS.BOTTOM_STACK)}>
-                <Typography style={styles.doneTxt}>Done</Typography>
+              <Pressable
+                style={styles.doneBtn}
+                disabled={ratingSubmitting}
+                onPress={async () => {
+                  if (!hasRated && rating >= 1) {
+                    const ok = await submitRating();
+                    if (!ok) return;
+                  }
+                  reset(SCREENS.BOTTOM_STACK);
+                }}
+              >
+                <Typography style={styles.doneTxt}>
+                  {ratingSubmitting ? 'Submitting…' : 'Done'}
+                </Typography>
               </Pressable>
             ) : canCancel ? (
               <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
@@ -620,5 +668,46 @@ const styles = StyleSheet.create({
     color: COLORS.APP_DANGER_TEXT,
     fontWeight: FontWeight.SemiBold,
     fontSize: FontSize.Medium,
+  },
+  itemsCard: {
+    backgroundColor: COLORS.APP_SURFACE,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: COLORS.APP_LINE,
+    gap: 8,
+    marginBottom: 4,
+  },
+  itemsTitle: {
+    fontSize: FontSize.Medium,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.APP_LINE,
+  },
+  itemMeta: {
+    flex: 1,
+    gap: 2,
+  },
+  itemName: {
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
+  },
+  itemQty: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+  },
+  itemPrice: {
+    fontSize: FontSize.Small,
+    fontWeight: FontWeight.SemiBold,
+    color: COLORS.APP_TEXT,
   },
 });

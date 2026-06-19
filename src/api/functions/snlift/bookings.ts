@@ -488,7 +488,11 @@ export async function createParcelBooking(
   });
 }
 
-export async function acceptBooking(id: number | string, role: BookingRole) {
+export async function acceptBooking(
+  id: number | string,
+  role: BookingRole,
+  options?: { showLoader?: boolean },
+) {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     ensureAlphaWorkerBooking(id);
     return alphaAcceptBooking(id);
@@ -498,6 +502,7 @@ export async function acceptBooking(id: number | string, role: BookingRole) {
   return handlePostApiRequest<{ booking: SnliftBooking }, Record<string, never>>({
     url: urls.accept(id),
     data: {},
+    showLoader: options?.showLoader ?? true,
   });
 }
 

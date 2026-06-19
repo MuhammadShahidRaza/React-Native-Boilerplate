@@ -6,3 +6,4 @@ export * from './FoodCartBar';
 export * from './foodRestaurants';
 export * from './foodOrderMock';
 export * from './FoodPreparingAnimation';
+export * from './FoodOrderSummary';

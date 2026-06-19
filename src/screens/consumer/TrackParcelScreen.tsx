@@ -4,6 +4,7 @@ import type MapView from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
+  BookingRatingStars,
   Icon,
   LiveVehicleMapMarker,
   ParcelCourierCard,
@@ -30,6 +31,7 @@ import { CancelReasonModal } from './CancelReasonModal';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { useBookingRating } from 'hooks/useBookingRating';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapParcelTrackPhase } from 'utils/bookingTrackPhases';
@@ -73,8 +75,14 @@ export const TrackParcelScreen = () => {
   );
 
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [rating, setRating] = useState(0);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const {
+    rating,
+    setRating,
+    hasRated,
+    submitting: ratingSubmitting,
+    submit: submitRating,
+  } = useBookingRating(bookingId, track.booking?.booking_type ?? 'parcel');
   const mapRef = useRef<MapView>(null);
 
   const pickup = track.pickup ?? fallbackCoord(pickupLat, pickupLng);
@@ -259,23 +267,24 @@ export const TrackParcelScreen = () => {
         ) : (
           <>
             <View style={styles.rateWrap}>
-              <Typography style={styles.rateTitle}>Rate your experience</Typography>
-              <View style={styles.stars}>
-                {[1, 2, 3, 4, 5].map(step => (
-                  <Pressable key={step} onPress={() => setRating(step)} hitSlop={8}>
-                    <Icon
-                      componentName={VARIABLES.Ionicons}
-                      iconName={step <= rating ? 'star' : 'star-outline'}
-                      size={50}
-                      color={step <= rating ? COLORS.APP_STAR : COLORS.APP_LINE}
-                    />
-                  </Pressable>
-                ))}
-              </View>
+              <BookingRatingStars
+                title={hasRated ? 'Your rating' : 'Rate your experience'}
+                value={rating}
+                onChange={hasRated ? undefined : setRating}
+                readonly={hasRated}
+                size={50}
+              />
             </View>
             <Button
-              title='Done'
-              onPress={() => reset(SCREENS.BOTTOM_STACK)}
+              title={hasRated ? 'Done' : ratingSubmitting ? 'Submitting…' : 'Done'}
+              disabled={ratingSubmitting}
+              onPress={async () => {
+                if (!hasRated && rating >= 1) {
+                  const ok = await submitRating();
+                  if (!ok) return;
+                }
+                reset(SCREENS.BOTTOM_STACK);
+              }}
               style={styles.doneBtn}
             />
           </>

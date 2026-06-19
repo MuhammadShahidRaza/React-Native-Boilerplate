@@ -6,21 +6,26 @@ export type MapVehicleMarkerKind = 'car' | 'bike';
 
 export interface MapVehicleMarkerProps {
   kind: MapVehicleMarkerKind;
+  onLoad?: () => void;
 }
 
-/** Live vehicle marker on map: car for ride drivers, bike for courier / food delivery. */
-export const MapVehicleMarker = ({ kind }: MapVehicleMarkerProps) => (
-  <View style={styles.wrapAsset}>
+/** Top-down car/bike asset for map markers. */
+export const MapVehicleMarker = ({ kind, onLoad }: MapVehicleMarkerProps) => (
+  <View style={styles.wrapAsset} collapsable={false}>
     <Image
       source={kind === 'bike' ? IMAGES.MAP_COURIER_BIKE : IMAGES.MAP_DRIVER_CAR}
       style={kind === 'bike' ? styles.bikeImg : styles.carImg}
       resizeMode='contain'
+      fadeDuration={0}
+      onLoad={onLoad}
     />
   </View>
 );
 
 const styles = StyleSheet.create({
   wrapAsset: {
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },

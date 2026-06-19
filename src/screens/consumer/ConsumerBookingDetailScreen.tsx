@@ -18,7 +18,8 @@ import { onBack, pushRootScreen } from 'navigation/Navigators';
 import { ENV_CONSTANTS } from 'constants/common';
 import { getAlphaBookingById } from 'constants/alphaBookingMocks';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
-import { getBookingStatusLabel, resolveFoodOrderLines } from 'api/mappers/snliftBooking';
+import { getBookingStatusLabel, resolveFoodOrderLines, resolveFoodOrderSummary } from 'api/mappers/snliftBooking';
+import { FoodOrderSummaryCard } from 'components/common/food/FoodOrderSummary';
 import type { SnliftBooking } from 'types/snliftApi';
 import { COLORS, formatMoney, formatDistanceKm } from 'utils/index';
 import {
@@ -121,6 +122,11 @@ export const ConsumerBookingDetailScreen = () => {
     [booking],
   );
 
+  const foodOrderSummary = useMemo(
+    () => (booking?.booking_type === 'food' ? resolveFoodOrderSummary(booking) : null),
+    [booking],
+  );
+
   const showParcelContacts =
     booking?.booking_type === 'parcel' &&
     Boolean(
@@ -190,17 +196,19 @@ export const ConsumerBookingDetailScreen = () => {
             </View>
           </View>
 
-          <View style={styles.priceCard}>
-            <Typography style={styles.priceLabel}>Total</Typography>
-            <Typography style={styles.priceValue}>
-              {formatMoney(booking.total_amount ?? booking.estimated_amount ?? booking.fare)}
-            </Typography>
-            {booking.distance_km != null ? (
-              <Typography style={styles.distance}>
-                {formatDistanceKm(booking.distance_km)}
+          {booking.booking_type !== 'food' ? (
+            <View style={styles.priceCard}>
+              <Typography style={styles.priceLabel}>Total</Typography>
+              <Typography style={styles.priceValue}>
+                {formatMoney(booking.total_amount ?? booking.estimated_amount ?? booking.fare)}
               </Typography>
-            ) : null}
-          </View>
+              {booking.distance_km != null ? (
+                <Typography style={styles.distance}>
+                  {formatDistanceKm(booking.distance_km)}
+                </Typography>
+              ) : null}
+            </View>
+          ) : null}
 
           <WorkerRouteAddresses
             pickupAddress={booking.pickup_address ?? booking.restaurant?.name ?? 'Pickup'}
@@ -261,6 +269,8 @@ export const ConsumerBookingDetailScreen = () => {
               ))}
             </View>
           ) : null}
+
+          {foodOrderSummary ? <FoodOrderSummaryCard summary={foodOrderSummary} /> : null}
 
           {booking.provider?.full_name ? (
             <View style={styles.providerCard}>

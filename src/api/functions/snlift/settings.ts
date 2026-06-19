@@ -16,15 +16,47 @@ type SettingsResponse = {
   settings?: AppSettings;
 };
 
+function normalizeAppSettings(raw: Record<string, unknown>): AppSettings {
+  const timer =
+    raw.job_display_timer ??
+    raw.job_display_timer_minutes ??
+    raw.job_timer ??
+    raw.jobTimer;
+  return {
+    ...(raw as AppSettings),
+    ...(timer != null ? { job_display_timer: timer as string | number } : {}),
+  };
+}
+
 function extractAppSettings(res: unknown): AppSettings | null {
   if (!res || typeof res !== 'object') return null;
   const record = res as Record<string, unknown>;
+
   if (record.settings && typeof record.settings === 'object') {
-    return record.settings as AppSettings;
+    return normalizeAppSettings(record.settings as Record<string, unknown>);
   }
-  if ('job_display_timer' in record) {
-    return record as AppSettings;
+
+  const data = record.data;
+  if (data && typeof data === 'object') {
+    const dataRecord = data as Record<string, unknown>;
+    if (dataRecord.settings && typeof dataRecord.settings === 'object') {
+      return normalizeAppSettings(dataRecord.settings as Record<string, unknown>);
+    }
+    if (
+      'job_display_timer' in dataRecord ||
+      'job_display_timer_minutes' in dataRecord
+    ) {
+      return normalizeAppSettings(dataRecord);
+    }
   }
+
+  if (
+    'job_display_timer' in record ||
+    'job_display_timer_minutes' in record
+  ) {
+    return normalizeAppSettings(record);
+  }
+
   return null;
 }
 

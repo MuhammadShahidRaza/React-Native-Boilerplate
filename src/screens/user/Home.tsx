@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   locText: {
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
-    width: '90%',
+    width: '60%',
     fontWeight: FontWeight.SemiBold,
   },
   greet: {

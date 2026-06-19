@@ -55,6 +55,7 @@ export const WorkerRequestDetailScreen = () => {
     useWorkerRequestDetail(requestId, role);
   const { expiresAt, ready } = useJobDisplayTimer(bookingCreatedAt);
   const [timerActive, setTimerActive] = useState(true);
+  const [accepting, setAccepting] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const hasAcceptedRef = useRef(false);
 
@@ -81,14 +82,23 @@ export const WorkerRequestDetailScreen = () => {
   };
 
   const accept = async () => {
-    if (!detail) return;
-    const res = await acceptBooking(requestId, role);
+    if (!detail || accepting || rejecting || hasAcceptedRef.current) return;
+
+    setAccepting(true);
+    setTimerActive(false);
+
+    const res = await acceptBooking(requestId, role, {
+      showLoader: !ENV_CONSTANTS.IS_ALPHA_PHASE,
+    });
+
     if (!res?.booking) {
+      setAccepting(false);
       showToast({ message: 'Could not accept this request. Try again.' });
+      if (isPending) setTimerActive(true);
       return;
     }
+
     hasAcceptedRef.current = true;
-    setTimerActive(false);
     setBookingStatus(normalizeBookingStatus(res.booking.status));
     if (userDetails?.id) {
       void startWorkerActiveJobTracking({
@@ -97,6 +107,7 @@ export const WorkerRequestDetailScreen = () => {
         bookingId: detail.id,
       });
     }
+    setAccepting(false);
     navigate(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: 'pickup',
@@ -236,11 +247,21 @@ export const WorkerRequestDetailScreen = () => {
 
                 {isPending ? (
                   <>
-                    <Button title={copy.acceptButton} onPress={accept} style={styles.acceptBtn} />
+                    <Button
+                      title={copy.acceptButton}
+                      onPress={accept}
+                      loading={accepting}
+                      loadingText={copy.acceptButton}
+                      disabled={rejecting}
+                      style={styles.acceptBtn}
+                    />
                     <Pressable
                       onPress={reject}
-                      disabled={rejecting}
-                      style={[styles.rejectBtn, rejecting && styles.rejectBtnDisabled]}
+                      disabled={rejecting || accepting}
+                      style={[
+                        styles.rejectBtn,
+                        (rejecting || accepting) && styles.rejectBtnDisabled,
+                      ]}
                     >
                       <Typography style={styles.rejectTxt}>
                         {rejecting ? 'Rejecting…' : 'Reject'}

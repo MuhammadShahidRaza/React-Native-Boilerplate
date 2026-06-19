@@ -59,8 +59,11 @@ const FOOD_RESTAURANT_ACTIVE = new Set<string>([
   BOOKING_STATUS.PREPARING,
 ]);
 
-/** Food — courier can accept/reject. */
-const FOOD_COURIER_PENDING = new Set<string>([BOOKING_STATUS.READY_FOR_PICKUP]);
+/** Food — courier can accept/reject (including while restaurant is preparing). */
+const FOOD_COURIER_PENDING = new Set<string>([
+  BOOKING_STATUS.PREPARING,
+  BOOKING_STATUS.READY_FOR_PICKUP,
+]);
 
 /** Food — courier active job. */
 const FOOD_COURIER_ACTIVE = new Set<string>([

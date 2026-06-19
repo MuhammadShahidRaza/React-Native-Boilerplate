@@ -26,7 +26,9 @@ const platformSettingsSlice = createSlice({
     setPlatformSettings(state, action: PayloadAction<AppSettings | null>) {
       state.settings = action.payload;
       state.jobDisplayTimerSeconds = parseJobDisplayTimer(
-        action.payload?.job_display_timer,
+        action.payload?.job_display_timer ??
+          (action.payload as { job_display_timer_minutes?: string | number } | null)
+            ?.job_display_timer_minutes,
       );
       state.loaded = true;
       state.loading = false;

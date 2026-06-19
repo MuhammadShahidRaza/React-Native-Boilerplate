@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
+  BookingRatingStars,
   Icon,
   LiveTrackingMapDirections,
   LiveVehicleMapMarker,
@@ -15,8 +16,6 @@ import {
   RideProgressSegments,
   RideVehicleStatsRow,
   SkeletonWrapper,
-  Typography,
-  WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
@@ -33,6 +32,7 @@ import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { mapBookingToRideTrip } from 'hooks/useRideTripDisplay';
 import { MOCK_RIDE_TRIP } from 'components/common/ride/rideMockTrip';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { useBookingRating } from 'hooks/useBookingRating';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapRideTrackPhase } from 'utils/bookingTrackPhases';
@@ -89,8 +89,14 @@ export const TrackRideScreen = () => {
   const mapRef = useRef<MapView>(null);
   const fittedLegRef = useRef<string | null>(null);
   const [cancelVisible, setCancelVisible] = useState(false);
-  const [rideRating, setRideRating] = useState(0);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
+  const {
+    rating: rideRating,
+    setRating: setRideRating,
+    hasRated,
+    submitting: ratingSubmitting,
+    submit: submitRating,
+  } = useBookingRating(bookingId, track.booking?.booking_type ?? 'ride');
   const directionsOrigin = useThrottledMapCoord(track.providerCoord, 8000, 0.05);
 
   const pickupCoord = track.pickup ?? fallbackCoord(pickupLat, pickupLng, 0.008, 0);
@@ -306,23 +312,24 @@ export const TrackRideScreen = () => {
         {isCompleted ? (
           <>
             <View style={styles.rateWrap}>
-              <Typography style={styles.rateTitle}>Rate your ride</Typography>
-              <View style={styles.rateStars}>
-                {[1, 2, 3, 4, 5].map(step => (
-                  <Pressable key={step} onPress={() => setRideRating(step)} hitSlop={8}>
-                    <Icon
-                      componentName={VARIABLES.Ionicons}
-                      iconName={step <= rideRating ? 'star' : 'star-outline'}
-                      size={50}
-                      color={step <= rideRating ? COLORS.APP_STAR : COLORS.APP_LINE}
-                    />
-                  </Pressable>
-                ))}
-              </View>
+              <BookingRatingStars
+                title={hasRated ? 'Your rating' : 'Rate your ride'}
+                value={rideRating}
+                onChange={hasRated ? undefined : setRideRating}
+                readonly={hasRated}
+                size={50}
+              />
             </View>
             <Button
-              title='Done'
-              onPress={() => reset(SCREENS.BOTTOM_STACK)}
+              title={hasRated ? 'Done' : ratingSubmitting ? 'Submitting…' : 'Done'}
+              disabled={ratingSubmitting}
+              onPress={async () => {
+                if (!hasRated && rideRating >= 1) {
+                  const ok = await submitRating();
+                  if (!ok) return;
+                }
+                reset(SCREENS.BOTTOM_STACK);
+              }}
               style={styles.doneBtn}
             />
           </>

@@ -34,15 +34,21 @@ export function ensurePlatformSettingsLoaded(
     }
 
     const settings = await getAppSettings();
-    dispatch(setPlatformSettings(settings));
-    return settings;
+    const resolved =
+      settings ??
+      ({
+        job_display_timer: '00:30:00',
+      } as AppSettings);
+    dispatch(setPlatformSettings(resolved));
+    return resolved;
   })()
     .catch(error => {
       logger.error('ensurePlatformSettingsLoaded failed', error);
-      const fallbackSeconds = parseJobDisplayTimer(undefined);
+      const fallbackTimer = ENV_CONSTANTS.IS_ALPHA_PHASE ? '00:02:00' : '00:30:00';
+      const fallbackSeconds = parseJobDisplayTimer(fallbackTimer);
       dispatch(
         setPlatformSettings({
-          job_display_timer: '00:02:00',
+          job_display_timer: fallbackTimer,
         }),
       );
       logger.log('[job timer] fallback settings →', fallbackSeconds, 'seconds');

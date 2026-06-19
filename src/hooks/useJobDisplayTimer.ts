@@ -22,7 +22,7 @@ function normalizeDurationSeconds(value: unknown): number | null {
       return parsed > 0 ? parsed : null;
     }
     const n = Number(trimmed);
-    if (Number.isFinite(n) && n > 0) return Math.round(n);
+    if (Number.isFinite(n) && n > 0) return parseJobDisplayTimer(n);
   }
   return null;
 }
