@@ -28,6 +28,12 @@ import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift
 import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
+import { updateAlphaSessionBookingStatus } from 'constants/alphaBookingMocks';
+import { BOOKING_STATUS } from 'utils/bookingStatuses';
+import { ALPHA_PHASE_DURATION_MS } from 'utils/alphaStatusCycle';
+import { ENV_CONSTANTS } from 'constants/common';
+
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 export const SendParcelFindingScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.SEND_PARCEL_FINDING>>();
@@ -93,7 +99,16 @@ export const SendParcelFindingScreen = () => {
     replace(SCREENS.COURIER_MATCHED, navCoords);
   }, [navCoords]);
 
-  useBookingAcceptPoll(bookingId, goToCourierMatched);
+  useBookingAcceptPoll(IS_ALPHA ? undefined : bookingId, goToCourierMatched);
+
+  useEffect(() => {
+    if (!IS_ALPHA || !bookingId) return;
+    const timeoutId = setTimeout(() => {
+      updateAlphaSessionBookingStatus(bookingId, BOOKING_STATUS.ACCEPTED);
+      goToCourierMatched();
+    }, ALPHA_PHASE_DURATION_MS);
+    return () => clearTimeout(timeoutId);
+  }, [bookingId, goToCourierMatched]);
 
   const handleTimerExpire = () => {
     if (timerHandledRef.current) return;
@@ -126,8 +141,11 @@ export const SendParcelFindingScreen = () => {
     replace(SCREENS.BOTTOM_STACK);
   };
 
-  const timerSubtitle =
-    ready && expiresAt ? 'Time remaining is shown above' : 'Please wait while we match you';
+  const timerSubtitle = IS_ALPHA
+    ? 'Demo: courier match in a few seconds'
+    : ready && expiresAt
+      ? 'Time remaining is shown above'
+      : 'Please wait while we match you';
 
   return (
     <Wrapper

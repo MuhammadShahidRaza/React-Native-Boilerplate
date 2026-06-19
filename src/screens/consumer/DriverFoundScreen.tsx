@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { Marker } from 'react-native-maps';
@@ -13,9 +13,10 @@ import {
   RideDriverCard,
   RideVehicleStatsRow,
   SkeletonWrapper,
+  WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { IMAGES } from 'constants/assets';
 import { COLORS, fitMapToDirectionCoordinates, openPhoneNumber, screenHeight } from 'utils/index';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
@@ -30,6 +31,9 @@ import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
 import { resolveRideDirectionsLeg } from 'utils/rideTrackMap';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import type { MapCoord } from 'utils/coordinateAlongPolyline';
+import { ALPHA_PHASE_DURATION_MS } from 'utils/alphaStatusCycle';
+
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 export const DriverFoundScreen = () => {
   const [cancelVisible, setCancelVisible] = useState(false);
@@ -100,6 +104,14 @@ export const DriverFoundScreen = () => {
     }),
     [pickupCoord, dropoffCoord, bookingId],
   );
+
+  useEffect(() => {
+    if (!IS_ALPHA || !bookingId) return;
+    const timeoutId = setTimeout(() => {
+      replace(SCREENS.TRACK_RIDE, trackRideParams);
+    }, ALPHA_PHASE_DURATION_MS);
+    return () => clearTimeout(timeoutId);
+  }, [bookingId, trackRideParams]);
 
   return (
     <Wrapper
@@ -192,9 +204,13 @@ export const DriverFoundScreen = () => {
           onCancelPress={() => setCancelVisible(true)}
         />
 
-        <SkeletonWrapper isLoading={tripLoading} height={72} count={1}>
+        <SkeletonWrapper isLoading={tripLoading && !IS_ALPHA} height={72} count={1}>
           <RideVehicleStatsRow items={trip ? [...trip.vehicleStats] : []} marginHorizontal={20} />
         </SkeletonWrapper>
+
+        {IS_ALPHA ? (
+          <WorkerRequestTimer seconds={3} active />
+        ) : null}
 
         <Button
           title='Track Ride'

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import {
@@ -7,6 +7,7 @@ import {
   RideVehicleStatsRow,
   SkeletonWrapper,
   Typography,
+  WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
@@ -18,6 +19,9 @@ import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
+import { ALPHA_PHASE_DURATION_MS } from 'utils/alphaStatusCycle';
+
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 export const CourierMatchedScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.COURIER_MATCHED>>();
@@ -42,6 +46,14 @@ export const CourierMatchedScreen = () => {
   );
 
   const deliveryFee = track.booking?.total_amount ?? track.booking?.estimated_amount;
+
+  useEffect(() => {
+    if (!IS_ALPHA || !bookingId) return;
+    const timeoutId = setTimeout(() => {
+      replace(SCREENS.TRACK_PARCEL, trackParams);
+    }, ALPHA_PHASE_DURATION_MS);
+    return () => clearTimeout(timeoutId);
+  }, [bookingId, trackParams]);
 
   return (
     <Wrapper
@@ -79,6 +91,7 @@ export const CourierMatchedScreen = () => {
             />
           </View>
         </SkeletonWrapper>
+
 
         <Button
           title='Track Delivery'

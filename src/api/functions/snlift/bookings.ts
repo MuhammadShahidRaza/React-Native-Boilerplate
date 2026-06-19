@@ -22,6 +22,12 @@ import {
   removeAlphaSessionBooking,
   updateAlphaSessionBookingStatus,
 } from 'constants/alphaBookingMocks';
+import {
+  ensureAlphaWorkerBooking,
+  getAlphaWorkerAvailableBookings,
+  getAlphaWorkerHistoryBookings,
+  seedAlphaWorkerMockBookings,
+} from 'constants/alphaWorkerMocks';
 import { extractEstimateDistanceKm, resolveBookingDistanceKm } from 'utils/distance';
 import { BOOKING_STATUS } from 'utils/bookingStatuses';
 
@@ -296,6 +302,21 @@ export async function listBookings(
   role?: BookingRole,
   options?: BookingRequestOptions,
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    seedAlphaWorkerMockBookings();
+    const scope = params?.scope?.toLowerCase();
+    const bookings =
+      scope === 'available'
+        ? getAlphaWorkerAvailableBookings(role)
+        : getAlphaWorkerHistoryBookings(role);
+    return {
+      bookings,
+      current_page: 1,
+      last_page: 1,
+      per_page: bookings.length,
+      total: bookings.length,
+    };
+  }
   return handleGetApiRequest<SnliftBookingsListResponse>({
     url: bookingUrls(role).list,
     params: params as Record<string, string | number> | undefined,
@@ -319,7 +340,7 @@ export async function getBookingById(
   options?: BookingRequestOptions,
 ) {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    const booking = getAlphaBookingById(id);
+    const booking = ensureAlphaWorkerBooking(id) ?? getAlphaBookingById(id);
     return booking ? { booking } : null;
   }
   return handleGetApiRequest<{ booking: SnliftBooking } | SnliftBooking>({
@@ -469,6 +490,7 @@ export async function createParcelBooking(
 
 export async function acceptBooking(id: number | string, role: BookingRole) {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    ensureAlphaWorkerBooking(id);
     return alphaAcceptBooking(id);
   }
   const urls = bookingUrls(role);
@@ -485,6 +507,11 @@ export async function rejectBooking(
   role: BookingRole,
   options?: { showLoader?: boolean },
 ) {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    ensureAlphaWorkerBooking(id);
+    const booking = updateAlphaSessionBookingStatus(id, BOOKING_STATUS.CANCELLED);
+    return booking ? { booking } : null;
+  }
   const urls = bookingUrls(role);
   if (!urls.reject) return null;
   return handlePostApiRequest<{ booking: SnliftBooking }, Record<string, never>>({

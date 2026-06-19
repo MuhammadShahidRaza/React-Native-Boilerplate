@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ENV_CONSTANTS } from 'constants/common';
+import { getAlphaBookingById } from 'constants/alphaBookingMocks';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { mergeBookingWithTrackingProvider } from 'api/normalizers/snlift';
 import type { SnliftBooking } from 'types/snliftApi';
@@ -8,6 +9,10 @@ import {
   resolveBookingDropoffCoord,
   resolveBookingPickupCoord,
 } from 'utils/bookingCoords';
+import {
+  resolveAlphaProviderBearing,
+  resolveAlphaProviderCoord,
+} from 'utils/alphaProviderLocation';
 import { useBookingLiveTracking } from './useBookingLiveTracking';
 
 type RouteCoords = {
@@ -17,46 +22,70 @@ type RouteCoords = {
   dropoffLng?: number;
 };
 
-/** Booking detail + live tracking + resolved map coords (beta). */
+type ConsumerBookingTrackOptions = {
+  /** Alpha-only: override booking status when UI phase differs from stored booking. */
+  alphaStatusOverride?: string;
+};
+
+/** Booking detail + live tracking + resolved map coords. */
 export function useConsumerBookingTrack(
   bookingId: number | string | undefined,
   routeCoords?: RouteCoords,
   vehicleKind: 'car' | 'bike' = 'car',
+  options?: ConsumerBookingTrackOptions,
 ) {
+  const isAlpha = ENV_CONSTANTS.IS_ALPHA_PHASE;
   const [booking, setBooking] = useState<SnliftBooking | null>(null);
-  const [bookingLoading, setBookingLoading] = useState(
-    Boolean(bookingId) && !ENV_CONSTANTS.IS_ALPHA_PHASE,
-  );
+  const [bookingLoading, setBookingLoading] = useState(Boolean(bookingId) && !isAlpha);
 
   useEffect(() => {
-    if (ENV_CONSTANTS.IS_ALPHA_PHASE || !bookingId) {
+    if (!bookingId) {
       setBooking(null);
       setBookingLoading(false);
       return undefined;
     }
 
-    let cancelled = false;
-    setBookingLoading(true);
+    if (!isAlpha) {
+      let cancelled = false;
+      setBookingLoading(true);
 
-    (async () => {
-      const res = await getBookingById(bookingId, 'user', {
-        showLoader: false,
-        showError: false,
-        silentErrors: true,
-      });
-      if (cancelled) return;
-      setBooking(extractBookingFromResponse(res));
-      setBookingLoading(false);
-    })();
+      (async () => {
+        const res = await getBookingById(bookingId, 'user', {
+          showLoader: false,
+          showError: false,
+          silentErrors: true,
+        });
+        if (cancelled) return;
+        setBooking(extractBookingFromResponse(res));
+        setBookingLoading(false);
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    let cancelled = false;
+    const refresh = () => {
+      const next = getAlphaBookingById(bookingId) ?? null;
+      if (!cancelled) {
+        setBooking(next);
+        setBookingLoading(false);
+      }
+    };
+
+    refresh();
+    const intervalId = setInterval(refresh, isAlpha ? 500 : 5000);
 
     return () => {
       cancelled = true;
+      clearInterval(intervalId);
     };
-  }, [bookingId]);
+  }, [bookingId, isAlpha]);
 
   const live = useBookingLiveTracking(
     bookingId,
-    Boolean(bookingId) && !ENV_CONSTANTS.IS_ALPHA_PHASE,
+    Boolean(bookingId) && !isAlpha,
     vehicleKind,
     booking?.provider_id,
   );
@@ -83,12 +112,42 @@ export function useConsumerBookingTrack(
     [live.tracking?.dropoff, booking, routeCoords?.dropoffLat, routeCoords?.dropoffLng],
   );
 
+  const alphaProviderCoord = useMemo(() => {
+    if (!isAlpha || !booking || !pickup || !dropoff) return null;
+    return resolveAlphaProviderCoord(
+      booking,
+      pickup,
+      dropoff,
+      options?.alphaStatusOverride,
+    );
+  }, [booking, dropoff, isAlpha, options?.alphaStatusOverride, pickup]);
+
+  const alphaProviderBearing = useMemo(() => {
+    if (!isAlpha || !booking || !pickup || !dropoff || !alphaProviderCoord) return 0;
+    return resolveAlphaProviderBearing(
+      booking,
+      pickup,
+      dropoff,
+      alphaProviderCoord,
+      vehicleKind,
+      options?.alphaStatusOverride,
+    );
+  }, [
+    alphaProviderCoord,
+    booking,
+    dropoff,
+    isAlpha,
+    options?.alphaStatusOverride,
+    pickup,
+    vehicleKind,
+  ]);
+
   const mapRegion = useMemo(
     () => (pickup && dropoff ? buildMapRegion(pickup, dropoff) : null),
     [pickup, dropoff],
   );
 
-  const status = (live.status ?? booking?.status ?? '').toLowerCase();
+  const status = (options?.alphaStatusOverride ?? live.status ?? booking?.status ?? '').toLowerCase();
 
   const mergedBooking = useMemo(
     () =>
@@ -105,8 +164,8 @@ export function useConsumerBookingTrack(
     bookingLoading,
     tracking: live.tracking,
     status,
-    providerCoord: live.providerCoord,
-    providerBearing: live.providerBearing,
+    providerCoord: isAlpha ? alphaProviderCoord : live.providerCoord,
+    providerBearing: isAlpha ? alphaProviderBearing : live.providerBearing,
     pickup,
     dropoff,
     mapRegion,

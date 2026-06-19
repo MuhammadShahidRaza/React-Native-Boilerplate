@@ -257,11 +257,9 @@ export const WorkerJobNavigationScreen = () => {
       const advance = getWorkerPickupStatusAdvance(serviceType, pickupStep);
       if (!advance) return;
 
-      if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        await updateBookingStatus(detail.id, advance.nextStatus, role);
-        if (advance.startDropoff && advance.followUpStatus) {
-          await updateBookingStatus(detail.id, advance.followUpStatus, role);
-        }
+      await updateBookingStatus(detail.id, advance.nextStatus, role);
+      if (advance.startDropoff && advance.followUpStatus) {
+        await updateBookingStatus(detail.id, advance.followUpStatus, role);
       }
 
       if (advance.nextStep) {
@@ -276,20 +274,14 @@ export const WorkerJobNavigationScreen = () => {
       return;
     }
 
-    if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
-      const res = await updateBookingStatus(detail.id, 'completed', role);
-      const completedBooking = extractBookingFromResponse(res);
-      await stopWorkerActiveJobTracking();
-      refreshWorkerHomeStats();
-      resetToHomeAndScreen(SCREENS.WORKER_JOB_COMPLETED, {
-        requestId: detail.id,
-        completedBooking: completedBooking ?? undefined,
-      });
-      return;
-    }
+    const res = await updateBookingStatus(detail.id, 'completed', role);
+    const completedBooking = extractBookingFromResponse(res);
     await stopWorkerActiveJobTracking();
     refreshWorkerHomeStats();
-    resetToHomeAndScreen(SCREENS.WORKER_JOB_COMPLETED, { requestId: detail.id });
+    resetToHomeAndScreen(SCREENS.WORKER_JOB_COMPLETED, {
+      requestId: detail.id,
+      completedBooking: completedBooking ?? undefined,
+    });
   };
 
   const onPhonePress = () => {

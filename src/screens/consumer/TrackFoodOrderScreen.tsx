@@ -37,6 +37,7 @@ import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnc
 import { useFoodOrderDisplay } from 'hooks/useFoodOrderDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
+import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapFoodOrderPhase } from 'utils/bookingTrackPhases';
 import { resolveCourierToDropoffLeg } from 'utils/trackingDirections';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
@@ -98,11 +99,21 @@ export const TrackFoodOrderScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_FOOD_ORDER>>();
   const bookingId = route.params?.bookingId;
   const timerDurationSeconds = route.params?.timerDurationSeconds;
-  const [localPhase, setLocalPhase] = useState<FoodOrderPhase>(
-    route.params?.phase ?? 'order_placed',
-  );
+  const alphaCycle = useAlphaBookingStatusCycle(bookingId);
   const { order } = useFoodOrderDisplay(bookingId);
-  const track = useConsumerBookingTrack(bookingId, undefined, 'bike');
+  const track = useConsumerBookingTrack(bookingId, undefined, 'bike', {
+    alphaStatusOverride: IS_ALPHA ? alphaCycle.status ?? undefined : undefined,
+  });
+
+  const effectiveStatus =
+    IS_ALPHA && alphaCycle.status ? alphaCycle.status : track.status;
+
+  const phase = useMemo((): FoodOrderPhase => {
+    if (IS_ALPHA && effectiveStatus) return mapFoodOrderPhase(effectiveStatus);
+    if (track.status) return mapFoodOrderPhase(track.status);
+    return route.params?.phase ?? 'order_placed';
+  }, [effectiveStatus, route.params?.phase, track.status]);
+
   const [cancelOpen, setCancelOpen] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
   const [rating, setRating] = useState(0);
@@ -137,19 +148,15 @@ export const TrackFoodOrderScreen = () => {
 
   const handleBookingAccepted = useCallback(() => {
     timerHandledRef.current = true;
-    setLocalPhase(IS_ALPHA ? 'order_accepted' : 'preparing');
   }, []);
 
   const pickup = track.pickup ?? order?.pickup ?? { latitude: 0, longitude: 0 };
   const dropoff = track.dropoff ?? order?.dropoff ?? { latitude: 0, longitude: 0 };
 
-  const phase = useMemo(() => {
-    if (IS_ALPHA) return localPhase;
-    if (track.status) return mapFoodOrderPhase(track.status);
-    return localPhase;
-  }, [localPhase, track.status]);
-
-  useBookingAcceptPoll(phase === 'order_placed' ? bookingId : undefined, handleBookingAccepted);
+  useBookingAcceptPoll(
+    IS_ALPHA ? undefined : phase === 'order_placed' ? bookingId : undefined,
+    handleBookingAccepted,
+  );
 
   const handleTimerExpire = () => {
     if (timerHandledRef.current) return;
@@ -337,12 +344,12 @@ export const TrackFoodOrderScreen = () => {
             ) : null}
 
             {showTrackingUi && !isDelivered ? (
-              <RideAnimatedStatusBlock
-                animationKey={status.key}
-                iconProps={status.icon}
-                title={status.title}
-                subtitle={status.subtitle}
-              />
+                <RideAnimatedStatusBlock
+                  animationKey={status.key}
+                  iconProps={status.icon}
+                  title={status.title}
+                  subtitle={status.subtitle}
+                />
             ) : null}
 
             {showMap && !isDelivered && order ? (

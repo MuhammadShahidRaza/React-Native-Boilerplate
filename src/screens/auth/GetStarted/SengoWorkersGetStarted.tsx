@@ -69,7 +69,9 @@ export const SengoWorkersGetStarted = () => {
         </View>
 
         <View style={styles.textSection}>
-          <Typography style={styles.mainTitle}>{t(AUTH_TEXT.GET_STARTED_HEADING)}</Typography>
+          <Typography style={styles.mainTitle}>
+            {t(AUTH_TEXT.GET_STARTED_HEADING_SENGO_WORKERS)}
+          </Typography>
           <Typography style={styles.description}>
             {t(VARIANT.getStartedDescriptionKey)}
           </Typography>

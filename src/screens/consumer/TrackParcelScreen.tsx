@@ -14,6 +14,7 @@ import {
   RideVehicleStatsRow,
   SkeletonWrapper,
   Typography,
+  WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
@@ -30,6 +31,7 @@ import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { useParcelTripDisplay } from 'hooks/useParcelTripDisplay';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
+import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapParcelTrackPhase } from 'utils/bookingTrackPhases';
 import { resolveParcelDirectionsLeg } from 'utils/trackingDirections';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
@@ -58,11 +60,16 @@ export const TrackParcelScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_PARCEL>>();
   const { bookingId, pickupLat, pickupLng, dropoffLat, dropoffLng } = route.params ?? {};
 
+  const alphaCycle = useAlphaBookingStatusCycle(bookingId);
+
   const { trip, loading: tripLoading } = useParcelTripDisplay(bookingId);
   const track = useConsumerBookingTrack(
     bookingId,
     { pickupLat, pickupLng, dropoffLat, dropoffLng },
     'bike',
+    {
+      alphaStatusOverride: IS_ALPHA ? alphaCycle.status ?? undefined : undefined,
+    },
   );
 
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -79,10 +86,12 @@ export const TrackParcelScreen = () => {
     longitudeDelta: Math.abs(pickup.longitude - dropoff.longitude) * 2 + 0.02,
   };
 
+  const effectiveStatus =
+    IS_ALPHA && alphaCycle.status ? alphaCycle.status : track.status;
+
   const phase = useMemo((): ParcelTrackPhase => {
-    if (IS_ALPHA) return 'picked_up';
-    return mapParcelTrackPhase(track.status);
-  }, [track.status]);
+    return mapParcelTrackPhase(effectiveStatus);
+  }, [effectiveStatus]);
 
   const directionsOrigin = useThrottledMapCoord(track.providerCoord, 8000, 0.05);
 
@@ -148,9 +157,7 @@ export const TrackParcelScreen = () => {
             color: COLORS.WHITE,
           },
           title: 'Parcel Picked Up',
-          subtitle: track.status === 'accepted'
-            ? 'Courier has accepted your delivery'
-            : 'Courier has collected your parcel',
+          subtitle: 'Courier has collected your parcel',
         } as const;
       case 'in_transit':
         return {
@@ -172,7 +179,7 @@ export const TrackParcelScreen = () => {
           subtitle: 'Parcel has been delivered',
         } as const;
     }
-  }, [phase, track.status]);
+  }, [phase]);
 
   const isDelivered = phase === 'delivered';
   const showCourier = !isDelivered && Boolean(track.providerCoord);
@@ -215,6 +222,8 @@ export const TrackParcelScreen = () => {
           title={status.title}
           subtitle={status.subtitle}
         />
+
+        
 
         <ParcelCourierCard
           courierName={trip?.courierName ?? '—'}

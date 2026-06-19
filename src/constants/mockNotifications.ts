@@ -39,7 +39,7 @@ export const MOCK_NOTIFICATION_ACTIVITIES: Activity[] = [
     ...base,
     id: 9003,
     type: 'welcome',
-    title: 'Welcome to SN Lift!',
+    title: 'Welcome to Sengo!',
     body: 'Start your journey with us. Book Rides, order food, and send parcels?',
     created_at: daysAgo(5),
   },

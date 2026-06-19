@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ENV_CONSTANTS } from 'constants/common';
+import { ensureAlphaWorkerBooking } from 'constants/alphaWorkerMocks';
 import {
   getWorkerRequestDetail,
   type WorkerRequestDetail,
@@ -27,6 +28,8 @@ export function useWorkerRequestDetail(
       return mapBookingToWorkerRequestDetail(options.initialBooking);
     }
     if (ENV_CONSTANTS.IS_ALPHA_PHASE && requestId) {
+      const booking = ensureAlphaWorkerBooking(requestId);
+      if (booking) return mapBookingToWorkerRequestDetail(booking);
       return getWorkerRequestDetail(requestId);
     }
     return null;
@@ -51,8 +54,21 @@ export function useWorkerRequestDetail(
     }
 
     if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-      if (requestId) setDetail(getWorkerRequestDetail(requestId));
-      setBookingStatus('pending');
+      if (!requestId) {
+        setDetail(null);
+        setLoading(false);
+        return;
+      }
+
+      const booking = ensureAlphaWorkerBooking(requestId);
+      if (booking) {
+        setDetail(mapBookingToWorkerRequestDetail(booking));
+        if (booking.created_at) setBookingCreatedAt(booking.created_at.trim());
+        setBookingStatus(normalizeBookingStatus(booking.status));
+      } else {
+        setDetail(getWorkerRequestDetail(requestId));
+        setBookingStatus('pending');
+      }
       setLoading(false);
       return;
     }

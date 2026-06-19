@@ -6,6 +6,13 @@ import {
   handlePatchApiRequest,
   handlePostApiRequest,
 } from '.';
+import {
+  createAlphaAddress,
+  deleteAlphaAddress,
+  getAlphaAddressList,
+  updateAlphaAddress,
+} from 'constants/alphaAddressMocks';
+import { ENV_CONSTANTS } from 'constants/common';
 import { Address, AddressListData, AddressPayload } from 'types/responseTypes';
 
 /** Postman: POST /address/create — `title`, `address`, string lat/long. */
@@ -72,6 +79,9 @@ const getAddressList = async ({
 }: {
   page?: number;
 }): Promise<AddressListData | undefined> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return getAlphaAddressList(page);
+  }
   const response = await handleGetApiRequest<AddressListData>({
     url: API_ROUTES.ADDRESS_LIST,
     params: { page },
@@ -81,6 +91,9 @@ const getAddressList = async ({
 
 /** Create new address — POST /address/create or POST /address (alias). */
 const createAddress = async (data: AddressPayload): Promise<Address | undefined> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return createAlphaAddress(data);
+  }
   const body = toApiAddressBody(data);
   let response = await handlePostApiRequest<Record<string, unknown>, Record<string, unknown>>({
     url: API_ROUTES.ADDRESS_CREATE,
@@ -102,6 +115,9 @@ const updateAddress = async (
   id: number,
   data: Partial<AddressPayload>,
 ): Promise<Address | undefined> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    return updateAlphaAddress(id, data);
+  }
   const response = await handlePatchApiRequest<Record<string, unknown>, Record<string, unknown>>({
     url: API_ROUTES.ADDRESS_UPDATE(id),
     data: toApiAddressBody({
@@ -116,6 +132,10 @@ const updateAddress = async (
 
 /** Delete address by id */
 const deleteAddress = async (id: number): Promise<void> => {
+  if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+    deleteAlphaAddress(id);
+    return;
+  }
   await handleDeleteApiRequest<{ message?: string }, Record<string, never>>({
     url: API_ROUTES.ADDRESS_DELETE(id),
     data: {},

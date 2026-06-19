@@ -32,6 +32,7 @@ import {
   isWorkerTerminalBookingStatus,
   workerJobNavigationPhase,
 } from 'utils/workerBookingNavigation';
+import { normalizeBookingStatus } from 'utils/bookingStatuses';
 
 const AVATAR_SIZE = 56;
 
@@ -82,13 +83,13 @@ export const WorkerRequestDetailScreen = () => {
   const accept = async () => {
     if (!detail) return;
     const res = await acceptBooking(requestId, role);
-    if (!res) {
+    if (!res?.booking) {
       showToast({ message: 'Could not accept this request. Try again.' });
       return;
     }
     hasAcceptedRef.current = true;
     setTimerActive(false);
-    setBookingStatus('accepted');
+    setBookingStatus(normalizeBookingStatus(res.booking.status));
     if (userDetails?.id) {
       void startWorkerActiveJobTracking({
         userId: String(userDetails.id),
@@ -110,16 +111,11 @@ export const WorkerRequestDetailScreen = () => {
   const reject = async () => {
     if (!detail || rejecting || hasAcceptedRef.current) return;
 
-    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-      handleBack();
-      return;
-    }
-
     setRejecting(true);
     setTimerActive(false);
 
     const res = await rejectBooking(requestId, role, {
-      showLoader: true,
+      showLoader: !ENV_CONSTANTS.IS_ALPHA_PHASE,
     });
 
     setRejecting(false);

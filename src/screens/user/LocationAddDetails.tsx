@@ -85,18 +85,21 @@ export const LocationAddDetails = () => {
         ? await updateAddress(address.addressId, payload)
         : await createAddress(payload);
 
-      if (result) {
-        const addr = ensureFullAddress(result as Address);
-        if (address.addressId) {
-          dispatch(updateAddressInList(addr));
-          if (addr.is_default === 1) dispatch(setAddressDefault(addr.id));
-        } else {
-          dispatch(addAddress({ ...addr, is_default: 1 }));
-          dispatch(setAddressDefault(addr.id)); // new address is always set as default
-        }
-        // Location → MapPicker → AddDetails: pop both picker + details in one step
-        pop(2);
+      if (!result) {
+        Alert.alert('Error', 'Failed to save address. Please try again.');
+        return;
       }
+
+      const addr = ensureFullAddress(result as Address);
+      if (address.addressId) {
+        dispatch(updateAddressInList(addr));
+        if (addr.is_default === 1) dispatch(setAddressDefault(addr.id));
+      } else {
+        dispatch(addAddress({ ...addr, is_default: 1 }));
+        dispatch(setAddressDefault(addr.id)); // new address is always set as default
+      }
+      // Location → MapPicker → AddDetails: pop both picker + details in one step
+      pop(2);
     } catch (e) {
       Alert.alert('Error', 'Failed to save address. Please try again.');
     } finally {

@@ -307,7 +307,7 @@ export const WorkerWalletScreen = () => {
 
       {IS_SENGO_WORKERS ? (
         <>
-          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+          <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 100) }]}>
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={handleContinueWithdraw}

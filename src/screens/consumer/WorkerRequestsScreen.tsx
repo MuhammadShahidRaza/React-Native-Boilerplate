@@ -6,10 +6,8 @@ import { FontSize } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import {
-  WORKER_MOCK_REQUESTS,
   type WorkerRequestRecord,
 } from 'components/common/worker/workerMockData';
-import { ENV_CONSTANTS } from 'constants/common';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
@@ -34,11 +32,11 @@ export const WorkerRequestsScreen = () => {
   const loadRequests = useCallback(async () => {
     setLoading(true);
     try {
-      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        setRequests(WORKER_MOCK_REQUESTS);
-        return;
-      }
-      const res = await listBookings({ scope: 'available' }, role);
+      const res = await listBookings(
+        { scope: 'available' },
+        role,
+        { showLoader: false, showError: false, silentErrors: true },
+      );
       const bookings = extractBookingsList(res);
       setRequests(bookings.map(mapBookingToWorkerRequest));
     } catch {

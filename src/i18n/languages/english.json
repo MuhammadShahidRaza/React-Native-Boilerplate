@@ -243,7 +243,11 @@
     "HEADING_3": "One app for customers & drivers",
     "DESCRIPTION_1": "Request rides, send parcels, and order food — all from one home hub built for speed and clarity.",
     "DESCRIPTION_2": "Follow your courier or driver in real time with clear status updates from pickup to drop-off.",
-    "DESCRIPTION_3": "Whether you are a customer, courier, or driver, sign in with your role after onboarding to see the right tools."
+    "DESCRIPTION_3": "Whether you are a customer, courier, or driver, sign in with your role after onboarding to see the right tools.",
+    "HEADING_SENGO": "Book rides & deliveries",
+    "DESCRIPTION_SENGO": "Request rides, send parcels, and order food — all from one home hub built for speed and clarity.",
+    "HEADING_SENGO_WORKERS": "Work on your schedule",
+    "DESCRIPTION_SENGO_WORKERS": "Accept ride and parcel jobs near you, navigate with live maps, and track your earnings — built for Sengo drivers and couriers."
   },
   "AUTH": {
     "LOGIN_HEADING": "Welcome Back! 👋",
@@ -253,6 +257,7 @@
     "SIGN_UP_HEADING": "Join Us Today! 🎉",
     "SIGN_UP_DESCRIPTION": "Create your account to get started.",
     "GET_STARTED_HEADING": "Choose your role",
+    "GET_STARTED_HEADING_SENGO_WORKERS": "Choose how you earn",
     "GET_STARTED_DESCRIPTION": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
     "GET_STARTED_DESCRIPTION_SNLIFT": "SN LIFT connects riders, senders, and drivers in one place. Select whether you book trips and deliveries, carry parcels as a courier, or drive passengers—then sign in to open the right home screen for you.",
     "GET_STARTED_DESCRIPTION_SENGO": "Book rides and deliveries with Sengo. Sign in to get started.",

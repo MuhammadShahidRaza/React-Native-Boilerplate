@@ -9,7 +9,7 @@ import type {
   EstimateCategoryResult,
 } from 'api/functions/snlift/bookings';
 import { getAlphaConsumerBookingById } from 'constants/consumerBookingMock';
-import { BOOKING_STATUS } from 'utils/bookingStatuses';
+import { BOOKING_STATUS, normalizeBookingStatus } from 'utils/bookingStatuses';
 import { haversineDistanceKmExact } from 'utils/distance';
 import type { SnliftBooking } from 'types/snliftApi';
 
@@ -170,6 +170,11 @@ function storeAlphaBooking(booking: SnliftBooking): SnliftBooking {
   return booking;
 }
 
+/** Register or replace a booking in the alpha session store (worker mocks, consumer creates). */
+export function registerAlphaSessionBooking(booking: SnliftBooking): SnliftBooking {
+  return storeAlphaBooking(booking);
+}
+
 export function getAlphaBookingById(id: number | string): SnliftBooking | undefined {
   const numericId = typeof id === 'number' ? id : parseInt(String(id), 10);
   if (Number.isNaN(numericId)) return undefined;
@@ -207,12 +212,33 @@ export function removeAlphaSessionBooking(id: number | string): void {
   if (!Number.isNaN(numericId)) alphaSessionBookings.delete(numericId);
 }
 
+function alphaStatusNeedsProvider(booking: SnliftBooking): boolean {
+  const s = normalizeBookingStatus(booking.status);
+  if (s === BOOKING_STATUS.PENDING || s === BOOKING_STATUS.CANCELLED) return false;
+  if (booking.booking_type === 'food') {
+    return (
+      s === BOOKING_STATUS.READY_FOR_PICKUP ||
+      s === BOOKING_STATUS.PICKED_UP ||
+      s === BOOKING_STATUS.IN_TRANSIT ||
+      s === BOOKING_STATUS.COMPLETED
+    );
+  }
+  return true;
+}
+
 export function updateAlphaSessionBookingStatus(id: number | string, status: string): SnliftBooking | null {
   const booking = getAlphaBookingById(id);
   if (!booking) return null;
-  const updated = { ...booking, status, updated_at: new Date().toISOString() };
+  let updated: SnliftBooking = {
+    ...booking,
+    status,
+    updated_at: new Date().toISOString(),
+  };
   if (status === BOOKING_STATUS.COMPLETED) {
     updated.completed_at = new Date().toISOString();
+  }
+  if (alphaStatusNeedsProvider(updated)) {
+    updated = withMockProvider(updated);
   }
   return storeAlphaBooking(updated);
 }
@@ -312,9 +338,11 @@ export function alphaCreateParcelBooking(data: CreateParcelBookingPayload): { bo
 export function alphaAcceptBooking(id: number | string): { booking: SnliftBooking } | null {
   const existing = getAlphaBookingById(id);
   if (!existing) return null;
-  const status =
-    existing.booking_type === 'food' ? BOOKING_STATUS.READY_FOR_PICKUP : BOOKING_STATUS.ACCEPTED;
-  return { booking: storeAlphaBooking(withMockProvider({ ...existing, status })) };
+  return {
+    booking: storeAlphaBooking(
+      withMockProvider({ ...existing, status: BOOKING_STATUS.ACCEPTED }),
+    ),
+  };
 }
 
 export function getAlphaSessionBookings(): SnliftBooking[] {

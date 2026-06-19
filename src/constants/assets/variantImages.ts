@@ -1,4 +1,5 @@
 import { VARIANT_ID } from 'config/variant';
+import { ONBOARDING_TEXT } from 'constants/screens';
 import { IMAGES } from './images';
 
 /** Raster assets for Sengo flavors (splash cloud, onboarding hero). */
@@ -45,6 +46,56 @@ export function getVariantOnboardingImages() {
 /** Sengo flavors use a single onboarding slide. */
 export function getVariantOnboardingPageCount(): number {
   return VARIANT_ID === 'sengo' || VARIANT_ID === 'sengoWorkers' ? 1 : 3;
+}
+
+export type VariantOnboardingPage = {
+  image: (typeof SNLIFT_ONBOARDING)['one'];
+  heading: string;
+  description: string;
+};
+
+/** Onboarding copy + image for the active app flavor. */
+export function getVariantOnboardingPages(): VariantOnboardingPage[] {
+  const images = getVariantOnboardingImages();
+  const pageCount = getVariantOnboardingPageCount();
+
+  if (VARIANT_ID === 'sengoWorkers') {
+    return [
+      {
+        image: images.one,
+        heading: ONBOARDING_TEXT.HEADING_SENGO_WORKERS,
+        description: ONBOARDING_TEXT.DESCRIPTION_SENGO_WORKERS,
+      },
+    ];
+  }
+
+  if (VARIANT_ID === 'sengo') {
+    return [
+      {
+        image: images.one,
+        heading: ONBOARDING_TEXT.HEADING_SENGO,
+        description: ONBOARDING_TEXT.DESCRIPTION_SENGO,
+      },
+    ];
+  }
+
+  return [
+    {
+      image: images.one,
+      heading: ONBOARDING_TEXT.HEADING_1,
+      description: ONBOARDING_TEXT.DESCRIPTION_1,
+    },
+    {
+      image: images.two,
+      heading: ONBOARDING_TEXT.HEADING_2,
+      description: ONBOARDING_TEXT.DESCRIPTION_2,
+    },
+    {
+      image: images.three,
+      heading: ONBOARDING_TEXT.HEADING_3,
+      description: ONBOARDING_TEXT.DESCRIPTION_3,
+    },
+  ].slice(0, pageCount);
 }
 
 /** My Account header background for the active flavor. */

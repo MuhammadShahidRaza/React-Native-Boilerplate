@@ -171,7 +171,7 @@ export const Home = () => {
       >
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
-            <RowComponent style={styles.locPillWrap}>
+            <RowComponent onPress={() => navigate(SCREENS.LOCATION)} style={styles.locPillWrap}>
               <GradientIcon
                 componentName={VARIABLES.EvilIcons}
                 iconName='location'
@@ -314,7 +314,7 @@ export const Home = () => {
             promoCodes.map(p => (
               <View key={p.id} style={[styles.promoCard]}>
                 <SvgComponent
-                  Svg={SVG.COUPON}
+                  Svg={getServiceIcon('coupon')}
                   svgWidth={40}
                   svgHeight={40}
                   containerStyle={{ ...STYLES.SHADOW, padding: 10, borderRadius: 100 }}
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   locText: {
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
-    width: '40%',
+    width: '90%',
     fontWeight: FontWeight.SemiBold,
   },
   greet: {

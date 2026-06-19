@@ -5,7 +5,8 @@ import type { Region } from 'react-native-maps';
 import type MapView from 'react-native-maps';
 import { Map } from 'components/common/Map';
 import { Autocomplete, Button, GradientIcon, Icon, Typography, Wrapper } from 'components/index';
-import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
+import { INITIAL_REGION, VARIABLES } from 'constants/common';
+import { useAddressList } from 'hooks/useAddressList';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, screenHeight } from 'utils/index';
 import {
@@ -17,7 +18,6 @@ import {
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { setPickerResult } from 'utils/pickerStore';
-import { useAppSelector } from 'types/reduxTypes';
 
 type SavedPlaceItem = {
   id: string;
@@ -34,34 +34,6 @@ const LABEL_ICON: Record<string, string> = {
   partner: 'heart',
 };
 
-const SAVED = [
-  {
-    id: 'home',
-    label: 'Home',
-    full_address: '67 Murray Street, NY',
-    street: '67 Murray Street',
-    city: 'New York',
-    state: 'NY',
-    country: 'USA',
-    postal_code: '10001',
-    icon: 'home',
-    latitude: INITIAL_REGION.latitude + 0.005,
-    longitude: INITIAL_REGION.longitude - 0.003,
-  },
-  {
-    id: 'work',
-    label: 'Work',
-    full_address: '67 Murray Street, NY',
-    street: '67 Murray Street',
-    city: 'New York',
-    state: 'NY',
-    country: 'USA',
-    postal_code: '10001',
-    icon: 'briefcase',
-    latitude: INITIAL_REGION.latitude - 0.008,
-    longitude: INITIAL_REGION.longitude + 0.006,
-  },
-];
 // ── Component ─────────────────────────────────────────────────────────────────
 
 type StoredAddress = NonNullable<
@@ -89,8 +61,7 @@ export const RideLocationPickerScreen = () => {
   const [initialRegion, setInitialRegion] = useState<Region>(INITIAL_REGION);
   const [regionReady, setRegionReady] = useState(false);
 
-  const reduxAddressList = useAppSelector(state => state.address.addressList);
-  const addressList = ENV_CONSTANTS.IS_ALPHA_PHASE ? SAVED : reduxAddressList;
+  const { addressList } = useAddressList();
   const savedPlaces = useMemo<SavedPlaceItem[]>(() => {
     const filtered = addressList
       .filter(a => {

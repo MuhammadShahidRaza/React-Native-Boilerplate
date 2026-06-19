@@ -29,6 +29,11 @@ import { useJobDisplayTimer } from 'hooks/useJobDisplayTimer';
 import { useBookingAcceptPoll } from 'hooks/useBookingAcceptPoll';
 import { isFreshJobTimer, resolveJobTimerAnchor } from 'utils/resolveJobTimerAnchor';
 import { logger } from 'utils/logger';
+import { updateAlphaSessionBookingStatus } from 'constants/alphaBookingMocks';
+import { BOOKING_STATUS } from 'utils/bookingStatuses';
+import { ALPHA_PHASE_DURATION_MS } from 'utils/alphaStatusCycle';
+
+const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 
 export const FindingDriverScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.FINDING_DRIVER>>();
@@ -123,7 +128,16 @@ export const FindingDriverScreen = () => {
     });
   }, [pickupCoord, dropoffCoord, bookingId]);
 
-  useBookingAcceptPoll(bookingId, goToDriverFound);
+  useBookingAcceptPoll(IS_ALPHA ? undefined : bookingId, goToDriverFound);
+
+  useEffect(() => {
+    if (!IS_ALPHA || !bookingId) return;
+    const timeoutId = setTimeout(() => {
+      updateAlphaSessionBookingStatus(bookingId, BOOKING_STATUS.ACCEPTED);
+      goToDriverFound();
+    }, ALPHA_PHASE_DURATION_MS);
+    return () => clearTimeout(timeoutId);
+  }, [bookingId, goToDriverFound]);
 
   const handleTimerExpire = () => {
     if (timerHandledRef.current) return;
@@ -150,8 +164,11 @@ export const FindingDriverScreen = () => {
     replace(SCREENS.BOTTOM_STACK);
   };
 
-  const timerSubtitle =
-    ready && expiresAt ? 'Time remaining is shown above' : 'Please wait while we match you';
+  const timerSubtitle = IS_ALPHA
+    ? 'Demo: driver match in a few seconds'
+    : ready && expiresAt
+      ? 'Time remaining is shown above'
+      : 'Please wait while we match you';
 
   return (
     <Wrapper
@@ -204,7 +221,7 @@ export const FindingDriverScreen = () => {
       </View>
 
       <View style={styles.center}>
-        {ready && expiresAt ? (
+      {ready && expiresAt ? (
           <View style={styles.timerWrap}>
             <WorkerRequestTimer
               expiresAt={expiresAt}

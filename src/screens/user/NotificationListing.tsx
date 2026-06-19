@@ -359,7 +359,6 @@ export const NotificationListing = () => {
   return (
     <Wrapper
       headerTitle={COMMON_TEXT.NOTIFICATIONS}
-      backIconStyle={USE_ALPHA_CARDS ? CONSUMER_BACK_ICON : undefined}
       backgroundColor={USE_ALPHA_CARDS ? COLORS.BACKGROUND : undefined}
     >
       {loading ? (

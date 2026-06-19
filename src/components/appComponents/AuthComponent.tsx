@@ -53,7 +53,7 @@ export const AuthComponent = ({
 
   return (
     <>
-      <Wrapper useScrollView showBackButton={showBack}>
+      <Wrapper useScrollView showBackButton={showBack} wantPaddingBottom={false}>
         <View style={styles.mainContainer}>
           {showLogo && (
             <SvgComponent

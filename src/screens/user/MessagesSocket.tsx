@@ -48,6 +48,8 @@ const groupMessagesByDate = (messages: SocketMessage[]) => {
 export const MessagesSocket = ({ route }: AppScreenProps<typeof SCREENS.MESSAGES_SOCKET>) => {
   const { isLangRTL } = useTranslation();
   const conversationId = route.params?.data?.conversationId;
+  const otherUser = route.params?.data?.otherUser;
+  const chatTitle = otherUser?.full_name?.trim() || TEMPORARY_TEXT.JOHN_DOE;
   const { on, off, emit } = useSocketFunctions();
 
   useEffect(() => {
@@ -294,7 +296,7 @@ export const MessagesSocket = ({ route }: AppScreenProps<typeof SCREENS.MESSAGES
           subtitleTextStyle={{
             color: COLORS.GREEN,
           }}
-          title={TEMPORARY_TEXT.JOHN_DOE}
+          title={chatTitle}
           centerImage={IMAGES.USER_IMAGE}
           showBackButton={true}
           centerImageStyle={{

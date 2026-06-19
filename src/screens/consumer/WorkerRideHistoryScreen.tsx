@@ -38,20 +38,22 @@ export const WorkerRideHistoryScreen = () => {
       setLoading(true);
     }
     try {
-      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-        setTrips(WORKER_HISTORY_TRIPS);
-        return;
-      }
-      const bookings = await listWorkerBookingHistory(role);
-      const trips: WorkerTripRecord[] = [];
+      const bookings = await listWorkerBookingHistory(role, {
+        showLoader: false,
+        showError: false,
+        silentErrors: true,
+      });
+      const mapped: WorkerTripRecord[] = [];
       for (const booking of bookings) {
         try {
-          trips.push(mapBookingToWorkerTrip(booking));
+          mapped.push(mapBookingToWorkerTrip(booking));
         } catch {
           // Skip malformed rows instead of failing the whole list.
         }
       }
-      setTrips(trips);
+      setTrips(
+        mapped.length > 0 || !ENV_CONSTANTS.IS_ALPHA_PHASE ? mapped : WORKER_HISTORY_TRIPS,
+      );
     } catch {
       if (!isRefresh) {
         setTrips([]);

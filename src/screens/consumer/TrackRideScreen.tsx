@@ -16,6 +16,7 @@ import {
   RideVehicleStatsRow,
   SkeletonWrapper,
   Typography,
+  WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
@@ -33,6 +34,7 @@ import { mapBookingToRideTrip } from 'hooks/useRideTripDisplay';
 import { MOCK_RIDE_TRIP } from 'components/common/ride/rideMockTrip';
 import { useConsumerBookingTrack } from 'hooks/useConsumerBookingTrack';
 import { useThrottledMapCoord } from 'hooks/useThrottledMapCoord';
+import { useAlphaBookingStatusCycle } from 'hooks/useAlphaBookingStatusCycle';
 import { mapRideTrackPhase } from 'utils/bookingTrackPhases';
 import { resolveRideDirectionsLeg, rideStatusLabel } from 'utils/rideTrackMap';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
@@ -66,15 +68,21 @@ export const TrackRideScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, typeof SCREENS.TRACK_RIDE>>();
   const { pickupLat, pickupLng, dropoffLat, dropoffLng, bookingId } = route.params ?? {};
 
+  const alphaCycle = useAlphaBookingStatusCycle(bookingId);
+
   const track = useConsumerBookingTrack(
     bookingId,
     { pickupLat, pickupLng, dropoffLat, dropoffLng },
     'car',
+    {
+      alphaStatusOverride: IS_ALPHA ? alphaCycle.status ?? undefined : undefined,
+    },
   );
 
   const trip = useMemo(() => {
+    if (track.booking) return mapBookingToRideTrip(track.booking);
     if (IS_ALPHA) return MOCK_RIDE_TRIP;
-    return track.booking ? mapBookingToRideTrip(track.booking) : null;
+    return null;
   }, [track.booking]);
   const tripLoading = IS_ALPHA ? false : track.bookingLoading;
 
@@ -88,10 +96,12 @@ export const TrackRideScreen = () => {
   const pickupCoord = track.pickup ?? fallbackCoord(pickupLat, pickupLng, 0.008, 0);
   const dropoffCoord = track.dropoff ?? fallbackCoord(dropoffLat, dropoffLng, -0.004, 0.005);
 
+  const effectiveStatus =
+    IS_ALPHA && alphaCycle.status ? alphaCycle.status : track.status;
+
   const phase = useMemo((): RideTrackPhase => {
-    if (IS_ALPHA) return 'arriving';
-    return mapRideTrackPhase(track.status, track.providerCoord, pickupCoord);
-  }, [track.status, track.providerCoord, pickupCoord]);
+    return mapRideTrackPhase(effectiveStatus, track.providerCoord, pickupCoord);
+  }, [effectiveStatus, track.providerCoord, pickupCoord]);
 
   const directionsLeg = useMemo(
     () => resolveRideDirectionsLeg(phase, pickupCoord, dropoffCoord, directionsOrigin),
@@ -252,6 +262,8 @@ export const TrackRideScreen = () => {
           title={status.title}
           subtitle={status.subtitle}
         />
+
+       
 
         <RideDriverCard
           driverName={trip?.driverName ?? '—'}

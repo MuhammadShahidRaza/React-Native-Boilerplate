@@ -9,14 +9,13 @@ import {
 } from 'react-native';
 import { Wrapper, Typography, Photo, Button } from 'components/common';
 import { screenHeight, screenWidth, COLORS, FLEX_CENTER, setItem, formatTitle } from 'utils/index';
-import { COMMON_TEXT, ONBOARDING_TEXT } from 'constants/screens';
+import { COMMON_TEXT } from 'constants/screens';
 import { FontSize, FontWeight } from 'types/index';
 import { VARIABLES } from 'constants/common';
 import { useTranslation } from 'hooks/index';
 import {
   getVariant,
-  getVariantOnboardingImages,
-  getVariantOnboardingPageCount,
+  getVariantOnboardingPages,
   isSengoBrand,
 } from 'constants/assets';
 import { useAppDispatch } from 'types/reduxTypes';
@@ -43,27 +42,8 @@ export const OnBoarding = () => {
     return () => clearTimeout(timeout);
   }, [isLangRTL, scrollViewRef]);
 
-  const onboardingImages = getVariantOnboardingImages();
   const variant = getVariant();
-  const pageCount = getVariantOnboardingPageCount();
-  const allPages = [
-    {
-      image: onboardingImages.one,
-      heading: ONBOARDING_TEXT.HEADING_1,
-      description: ONBOARDING_TEXT.DESCRIPTION_1,
-    },
-    {
-      image: onboardingImages.two,
-      heading: ONBOARDING_TEXT.HEADING_2,
-      description: ONBOARDING_TEXT.DESCRIPTION_2,
-    },
-    {
-      image: onboardingImages.three,
-      heading: ONBOARDING_TEXT.HEADING_3,
-      description: ONBOARDING_TEXT.DESCRIPTION_3,
-    },
-  ];
-  const pages = allPages.slice(0, pageCount);
+  const pages = getVariantOnboardingPages();
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -148,7 +128,7 @@ export const OnBoarding = () => {
             },
           ]}
         >
-          {currentContent?.description}
+          {t(currentContent?.description ?? '')}
         </Typography>
 
         {pages.length > 1 && (
