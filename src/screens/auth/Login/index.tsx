@@ -43,7 +43,7 @@ export const Login = () => {
     email: '',
     phone_number: __DEV__ ? '3242445623' : '',
     country_code: __DEV__ ? 'PK' : 'US',
-    calling_code: __DEV__ ? '+92' : '+234',
+    calling_code: __DEV__ ? '+92' : '+1',
     password: __DEV__ ? 'Passward123!' : '',
     showPassword: false,
     rememberMe: false,
