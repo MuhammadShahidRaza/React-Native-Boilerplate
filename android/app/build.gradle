@@ -72,7 +72,7 @@ def packageJsonFile = file("${rootDir}/package.json")
 
 // 1) App name from app.json (e.g. "yourappname")
 def appJson = new groovy.json.JsonSlurper().parseText(file("${rootDir}/app.json").text)
-def appName = "yourappname" // appJson.displayName ?: appJson.name ?: "YourAppName" TODO:OPEN THIS AND REMOVE yourappname
+def appName =  appJson.displayName ?: appJson.name ?: "YourAppName" 
 
 // 2) Version and version code from package.json
 def pkgJson = new groovy.json.JsonSlurper().parseText(packageJsonFile.text)
@@ -150,12 +150,10 @@ android {
             keyPassword 'android'
         }
         release {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-            }
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
         }
     }
     buildTypes {
@@ -163,9 +161,7 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            if (keystorePropertiesFile.exists()) {
                 signingConfig signingConfigs.release
-            }
             firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
                 unstrippedNativeLibsDir 'build/intermediates/merged_native_libs/release/out/lib'
