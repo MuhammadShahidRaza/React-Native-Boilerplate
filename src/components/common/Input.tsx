@@ -133,9 +133,7 @@ export const Input: React.FC<InputProps> = ({
         {lineAfterIcon && <View style={styles.lineStyle} />}
         {label && <Typography style={styles.label}>{label}</Typography>}
 
-        <View
-          style={[{ width: !startIcon || !endIcon ? '100%' : '85%' }, inputContainerWithTitleStyle]}
-        >
+        <View style={[styles.inputContent, inputContainerWithTitleStyle]}>
           {isTitleInLine && title && (
             <Typography style={[styles.title, titleStyle]}>{title}</Typography>
           )}
@@ -181,6 +179,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputContainerWithTitle: { width: '80%' },
+  inputContent: { flex: 1 },
   label: {
     backgroundColor: COLORS.BACKGROUND,
     top: -9,

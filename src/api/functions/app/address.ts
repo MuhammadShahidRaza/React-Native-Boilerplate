@@ -34,6 +34,26 @@ function toApiAddressBody(
   return body;
 }
 
+/** Update payload: only include keys the caller actually passed (e.g. is_default toggle). */
+function toApiAddressUpdateBody(data: Partial<AddressPayload>): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (data.title !== undefined || data.label !== undefined) {
+    body.title = data.title ?? data.label;
+  }
+  if (data.street !== undefined) {
+    body.address = data.street;
+    body.street = data.street;
+  }
+  if (data.city !== undefined) body.city = data.city;
+  if (data.state !== undefined) body.state = data.state;
+  if (data.postal_code !== undefined) body.postal_code = data.postal_code;
+  if (data.country !== undefined) body.country = data.country;
+  if (data.latitude !== undefined) body.latitude = String(data.latitude);
+  if (data.longitude !== undefined) body.longitude = String(data.longitude);
+  if (data.is_default !== undefined) body.is_default = data.is_default;
+  return body;
+}
+
 function normalizeAddressItem(raw: Record<string, unknown>): Address {
   const street = String(raw.address ?? raw.street ?? '').trim() || String(raw.title ?? '').trim();
   return {
@@ -120,11 +140,7 @@ const updateAddress = async (
   }
   const response = await handlePatchApiRequest<Record<string, unknown>, Record<string, unknown>>({
     url: API_ROUTES.ADDRESS_UPDATE(id),
-    data: toApiAddressBody({
-      street: data.street ?? '',
-      ...data,
-      is_default: data.is_default ?? false,
-    }),
+    data: toApiAddressUpdateBody(data),
   });
   const raw = ((response as any)?.address as Record<string, unknown>) ?? response;
   return raw ? normalizeAddressItem(raw) : undefined;

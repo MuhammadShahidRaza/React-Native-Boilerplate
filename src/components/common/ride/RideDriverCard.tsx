@@ -17,7 +17,7 @@ export type RideDriverCardVariant = 'elevatedMuted' | 'elevatedWhite';
 
 export interface RideDriverCardProps {
   driverName: string;
-  rating: string;
+  rating?: string;
   avatarSource: ImageSourcePropType;
   onPhonePress: () => void;
   onMessagePress: () => void;
@@ -48,15 +48,17 @@ export const RideDriverCard = ({
         <Photo source={avatarSource} imageStyle={styles.avatar} />
         <View style={styles.driverInfo}>
           <Typography style={styles.driverName}>{driverName}</Typography>
-          <View style={styles.ratingRow}>
-            <Icon
-              componentName={VARIABLES.Ionicons}
-              iconName='star'
-              size={FontSize.Small}
-              color={COLORS.APP_STAR}
-            />
-            <Typography style={styles.rating}>{rating}</Typography>
-          </View>
+          {rating ? (
+            <View style={styles.ratingRow}>
+              <Icon
+                componentName={VARIABLES.Ionicons}
+                iconName='star'
+                size={FontSize.Small}
+                color={COLORS.APP_STAR}
+              />
+              <Typography style={styles.rating}>{rating}</Typography>
+            </View>
+          ) : null}
         </View>
         <AppGradient variant='primaryLight'  style={styles.contactCircle} >
           <Icon

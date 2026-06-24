@@ -1,6 +1,6 @@
 import type { User } from 'types/responseTypes';
 import { pickFromUserDetails } from 'api/normalizers/snlift';
-import { vehicleTypeToApiValue } from 'constants/vehicleTypes';
+import { resolveWorkerVehicleApiType } from 'constants/vehicleTypes';
 import { hasUri } from 'utils/index';
 import store from 'store/store';
 import {
@@ -29,14 +29,17 @@ function formatValidityDateForApi(isoDate: string): string {
 }
 
 /** PATCH user/onboarding — vehicle fields (matches backend schema). */
-export function buildVehicleDetailsUploadPayload(values: {
-  vehicle_brand: string;
-  vehicle_model: string;
-  vehicle_license_plate: string;
-  vehicle_year: string;
-  vehicle_color: string;
-  vehicle_type: string;
-}): Record<string, string> {
+export function buildVehicleDetailsUploadPayload(
+  values: {
+    vehicle_brand: string;
+    vehicle_model: string;
+    vehicle_license_plate: string;
+    vehicle_year: string;
+    vehicle_color: string;
+    vehicle_type: string;
+  },
+  role?: string | null,
+): Record<string, string> {
   const year = values.vehicle_year.trim();
   return {
     vehicle_brand: values.vehicle_brand.trim(),
@@ -45,7 +48,7 @@ export function buildVehicleDetailsUploadPayload(values: {
     vehicle_year: year,
     year,
     vehicle_color: values.vehicle_color.trim(),
-    vehicle_type: vehicleTypeToApiValue(values.vehicle_type),
+    vehicle_type: resolveWorkerVehicleApiType(values.vehicle_type, role),
   };
 }
 

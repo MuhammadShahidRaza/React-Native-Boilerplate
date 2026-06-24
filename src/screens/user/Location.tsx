@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Pressable, ActivityIndicator, Alert } from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import { Typography, Wrapper, Icon, RowComponent, FlatListComponent } from 'components/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -11,8 +11,8 @@ import { Map } from 'components/common/Map';
 import { INITIAL_REGION } from 'constants/common';
 import type { Region } from 'react-native-maps';
 import { VARIABLES } from 'constants/common';
-import { updateAddress } from 'api/functions/app/address';
-import { setAddressDefault } from 'store/slices/address';
+import { updateAddress, deleteAddress } from 'api/functions/app/address';
+import { setAddressDefault, removeAddress } from 'store/slices/address';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
 import { useAppDispatch } from 'types/reduxTypes';
 import { useAddressList } from 'hooks/useAddressList';
@@ -69,6 +69,7 @@ export const Location = () => {
   const { currentAddress, loading: loadingLocation, loadCurrentLocation } = useCurrentLocation();
   const [mapRegion, setMapRegion] = useState<Region>(INITIAL_REGION);
   const [updatingDefaultId, setUpdatingDefaultId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadAndUpdateMap = useCallback(
@@ -100,6 +101,30 @@ export const Location = () => {
   const handleEditAddress = useCallback((item: Address) => {
     navigate(SCREENS.LOCATION_MAP_PICKER, { editAddress: item });
   }, []);
+
+  const handleDeleteAddress = useCallback(
+    (item: Address) => {
+      Alert.alert('Delete Address', 'Are you sure you want to delete this address?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeletingId(item.id);
+            try {
+              await deleteAddress(item.id);
+              dispatch(removeAddress(item.id));
+            } catch {
+              Alert.alert('Error', 'Failed to delete address. Please try again.');
+            } finally {
+              setDeletingId(null);
+            }
+          },
+        },
+      ]);
+    },
+    [dispatch],
+  );
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -154,9 +179,26 @@ export const Location = () => {
             color={COLORS.TEXT_SECONDARY}
           />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          onPress={() => handleDeleteAddress(item)}
+          disabled={deletingId === item.id}
+        >
+          {deletingId === item.id ? (
+            <ActivityIndicator size='small' color={COLORS.TEXT_SECONDARY} />
+          ) : (
+            <Icon
+              componentName={VARIABLES.MaterialCommunityIcons}
+              iconName='trash-can-outline'
+              size={FontSize.MediumLarge}
+              color={COLORS.ERROR}
+            />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
     ),
-    [handleSelectAddress, handleEditAddress, selectedId, updatingDefaultId],
+    [handleSelectAddress, handleEditAddress, handleDeleteAddress, selectedId, updatingDefaultId, deletingId],
   );
 
   const ListHeader = useMemo(
@@ -334,6 +376,9 @@ const styles = StyleSheet.create({
   },
   addressContent: {
     flex: 1,
+  },
+  deleteBtn: {
+    marginLeft: 16,
   },
   addressLabel: {
     fontSize: FontSize.Medium,

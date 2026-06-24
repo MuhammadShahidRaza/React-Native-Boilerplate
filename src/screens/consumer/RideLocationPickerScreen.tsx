@@ -102,8 +102,7 @@ export const RideLocationPickerScreen = () => {
     const setupInitialLocation = async () => {
       await getLocationPermission();
 
-      const stored =
-        field === 'pickup' ? route.params?.storedPickup : route.params?.storedDropoff;
+      const stored = field === 'pickup' ? route.params?.storedPickup : route.params?.storedDropoff;
 
       if (
         stored &&
@@ -125,6 +124,7 @@ export const RideLocationPickerScreen = () => {
         return;
       }
 
+      // Only default to the user's current location for pickup — drop-off must be chosen explicitly.
       const position = await getCurrentLocation();
       if (position && !cancelled) {
         const region: Region = {
@@ -134,14 +134,18 @@ export const RideLocationPickerScreen = () => {
         };
         setInitialRegion(region);
         setRegionReady(true);
-        await resolveAddressForRegion(region);
+        if (field === 'pickup') {
+          await resolveAddressForRegion(region);
+        }
         return;
       }
 
       if (!cancelled) {
         setInitialRegion(INITIAL_REGION);
         setRegionReady(true);
-        await resolveAddressForRegion(INITIAL_REGION);
+        if (field === 'pickup') {
+          await resolveAddressForRegion(INITIAL_REGION);
+        }
       }
     };
 

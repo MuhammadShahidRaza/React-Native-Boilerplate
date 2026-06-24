@@ -403,7 +403,6 @@ export const WorkerJobNavigationScreen = () => {
         <View style={styles.bottom}>
           <RideDriverCard
             driverName={detail.customerName}
-            rating={detail.customerRating ?? '—'}
             avatarSource={customerAvatar}
             onPhonePress={onPhonePress}
             onMessagePress={onMessagePress}

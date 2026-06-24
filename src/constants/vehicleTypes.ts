@@ -1,4 +1,5 @@
 import type { DropdownItemProps } from 'components/common/Dropdown';
+import { APP_CONFIG } from 'config/app';
 
 export const WORKER_VEHICLE_TYPE_OPTIONS = [
   { label: 'Car', value: 'car' },
@@ -51,9 +52,24 @@ export function vehicleTypeDisplayLabel(input: string): string {
   return vehicleTypeToFormLabel(input) || input.trim();
 }
 
-export const WORKER_VEHICLE_TYPE_DROPDOWN: DropdownItemProps[] = WORKER_VEHICLE_TYPE_OPTIONS.map(
-  (option, index) => ({
+/** Service tier shown in the "Vehicle Type" picker — same 3 options for courier and driver. */
+const WORKER_VEHICLE_CATEGORY_OPTIONS = [
+  { label: 'Standard', value: 'standard' },
+  { label: 'Comfort', value: 'comfort' },
+  { label: 'Business', value: 'business' },
+] as const;
+
+export const WORKER_VEHICLE_TYPE_DROPDOWN: DropdownItemProps[] =
+  WORKER_VEHICLE_CATEGORY_OPTIONS.map((option, index) => ({
     name: option.label,
     id: index + 1,
-  }),
-);
+  }));
+
+/** Tier sent to the backend — courier always gets 'standard' (no picker shown); driver sends their pick. */
+export function resolveWorkerVehicleApiType(
+  selectedTier: string,
+  role: string | null | undefined,
+): string {
+  if (role === APP_CONFIG.COURIER_ROLE) return 'standard';
+  return vehicleTypeToApiValue(selectedTier);
+}

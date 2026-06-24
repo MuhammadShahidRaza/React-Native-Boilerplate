@@ -45,10 +45,10 @@ const IS_ALPHA = ENV_CONSTANTS.IS_ALPHA_PHASE;
 const PROGRESS_PHASE_INDEX: Record<ParcelTrackPhase, number> = {
   accepted: 0,
   arrived: 0,
-  ready_for_pickup: 0,
-  picked_up: 1,
+  ready_for_pickup: 1,
+  picked_up: 2,
   in_transit: 2,
-  delivered: 3,
+  delivered: 2,
 };
 
 function fallbackCoord(lat?: number, lng?: number, latOff = 0.008, lngOff = 0): MapCoord {

@@ -17,6 +17,7 @@ import {
 } from 'constants/vehicleTypes';
 import { completeProfile } from 'api/functions/app/settings';
 import { useAppSelector } from 'types/reduxTypes';
+import { APP_CONFIG } from 'config/app';
 
 export interface VehicleDetailsFormValues {
   vehicle_brand: string;
@@ -33,6 +34,8 @@ export const VehicleDetails = ({
   const isFromSettings = Boolean(route.params?.isFromSettings);
   const [isEditing, setIsEditing] = useState(!isFromSettings);
   const userRoot = useAppSelector(state => state.user.userDetails);
+  const role = useAppSelector(state => state.user.role);
+  const isCourier = role === APP_CONFIG.COURIER_ROLE;
 
   const initialValues: VehicleDetailsFormValues = {
     vehicle_brand: pickFromUserDetails(userRoot, ['vehicle_brand', 'vehicle_make']),
@@ -43,14 +46,14 @@ export const VehicleDetails = ({
       pickFromUserDetails(userRoot, ['vehicle_brand', 'vehicle_make']),
     ),
     vehicle_color: pickFromUserDetails(userRoot, ['vehicle_color', 'color']),
-    vehicle_type: vehicleTypeToFormLabel(
-      pickFromUserDetails(userRoot, ['vehicle_type', 'type']),
-    ),
+    vehicle_type: isCourier
+      ? 'Standard'
+      : vehicleTypeToFormLabel(pickFromUserDetails(userRoot, ['vehicle_type', 'type'])),
   };
 
   const handleSubmit = async (values: VehicleDetailsFormValues) => {
     const user = await completeProfile({
-      data: buildVehicleDetailsUploadPayload(values),
+      data: buildVehicleDetailsUploadPayload(values, role),
     });
     if (!user) return;
 
@@ -143,17 +146,19 @@ export const VehicleDetails = ({
               error={formik.errors.vehicle_color}
               touched={Boolean(formik.touched.vehicle_color && formik.submitCount)}
             />
-            <Dropdown
-              title='Vehicle Type'
-              options={WORKER_VEHICLE_TYPE_DROPDOWN}
-              selectedValue={formik.values.vehicle_type}
-              onSelect={value => {
-                formik.setFieldValue('vehicle_type', value);
-                formik.setFieldTouched('vehicle_type', true);
-              }}
-              error={formik.errors.vehicle_type}
-              touched={Boolean(formik.touched.vehicle_type && formik.submitCount)}
-            />
+            {!isCourier && (
+              <Dropdown
+                title='Vehicle Type'
+                options={WORKER_VEHICLE_TYPE_DROPDOWN}
+                selectedValue={formik.values.vehicle_type}
+                onSelect={value => {
+                  formik.setFieldValue('vehicle_type', value);
+                  formik.setFieldTouched('vehicle_type', true);
+                }}
+                error={formik.errors.vehicle_type}
+                touched={Boolean(formik.touched.vehicle_type && formik.submitCount)}
+              />
+            )}
             <Button
               title={isFromSettings ? 'Update' : 'Save'}
               loading={loading}

@@ -180,7 +180,7 @@ export const Home = () => {
               />
               <TouchableOpacity
                 onPress={() => navigate(SCREENS.LOCATION)}
-                style={{ marginLeft: 10 }}
+                style={styles.locTextWrap}
               >
                 <Typography style={styles.locLabel}>Location</Typography>
                 <Typography style={styles.locText} numberOfLines={1} translate={false}>
@@ -453,6 +453,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
+  locTextWrap: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
   locLabel: {
     color: COLORS.WHITE,
     fontSize: FontSize.Small,
@@ -460,7 +464,6 @@ const styles = StyleSheet.create({
   locText: {
     color: COLORS.WHITE,
     fontSize: FontSize.MediumSmall,
-    width: '60%',
     fontWeight: FontWeight.SemiBold,
   },
   greet: {

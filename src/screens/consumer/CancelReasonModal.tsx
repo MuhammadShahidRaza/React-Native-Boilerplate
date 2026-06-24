@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, TextInput } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, TextInput } from 'react-native';
 import { GradientIcon, Typography, Button } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -45,40 +45,48 @@ export const CancelReasonModal = ({ visible, onClose, onContinue }: Props) => {
         if (!submitting) onClose();
       }}
     >
-      <Pressable style={styles.overlay} onPress={submitting ? undefined : onClose}>
-        <Pressable style={styles.card} onPress={e => e.stopPropagation()}>
-          <GradientIcon
-            componentName={VARIABLES.Feather}
-            iconName="x"
-            size={FontSize.ExtraLarge}
-            color={COLORS.WHITE}
-            containerStyle={styles.iconCircle}
-          />
-          <Typography style={styles.heading}>Reason For Cancelling</Typography>
-          <TextInput
-            style={styles.input}
-            placeholder="Type Here..."
-            placeholderTextColor={COLORS.APP_TEXT_MUTED}
-            multiline
-            editable={!submitting}
-            value={reason}
-            onChangeText={setReason}
-          />
-          <Button
-            title="Continue"
-            onPress={handleContinue}
-            style={styles.btn}
-            textStyle={styles.btnText}
-            loading={submitting}
-            disabled={submitting}
-          />
+      <KeyboardAvoidingView
+        style={styles.flexFill}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Pressable style={styles.overlay} onPress={submitting ? undefined : onClose}>
+          <Pressable style={styles.card} onPress={e => e.stopPropagation()}>
+            <GradientIcon
+              componentName={VARIABLES.Feather}
+              iconName="x"
+              size={FontSize.ExtraLarge}
+              color={COLORS.WHITE}
+              containerStyle={styles.iconCircle}
+            />
+            <Typography style={styles.heading}>Reason For Cancelling</Typography>
+            <TextInput
+              style={styles.input}
+              placeholder="Type Here..."
+              placeholderTextColor={COLORS.APP_TEXT_MUTED}
+              multiline
+              editable={!submitting}
+              value={reason}
+              onChangeText={setReason}
+            />
+            <Button
+              title="Continue"
+              onPress={handleContinue}
+              style={styles.btn}
+              textStyle={styles.btnText}
+              loading={submitting}
+              disabled={submitting}
+            />
+          </Pressable>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  flexFill: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',

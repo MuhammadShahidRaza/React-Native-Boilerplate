@@ -39,7 +39,6 @@ import { showToast } from 'utils/toast';
 import type { AddressDetails } from 'utils/location';
 import { sendParcelValidationSchema } from 'utils/validations';
 
- 
 export type ParcelFormValues = {
   pickup: AddressDetails | null;
   dropoff: AddressDetails | null;
@@ -68,11 +67,7 @@ const emptyAddressFields = {
   country: '',
 };
 
-const addressFromRoute = (
-  lat: number,
-  lng: number,
-  fullAddress: string,
-): AddressDetails => ({
+const addressFromRoute = (lat: number, lng: number, fullAddress: string): AddressDetails => ({
   latitude: lat,
   longitude: lng,
   fullAddress,
@@ -169,8 +164,7 @@ export const SendParcelScreen = () => {
           showToast({ message: 'Could not create parcel booking. Try again.' });
           return;
         }
-        const durationSeconds =
-          timerDurationSeconds ?? (await getJobDisplayTimerSeconds());
+        const durationSeconds = timerDurationSeconds ?? (await getJobDisplayTimerSeconds());
         resetToHomeAndScreen(SCREENS.SEND_PARCEL_FINDING, {
           pickupAddress: values.pickup!.fullAddress ?? 'Pickup',
           dropoffAddress: values.dropoff!.fullAddress ?? 'Drop-off',
@@ -260,18 +254,12 @@ export const SendParcelScreen = () => {
     return () => {
       cancelled = true;
     };
-  }, [
-    pickup?.latitude,
-    pickup?.longitude,
-    dropoff?.latitude,
-    dropoff?.longitude,
-  ]);
+  }, [pickup?.latitude, pickup?.longitude, dropoff?.latitude, dropoff?.longitude]);
 
   return (
     <Wrapper
       headerTitle='Send Parcel'
       showBackButton
-       
       useScrollView
       backgroundColor={COLORS.WHITE}
       darkMode={false}
@@ -420,7 +408,9 @@ export const SendParcelScreen = () => {
             }}
           />
 
-          <Typography style={styles.sectionTitle}>Package Description</Typography>
+          <Typography style={styles.sectionTitle} translate={false}>
+            Package Description (Optional)
+          </Typography>
           <Input
             name='pkg'
             placeholder='What are you sending?'

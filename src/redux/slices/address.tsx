@@ -30,6 +30,9 @@ const addressSlice = createSlice({
       const idx = state.addressList.findIndex(a => a.id === action.payload.id);
       if (idx >= 0) state.addressList[idx] = action.payload;
     },
+    removeAddress(state, action: PayloadAction<number>) {
+      state.addressList = state.addressList.filter(a => a.id !== action.payload);
+    },
     setAddressDefault(state, action: PayloadAction<number>) {
       const id = action.payload;
       state.addressList.forEach(addr => {
@@ -50,6 +53,7 @@ export const {
   appendAddressList,
   addAddress,
   updateAddressInList,
+  removeAddress,
   setAddressDefault,
   setCurrentAddress,
   resetAddressState,
