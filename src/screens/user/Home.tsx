@@ -43,7 +43,11 @@ import { getCurrentLocation } from 'utils/location';
 import { updateUserLocation } from 'api/functions/app/user';
 import { updateWorkerFirestoreLocation } from 'services/location/workerLocation';
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
+import { useActiveConsumerBookings } from 'hooks/useActiveConsumerBookings';
+import { buildConsumerBookingTrackTarget } from 'utils/consumerBookingNavigation';
 import type { Address, User } from 'types/responseTypes';
+import type { RootStackParamList } from 'navigation/Navigators';
+import type { SnliftBookingType } from 'types/snliftApi';
 
 const IS_SENGO = isSengoBrand();
 
@@ -70,6 +74,33 @@ export const Home = () => {
   const locationUpdatedRef = useRef(false);
   const homeLoadedRef = useRef(false);
   const { currentAddress, loading: locationLoading, loadCurrentLocation } = useCurrentLocation();
+  const { ensureLoaded } = useActiveConsumerBookings();
+  const [checkingActiveBooking, setCheckingActiveBooking] = useState(false);
+
+  // If an active booking of the same type exists, jump straight to its tracking screen.
+  // Awaits any in-flight fetch first so a tap mid-load doesn't fall through to the create flow.
+  const goToService = useCallback(
+    async (type: SnliftBookingType, fallbackScreen: keyof RootStackParamList) => {
+      if (checkingActiveBooking) return;
+      setCheckingActiveBooking(true);
+      try {
+        const bookings = await ensureLoaded();
+        const active = bookings.find(b => b.booking_type === type);
+        const target = active ? buildConsumerBookingTrackTarget(active) : null;
+        if (target) {
+          navigate(
+            target.screen as keyof RootStackParamList,
+            target.params as RootStackParamList[keyof RootStackParamList],
+          );
+          return;
+        }
+        navigate(fallbackScreen);
+      } finally {
+        setCheckingActiveBooking(false);
+      }
+    },
+    [checkingActiveBooking, ensureLoaded],
+  );
 
   // Update user location once when Home tab is visible — REST API + Firestore
   useEffect(() => {
@@ -205,7 +236,11 @@ export const Home = () => {
             {loading && !refreshing ? (
               <HomeBannerSkeleton />
             ) : (
-              <Pressable style={styles.banner} onPress={() => navigate(SCREENS.BOOK_RIDE)}>
+              <Pressable
+                style={styles.banner}
+                disabled={checkingActiveBooking}
+                onPress={() => goToService('ride', SCREENS.BOOK_RIDE)}
+              >
                 <Photo
                   source={
                     primaryBanner?.image
@@ -224,7 +259,8 @@ export const Home = () => {
                   </Typography>
                   <Button
                     title='Book Now'
-                    onPress={() => navigate(SCREENS.BOOK_RIDE)}
+                    disabled={checkingActiveBooking}
+                    onPress={() => goToService('ride', SCREENS.BOOK_RIDE)}
                     style={styles.bookNow}
                     textStyle={styles.bookNowText}
                   />
@@ -257,19 +293,22 @@ export const Home = () => {
               label='Book a Ride'
               subLabel={'Get Anywhere\nSafely'}
               SvgIcon={getServiceIcon('bookRide')}
-              onPress={() => navigate(SCREENS.BOOK_RIDE)}
+              disabled={checkingActiveBooking}
+              onPress={() => goToService('ride', SCREENS.BOOK_RIDE)}
             />
             <ServiceCard
               label='Send Parcel'
               subLabel={'Fast\nDelivery'}
               SvgIcon={getServiceIcon('sendParcel')}
-              onPress={() => navigate(SCREENS.SEND_PARCEL)}
+              disabled={checkingActiveBooking}
+              onPress={() => goToService('parcel', SCREENS.SEND_PARCEL)}
             />
             <ServiceCard
               label='Order Food'
               subLabel={'From Top\nRestaurant'}
               SvgIcon={getServiceIcon('orderFood')}
-              onPress={() => navigate(SCREENS.ORDER_FOOD)}
+              disabled={checkingActiveBooking}
+              onPress={() => goToService('food', SCREENS.ORDER_FOOD)}
             />
           </View>
         </View>
@@ -406,16 +445,19 @@ const ServiceCard = ({
   subLabel,
   SvgIcon,
   svgSize = 70,
+  disabled,
   onPress,
 }: {
   label: string;
   subLabel: string;
   SvgIcon: React.FC<SvgProps>;
   svgSize?: number;
+  disabled?: boolean;
   onPress: () => void;
 }) => (
   <Pressable
     style={[styles.serviceCard, { backgroundColor: COLORS.SURFACE, borderColor: COLORS.BORDER }]}
+    disabled={disabled}
     onPress={onPress}
   >
     <SvgComponent Svg={SvgIcon} svgWidth={svgSize} svgHeight={svgSize} />

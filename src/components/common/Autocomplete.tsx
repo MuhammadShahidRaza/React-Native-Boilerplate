@@ -13,6 +13,7 @@ import {
 } from 'react-native-google-places-autocomplete';
 import { COMMON_TEXT } from 'constants/screens';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
+import { isSengoBrand } from 'constants/assets/brandLogo';
 import { Icon, IconComponentProps } from './Icon';
 import { Typography } from './Typography';
 import { StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
@@ -158,6 +159,8 @@ export const Autocomplete = ({
           query={{
             key: ENV_CONSTANTS.MAP_API_KEY,
             language: 'en',
+            // Ivory Coast only — SN Lift operates exclusively there; Sengo is unrestricted.
+            ...(isSengoBrand() ? {} : { components: 'country:ci' }),
           }}
           styles={{
             textInput: {

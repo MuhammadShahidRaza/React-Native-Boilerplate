@@ -73,6 +73,10 @@ export type WorkerRequestDetail = WorkerRequestRecord & {
   customerPhone?: string;
   customerAvatar?: string | null;
   customerRating?: string;
+  senderName?: string;
+  senderPhone?: string;
+  receiverName?: string;
+  receiverPhone?: string;
   pickupAddress: string;
   pickupShortName: string;
   dropoffAddress: string;

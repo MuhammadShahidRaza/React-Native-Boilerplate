@@ -18,6 +18,8 @@ import {
 import { SCREENS } from 'constants/routes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { setPickerResult } from 'utils/pickerStore';
+import { isServiceAreaRestricted, isWithinIvoryCoast } from 'utils/serviceArea';
+import { showToast } from 'utils/toast';
 
 type SavedPlaceItem = {
   id: string;
@@ -81,20 +83,39 @@ export const RideLocationPickerScreen = () => {
   const mapRef = useRef<MapView>(null);
   const [address, setAddress] = useState<AddressDetails | null>(null);
   const [loading, setLoading] = useState(false);
+  const [outOfServiceArea, setOutOfServiceArea] = useState(false);
   const skipNextRegionGeocodeRef = useRef(true);
 
-  const resolveAddressForRegion = useCallback(async (region: Region) => {
-    setLoading(true);
-    try {
-      const result = await reverseGeocode({
-        latitude: region.latitude,
-        longitude: region.longitude,
-      });
-      if (result) setAddress(result);
-    } finally {
-      setLoading(false);
+  // Rejects any address outside Ivory Coast — SN Lift only; no-op restriction for Sengo.
+  const applyAddressIfInServiceArea = useCallback((details: AddressDetails) => {
+    if (isServiceAreaRestricted() && !isWithinIvoryCoast(details.latitude, details.longitude)) {
+      setAddress(null);
+      setOutOfServiceArea(true);
+      // showToast({
+      //   message: 'SN Lift is currently only available in Ivory Coast.',
+      //   type: 'error',
+      // });
+      return;
     }
+    setOutOfServiceArea(false);
+    setAddress(details);
   }, []);
+
+  const resolveAddressForRegion = useCallback(
+    async (region: Region) => {
+      setLoading(true);
+      try {
+        const result = await reverseGeocode({
+          latitude: region.latitude,
+          longitude: region.longitude,
+        });
+        if (result) applyAddressIfInServiceArea(result);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [applyAddressIfInServiceArea],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -169,19 +190,22 @@ export const RideLocationPickerScreen = () => {
   );
 
   // Called when user picks from Autocomplete suggestions
-  const handleAutocomplete = useCallback((result: AddressDetails | null) => {
-    if (!result) return;
-    setAddress(result);
-    mapRef.current?.animateToRegion(
-      {
-        latitude: result.latitude,
-        longitude: result.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.008,
-      },
-      600,
-    );
-  }, []);
+  const handleAutocomplete = useCallback(
+    (result: AddressDetails | null) => {
+      if (!result) return;
+      applyAddressIfInServiceArea(result);
+      mapRef.current?.animateToRegion(
+        {
+          latitude: result.latitude,
+          longitude: result.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.008,
+        },
+        600,
+      );
+    },
+    [applyAddressIfInServiceArea],
+  );
 
   // Called when user taps a saved location
   const handleSaved = (item: SavedPlaceItem) => {
@@ -196,7 +220,7 @@ export const RideLocationPickerScreen = () => {
       latitude: item.lat,
       longitude: item.lng,
     };
-    setAddress(addr);
+    applyAddressIfInServiceArea(addr);
     mapRef.current?.animateToRegion(
       { latitude: item.lat, longitude: item.lng, latitudeDelta: 0.01, longitudeDelta: 0.008 },
       600,
@@ -264,10 +288,15 @@ export const RideLocationPickerScreen = () => {
             {/* {loading ? (
               <Typography style={styles.addressLoading}>Locating address...</Typography>
             ) : ( */}
-            <Typography style={styles.addressText} numberOfLines={2}>
+            <Typography
+              style={[styles.addressText, outOfServiceArea && styles.addressErrorText]}
+              numberOfLines={2}
+            >
               {loading
                 ? 'Locating address...'
-                : (address?.fullAddress ?? 'Move the map to select a location')}
+                : outOfServiceArea
+                  ? 'SN Lift is only available in Ivory Coast. Move the map within Ivory Coast.'
+                  : (address?.fullAddress ?? 'Move the map to select a location')}
             </Typography>
             {/* // )} */}
           </View>
@@ -386,6 +415,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MediumSmall,
     color: COLORS.APP_TEXT,
     lineHeight: 20,
+  },
+  addressErrorText: {
+    color: COLORS.RED,
   },
   addressLoading: {
     fontSize: FontSize.Small,

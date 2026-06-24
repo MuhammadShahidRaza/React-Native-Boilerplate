@@ -1,5 +1,6 @@
 import { IconComponentName } from 'types/iconTypes';
 import { VARIANT } from 'config/variant';
+import { isSengoBrand } from 'constants/assets/brandLogo';
 import {
   API_BASE_URL,
   ANDROID_MAP_KEYS,
@@ -180,12 +181,18 @@ export const VARIABLES = {
   Zocial: 'Zocial' as IconComponentName,
 };
 
-/** Default map location (e.g. app HQ or fallback when no address). */
-export const DEFAULT_MAP_ADDRESS = {
-  address: 'Atlanta, GA, USA',
-  lat: 33.753746,
-  lng: -84.38633,
-} as const;
+/** Default map location (e.g. app HQ or fallback when no address). SN Lift only operates in Ivory Coast. */
+export const DEFAULT_MAP_ADDRESS = isSengoBrand()
+  ? {
+      address: 'Atlanta, GA, USA',
+      lat: 33.753746,
+      lng: -84.38633,
+    }
+  : {
+      address: 'Abidjan, Ivory Coast',
+      lat: 5.3599517,
+      lng: -4.0082563,
+    };
 
 export const INITIAL_LAT_LNG = {
   lat: DEFAULT_MAP_ADDRESS.lat,

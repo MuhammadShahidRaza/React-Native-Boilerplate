@@ -105,6 +105,19 @@ const navigateToJobsFallback = (params?: { selectedTab?: JobStatus }) => {
   }
 };
 
+/** SN Lift ride/parcel/food booking notification — worker sees the request, consumer sees the booking. */
+const navigateToSnliftBookingDetail = (jobId: number | undefined, role: USER_TYPE) => {
+  if (jobId == null) {
+    navigate(SCREENS.HOME);
+    return;
+  }
+  if (isWorkerRole(role)) {
+    navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: String(jobId) });
+  } else {
+    navigate(SCREENS.CONSUMER_BOOKING_DETAIL, { bookingId: jobId });
+  }
+};
+
 /** Shared routing for notification tap – used by push handler and NotificationListing */
 export const handleNotificationNavigation = (notificationData: any) => {
   const jobId = getJobId(notificationData);
@@ -190,8 +203,19 @@ export const handleNotificationNavigation = (notificationData: any) => {
       }
       break;
 
+    // SN Lift ride/parcel/food booking lifecycle notifications.
+    case 'order-confirmed':
+    case 'driver-found':
+    case 'parcel-delivered':
+    case 'ride-completed':
+      navigateToSnliftBookingDetail(jobId, role);
+      break;
+
     default:
-      if (notificationData?.type) {
+      if (jobId != null) {
+        // Unrecognized but booking-linked notification — best-effort redirect to its detail screen.
+        navigateToSnliftBookingDetail(jobId, role);
+      } else if (notificationData?.type) {
         logger.log('Unknown notification type:', notificationData.type);
       }
       break;

@@ -17,10 +17,11 @@ export type RideDriverCardVariant = 'elevatedMuted' | 'elevatedWhite';
 
 export interface RideDriverCardProps {
   driverName: string;
+  roleLabel?: string;
   rating?: string;
   avatarSource: ImageSourcePropType;
   onPhonePress: () => void;
-  onMessagePress: () => void;
+  onMessagePress?: () => void;
   vehicleModel?: string;
   vehiclePlate?: string;
   showVehicleSection?: boolean;
@@ -30,6 +31,7 @@ export interface RideDriverCardProps {
 
 export const RideDriverCard = ({
   driverName,
+  roleLabel,
   rating,
   avatarSource,
   onPhonePress,
@@ -47,6 +49,7 @@ export const RideDriverCard = ({
       <View style={styles.driverRow}>
         <Photo source={avatarSource} imageStyle={styles.avatar} />
         <View style={styles.driverInfo}>
+          {roleLabel ? <Typography style={styles.roleLabel}>{roleLabel}</Typography> : null}
           <Typography style={styles.driverName}>{driverName}</Typography>
           {rating ? (
             <View style={styles.ratingRow}>
@@ -69,18 +72,20 @@ export const RideDriverCard = ({
             onPress={onPhonePress}
           />
         </AppGradient>
-        <TouchableOpacity
-          style={[styles.contactCircle, styles.messageCircle]}
-          onPress={onMessagePress}
-        >
-          <Icon
-            componentName={VARIABLES.Feather}
-            iconName='mail'
-            size={16}
-            color={COLORS.WHITE}
+        {onMessagePress ? (
+          <TouchableOpacity
+            style={[styles.contactCircle, styles.messageCircle]}
             onPress={onMessagePress}
-          />
-        </TouchableOpacity>
+          >
+            <Icon
+              componentName={VARIABLES.Feather}
+              iconName='mail'
+              size={16}
+              color={COLORS.WHITE}
+              onPress={onMessagePress}
+            />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {showVehicleSection && vehicleModel && vehiclePlate !== undefined ? (
@@ -128,6 +133,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.BORDER,
   },
   driverInfo: { flex: 1 },
+  roleLabel: {
+    fontSize: FontSize.Small,
+    color: COLORS.APP_TEXT_MUTED,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
   driverName: {
     fontWeight: FontWeight.Bold,
     color: COLORS.APP_TEXT,

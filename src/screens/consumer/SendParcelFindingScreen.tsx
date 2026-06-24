@@ -137,7 +137,6 @@ export const SendParcelFindingScreen = () => {
   };
 
   const handleBackPress = async () => {
-    await deleteSniftBooking(bookingId);
     replace(SCREENS.BOTTOM_STACK);
   };
 

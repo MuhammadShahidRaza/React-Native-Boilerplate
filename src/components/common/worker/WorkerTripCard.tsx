@@ -61,7 +61,7 @@ export const WorkerTripCard = ({ trip, onPress }: WorkerTripCardProps) => {
           />
           <Typography style={styles.metaTxt}>{trip.distance}</Typography>
         </View>
-        <View style={styles.metaItem}>
+        {/* <View style={styles.metaItem}>
           <Icon
             componentName={VARIABLES.Ionicons}
             iconName='star'
@@ -69,7 +69,7 @@ export const WorkerTripCard = ({ trip, onPress }: WorkerTripCardProps) => {
             color={COLORS.APP_STAR}
           />
           <Typography style={styles.metaTxt}>{trip.rating}</Typography>
-        </View>
+        </View> */}
         <View style={styles.metaItem}>
           <Icon
             componentName={VARIABLES.MaterialCommunityIcons}

@@ -4,6 +4,8 @@ import { Alert, Linking } from 'react-native';
 import { isIOS } from './helpers';
 import { ENV_CONSTANTS } from 'constants/common';
 import { logger } from 'utils/logger';
+import { isServiceAreaRestricted, isWithinIvoryCoast } from 'utils/serviceArea';
+import { showToast } from 'utils/toast';
 // import { getUniqueId } from 'react-native-device-info';
 
 interface AddressComponents {
@@ -200,19 +202,35 @@ const getLocationPermission = async (): Promise<boolean> => {
 //   }
 // };
 
+let outOfServiceAreaWarned = false;
+
 const getCurrentLocation = async (): Promise<GeolocationResponse | null> => {
   try {
     const hasPermission = await getLocationPermission();
-    if (hasPermission) {
-      return new Promise((resolve, reject) => {
-        Geolocation.getCurrentPosition(
-          position => resolve(position),
-          error => reject(error),
-        );
-      });
+    if (!hasPermission) return null;
+
+    const position = await new Promise<GeolocationResponse>((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        position => resolve(position),
+        error => reject(error),
+      );
+    });
+
+    if (isServiceAreaRestricted()) {
+      const { latitude, longitude } = position.coords;
+      if (!isWithinIvoryCoast(latitude, longitude)) {
+        if (!outOfServiceAreaWarned) {
+          outOfServiceAreaWarned = true;
+          showToast({
+            message: 'SN Lift is currently only available in Ivory Coast.',
+            type: 'error',
+          });
+        }
+        return null;
+      }
     }
 
-    return null;
+    return position;
   } catch (error) {
     logger.error('Error getting current location:', error);
     return null;

@@ -292,6 +292,14 @@ export const WorkerJobNavigationScreen = () => {
     showToast({ message: 'Customer phone number is not available.' });
   };
 
+  const onReceiverPhonePress = () => {
+    if (detail?.receiverPhone) {
+      openPhoneNumber(detail.receiverPhone);
+      return;
+    }
+    showToast({ message: 'Receiver phone number is not available.' });
+  };
+
   const onMessagePress = () => {
     navigateToBookingFirebaseChat({
       otherUser: {
@@ -401,14 +409,36 @@ export const WorkerJobNavigationScreen = () => {
         </View>
 
         <View style={styles.bottom}>
-          <RideDriverCard
-            driverName={detail.customerName}
-            avatarSource={customerAvatar}
-            onPhonePress={onPhonePress}
-            onMessagePress={onMessagePress}
-            showVehicleSection={false}
-            variant='elevatedWhite'
-          />
+          {serviceType === 'parcel' ? (
+            <>
+              <RideDriverCard
+                roleLabel='Sender'
+                driverName={detail.senderName || detail.customerName}
+                avatarSource={customerAvatar}
+                onPhonePress={onPhonePress}
+                onMessagePress={onMessagePress}
+                showVehicleSection={false}
+                variant='elevatedWhite'
+              />
+              <RideDriverCard
+                roleLabel='Receiver'
+                driverName={detail.receiverName || 'Receiver'}
+                avatarSource={IMAGES.USER}
+                onPhonePress={onReceiverPhonePress}
+                showVehicleSection={false}
+                variant='elevatedWhite'
+              />
+            </>
+          ) : (
+            <RideDriverCard
+              driverName={detail.customerName}
+              avatarSource={customerAvatar}
+              onPhonePress={onPhonePress}
+              onMessagePress={onMessagePress}
+              showVehicleSection={false}
+              variant='elevatedWhite'
+            />
+          )}
 
           {headingDestination ? (
             <AppGradient

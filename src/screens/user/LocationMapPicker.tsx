@@ -21,6 +21,8 @@ import { useRoute } from '@react-navigation/native';
 import { screenHeight } from 'utils/helpers';
 import { COMMON_TEXT } from 'constants/screens';
 import { Address } from 'types/responseTypes';
+import { isServiceAreaRestricted, isWithinIvoryCoast } from 'utils/serviceArea';
+import { showToast } from 'utils/toast';
 
 export const LocationMapPicker = () => {
   const route = useRoute<any>();
@@ -32,21 +34,44 @@ export const LocationMapPicker = () => {
   const [initialRegion, setInitialRegion] = useState<Region>(INITIAL_REGION);
   const [regionReady, setRegionReady] = useState(false);
   const [showAddressSheet, setShowAddressSheet] = useState(addNewAddress ? true : false);
+  const [outOfServiceArea, setOutOfServiceArea] = useState(false);
 
-  const fetchAddress = useCallback(async (region: Region) => {
-    setLoadingAddress(true);
-    try {
-      const result = await reverseGeocode({
-        latitude: region.latitude,
-        longitude: region.longitude,
-      });
-      setAddress(result);
-    } catch {
+  // Rejects any address outside Ivory Coast — SN Lift only; no-op restriction for Sengo.
+  const applyAddressIfInServiceArea = useCallback((details: AddressDetails | null) => {
+    if (!details) {
       setAddress(null);
-    } finally {
-      setLoadingAddress(false);
+      return;
     }
+    if (isServiceAreaRestricted() && !isWithinIvoryCoast(details.latitude, details.longitude)) {
+      setAddress(null);
+      setOutOfServiceArea(true);
+      showToast({
+        message: 'SN Lift is currently only available in Ivory Coast.',
+        type: 'error',
+      });
+      return;
+    }
+    setOutOfServiceArea(false);
+    setAddress(details);
   }, []);
+
+  const fetchAddress = useCallback(
+    async (region: Region) => {
+      setLoadingAddress(true);
+      try {
+        const result = await reverseGeocode({
+          latitude: region.latitude,
+          longitude: region.longitude,
+        });
+        applyAddressIfInServiceArea(result);
+      } catch {
+        setAddress(null);
+      } finally {
+        setLoadingAddress(false);
+      }
+    },
+    [applyAddressIfInServiceArea],
+  );
 
   const handleRegionChangeComplete = useCallback(
     (region: Region) => fetchAddress(region),
@@ -110,19 +135,22 @@ export const LocationMapPicker = () => {
     setupRegion();
   }, [editAddress, fetchAddress]);
 
-  const handleAddressSelectedFromSheet = useCallback((newAddress: AddressDetails | null) => {
-    if (newAddress) {
-      setAddress(newAddress);
-      setShowAddressSheet(false);
-      const newRegion: Region = {
-        ...INITIAL_REGION,
-        latitude: newAddress.latitude,
-        longitude: newAddress.longitude,
-      };
-      setInitialRegion(newRegion);
-      mapRef.current?.animateToRegion(newRegion, 500);
-    }
-  }, []);
+  const handleAddressSelectedFromSheet = useCallback(
+    (newAddress: AddressDetails | null) => {
+      if (newAddress) {
+        applyAddressIfInServiceArea(newAddress);
+        setShowAddressSheet(false);
+        const newRegion: Region = {
+          ...INITIAL_REGION,
+          latitude: newAddress.latitude,
+          longitude: newAddress.longitude,
+        };
+        setInitialRegion(newRegion);
+        mapRef.current?.animateToRegion(newRegion, 500);
+      }
+    },
+    [applyAddressIfInServiceArea],
+  );
 
   const handleAddAddressDetails = () => {
     if (address) {
@@ -184,8 +212,13 @@ export const LocationMapPicker = () => {
               {loadingAddress ? (
                 <ActivityIndicator size='small' color={COLORS.PRIMARY} />
               ) : (
-                <Typography style={styles.addressText} numberOfLines={3}>
-                  {address?.fullAddress || 'Move map to select address'}
+                <Typography
+                  style={[styles.addressText, outOfServiceArea && styles.addressErrorText]}
+                  numberOfLines={3}
+                >
+                  {outOfServiceArea
+                    ? 'SN Lift is only available in Ivory Coast. Move the map within Ivory Coast.'
+                    : address?.fullAddress || 'Move map to select address'}
                 </Typography>
               )}
             </View>
@@ -342,6 +375,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MediumLarge,
     fontWeight: FontWeight.Medium,
     color: COLORS.TEXT,
+  },
+  addressErrorText: {
+    color: COLORS.RED,
   },
   infoBanner: {
     flexDirection: 'row',
