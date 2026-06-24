@@ -70,17 +70,17 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>$(PRODUCT_NAME) requires access to your music library to enhance your experience with music features.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_http._tcp</string>
 		<string>_react-native-packager._tcp</string>
 	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>$(PRODUCT_NAME) needs local network access to connect to the development server.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>$(PRODUCT_NAME) requires access to your music library to enhance your experience with music features.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>$(PRODUCT_NAME) needs access to your camera to allow you to capture and upload photo.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>$(PRODUCT_NAME) needs local network access to connect to the development server.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>$(PRODUCT_NAME) requires access to your location to provide location-based services even when the app is in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

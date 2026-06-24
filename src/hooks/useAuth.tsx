@@ -24,12 +24,20 @@ export const useUserLoginStatus = (): UserLoginStatus => {
   const { isUserLoggedIn, isUserVisitedApp, appLanguage } = useAppSelector(
     (state: RootState) => state.app,
   );
-  const crashlyticsInstance = getCrashlytics();
+  const crashlyticsInstance = (() => {
+    try {
+      return getCrashlytics();
+    } catch {
+      return null;
+    }
+  })();
 
   useEffect(() => {
     const checkUserIsLogin = async () => {
       try {
-        log(crashlyticsInstance, 'App mounted.');
+        if (crashlyticsInstance) {
+          log(crashlyticsInstance, 'App mounted.');
+        }
         // Redux-persist will automatically restore isUserVisitedApp and appLanguage
         // We just need to apply the language if it exists
         if (appLanguage) {

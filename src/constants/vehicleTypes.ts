@@ -3,20 +3,22 @@ import type { DropdownItemProps } from 'components/common/Dropdown';
 export const WORKER_VEHICLE_TYPE_OPTIONS = [
   { label: 'Car', value: 'car' },
   { label: 'Bike', value: 'bike' },
-  { label: 'Van', value: 'van' },
-  { label: 'Motorcycle', value: 'motorcycle' },
-  { label: 'Truck', value: 'truck' },
+  // { label: 'Van', value: 'van' },
+  // { label: 'Motorcycle', value: 'motorcycle' },
+  // { label: 'Truck', value: 'truck' },
 ] as const;
 
 /** Ride-tier labels that were incorrectly used as vehicle types. */
-const LEGACY_VEHICLE_TYPE_MAP: Record<string, (typeof WORKER_VEHICLE_TYPE_OPTIONS)[number]['value']> =
-  {
-    standard: 'car',
-    premium: 'car',
-    comfort: 'car',
-    business: 'car',
-    xl: 'van',
-  };
+const LEGACY_VEHICLE_TYPE_MAP: Record<
+  string,
+  (typeof WORKER_VEHICLE_TYPE_OPTIONS)[number]['value']
+> = {
+  standard: 'car',
+  premium: 'car',
+  comfort: 'car',
+  business: 'car',
+  xl: 'car',
+};
 
 export function vehicleTypeToApiValue(input: string): string {
   const trimmed = input.trim();
