@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -31,12 +31,7 @@ import { logger } from 'utils/logger';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { useAddressList } from 'hooks/useAddressList';
 import type { Address } from 'types/responseTypes';
-import {
-  clearCart,
-  decrementItem,
-  removeItem,
-  upsertItem,
-} from 'store/slices/foodCart';
+import { clearCart, decrementItem, removeItem, upsertItem } from 'store/slices/foodCart';
 
 const DEFAULT_DISTANCE_KM = 4.2;
 
@@ -59,6 +54,7 @@ const parseAddressCoord = (raw: string): number | null => {
 
 export const FoodDeliveryCartScreen = () => {
   const [promo, setPromo] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<string | undefined>(undefined);
   const [promoLoading, setPromoLoading] = useState(false);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [foodEstimate, setFoodEstimate] = useState<EstimateBookingResult | null>(null);
@@ -69,6 +65,7 @@ export const FoodDeliveryCartScreen = () => {
     s => s.foodCart,
   );
   const { addressList, loadingAddresses, selectedId, refetch } = useAddressList();
+  const estimateRequestIdRef = useRef(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -98,10 +95,7 @@ export const FoodDeliveryCartScreen = () => {
     return estimateRequestDistanceKm;
   }, [estimateRequestDistanceKm, foodEstimate]);
 
-  const localSubtotal = useMemo(
-    () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
-    [items],
-  );
+  const localSubtotal = useMemo(() => items.reduce((sum, i) => sum + i.price * i.qty, 0), [items]);
 
   const totals = useMemo(
     () =>
@@ -131,38 +125,39 @@ export const FoodDeliveryCartScreen = () => {
 
   const fetchFoodEstimate = useCallback(
     async (promoCode?: string) => {
-      if (items.length === 0 || !deliveryAddress || !restaurantId) return null;
+      if (items.length === 0 || !deliveryAddress || !restaurantId) {
+        // This call is the current desired state ("no estimate needed") — bump the id so
+        // any older in-flight request becomes stale, and clear loading ourselves since
+        // that older request's `finally` will now skip doing it (its id no longer matches).
+        estimateRequestIdRef.current += 1;
+        setFoodEstimate(null);
+        setEstimateLoading(false);
+        return null;
+      }
 
+      const requestId = ++estimateRequestIdRef.current;
       setEstimateLoading(true);
       try {
         const result = await estimateBooking(buildFoodEstimatePayload(promoCode));
+        if (estimateRequestIdRef.current !== requestId) return null; // superseded by a newer request
         setFoodEstimate(result ?? null);
         return result ?? null;
       } catch (error) {
         logger.error('food estimateBooking failed', error);
-        setFoodEstimate(null);
+        if (estimateRequestIdRef.current === requestId) setFoodEstimate(null);
         return null;
       } finally {
-        setEstimateLoading(false);
+        if (estimateRequestIdRef.current === requestId) setEstimateLoading(false);
       }
     },
     [buildFoodEstimatePayload, deliveryAddress, items.length, restaurantId],
   );
 
   useEffect(() => {
-    setFoodEstimate(null);
-  }, [items, restaurantId, deliveryAddress?.lat, deliveryAddress?.lng]);
-
-  useEffect(() => {
-    if (items.length === 0 || !deliveryAddress || !restaurantId) return;
-    void fetchFoodEstimate();
-  }, [
-    deliveryAddress?.lat,
-    deliveryAddress?.lng,
-    fetchFoodEstimate,
-    items.length,
-    restaurantId,
-  ]);
+    // Re-quote on every item/address change, keeping the applied promo so the
+    // discount survives quantity changes instead of silently dropping off.
+    void fetchFoodEstimate(appliedPromo);
+  }, [items, deliveryAddress?.lat, deliveryAddress?.lng, restaurantId, fetchFoodEstimate, appliedPromo]);
 
   const handleApplyPromo = async () => {
     const promoTrimmed = promo.trim();
@@ -183,23 +178,24 @@ export const FoodDeliveryCartScreen = () => {
         return;
       }
 
-      if (result.promo_valid === false) {
-        setFoodEstimate(null);
-        showToast({ message: 'Invalid promo code.', isError: true });
-        return;
-      }
-
       const applied = resolveFoodEstimateTotals(result, {
         subTotal: localSubtotal,
         deliveryFee: 0,
       });
 
-      if (applied.promoApplied || applied.discountAmount > 0) {
-        showToast({ message: 'Promo applied successfully.' });
+      if (applied.promoValid === false) {
+        setFoodEstimate(null);
+        setAppliedPromo(undefined);
+        showToast({ message: 'Invalid promo code.', isError: true });
         return;
       }
 
-      showToast({ message: 'Promo code is not applicable to this order.', isError: true });
+      if (applied.promoApplied || applied.discountAmount > 0) {
+        setAppliedPromo(promoTrimmed);
+        return;
+      }
+
+      // showToast({ message: 'Promo code is not applicable to this order.', isError: true });
     } catch (error) {
       logger.error('food estimateBooking failed', error);
     } finally {
@@ -286,19 +282,12 @@ export const FoodDeliveryCartScreen = () => {
                 <Typography style={styles.itemName} numberOfLines={2}>
                   {item.title}
                 </Typography>
-                <Typography style={styles.itemPrice}>
-                  {formatMoney(item.price)}
-                </Typography>
+                <Typography style={styles.itemPrice}>{formatMoney(item.price)}</Typography>
                 <View style={styles.qtyRow}>
-                  <Pressable
-                    style={styles.qtyBtn}
-                    onPress={() => dispatch(decrementItem(item.id))}
-                  >
+                  <Pressable style={styles.qtyBtn} onPress={() => dispatch(decrementItem(item.id))}>
                     <Typography style={styles.qtyTxt}>-</Typography>
                   </Pressable>
-                  <Typography style={styles.qtyVal}>
-                    {String(item.qty).padStart(2, '0')}
-                  </Typography>
+                  <Typography style={styles.qtyVal}>{String(item.qty).padStart(2, '0')}</Typography>
                   <Pressable
                     style={[styles.qtyBtn, styles.qtyBtnPlus]}
                     onPress={() =>
@@ -400,7 +389,11 @@ export const FoodDeliveryCartScreen = () => {
             value={formatEstimateAmount(summaryDeliveryFee, estimateLoading)}
           />
           {totals.discountAmount > 0 ? (
-            <Row label='Discount' value={formatMoney(-totals.discountAmount)} valueStyle={styles.discountVal} />
+            <Row
+              label='Discount'
+              value={formatMoney(-totals.discountAmount)}
+              valueStyle={styles.discountVal}
+            />
           ) : null}
           <RowComponent style={styles.totalRow}>
             <Typography style={styles.totalLabel}>Total</Typography>
@@ -435,11 +428,17 @@ export const FoodDeliveryCartScreen = () => {
           onPress={handlePlaceOrder}
           style={[
             styles.placeWrap,
-            (placing || items.length === 0 || !deliveryAddress || estimateLoading || !hasEstimate) && {
+            (placing ||
+              items.length === 0 ||
+              !deliveryAddress ||
+              estimateLoading ||
+              !hasEstimate) && {
               opacity: 0.6,
             },
           ]}
-          disabled={placing || items.length === 0 || !deliveryAddress || estimateLoading || !hasEstimate}
+          disabled={
+            placing || items.length === 0 || !deliveryAddress || estimateLoading || !hasEstimate
+          }
         >
           <AppGradient variant='primary' fill style={styles.placeGradient}>
             <Typography style={styles.placeTxt}>

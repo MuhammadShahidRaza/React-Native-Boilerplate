@@ -177,6 +177,7 @@ export interface SnliftWalletTransaction {
   type?: string;
   booking_type?: string;
   module?: string;
+  purpose?: string;
   amount?: number | string;
   value?: number | string;
   total?: number | string;

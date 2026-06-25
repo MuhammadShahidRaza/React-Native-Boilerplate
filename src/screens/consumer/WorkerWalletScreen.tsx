@@ -53,12 +53,13 @@ type Transaction = {
   name: string;
   type: string;
   amount: string;
+  isCredit: boolean;
 };
 
 const DUMMY_TRANSACTIONS: Transaction[] = [
-  { id: '1', name: 'Comission - John Doe', type: 'Parcel', amount: '-CFA 10.19' },
-  { id: '2', name: 'Comission - John Doe', type: 'Food', amount: '-CFA 3' },
-  { id: '3', name: 'Comission - John Doe', type: 'Parcel', amount: '-CFA 7.73' },
+  { id: '1', name: 'Comission - John Doe', type: 'Parcel', amount: 'CFA 10.19', isCredit: false },
+  { id: '2', name: 'Comission - John Doe', type: 'Food', amount: 'CFA 3', isCredit: false },
+  { id: '3', name: 'Comission - John Doe', type: 'Parcel', amount: 'CFA 7.73', isCredit: false },
 ];
 
 const hasStripeAccount = (user: User | null) =>
@@ -231,7 +232,11 @@ export const WorkerWalletScreen = () => {
                   <Typography style={styles.txName}>{item.name}</Typography>
                   <Typography style={styles.txType}>{item.type}</Typography>
                 </View>
-                <Typography style={styles.txAmount}>{item.amount}</Typography>
+                <Typography
+                  style={[styles.txAmount, item.isCredit ? styles.txAmountCredit : styles.txAmountDebit]}
+                >
+                  {`${item.isCredit ? '+' : '-'}${item.amount}`}
+                </Typography>
               </RowComponent>
             ))}
           </View>
@@ -499,8 +504,10 @@ const styles = StyleSheet.create({
   txRowBorder: { borderBottomWidth: 1, borderBottomColor: COLORS.APP_LINE },
   txBody: { flex: 1 },
   txName: { fontWeight: FontWeight.SemiBold, color: COLORS.TEXT, fontSize: FontSize.Small },
-  txType: { color: COLORS.TEXT_SECONDARY, fontSize: FontSize.ExtraSmall, marginTop: 2 },
-  txAmount: { color: COLORS.ERROR, fontWeight: FontWeight.SemiBold, fontSize: FontSize.Small },
+  txType: { color: COLORS.TEXT_SECONDARY, fontSize: FontSize.ExtraSmall, marginTop: 2, textTransform: 'capitalize' },
+  txAmount: { fontWeight: FontWeight.SemiBold, fontSize: FontSize.Small },
+  txAmountCredit: { color: COLORS.GREEN_STATUS },
+  txAmountDebit: { color: COLORS.ERROR },
   infoBox: {
     marginTop: 8,
     borderWidth: 2,

@@ -300,7 +300,11 @@ export type WalletTransactionUi = {
   name: string;
   type: string;
   amount: string;
+  isCredit: boolean;
 };
+
+/** Purposes that add money to the wallet — everything else (deductions, withdrawals) is a debit. */
+const WALLET_CREDIT_PURPOSES = new Set(['topup', 'top_up', 'top-up', 'refund', 'bonus', 'credit']);
 
 /** Wallet transaction — `title`, `name`, `description`, `label`, amount formats. */
 export function normalizeWalletTransaction(
@@ -321,12 +325,15 @@ export function normalizeWalletTransaction(
     'transaction_type',
     'category',
   ]);
+  const purpose = pickString(raw, ['purpose']).toLowerCase();
+  const isCredit = WALLET_CREDIT_PURPOSES.has(purpose);
   const amountRaw = raw.amount ?? raw.value ?? raw.total ?? raw.commission;
   return {
     id: String(raw.id ?? ''),
     name: name || 'Transaction',
     type: type || 'Booking',
     amount: formatMoney(amountRaw as string | number),
+    isCredit,
   };
 }
 

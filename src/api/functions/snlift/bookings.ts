@@ -146,16 +146,22 @@ export function normalizeEstimateBookingResult(
   return { ...merged, distance_km };
 }
 
-/** Food estimate — subtotal, delivery, discount, and total from flat estimate response. */
+333/**
+ * Food estimate — `sub_total`/`delivery_fee` are flat on the response, but
+ * `discount_amount`/`total_amount`/`promo_*` come back inside `categories[0]`
+ * (same shape the ride estimate uses), e.g.:
+ * { sub_total, delivery_fee, categories: [{ discount_amount, total_amount, promo_applied, promo_valid }] }
+ */
 export function resolveFoodEstimateTotals(
   result: EstimateBookingResult | null | undefined,
   fallback: { subTotal: number; deliveryFee: number },
 ) {
+  const cat = result?.categories?.[0];
   const subTotal = pickEstimateNumber(result?.sub_total) ?? fallback.subTotal;
   const deliveryFee = pickEstimateNumber(result?.delivery_fee) ?? fallback.deliveryFee;
-  const discountAmount = pickEstimateNumber(result?.discount_amount) ?? 0;
+  const discountAmount = pickEstimateNumber(cat?.discount_amount ?? result?.discount_amount) ?? 0;
   const totalAmount =
-    pickEstimateNumber(result?.total_amount) ??
+    pickEstimateNumber(cat?.total_amount ?? result?.total_amount) ??
     Math.max(0, subTotal + deliveryFee - discountAmount);
 
   return {
@@ -163,8 +169,8 @@ export function resolveFoodEstimateTotals(
     deliveryFee,
     discountAmount,
     totalAmount,
-    promoApplied: Boolean(result?.promo_applied),
-    promoValid: result?.promo_valid ?? null,
+    promoApplied: Boolean(cat?.promo_applied ?? result?.promo_applied),
+    promoValid: cat?.promo_valid ?? result?.promo_valid ?? null,
   };
 }
 

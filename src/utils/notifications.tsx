@@ -128,6 +128,14 @@ export const handleNotificationNavigation = (notificationData: any) => {
     case 'payment-withdrawal-requested':
       navigate(SCREENS.MY_WALLET);
       break;
+    case 'wallet_topup':
+      if (isWorkerRole(role)) {
+        navigate(SCREENS.BOTTOM_STACK, { screen: SCREENS.WALLET });
+      }
+      //  else {
+      //   navigate(SCREENS.MY_WALLET);
+      // }
+      break;
     case 'new-message':
       // navigate(SCREENS.CHAT_FIREBASE);
       if (notificationData?.actor_id) {
@@ -165,7 +173,6 @@ export const handleNotificationNavigation = (notificationData: any) => {
     case 'result-of-work-approved':
       if (role !== 'user') return;
       if (jobId) {
-      
       } else {
         navigate(SCREENS.HOME);
       }

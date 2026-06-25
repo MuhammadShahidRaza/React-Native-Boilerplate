@@ -197,10 +197,10 @@ export const Autocomplete = ({
             iconName={'my-location'}
             size={25}
             onPress={getUserCurrentLocation}
-            iconStyle={styles.iconStyle}
+            iconStyle={[styles.iconStyle, styles.trailingIconStyle]}
           />
         )}
-        {endIcon && <Icon {...endIcon} iconStyle={styles.endIconStyle} />}
+        {endIcon && <Icon {...endIcon} iconStyle={[styles.endIconStyle, styles.trailingIconStyle]} />}
       </RowComponent>
       {isErrorShown && <Typography style={styles.error}>{error}</Typography>}
     </>
@@ -222,6 +222,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginVertical: 10,
     color: COLORS.PRIMARY,
+  },
+  // Pins icons that sit after the autocomplete input to the top of the row,
+  // so they don't drift down as the suggestions list grows the row's height.
+  trailingIconStyle: {
+    alignSelf: 'flex-start',
   },
   endIconStyle: {
     marginHorizontal: 10,
