@@ -184,7 +184,9 @@ export const FoodDeliveryCartScreen = () => {
       });
 
       if (applied.promoValid === false) {
-        setFoodEstimate(null);
+        // `result` (already set as foodEstimate by fetchFoodEstimate above) still has a
+        // valid subtotal/delivery fee/total — just without a discount. Keep it; only the
+        // "applied" tracking should clear, so the summary doesn't collapse to "—".
         setAppliedPromo(undefined);
         showToast({ message: 'Invalid promo code.', isError: true });
         return;

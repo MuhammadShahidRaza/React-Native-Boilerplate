@@ -20,6 +20,8 @@ import {
   requestPermission,
 } from '@react-native-firebase/messaging';
 import { setNotificationUnreadCount } from 'store/slices/user';
+import { notifyBookingUpdated } from 'utils/bookingUpdateSignal';
+import { notifyWalletUpdated } from 'utils/walletUpdateSignal';
 
 interface DisplayNotificationParams {
   notificationData: any;
@@ -275,6 +277,15 @@ const messageHandler = async (remoteMessage: any) => {
 
   if (isNewInquiryNotification(remoteMessage?.data)) {
     store.dispatch(incrementNewInquiriesUnreadCount());
+  }
+
+  // Booking changed server-side — wake any open tracking screen instead of waiting for its next poll.
+  const custom = getCustomNotification(remoteMessage?.data);
+  notifyBookingUpdated(getJobId(custom));
+
+  // Admin topped up the wallet — refresh balance now instead of polling on focus/app-foreground.
+  if (custom?.type === 'wallet_topup') {
+    notifyWalletUpdated();
   }
 
   displayNotification({

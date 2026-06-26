@@ -8,6 +8,8 @@ import {
 import { logger } from 'utils/logger';
 import { useAppSelector } from 'types/reduxTypes';
 import { ENV_CONSTANTS } from 'constants/common';
+import { getCurrentLocation } from 'utils/location';
+import { updateUserLocation } from 'api/functions/app/user';
 
 /** Restaurants from API with local mock fallback (Order Food / Favorites). */
 export function useRestaurantCatalog() {
@@ -19,8 +21,14 @@ export function useRestaurantCatalog() {
   const [locationMissing, setLocationMissing] = useState(false);
 
   const userDetails = useAppSelector(state => state.user.userDetails);
-  const latitude = userDetails?.latitude ? Number(userDetails.latitude) : undefined;
-  const longitude = userDetails?.longitude ? Number(userDetails.longitude) : undefined;
+  const profileLat = userDetails?.latitude ? Number(userDetails.latitude) : undefined;
+  const profileLng = userDetails?.longitude ? Number(userDetails.longitude) : undefined;
+
+  const fetchRestaurants = useCallback(async (latitude: number, longitude: number) => {
+    const res = await listRestaurants({ latitude, longitude });
+    const list = extractRestaurants(res);
+    setRestaurants(list.map(mapApiRestaurantToItem));
+  }, []);
 
   const loadRestaurants = useCallback(
     async (isRefresh = false) => {
@@ -32,21 +40,28 @@ export function useRestaurantCatalog() {
         return;
       }
 
-      if (!latitude || !longitude) {
-        setLocationMissing(true);
-        setLoading(false);
-        setRefreshing(false);
-        return;
-      }
-
-      setLocationMissing(false);
       if (isRefresh) setRefreshing(true);
       else setLoading(true);
 
       try {
-        const res = await listRestaurants({ latitude, longitude });
-        const list = extractRestaurants(res);
-        setRestaurants(list.map(mapApiRestaurantToItem));
+        if (profileLat && profileLng) {
+          setLocationMissing(false);
+          await fetchRestaurants(profileLat, profileLng);
+          return;
+        }
+
+        // Profile has no saved coordinates yet (e.g. not synced on this device/platform) —
+        // fall back to live GPS when permission is already granted instead of gating the screen.
+        const pos = await getCurrentLocation();
+        if (pos) {
+          const { latitude, longitude } = pos.coords;
+          setLocationMissing(false);
+          updateUserLocation(latitude, longitude);
+          await fetchRestaurants(latitude, longitude);
+          return;
+        }
+
+        setLocationMissing(true);
       } catch (e) {
         logger.error('listRestaurants failed', e);
       } finally {
@@ -54,7 +69,7 @@ export function useRestaurantCatalog() {
         setRefreshing(false);
       }
     },
-    [latitude, longitude],
+    [profileLat, profileLng, fetchRestaurants],
   );
 
   useEffect(() => {

@@ -426,6 +426,7 @@ export const WorkerWalletScreen = () => {
 
       <AppStatusModal
         visible={topOffVisible}
+        wantCloseOnBackdrop={true}
         onClose={() => setTopOffVisible(false)}
         onPrimaryPress={() => navigate(SCREENS.CONTACT_US)}
         title={WORKER_WALLET_TOP_OFF.title}

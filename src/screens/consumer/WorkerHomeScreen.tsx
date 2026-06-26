@@ -25,6 +25,7 @@ import { updateWorkerFirestoreLocation } from 'services/location/workerLocation'
 import { useCurrentLocation } from 'hooks/useCurrentLocation';
 import { subscribeWorkerHomeStatsRefresh } from 'utils/workerHomeStats';
 import { getWorkerHomeStatsFromUser } from 'utils/workerStats';
+import { subscribeWalletUpdate } from 'utils/walletUpdateSignal';
 
 export const WorkerHomeScreen = () => {
   const dispatch = useAppDispatch();
@@ -55,7 +56,8 @@ export const WorkerHomeScreen = () => {
 
   const refreshHomeUser = useCallback(async () => {
     if (!role) return;
-    await getUserDetails();
+    // Silent — this runs in the background (focus/app-foreground/job-complete), not from a tap.
+    await getUserDetails({ showLoader: false });
   }, [role]);
 
   useEffect(() => subscribeWorkerHomeStatsRefresh(refreshHomeUser), [refreshHomeUser]);
@@ -65,6 +67,10 @@ export const WorkerHomeScreen = () => {
       void getUserDetails();
     }
   }, []);
+
+  // Wallet balance (e.g. an admin top-up) changes server-side — refresh on the matching
+  // push notification instead of polling on every focus/app-foreground.
+  useEffect(() => subscribeWalletUpdate(refreshHomeUser), [refreshHomeUser]);
 
   useEffect(() => {
     syncWorkerOnlineFromUser(userDetails);
@@ -238,7 +244,9 @@ export const WorkerHomeScreen = () => {
 
       <AppStatusModal
         visible={topOffVisible}
+        wantCloseOnBackdrop={true}
         onClose={() => setTopOffVisible(false)}
+        
         onPrimaryPress={() => {
           setTopOffVisible(false);
           navigate(SCREENS.CONTACT_US);

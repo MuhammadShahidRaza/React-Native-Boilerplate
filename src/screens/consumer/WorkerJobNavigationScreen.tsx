@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type MapView from 'react-native-maps';
 import {
   AppGradient,
+  AppStatusModal,
   Button,
   GRADIENT_END,
   GRADIENT_START,
@@ -19,7 +20,7 @@ import { FontSize, FontWeight } from 'types/fontTypes';
 import { IMAGES } from 'constants/assets';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { CustomBackIcon, navigate, resetToHomeAndScreen } from 'navigation/index';
+import { CustomBackIcon, navigate, reset, resetToHomeAndScreen } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import {
   APP_GRADIENT_HORIZONTAL,
@@ -40,6 +41,8 @@ import { resolveWorkerDirectionsLeg } from 'utils/trackingDirections';
 import { resolveVehicleMapBearing } from 'utils/vehicleMapBearing';
 import {
   getWorkerPickupStatusAdvance,
+  isWorkerTerminalBookingStatus,
+  normalizeBookingStatus,
   resolveWorkerPickupStep,
   type WorkerPickupStep,
   type WorkerServiceType,
@@ -53,12 +56,18 @@ import {
 } from 'utils/workerNavigation';
 import { navigateToBookingFirebaseChat } from 'utils/bookingFirebaseChat';
 import { showToast } from 'utils/toast';
-import { updateBookingStatus, extractBookingFromResponse } from 'api/functions/snlift/bookings';
+import {
+  updateBookingStatus,
+  extractBookingFromResponse,
+  getBookingById,
+} from 'api/functions/snlift/bookings';
+import { isCompletedBookingStatus } from 'api/mappers/snliftBooking';
 import {
   ensureWorkerActiveJobTracking,
   stopWorkerActiveJobTracking,
 } from 'services/location/workerActiveJobTracking';
 import { refreshWorkerHomeStats } from 'utils/workerHomeStats';
+import { subscribeBookingUpdate } from 'utils/bookingUpdateSignal';
 
 type JobPhase = 'pickup' | 'dropoff';
 
@@ -70,10 +79,14 @@ export const WorkerJobNavigationScreen = () => {
   const userDetails = useAppSelector(state => state.user?.userDetails);
   const copy = getWorkerRoleCopy(role);
   const requestId = route.params?.requestId ?? '1';
-  const { detail, loading, bookingStatus } = useWorkerRequestDetail(requestId, role);
+  const { detail, loading, bookingStatus, setBookingStatus } = useWorkerRequestDetail(
+    requestId,
+    role,
+  );
   const serviceType = (detail?.serviceType ?? 'ride') as WorkerServiceType;
   const [phase, setPhase] = useState<JobPhase>(route.params?.phase ?? 'pickup');
   const [pickupStep, setPickupStep] = useState<WorkerPickupStep>('en_route');
+  const [cancelledByCustomer, setCancelledByCustomer] = useState(false);
   const mapRef = useRef<MapView>(null);
   const fittedLegRef = useRef<string | null>(null);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
@@ -82,6 +95,36 @@ export const WorkerJobNavigationScreen = () => {
     distanceKm: 0,
     durationMin: 5,
   });
+
+  // Customer cancelled this same job from their side — re-pull status the moment the push arrives.
+  useEffect(() => {
+    if (!detail?.id) return undefined;
+    const unsubscribe = subscribeBookingUpdate(updatedBookingId => {
+      if (String(updatedBookingId) !== String(detail.id)) return;
+      (async () => {
+        const res = await getBookingById(requestId, role, {
+          showLoader: false,
+          showError: false,
+          silentErrors: true,
+        });
+        const booking = extractBookingFromResponse(res);
+        if (booking) setBookingStatus(normalizeBookingStatus(booking.status));
+      })();
+    });
+    return unsubscribe;
+  }, [detail?.id, requestId, role, setBookingStatus]);
+
+  // Status flipped to a terminal-but-not-completed state (cancelled) — tell the worker and back out.
+  useEffect(() => {
+    if (isWorkerTerminalBookingStatus(bookingStatus) && !isCompletedBookingStatus(bookingStatus)) {
+      setCancelledByCustomer(true);
+    }
+  }, [bookingStatus]);
+
+  const handleCancelledAcknowledge = useCallback(() => {
+    void stopWorkerActiveJobTracking();
+    reset(SCREENS.BOTTOM_STACK);
+  }, []);
 
   useEffect(() => {
     setPickupStep(resolveWorkerPickupStep(serviceType, bookingStatus));
@@ -470,6 +513,20 @@ export const WorkerJobNavigationScreen = () => {
           ) : null}
         </View>
       </View>
+
+      <AppStatusModal
+        visible={cancelledByCustomer}
+        onClose={handleCancelledAcknowledge}
+        onPrimaryPress={handleCancelledAcknowledge}
+        title='Job Cancelled'
+        description="The customer has cancelled this job. You'll be taken back to the home screen."
+        primaryButtonText='OK'
+        iconProps={{
+          componentName: VARIABLES.MaterialCommunityIcons,
+          iconName: 'close-circle',
+          size: 32,
+        }}
+      />
     </Wrapper>
   );
 };

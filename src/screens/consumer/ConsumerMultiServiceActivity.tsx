@@ -28,6 +28,7 @@ import {
 } from 'api/mappers/snliftBooking';
 import { pushRootScreen } from 'navigation/Navigators';
 import { SCREENS } from 'constants/routes';
+import { getBookingStatusColor } from 'utils/bookingStatuses';
 
 type ServiceCat = 'All' | 'Rides' | 'Food' | 'Parcel';
 
@@ -211,7 +212,9 @@ const ActivityCard = ({ item, onPress }: { item: ActivityItem; onPress?: () => v
 
     <View style={styles.cardRight}>
       <Typography style={styles.price}>{item.price}</Typography>
-      <Typography style={styles.status}>{item.status}</Typography>
+      <Typography style={[styles.status, { color: getBookingStatusColor(item.rawStatus) }]}>
+        {item.status}
+      </Typography>
     </View>
   </Pressable>
 );

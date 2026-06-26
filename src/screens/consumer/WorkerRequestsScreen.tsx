@@ -5,15 +5,14 @@ import { Typography, Wrapper, WorkerRequestCard } from 'components/index';
 import { FontSize } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
-import {
-  type WorkerRequestRecord,
-} from 'components/common/worker/workerMockData';
+import { type WorkerRequestRecord } from 'components/common/worker/workerMockData';
 import { useAppDispatch, useAppSelector } from 'types/reduxTypes';
 import { getWorkerRoleCopy } from 'utils/workerRoleCopy';
 import { COLORS } from 'utils/index';
 import { setLookingForDeliveries } from 'store/slices/worker';
 import { extractBookingsList, listBookings } from 'api/functions/snlift/bookings';
 import { mapBookingToWorkerRequest } from 'api/mappers/snliftBooking';
+import { useIsFocused } from '@react-navigation/native';
 
 export const WorkerRequestsScreen = () => {
   const dispatch = useAppDispatch();
@@ -22,6 +21,7 @@ export const WorkerRequestsScreen = () => {
   const [requests, setRequests] = useState<WorkerRequestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     dispatch(setLookingForDeliveries(true));
@@ -30,31 +30,34 @@ export const WorkerRequestsScreen = () => {
     };
   }, [dispatch]);
 
-  const loadRequests = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    try {
-      const res = await listBookings(
-        { scope: 'available' },
-        role,
-        { showLoader: false, showError: false, silentErrors: true },
-      );
-      const bookings = extractBookingsList(res);
-      setRequests(bookings.map(mapBookingToWorkerRequest));
-    } catch {
-      if (!isRefresh) setRequests([]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [role]);
+  const loadRequests = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      try {
+        const res = await listBookings({ scope: 'available' }, role, {
+          showLoader: false,
+          showError: false,
+          silentErrors: true,
+        });
+        const bookings = extractBookingsList(res);
+        setRequests(bookings.map(mapBookingToWorkerRequest));
+      } catch {
+        if (!isRefresh) setRequests([]);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [role],
+  );
 
   useEffect(() => {
     loadRequests();
-  }, [loadRequests]);
+  }, [isFocused]);
 
   return (
     <Wrapper
@@ -89,9 +92,7 @@ export const WorkerRequestsScreen = () => {
             <WorkerRequestCard
               request={item}
               fareLabel={copy.fareLabel}
-              onPress={() =>
-                navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })
-              }
+              onPress={() => navigate(SCREENS.WORKER_REQUEST_DETAIL, { requestId: item.id })}
             />
           )}
         />
@@ -106,12 +107,7 @@ const WorkerRequestsSkeleton = () => (
     highlightColor={COLORS.SKELETON_HIGHLIGHT}
   >
     {[0, 1, 2].map(index => (
-      <SkeletonPlaceholder.Item
-        key={index}
-        height={96}
-        borderRadius={16}
-        marginBottom={12}
-      />
+      <SkeletonPlaceholder.Item key={index} height={96} borderRadius={16} marginBottom={12} />
     ))}
   </SkeletonPlaceholder>
 );

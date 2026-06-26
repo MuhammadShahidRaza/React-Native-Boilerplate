@@ -156,6 +156,9 @@ export const TrackRideScreen = () => {
   const showCar = !isCompleted && Boolean(track.providerCoord);
   const showDropoffPin = phase === 'in_progress' || phase === 'completed';
 
+  const rideStarted = phase === 'arrived' || phase === 'in_progress';
+
+
   const status = useMemo(() => {
     switch (phase) {
       case 'arriving':
@@ -295,7 +298,7 @@ export const TrackRideScreen = () => {
           vehiclePlate={trip?.vehiclePlate ?? '—'}
           showVehicleSection={!isCompleted && Boolean(trip)}
           variant='elevatedMuted'
-          onCancelPress={isCompleted ? undefined : () => setCancelVisible(true)}
+          onCancelPress={isCompleted || rideStarted ? undefined : () => setCancelVisible(true)}
         />
 
         <SkeletonWrapper isLoading={tripLoading && !IS_ALPHA} height={72} count={1}>

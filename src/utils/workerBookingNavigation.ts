@@ -4,10 +4,10 @@ import type { SnliftBookingStatus, SnliftBookingType } from 'types/snliftApi';
 import {
   isWorkerActiveJob,
   isWorkerRequestPending,
-  isWorkerTerminalBookingStatus,
   normalizeBookingStatus,
   workerJobNavigationPhase,
 } from 'utils/bookingStatuses';
+import { isCompletedBookingStatus } from 'api/mappers/snliftBooking';
 
 export {
   isWorkerActiveJob,
@@ -24,7 +24,9 @@ export function navigateToWorkerBooking(
 ): void {
   const s = normalizeBookingStatus(status);
 
-  if (isWorkerTerminalBookingStatus(s)) {
+  // Only a genuinely completed job gets the earnings/fare-breakdown screen — cancelled
+  // bookings (also "terminal") fall through to WORKER_REQUEST_DETAIL's read-only view below.
+  if (isCompletedBookingStatus(s)) {
     navigate(SCREENS.WORKER_JOB_COMPLETED, { requestId });
     return;
   }

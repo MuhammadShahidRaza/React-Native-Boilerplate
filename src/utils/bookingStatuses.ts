@@ -1,4 +1,5 @@
 import type { SnliftBookingStatus, SnliftBookingType } from 'types/snliftApi';
+import { COLORS } from 'utils/colors';
 
 /** Canonical API booking statuses (shared across ride, food, parcel). */
 export const BOOKING_STATUS = {
@@ -28,11 +29,7 @@ export function normalizeBookingStatus(status?: string | null): string {
   return s;
 }
 
-const TERMINAL = new Set([
-  BOOKING_STATUS.COMPLETED,
-  BOOKING_STATUS.CANCELLED,
-  'canceled',
-]);
+const TERMINAL = new Set([BOOKING_STATUS.COMPLETED, BOOKING_STATUS.CANCELLED, 'canceled']);
 
 export function isTerminalBookingStatus(status?: string | null): boolean {
   return TERMINAL.has(normalizeBookingStatus(status));
@@ -54,20 +51,15 @@ export const FOOD_RESTAURANT_WAIT = new Set<string>([
 ]);
 
 /** Food — restaurant accepted / preparing (consumer tracking, no courier yet). */
-const FOOD_RESTAURANT_ACTIVE = new Set<string>([
-  BOOKING_STATUS.ACCEPTED,
-  BOOKING_STATUS.PREPARING,
-]);
+const FOOD_RESTAURANT_ACTIVE = new Set<string>([BOOKING_STATUS.ACCEPTED, BOOKING_STATUS.PREPARING]);
 
 /** Food — courier can accept/reject (including while restaurant is preparing). */
-const FOOD_COURIER_PENDING = new Set<string>([
-  BOOKING_STATUS.PREPARING,
-  BOOKING_STATUS.READY_FOR_PICKUP,
-]);
+const FOOD_COURIER_PENDING = new Set<string>([BOOKING_STATUS.PREPARING]);
 
 /** Food — courier active job. */
 const FOOD_COURIER_ACTIVE = new Set<string>([
   BOOKING_STATUS.ACCEPTED,
+  BOOKING_STATUS.READY_FOR_PICKUP,
   BOOKING_STATUS.PICKED_UP,
   BOOKING_STATUS.IN_TRANSIT,
 ]);
@@ -163,7 +155,24 @@ export function getBookingStatusLabel(status: SnliftBookingStatus | string | und
     [BOOKING_STATUS.DELIVERED]: 'Delivered',
   };
   const s = normalizeBookingStatus(status);
-  return map[s] ?? (status ?? 'Pending');
+  return map[s] ?? status ?? 'Pending';
+}
+
+/** Status badge/text color — red for cancelled, green for completed, brand colors in between. */
+export function getBookingStatusColor(status: SnliftBookingStatus | string | undefined): string {
+  const map: Record<string, string> = {
+    [BOOKING_STATUS.PENDING]: '#F59E0B',
+    [BOOKING_STATUS.ACCEPTED]: COLORS.APP_PRIMARY,
+    [BOOKING_STATUS.ARRIVED]: COLORS.APP_PRIMARY,
+    [BOOKING_STATUS.PREPARING]: COLORS.APP_PRIMARY,
+    [BOOKING_STATUS.READY_FOR_PICKUP]: COLORS.APP_SECONDARY,
+    [BOOKING_STATUS.PICKED_UP]: COLORS.APP_SECONDARY,
+    [BOOKING_STATUS.IN_TRANSIT]: COLORS.APP_SECONDARY,
+    [BOOKING_STATUS.COMPLETED]: '#16A34A',
+    [BOOKING_STATUS.CANCELLED]: COLORS.RED,
+  };
+  const s = normalizeBookingStatus(status);
+  return map[s] ?? COLORS.APP_PRIMARY;
 }
 
 export type WorkerServiceType = 'ride' | 'food' | 'parcel';

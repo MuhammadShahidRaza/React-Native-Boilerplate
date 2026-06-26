@@ -11,6 +11,7 @@ import {
 } from 'utils/coordinateAlongPolyline';
 import { getVehicleMarkerHeading } from 'hooks/useWorkerGpsNavigation';
 import { useProviderFirestoreLocation } from './useProviderFirestoreLocation';
+import { subscribeBookingUpdate } from 'utils/bookingUpdateSignal';
 
 const DEFAULT_POLL_MS = 15000;
 const FIRESTORE_STATUS_POLL_MS = 45000;
@@ -126,9 +127,16 @@ export function useBookingLiveTracking(
 
     void tick();
 
+    // A push notification about this booking arrived — poll now instead of waiting for the next tick.
+    const unsubscribe = subscribeBookingUpdate(updatedBookingId => {
+      if (String(updatedBookingId) !== String(bookingId)) return;
+      void tick();
+    });
+
     return () => {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
+      unsubscribe();
     };
   }, [bookingId, liveEnabled, vehicleKind]);
 

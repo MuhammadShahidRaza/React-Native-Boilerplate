@@ -191,6 +191,8 @@ export const TrackParcelScreen = () => {
 
   const isDelivered = phase === 'delivered';
   const showCourier = !isDelivered && Boolean(track.providerCoord);
+  // Once the courier has the parcel and is en route, the delivery can no longer be cancelled.
+  const rideStarted = phase === 'picked_up' || phase === 'in_transit';
 
   return (
     <Wrapper
@@ -290,7 +292,7 @@ export const TrackParcelScreen = () => {
           </>
         )}
 
-        {!isDelivered ? (
+        {!isDelivered && !rideStarted ? (
           <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
             <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
           </Pressable>

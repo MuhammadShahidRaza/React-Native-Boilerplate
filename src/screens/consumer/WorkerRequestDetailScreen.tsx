@@ -13,7 +13,7 @@ import {
 import { IMAGES } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
-import { navigate } from 'navigation/index';
+import { navigate, resetToHomeAndScreen } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
 import { COLORS, screenHeight } from 'utils/index';
 import { useAppSelector } from 'types/reduxTypes';
@@ -108,7 +108,8 @@ export const WorkerRequestDetailScreen = () => {
       });
     }
     setAccepting(false);
-    navigate(SCREENS.WORKER_JOB_NAVIGATION, {
+    // Reset (not push) so back from the job screen goes Home, not back into this stale request.
+    resetToHomeAndScreen(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: 'pickup',
     });
@@ -143,7 +144,7 @@ export const WorkerRequestDetailScreen = () => {
 
   const goToJob = () => {
     if (!detail) return;
-    navigate(SCREENS.WORKER_JOB_NAVIGATION, {
+    resetToHomeAndScreen(SCREENS.WORKER_JOB_NAVIGATION, {
       requestId: detail.id,
       phase: workerJobNavigationPhase(bookingStatus, detail.serviceType),
     });

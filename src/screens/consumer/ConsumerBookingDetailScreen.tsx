@@ -27,23 +27,11 @@ import {
   canCancelConsumerBooking,
   getConsumerTrackButtonLabel,
 } from 'utils/consumerBookingNavigation';
-import { BOOKING_STATUS } from 'utils/bookingStatuses';
+import { BOOKING_STATUS, getBookingStatusColor } from 'utils/bookingStatuses';
 import { isTerminalBookingStatus } from 'utils/bookingTrackPhases';
 import { cancelSniftBooking } from 'utils/snliftBookingActions';
 import { useBookingRating } from 'hooks/useBookingRating';
 import { CancelReasonModal } from './CancelReasonModal';
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: '#F59E0B',
-  accepted: COLORS.APP_PRIMARY,
-  arrived: COLORS.APP_PRIMARY,
-  preparing: COLORS.APP_PRIMARY,
-  ready_for_pickup: COLORS.APP_SECONDARY,
-  picked_up: COLORS.APP_SECONDARY,
-  in_transit: COLORS.APP_SECONDARY,
-  completed: '#16A34A',
-  cancelled: COLORS.RED,
-};
 
 function serviceLabel(type: SnliftBooking['booking_type']): string {
   if (type === 'food') return 'Food Delivery';
@@ -109,7 +97,7 @@ export const ConsumerBookingDetailScreen = () => {
   );
 
   const statusKey = (booking?.status ?? 'pending').toLowerCase();
-  const statusColor = STATUS_COLORS[statusKey] ?? COLORS.APP_PRIMARY;
+  const statusColor = getBookingStatusColor(statusKey);
   const trackTarget = booking ? buildConsumerBookingTrackTarget(booking) : null;
   const showCancel = canCancelConsumerBooking(booking?.status, booking?.booking_type);
   const isTerminal = isTerminalBookingStatus(booking?.status);

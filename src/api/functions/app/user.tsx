@@ -108,7 +108,7 @@ export function getAlphaDummyUser(userType: USER_TYPE | string = 'user'): User {
   } as unknown as User;
 }
 
-const getUserDetails = async <R extends { user: User }>() => {
+const getUserDetails = async <R extends { user: User }>(options?: { showLoader?: boolean }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
     const current = store.getState().user?.userDetails;
     const role = current?.user_type ?? current?.user_role;
@@ -118,7 +118,11 @@ const getUserDetails = async <R extends { user: User }>() => {
     return;
   }
 
-  const user = await handleGetApiRequest<R>({ url: API_ROUTES.GET_PROFILE, addToPending: true });
+  const user = await handleGetApiRequest<R>({
+    url: API_ROUTES.GET_PROFILE,
+    addToPending: true,
+    showLoader: options?.showLoader ?? true,
+  });
   if (user?.user) {
     const normalized = normalizeSniftUser(user.user as Partial<User> & Record<string, unknown>);
     store.dispatch(setUserDetails(normalized));
