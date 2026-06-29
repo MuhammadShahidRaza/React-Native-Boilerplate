@@ -93,3 +93,6 @@ GoogleService-Info.plist
 .env.production
 .env.development
 firebaseConfig.ts
+
+
+auto_keys.sh
