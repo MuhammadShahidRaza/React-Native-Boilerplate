@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { RouteProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   Button,
+  GradientButton,
   Photo,
   Typography,
   WorkerRouteAddresses,
@@ -10,7 +11,7 @@ import {
   WorkerRequestTimer,
   Wrapper,
 } from 'components/index';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { navigate, resetToHomeAndScreen } from 'navigation/index';
@@ -76,6 +77,9 @@ export const WorkerRequestDetailScreen = () => {
   };
 
   const handleTimerExpire = () => {
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      return;
+    }
     if (hasAcceptedRef.current) return;
     showToast({ message: 'This request has expired.' });
     handleBack();
@@ -203,11 +207,7 @@ export const WorkerRequestDetailScreen = () => {
               <View style={styles.sheetBody} pointerEvents='auto'>
                 <View style={[styles.passengerCard, CARD_SHADOW]}>
                   <Photo
-                    source={
-                      detail.customerAvatar
-                        ? { uri: detail.customerAvatar }
-                        : IMAGES.USER
-                    }
+                    source={detail.customerAvatar ? { uri: detail.customerAvatar } : IMAGES.USER}
                     size={AVATAR_SIZE}
                     borderRadius={AVATAR_SIZE / 2}
                     containerStyle={styles.avatarWrap}
@@ -248,14 +248,24 @@ export const WorkerRequestDetailScreen = () => {
 
                 {isPending ? (
                   <>
-                    <Button
-                      title={copy.acceptButton}
-                      onPress={accept}
-                      loading={accepting}
-                      loadingText={copy.acceptButton}
-                      disabled={rejecting}
-                      style={styles.acceptBtn}
-                    />
+                    {isSengoBrand() ? (
+                      <GradientButton
+                        title={copy.acceptButton}
+                        onPress={accept}
+                        loading={accepting}
+                        disabled={rejecting}
+                        style={[styles.acceptBtn, { alignSelf: 'stretch' }]}
+                      />
+                    ) : (
+                      <Button
+                        title={copy.acceptButton}
+                        onPress={accept}
+                        loading={accepting}
+                        loadingText={copy.acceptButton}
+                        disabled={rejecting}
+                        style={styles.acceptBtn}
+                      />
+                    )}
                     <Pressable
                       onPress={reject}
                       disabled={rejecting || accepting}
@@ -272,7 +282,11 @@ export const WorkerRequestDetailScreen = () => {
                 ) : null}
 
                 {isActiveJob ? (
-                  <Button title='Continue Job' onPress={goToJob} style={styles.acceptBtn} />
+                  isSengoBrand() ? (
+                    <GradientButton title='Continue Job' onPress={goToJob} style={[styles.acceptBtn, { alignSelf: 'stretch' }]} />
+                  ) : (
+                    <Button title='Continue Job' onPress={goToJob} style={styles.acceptBtn} />
+                  )
                 ) : null}
 
                 {isTerminal ? (
@@ -440,7 +454,7 @@ const styles = StyleSheet.create({
   acceptBtn: {
     marginTop: 30,
     marginHorizontal: 20,
-    backgroundColor: '#21409A',
+    backgroundColor: COLORS.BUTTON_BACKGROUND,
   },
   rejectBtn: {
     alignItems: 'center',

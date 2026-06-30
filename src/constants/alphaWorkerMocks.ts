@@ -57,6 +57,8 @@ function workerDetailToBooking(detail: WorkerRequestDetail): SnliftBooking {
       phone: detail.customerPhone,
       profile_image: detail.customerAvatar ?? null,
     },
+    wallet_prev_balance: parseMoneyAmount(detail.previousWallet) ?? 500,
+    wallet_new_balance: parseMoneyAmount(detail.newWallet) ?? 418,
   };
 
   if (detail.serviceType === 'food') {

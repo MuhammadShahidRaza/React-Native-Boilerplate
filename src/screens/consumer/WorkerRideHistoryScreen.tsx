@@ -26,6 +26,12 @@ export const WorkerRideHistoryScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadHistory = useCallback(async (isRefresh = false) => {
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+      setTrips(WORKER_HISTORY_TRIPS);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     if (!role) {
       setTrips([]);
       setLoading(false);
@@ -51,9 +57,7 @@ export const WorkerRideHistoryScreen = () => {
           // Skip malformed rows instead of failing the whole list.
         }
       }
-      setTrips(
-        mapped.length > 0 || !ENV_CONSTANTS.IS_ALPHA_PHASE ? mapped : WORKER_HISTORY_TRIPS,
-      );
+      setTrips(mapped.length > 0 ? mapped : []);
     } catch {
       if (!isRefresh) {
         setTrips([]);

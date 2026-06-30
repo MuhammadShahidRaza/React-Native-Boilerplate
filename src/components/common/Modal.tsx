@@ -111,35 +111,41 @@ export const ModalComponent: React.FC<ModalComponentProps> = ({
 
           <View
             style={[
-              styles.modalInnerWrapper,
-              position === 'center' ? styles.centeredModal : styles.bottomModal,
               position === 'center' && styles.centeredModalLayout,
-              modalSecondaryContainerStyle,
+              { position: 'relative' },
             ]}
           >
-            <View style={styles.modalInnerForeground}>
-              {closeIcon && (
-                <Icon
-                  onPress={() => setModalVisible(false)}
-                  componentName={VARIABLES.Entypo}
-                  iconName='cross'
-                  size={FontSize.ExtraLarge}
-                  color={COLORS.WHITE}
-                  iconStyle={[styles.closeIcon, closeIconStyle]}
-                />
-              )}
-              {scroll ? (
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  bounces={false}
-                  keyboardShouldPersistTaps='handled'
-                >
-                  {children}
-                </ScrollView>
-              ) : (
-                children
-              )}
+            <View
+              style={[
+                styles.modalInnerWrapper,
+                position === 'center' ? styles.centeredModal : styles.bottomModal,
+                modalSecondaryContainerStyle,
+              ]}
+            >
+              <View style={styles.modalInnerForeground}>
+                {scroll ? (
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    bounces={false}
+                    keyboardShouldPersistTaps='handled'
+                  >
+                    {children}
+                  </ScrollView>
+                ) : (
+                  children
+                )}
+              </View>
             </View>
+            {closeIcon && (
+              <Icon
+                onPress={() => setModalVisible(false)}
+                componentName={VARIABLES.Entypo}
+                iconName='cross'
+                size={FontSize.ExtraLarge}
+                color={COLORS.WHITE}
+                iconStyle={[styles.closeIcon, closeIconStyle]}
+              />
+            )}
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -195,7 +201,7 @@ const styles = StyleSheet.create({
   closeIcon: {
     alignSelf: 'flex-end',
     position: 'absolute',
-    right: -5,
+    right: 10,
     padding: 5,
     backgroundColor: COLORS.PRIMARY,
     borderRadius: 100,

@@ -68,14 +68,14 @@ export const CompleteProfile = ({
   }, [user]);
 
   const openDocuments = () => {
-    if (!profileGate.vehicleComplete) {
-      // showToast({
-      //   message: 'Please save your vehicle details first.',
-      //   isError: true,
-      // });
-      profileGate.setDetailsRequiredVisible(true);
-      return;
-    }
+    // if (!profileGate.vehicleComplete) {
+    //   // showToast({
+    //   //   message: 'Please save your vehicle details first.',
+    //   //   isError: true,
+    //   // });
+    //   profileGate.setDetailsRequiredVisible(true);
+    //   return;
+    // }
     navigate(SCREENS.DOCUMENTATION_UPLOAD, { isFromSettings });
   };
 

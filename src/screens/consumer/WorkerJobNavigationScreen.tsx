@@ -9,6 +9,7 @@ import {
   Button,
   GRADIENT_END,
   GRADIENT_START,
+  GradientButton,
   GradientIcon,
   RideDriverCard,
   Typography,
@@ -17,7 +18,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { CustomBackIcon, navigate, reset, resetToHomeAndScreen } from 'navigation/index';
@@ -485,7 +486,7 @@ export const WorkerJobNavigationScreen = () => {
 
           {headingDestination ? (
             <AppGradient
-              colors={[...APP_GRADIENT_HORIZONTAL]}
+              colors={isSengoBrand() ? ['#616161', '#616161'] : [...APP_GRADIENT_HORIZONTAL]}
               start={GRADIENT_START}
               end={GRADIENT_END}
               fill
@@ -500,12 +501,21 @@ export const WorkerJobNavigationScreen = () => {
             </AppGradient>
           ) : null}
 
-          <Button
-            title={primaryCta}
-            onPress={onPrimaryPress}
-            disabled={proximityBlocked}
-            style={[styles.cta, proximityBlocked && styles.ctaDisabled]}
-          />
+          {isSengoBrand() ? (
+            <GradientButton
+              title={primaryCta}
+              onPress={onPrimaryPress}
+              disabled={proximityBlocked}
+              style={[styles.cta, { alignSelf: 'stretch' }, proximityBlocked && styles.ctaDisabled]}
+            />
+          ) : (
+            <Button
+              title={primaryCta}
+              onPress={onPrimaryPress}
+              disabled={proximityBlocked}
+              style={[styles.cta, proximityBlocked && styles.ctaDisabled]}
+            />
+          )}
           {proximityBlocked ? (
             <Typography style={styles.proximityHint}>
               {workerProximityBlockedMessage(phase)}
@@ -628,7 +638,7 @@ const styles = StyleSheet.create({
   },
   cta: {
     marginHorizontal: 20,
-    backgroundColor: '#21409A',
+    backgroundColor: COLORS.BUTTON_BACKGROUND,
   },
   ctaDisabled: {
     opacity: 0.55,

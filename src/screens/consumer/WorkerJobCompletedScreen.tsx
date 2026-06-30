@@ -4,12 +4,14 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   AppGradient,
   Button,
+  GradientButton,
   Icon,
   Typography,
   WorkerRequestDetailSkeleton,
   Wrapper,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
+import { isSengoBrand } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { reset } from 'navigation/index';
@@ -144,7 +146,11 @@ export const WorkerJobCompletedScreen = () => {
           </View>
         </View>
 
-        <Button title='Finish' onPress={finish} style={styles.finishBtn} />
+        {isSengoBrand() ? (
+          <GradientButton title='Finish' onPress={finish} style={[styles.finishBtn, { alignSelf: 'stretch' }]} />
+        ) : (
+          <Button title='Finish' onPress={finish} style={styles.finishBtn} />
+        )}
       </ScrollView>
     </Wrapper>
   );
@@ -279,6 +285,6 @@ const styles = StyleSheet.create({
   finishBtn: {
     width: '100%',
     marginTop: 100,
-    backgroundColor: '#21409A',
+    backgroundColor: COLORS.BUTTON_BACKGROUND,
   },
 });

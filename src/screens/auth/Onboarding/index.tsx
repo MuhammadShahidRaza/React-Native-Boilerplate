@@ -108,7 +108,7 @@ export const OnBoarding = () => {
           },
         ]}
       >
-        {APP_CONFIG.USER_ROLE && isSengoBrand() && (
+        {isSengoBrand() && (
           <View
             style={{
               height: 5,

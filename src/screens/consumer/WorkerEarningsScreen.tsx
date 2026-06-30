@@ -27,14 +27,19 @@ export const WorkerEarningsScreen = () => {
   );
 
   useEffect(() => {
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) return;
     let cancelled = false;
     (async () => {
-      const summary = await getWorkerWalletSummary(role);
-      if (cancelled || !summary) return;
-      setTotal(formatMoney(summary.total_earnings));
-      setToday(formatMoney(summary.today_earnings));
-      setWeek(formatMoney(summary.week_earnings));
-      setMonth(formatMoney(summary.month_earnings));
+      try {
+        const summary = await getWorkerWalletSummary(role);
+        if (cancelled || !summary) return;
+        setTotal(formatMoney(summary.total_earnings));
+        setToday(formatMoney(summary.today_earnings));
+        setWeek(formatMoney(summary.week_earnings));
+        setMonth(formatMoney(summary.month_earnings));
+      } catch {
+        // keep initial state on error
+      }
     })();
     return () => {
       cancelled = true;
@@ -151,11 +156,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderWidth: 1,
     borderColor: COLORS.APP_LINE,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.06,
+    // shadowRadius: 8,
+    // elevation: 2,
   },
   summaryTitle: {
     fontSize: FontSize.MediumLarge,
