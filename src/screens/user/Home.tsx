@@ -20,6 +20,7 @@ import {
   GradientIcon,
   Button,
   Wrapper,
+  Icon,
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
@@ -203,12 +204,24 @@ export const Home = () => {
         <SafeAreaView edges={['top']}>
           <View style={styles.topRow}>
             <RowComponent onPress={() => navigate(SCREENS.LOCATION)} style={styles.locPillWrap}>
-              <GradientIcon
-                componentName={VARIABLES.EvilIcons}
-                iconName='location'
-                size={FontSize.ExtraLarge}
-                color={COLORS.WHITE}
-              />
+              {isSengoBrand() ? (
+                <Icon
+                  componentName={VARIABLES.EvilIcons}
+                  iconName='location'
+                  onPress={() => navigate(SCREENS.LOCATION)}
+                  size={FontSize.ExtraExtraLarge}
+                  iconStyle={{ backgroundColor: COLORS.WHITE, padding: 5, borderRadius: 10 }}
+                  color={COLORS.PRIMARY}
+                />
+              ) : (
+                <GradientIcon
+                  componentName={VARIABLES.EvilIcons}
+                  iconName='location'
+                  size={FontSize.ExtraLarge}
+                  color={COLORS.WHITE}
+                />
+              )}
+
               <TouchableOpacity
                 onPress={() => navigate(SCREENS.LOCATION)}
                 style={styles.locTextWrap}
@@ -219,13 +232,25 @@ export const Home = () => {
                 </Typography>
               </TouchableOpacity>
             </RowComponent>
-            <GradientIcon
-              componentName={VARIABLES.Feather}
-              iconName='bell'
-              onPress={() => navigate(SCREENS.NOTIFICATIONS)}
-              size={FontSize.Medium}
-              color={COLORS.WHITE}
-            />
+
+            {isSengoBrand() ? (
+              <Icon
+                componentName={VARIABLES.Feather}
+                iconName='bell'
+                size={FontSize.Large}
+                onPress={() => navigate(SCREENS.NOTIFICATIONS)}
+                iconStyle={{ backgroundColor: COLORS.WHITE, padding: 10, borderRadius: 10 }}
+                color={COLORS.PRIMARY}
+              />
+            ) : (
+              <GradientIcon
+                componentName={VARIABLES.Feather}
+                iconName='bell'
+                onPress={() => navigate(SCREENS.NOTIFICATIONS)}
+                size={FontSize.Medium}
+                color={COLORS.WHITE}
+              />
+            )}
           </View>
           <View style={{ paddingHorizontal: 20 }}>
             <Typography style={styles.greet} translate={false}>

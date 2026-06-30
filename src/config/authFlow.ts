@@ -14,8 +14,8 @@ export function getAuthStackRoutes(): ResetStackRoute[] {
   if (VARIANT.features.showGetStarted) {
     routes.push({ name: SCREENS.GET_STARTED });
   }
-  // routes.push({ name: SCREENS.LOGIN });
-  routes.push({ name: SCREENS.GET_STARTED });
+  routes.push({ name: SCREENS.LOGIN });
+  // routes.push({ name: SCREENS.GET_STARTED });
   return routes;
 }
 

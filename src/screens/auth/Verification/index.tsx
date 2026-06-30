@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { Typography, RowComponent, Button } from 'components/common';
+import { Typography, RowComponent, Button, GradientButton } from 'components/common';
 import { COLORS } from 'utils/colors';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COMMON_TEXT } from 'constants/screens';
+import { isSengoBrand } from 'constants/assets';
 import { AppScreenProps } from 'types/navigation';
 import { SCREENS } from 'constants/routes';
 import { resendSignupOtp, verifySignupOtp, verifyOtpCode } from 'api/functions/auth';
@@ -150,13 +151,23 @@ export const Verification = ({
         </Typography>
         <Typography style={styles.timer}>{`${timer.toString().padStart(2, '0')}`}</Typography>
       </RowComponent>
-      <Button
-        style={styles.verifyButton}
-        onPress={handleVerify}
-        title={COMMON_TEXT.VERIFY}
-        loading={buttons.isLoading('verify')}
-        disabled={code.length !== CODE_LENGTH || buttons.isLoading('verify')}
-      />
+      {isSengoBrand() ? (
+        <GradientButton
+          style={[styles.verifyButton, { alignSelf: 'stretch' }]}
+          onPress={handleVerify}
+          title={COMMON_TEXT.VERIFY}
+          loading={buttons.isLoading('verify')}
+          disabled={code.length !== CODE_LENGTH || buttons.isLoading('verify')}
+        />
+      ) : (
+        <Button
+          style={styles.verifyButton}
+          onPress={handleVerify}
+          title={COMMON_TEXT.VERIFY}
+          loading={buttons.isLoading('verify')}
+          disabled={code.length !== CODE_LENGTH || buttons.isLoading('verify')}
+        />
+      )}
       <Typography style={styles.infoText}>{COMMON_TEXT.DID_NOT_YOU_RECIEVE}</Typography>
       <TouchableOpacity
         onPress={handleResend}
@@ -225,7 +236,7 @@ const styles = StyleSheet.create({
     // borderRadius: 10,
   },
   codeText: {
-    fontSize: FontSize.Large,
+    fontSize: FontSize.ExtraExtraLarge,
     color: COLORS.TEXT,
     fontWeight: FontWeight.Bold,
   },

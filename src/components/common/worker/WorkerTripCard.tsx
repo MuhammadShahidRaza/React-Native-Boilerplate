@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon, Typography } from 'components/index';
 import { getBookingStatusColor } from 'api/mappers/snliftBooking';
+import { isSengoBrand } from 'constants/assets';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS } from 'utils/index';
@@ -73,7 +74,7 @@ export const WorkerTripCard = ({ trip, onPress }: WorkerTripCardProps) => {
         <View style={styles.metaItem}>
           <Icon
             componentName={VARIABLES.MaterialCommunityIcons}
-            iconName='cash'
+            iconName={isSengoBrand() ? 'credit-card-outline' : 'cash'}
             size={14}
             color={COLORS.APP_TEXT_MUTED}
           />

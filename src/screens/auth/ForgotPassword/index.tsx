@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, VARIABLES } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, isSengoBrand } from 'constants/index';
 import { forgotPasswordValidationSchema, buildPhonePayload } from 'utils/index';
 import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
-import { Button, AuthComponent, PhoneInputComponent } from 'components/index';
+import { Button, GradientButton, AuthComponent, PhoneInputComponent } from 'components/index';
 // import { sendOtpToEmail } from 'api/functions/auth';
 import { forgotPassword } from 'api/functions/auth';
 
@@ -62,13 +62,22 @@ export const ForgotPassword = () => {
           }}
         />
       </FocusProvider>
-      <Button
-        loading={loading}
-        title={COMMON_TEXT.SEND_OTP}
-        onPress={onPress}
-        style={styles.button}
-        textStyle={styles.buttonText}
-      />
+      {isSengoBrand() ? (
+        <GradientButton
+          loading={loading}
+          title={COMMON_TEXT.SEND_OTP}
+          onPress={onPress}
+          style={[styles.button, { alignSelf: 'stretch' }]}
+        />
+      ) : (
+        <Button
+          loading={loading}
+          title={COMMON_TEXT.SEND_OTP}
+          onPress={onPress}
+          style={styles.button}
+          textStyle={styles.buttonText}
+        />
+      )}
     </AuthComponent>
   );
 };

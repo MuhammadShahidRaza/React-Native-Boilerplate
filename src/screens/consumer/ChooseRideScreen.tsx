@@ -26,6 +26,7 @@ import { SCREENS } from 'constants/routes';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from 'navigation/Navigators';
 import { SVG } from 'constants/assets/svg';
+import { isSengoBrand } from 'constants/assets';
 import { logger } from 'utils/logger';
 
  
@@ -330,7 +331,9 @@ export const ChooseRideScreen = () => {
               )}
               <View style={styles.fareDivider} />
               <View style={styles.fareRow}>
-                <Typography style={styles.fareTotalLabel}>Total (Cash)</Typography>
+                <Typography style={styles.fareTotalLabel}>
+                  {`Total (${isSengoBrand() ? 'Card' : 'Cash'})`}
+                </Typography>
                 <Typography style={styles.fareTotalValue}>
                   {estimateLoading ? '...' : total}
                 </Typography>

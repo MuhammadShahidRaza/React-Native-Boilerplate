@@ -1,19 +1,10 @@
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  StyleProp,
-  TextStyle,
-  View,
-} from 'react-native';
+import { StatusBar, StyleSheet, StyleProp, TextStyle, View } from 'react-native';
+import { KeyboardAvoidingView, KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { COLORS } from 'utils/index';
 import { Loader } from './index';
 import { RootState, useAppSelector } from 'types/reduxTypes';
 import { Edge, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { isIOS } from 'utils/index';
+import { ReactNode, useMemo } from 'react';
 import { Header } from './Header';
 import { onBack } from 'navigation/index';
 import { useTheme } from 'hooks/useTheme';
@@ -49,6 +40,8 @@ interface WrapperProps {
   backIconStyle?: StyleProp<TextStyle>;
   /** Right side of header row (e.g. cancel action). */
   headerEndIcon?: ReactNode | (() => ReactNode);
+  /** Color of the bottom safe-area inset strip. Defaults to `backgroundColor` — override when the screen's last visible content (e.g. a bottom card) uses a different color. */
+  bottomSafeAreaColor?: string;
 }
 
 export const Wrapper: React.FC<WrapperProps> = ({
@@ -66,27 +59,13 @@ export const Wrapper: React.FC<WrapperProps> = ({
   onPressBack = () => onBack(),
   backIconStyle,
   headerEndIcon,
+  bottomSafeAreaColor = backgroundColor,
 }) => {
   const isAppLoading = useAppSelector((state: RootState) => state.app.isAppLoading);
   const insets = useSafeAreaInsets();
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const { isDark } = useTheme();
   // Only show header if title or back button is provided
   const shouldShowHeader = headerTitle || showBackButton;
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardVisible(true); // or some other action
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardVisible(false); // or some other action
-    });
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
 
   // Memoize safe area edge checks
   const hasTopSafeArea = useMemo(() => safeAreaEdges.includes('top'), [safeAreaEdges]);
@@ -99,15 +78,6 @@ export const Wrapper: React.FC<WrapperProps> = ({
     }
     return insets.bottom;
   }, [wantPaddingBottom, hasBottomSafeArea, insets.bottom]);
-
-  // Determine KeyboardAvoidingView behavior
-  const keyboardBehavior = useMemo(() => {
-    if (isIOS()) {
-      return 'padding';
-    }
-    // For Android, use 'height' when keyboard is visible, otherwise undefined
-    return isKeyboardVisible ? 'height' : undefined;
-  }, [isKeyboardVisible]);
 
   const content = (
     <>
@@ -129,32 +99,32 @@ export const Wrapper: React.FC<WrapperProps> = ({
           />
         </View>
       )}
-      <KeyboardAvoidingView
-        behavior={keyboardBehavior}
-        style={[
-          styles.container,
-          {
-            backgroundColor,
-            paddingBottom: bottomPadding,
-          },
-        ]}
-        // keyboardVerticalOffset={isIOS() ? 0 : 80}
-      >
-        {useScrollView ? (
-          <ScrollView
-            nestedScrollEnabled
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps='handled'
-            showsHorizontalScrollIndicator={false}
-            style={[styles.container, { backgroundColor }]}
-            bounces={false}
-          >
-            {children}
-          </ScrollView>
-        ) : (
-          children
-        )}
-      </KeyboardAvoidingView>
+      {useScrollView ? (
+        <KeyboardAwareScrollView
+          bottomOffset={20}
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps='handled'
+          showsHorizontalScrollIndicator={false}
+          style={[styles.container, { backgroundColor, paddingBottom: bottomPadding }]}
+          bounces={false}
+        >
+          {children}
+        </KeyboardAwareScrollView>
+      ) : (
+        <KeyboardAvoidingView
+          behavior='padding'
+          style={[
+            styles.container,
+            {
+              backgroundColor,
+              paddingBottom: bottomPadding,
+            },
+          ]}
+        >
+          {children}
+        </KeyboardAvoidingView>
+      )}
     </>
   );
 

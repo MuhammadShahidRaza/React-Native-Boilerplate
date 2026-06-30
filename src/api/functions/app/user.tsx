@@ -39,7 +39,7 @@ export const DUMMY_USER: User = {
   is_email_verified: true,
   upcoming_balance: 0,
   zip_code: '10001',
-  address: '123 Main St',
+  address: '67 Murray Street, New York, NY 10001, USA',
   is_notify: 1,
   longitude: -74.006,
   latitude: 40.7128,

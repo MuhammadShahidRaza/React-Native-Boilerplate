@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, SCREENS, VARIABLES, isSengoBrand } from 'constants/index';
 import {
   COLORS,
   deviceDetails,
@@ -11,6 +11,7 @@ import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import {
   Button,
+  GradientButton,
   Input,
   AuthComponent,
   PhoneInputComponent,
@@ -291,13 +292,23 @@ export const SignUp = () => {
         }
       />
 
-      <Button
-        loading={loading}
-        title={COMMON_TEXT.SIGN_UP}
-        disabled={!formik.values.agreeToTerms}
-        onPress={onPress}
-        style={styles.button}
-      />
+      {isSengoBrand() ? (
+        <GradientButton
+          loading={loading}
+          title={COMMON_TEXT.SIGN_UP}
+          disabled={!formik.values.agreeToTerms}
+          onPress={onPress}
+          style={[styles.button, { alignSelf: 'stretch' }]}
+        />
+      ) : (
+        <Button
+          loading={loading}
+          title={COMMON_TEXT.SIGN_UP}
+          disabled={!formik.values.agreeToTerms}
+          onPress={onPress}
+          style={styles.button}
+        />
+      )}
     </AuthComponent>
   );
 };

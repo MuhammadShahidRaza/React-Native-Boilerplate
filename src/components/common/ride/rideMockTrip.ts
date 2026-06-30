@@ -1,4 +1,4 @@
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 
 /** Mock trip data shared by driver-found and track-ride screens until API wiring. */
 export const MOCK_RIDE_TRIP = {
@@ -13,7 +13,7 @@ export const MOCK_RIDE_TRIP = {
     { icon: 'water', label: 'Color', value: 'Black' },
   ],
   estimateFare: 'CFA 330',
-  paymentMethod: 'Cash',
+  paymentMethod: isSengoBrand() ? 'Card' : 'Cash',
   providerId: 1 as number | null,
   providerPhone: '+1234567890' as string | undefined,
 };

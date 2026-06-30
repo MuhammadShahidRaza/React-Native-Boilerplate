@@ -5,11 +5,13 @@ import { Marker } from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
   Button,
+  GradientButton,
   BookingRatingStars,
   Icon,
   LiveTrackingMapDirections,
   LiveVehicleMapMarker,
   Map,
+  PaymentSuccessModal,
   RideAnimatedStatusBlock,
   RideDriverCard,
   RideFareSummary,
@@ -19,7 +21,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, INITIAL_REGION, VARIABLES } from 'constants/common';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { RideTrackPhase } from 'types/rideTracking';
 import { COLORS, fitMapToDirectionCoordinates, openPhoneNumber, screenHeight } from 'utils/index';
@@ -89,6 +91,8 @@ export const TrackRideScreen = () => {
   const mapRef = useRef<MapView>(null);
   const fittedLegRef = useRef<string | null>(null);
   const [cancelVisible, setCancelVisible] = useState(false);
+  const [hasPaid, setHasPaid] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const {
     rating: rideRating,
@@ -308,37 +312,54 @@ export const TrackRideScreen = () => {
         <View>
           <RideFareSummary
             fareValue={trip?.estimateFare ?? '—'}
-            paymentValue={trip?.paymentMethod ?? 'Cash'}
+            paymentValue={trip?.paymentMethod ?? (isSengoBrand() ? 'Card' : 'Cash')}
           />
         </View>
 
         {isCompleted ? (
           <>
-            <View style={styles.rateWrap}>
-              <BookingRatingStars
-                title={hasRated ? 'Your rating' : 'Rate your ride'}
-                value={rideRating}
-                onChange={hasRated ? undefined : setRideRating}
-                readonly={hasRated}
-                size={50}
+            {isSengoBrand() && !hasPaid ? (
+              <GradientButton
+                title='Pay'
+                onPress={() => setShowPaymentModal(true)}
+                style={[styles.doneBtn, { alignSelf: 'stretch' }]}
               />
-            </View>
-            <Button
-              title={hasRated ? 'Done' : ratingSubmitting ? 'Submitting…' : 'Done'}
-              disabled={ratingSubmitting}
-              onPress={async () => {
-                if (!hasRated && rideRating >= 1) {
-                  const ok = await submitRating();
-                  if (!ok) return;
-                }
-                reset(SCREENS.BOTTOM_STACK);
-              }}
-              style={styles.doneBtn}
-            />
+            ) : (
+              <>
+                <View style={styles.rateWrap}>
+                  <BookingRatingStars
+                    title={hasRated ? 'Your rating' : 'Rate your ride'}
+                    value={rideRating}
+                    onChange={hasRated ? undefined : setRideRating}
+                    readonly={hasRated}
+                    size={50}
+                  />
+                </View>
+                <Button
+                  title={hasRated ? 'Done' : ratingSubmitting ? 'Submitting…' : 'Done'}
+                  disabled={ratingSubmitting}
+                  onPress={async () => {
+                    if (!hasRated && rideRating >= 1) {
+                      const ok = await submitRating();
+                      if (!ok) return;
+                    }
+                    reset(SCREENS.BOTTOM_STACK);
+                  }}
+                  style={styles.doneBtn}
+                />
+              </>
+            )}
           </>
         ) : null}
       </View>
 
+      <PaymentSuccessModal
+        visible={showPaymentModal}
+        onContinue={() => {
+          setShowPaymentModal(false);
+          setHasPaid(true);
+        }}
+      />
       <CancelReasonModal
         visible={cancelVisible}
         onClose={() => setCancelVisible(false)}

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import {
+  GradientButton,
   GradientIcon,
   BookingRatingStars,
   LiveVehicleMapMarker,
@@ -10,6 +11,7 @@ import {
   FoodPreparingAnimation,
   ParcelCourierCard,
   ParcelRouteMap,
+  PaymentSuccessModal,
   RideAnimatedStatusBlock,
   RideProgressSegments,
   RideVehicleStatsRow,
@@ -18,7 +20,7 @@ import {
   WorkerRequestTimer,
 } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import type { FoodOrderPhase } from 'types/foodOrderTracking';
 import { FOOD_ORDER_PHASE_INDEX } from 'types/foodOrderTracking';
@@ -118,6 +120,8 @@ export const TrackFoodOrderScreen = () => {
   }, [effectiveStatus, route.params?.phase, track.status]);
 
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [hasPaid, setHasPaid] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [expiredVisible, setExpiredVisible] = useState(false);
   const [routeCoords, setRouteCoords] = useState<MapCoord[]>([]);
   const {
@@ -437,36 +441,46 @@ export const TrackFoodOrderScreen = () => {
                 {foodOrderSummary ? (
                   <FoodOrderSummaryCard summary={foodOrderSummary} />
                 ) : null}
-                <View style={styles.rateBlock}>
-                  <BookingRatingStars
-                    title={hasRated ? 'Your rating' : 'Rate your order'}
-                    value={rating}
-                    onChange={hasRated ? undefined : setRating}
-                    readonly={hasRated}
-                    size={55}
-                  />
-                </View>
+                {(!isSengoBrand() || hasPaid) ? (
+                  <View style={styles.rateBlock}>
+                    <BookingRatingStars
+                      title={hasRated ? 'Your rating' : 'Rate your order'}
+                      value={rating}
+                      onChange={hasRated ? undefined : setRating}
+                      readonly={hasRated}
+                      size={55}
+                    />
+                  </View>
+                ) : null}
               </>
             ) : null}
           </ScrollView>
 
           <View style={styles.footer}>
             {isDelivered ? (
-              <Pressable
-                style={styles.doneBtn}
-                disabled={ratingSubmitting}
-                onPress={async () => {
-                  if (!hasRated && rating >= 1) {
-                    const ok = await submitRating();
-                    if (!ok) return;
-                  }
-                  reset(SCREENS.BOTTOM_STACK);
-                }}
-              >
-                <Typography style={styles.doneTxt}>
-                  {ratingSubmitting ? 'Submitting…' : 'Done'}
-                </Typography>
-              </Pressable>
+              isSengoBrand() && !hasPaid ? (
+                <GradientButton
+                  title='Pay'
+                  onPress={() => setShowPaymentModal(true)}
+                  style={{ alignSelf: 'stretch' }}
+                />
+              ) : (
+                <Pressable
+                  style={styles.doneBtn}
+                  disabled={ratingSubmitting}
+                  onPress={async () => {
+                    if (!hasRated && rating >= 1) {
+                      const ok = await submitRating();
+                      if (!ok) return;
+                    }
+                    reset(SCREENS.BOTTOM_STACK);
+                  }}
+                >
+                  <Typography style={styles.doneTxt}>
+                    {ratingSubmitting ? 'Submitting…' : 'Done'}
+                  </Typography>
+                </Pressable>
+              )
             ) : canCancel ? (
               <Pressable style={styles.cancelSoft} onPress={() => setCancelOpen(true)}>
                 <Typography style={styles.cancelSoftTxt}>Cancel Delivery</Typography>
@@ -509,6 +523,13 @@ export const TrackFoodOrderScreen = () => {
         }}
       />
 
+      <PaymentSuccessModal
+        visible={showPaymentModal}
+        onContinue={() => {
+          setShowPaymentModal(false);
+          setHasPaid(true);
+        }}
+      />
       <CancelReasonModal
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}

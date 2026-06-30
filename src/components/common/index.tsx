@@ -47,3 +47,4 @@ export * from './DateRangeFilter';
 export * from './AppGradient';
 export * from './GradientIcon';
 export * from './AppStatusModal';
+export * from './PaymentSuccessModal';

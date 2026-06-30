@@ -1,4 +1,5 @@
 import { normalizeSniftBooking } from 'api/normalizers/snlift';
+import { isSengoBrand } from 'constants/assets';
 import type {
   WorkerRequestDetail,
   WorkerRequestRecord,
@@ -13,6 +14,8 @@ import { COLORS } from 'utils/colors';
 import { getBookingStatusLabel, isActiveBookingStatus as isBookingActive } from 'utils/bookingStatuses';
 
 export { getBookingStatusLabel } from 'utils/bookingStatuses';
+
+const BOOKING_PAYMENT_METHOD = isSengoBrand() ? 'Card' : 'Cash';
 
 export type ConsumerFoodOrderLine = {
   key: string;
@@ -220,7 +223,7 @@ export function mapBookingToWorkerTrip(booking: SnliftBooking): WorkerTripRecord
     destinationAddress: drop,
     distance: km,
     rating: formatCustomerRating(b.customer),
-    payment: 'Cash',
+    payment: BOOKING_PAYMENT_METHOD,
   };
 }
 
@@ -258,7 +261,7 @@ export function mapBookingToWorkerRequestDetail(booking: SnliftBooking): WorkerR
     dropoffShortName: shortPlaceName(drop),
     distance: formatDistanceKm(b.distance_km),
     eta: estimateEtaMinutes(b.distance_km),
-    payment: 'Cash',
+    payment: BOOKING_PAYMENT_METHOD,
     baseFare: formatMoney(baseFareNum),
     commission: formatMoney(commissionNum > 0 ? -commissionNum : 0),
     commissionPercentage: commissionPct != null && commissionPct > 0 ? commissionPct : undefined,

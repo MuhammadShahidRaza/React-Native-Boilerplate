@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS } from 'constants/index';
+import { AUTH_TEXT, COMMON_TEXT, VARIABLES, SCREENS, isSengoBrand } from 'constants/index';
 import {
   loginValidationSchema,
   COLORS,
@@ -12,6 +12,7 @@ import { FocusProvider, useFormikForm, useAsyncButton } from 'hooks/index';
 import { FontSize } from 'types/fontTypes';
 import {
   Button,
+  GradientButton,
   Typography,
   Input,
   AuthComponent,
@@ -24,6 +25,7 @@ import { Login_SignUp, type USER_TYPE } from 'types/auth';
 import { RootState } from 'types/reduxTypes';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import { APP_CONFIG } from 'config/app';
 interface LoginFormValues {
   email: string;
   password: string;
@@ -89,6 +91,7 @@ export const Login = () => {
   return (
     <AuthComponent
       heading1={AUTH_TEXT.LOGIN_HEADING}
+      showBack={(isSengoBrand() && !APP_CONFIG.USER_ROLE) || !isSengoBrand()}
       description={AUTH_TEXT.LOGIN_DESCRIPTION}
       bottomText={COMMON_TEXT.DONT_HAVE_AN_ACCOUNT}
       bottomButtonText={COMMON_TEXT.SIGN_UP}
@@ -188,12 +191,21 @@ export const Login = () => {
           </Typography>
         </RowComponent>
       </RowComponent>
-      <Button
-        loading={loading}
-        title={COMMON_TEXT.LOGIN}
-        onPress={onPress}
-        style={[styles.row, styles.button]}
-      />
+      {isSengoBrand() ? (
+        <GradientButton
+          loading={loading}
+          title={COMMON_TEXT.LOGIN}
+          onPress={onPress}
+          style={[styles.row, styles.button, { alignSelf: 'stretch' }]}
+        />
+      ) : (
+        <Button
+          loading={loading}
+          title={COMMON_TEXT.LOGIN}
+          onPress={onPress}
+          style={[styles.row, styles.button]}
+        />
+      )}
 
       {/* <RowComponent style={{ gap: 10, alignItems: 'center', marginBottom: 30 }}>
         <View style={styles.line} />

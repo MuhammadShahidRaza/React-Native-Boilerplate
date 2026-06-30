@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MOCK_RIDE_TRIP } from 'components/common/ride/rideMockTrip';
 import { ENV_CONSTANTS } from 'constants/common';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { extractBookingFromResponse, getBookingById } from 'api/functions/snlift/bookings';
 import { formatProviderRating } from 'api/normalizers/snlift';
 import { formatMoney } from 'utils/currency';
@@ -30,7 +30,7 @@ export function mapBookingToRideTrip(
       { icon: 'water', label: 'Color', value: color },
     ],
     estimateFare: formatMoney(booking.total_amount ?? booking.estimated_amount),
-    paymentMethod: 'Cash',
+    paymentMethod: isSengoBrand() ? 'Card' : 'Cash',
   };
 }
 

@@ -13,7 +13,7 @@ import {
 } from 'components/index';
 import { VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { navigate, resetToHomeAndScreen } from 'navigation/index';
 import { COLORS, screenHeight, screenWidth } from 'utils/index';
 import { extractEstimateDistanceKm } from 'utils/distance';
@@ -410,7 +410,9 @@ export const FoodDeliveryCartScreen = () => {
               size={FontSize.Small}
               color={COLORS.APP_PRIMARY}
             />
-            <Typography style={styles.payTxt}>Payment: Cash On Delivery</Typography>
+            <Typography style={styles.payTxt}>
+              {`Payment: ${isSengoBrand() ? 'Card' : 'Cash On Delivery'}`}
+            </Typography>
           </View>
         </View>
 

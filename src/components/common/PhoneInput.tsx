@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleProp, useColorScheme } from 'react-native';
 import {
   StyleSheet,
+  TextInput,
   TextInputProps,
   View,
   NativeSyntheticEvent,
@@ -98,7 +99,8 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
   ...rest
 }) => {
   const phoneRef = useRef<PhoneInput>(null);
-  const { activeInput, setActiveInput } = useFocus();
+  const textInputRef = useRef<TextInput>(null);
+  const { activeInput, setActiveInput, focusNextInput, textInput } = useFocus();
   const [showError, setShowError] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const [displayNumber, setDisplayNumber] = useState(() => toNationalPhoneDigits(value));
@@ -135,6 +137,9 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
 
   const handleSubmitEditing = (e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
     if (onSubmitEditing) onSubmitEditing(e);
+    if (returnKeyType === 'next') {
+      focusNextInput();
+    }
   };
 
   const validateNumber = (text: string) => {
@@ -150,6 +155,28 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
     setDisplayNumber(national);
     validateNumber(national);
   }, [value, countryCode]);
+
+  useEffect(() => {
+    textInput(name, textInputRef.current);
+  }, [name, textInput]);
+
+  // `textInputProps` is typed without `ref` by the library — built as a variable
+  // (not an inline literal) so TS doesn't excess-property-check the extra `ref` key.
+  const phoneTextInputProps = {
+    placeholderTextColor: isDarkMode ? COLORS.ICONS : COLORS.TEXT,
+    editable: editable,
+    returnKeyType: returnKeyType,
+    maxLength: 12,
+    blurOnSubmit: blurOnSubmit,
+    onSubmitEditing: handleSubmitEditing,
+    onBlur: () => {
+      setActiveInput('');
+      onBlur?.();
+    },
+    onFocus: () => setActiveInput(name),
+    allowFontScaling: false,
+    ref: textInputRef,
+  };
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -211,20 +238,7 @@ export const PhoneInputComponent: React.FC<PhoneInputProp> = ({
                 styles.countryPickerButtonStyle,
                 isTitleInLine && styles.countryPickerInline,
               ]}
-              textInputProps={{
-                placeholderTextColor: isDarkMode ? COLORS.ICONS : COLORS.TEXT,
-                editable: editable,
-                returnKeyType: returnKeyType,
-                maxLength: 12,
-                blurOnSubmit: blurOnSubmit,
-                onSubmitEditing: handleSubmitEditing,
-                onBlur: () => {
-                  setActiveInput('');
-                  onBlur?.();
-                },
-                onFocus: () => setActiveInput(name),
-                allowFontScaling: false,
-              }}
+              textInputProps={phoneTextInputProps}
               disabled={lockCountryPicker}
               textInputStyle={[
                 { height, fontSize: INPUT_THEME.value.fontSize },

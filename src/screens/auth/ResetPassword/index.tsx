@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { COMMON_TEXT, ENV_CONSTANTS, SCREENS, VARIABLES } from 'constants/index';
+import { COMMON_TEXT, ENV_CONSTANTS, SCREENS, VARIABLES, isSengoBrand } from 'constants/index';
 import { COLORS, removeKeychainItem, resetPasswordValidationSchema } from 'utils/index';
 import { FocusProvider, useFormikForm, useAsyncButton, useResetStackOnBack } from 'hooks/index';
 import { FontSize, AppScreenProps } from 'types/index';
-import { Button, Input, AuthComponent } from 'components/index';
+import { Button, GradientButton, Input, AuthComponent } from 'components/index';
 import { resetUserPassword } from 'api/functions/auth';
 import { SuccessFailureModal } from 'components/common/SuccessFailureModal';
 import { useState } from 'react';
@@ -122,12 +122,21 @@ export const ResetPassword = ({
           touched={Boolean(formik.touched.confirm_password && formik.submitCount)}
         />
       </FocusProvider>
-      <Button
-        loading={loading}
-        title={COMMON_TEXT.UPDATE}
-        onPress={onPress}
-        style={styles.button}
-      />
+      {isSengoBrand() ? (
+        <GradientButton
+          loading={loading}
+          title={COMMON_TEXT.UPDATE}
+          onPress={onPress}
+          style={[styles.button, { alignSelf: 'stretch' }]}
+        />
+      ) : (
+        <Button
+          loading={loading}
+          title={COMMON_TEXT.UPDATE}
+          onPress={onPress}
+          style={styles.button}
+        />
+      )}
 
       <SuccessFailureModal
         isVisible={isVisible}

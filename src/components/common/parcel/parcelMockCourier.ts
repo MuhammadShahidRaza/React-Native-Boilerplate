@@ -1,4 +1,4 @@
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import type { RideVehicleStatItem } from '../ride/RideVehicleStatsRow';
 
 /** Shown under Vehicle Type on Courier Matched / Track Parcel. */
@@ -26,7 +26,7 @@ export const MOCK_PARCEL_COURIER = {
   avatar: IMAGES.USER,
   trackingId: 'SN-PKL-2847',
   deliveryFee: 'CFA 100',
-  paymentMethod: 'Cash',
+  paymentMethod: isSengoBrand() ? 'Card' : 'Cash',
   vehicleStats: [
     { icon: 'bike', label: 'Vehicle Type', value: PARCEL_VEHICLE_TYPE_LABEL },
     { icon: 'card-text-outline', label: 'License Plate', value: 'AA-001-AA' },

@@ -31,10 +31,16 @@ export const MyAccount = () => {
     ...(role === APP_CONFIG.USER_ROLE
       ? [
           {
-            title: "My Profile",
+            title: 'My Profile',
             iconName: 'user-circle',
             onPress: () => navigate(SCREENS.PROFILE),
             iconComponent: VARIABLES.FontAwesome,
+          },
+          {
+            title: 'Favorites',
+            iconName: 'heart',
+            iconComponent: VARIABLES.Ionicons,
+            onPress: () => navigate(SCREENS.FAVORITES),
           },
         ]
       : []),
@@ -75,7 +81,7 @@ export const MyAccount = () => {
         setisLogoutModalVisible(true);
       },
       style: {
-        marginTop: 200,
+        marginTop: 150,
         borderBottomWidth: 0,
       },
     },

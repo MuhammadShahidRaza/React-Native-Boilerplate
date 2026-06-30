@@ -13,13 +13,10 @@ import { COMMON_TEXT } from 'constants/screens';
 import { FontSize, FontWeight } from 'types/index';
 import { VARIABLES } from 'constants/common';
 import { useTranslation } from 'hooks/index';
-import {
-  getVariant,
-  getVariantOnboardingPages,
-  isSengoBrand,
-} from 'constants/assets';
+import { getVariant, getVariantOnboardingPages, isSengoBrand } from 'constants/assets';
 import { useAppDispatch } from 'types/reduxTypes';
 import { setIsUserVisitedApp } from 'store/slices/appSettings';
+import { APP_CONFIG } from 'config/app';
 
 export const OnBoarding = () => {
   const dispatch = useAppDispatch();
@@ -106,10 +103,24 @@ export const OnBoarding = () => {
             borderTopLeftRadius: isSengoBrand() ? 60 : 25,
             borderTopRightRadius: isSengoBrand() ? 60 : 25,
             gap: isSengoBrand() ? 25 : 15,
-            paddingVertical: isSengoBrand() ? 60 : 20,
+            paddingBottom: isSengoBrand() ? 60 : 20,
+            paddingTop: isSengoBrand() ? 0 : 60,
           },
         ]}
       >
+        {APP_CONFIG.USER_ROLE && isSengoBrand() && (
+          <View
+            style={{
+              height: 5,
+              borderRadius: 10,
+              backgroundColor: COLORS.WHITE,
+              width: '50%',
+              alignSelf: 'center',
+              marginBottom: isSengoBrand() ? 40 : 0,
+              top: 6,
+            }}
+          />
+        )}
         <Typography
           style={[
             styles.heading,

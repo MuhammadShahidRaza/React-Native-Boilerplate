@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
-import { Wrapper, Typography, SvgComponent, Button, Icon } from 'components/common';
+import { Wrapper, Typography, SvgComponent, Button, GradientButton, Icon } from 'components/common';
 import { screenHeight, screenWidth, COLORS, isIOS, BRAND_PRIMARY, BRAND_SECONDARY } from 'utils/index';
 import { FontSize, FontWeight } from 'types/index';
 import { getBrandLogoAspect, getBrandLogoSvg, isSengoBrand } from 'constants/assets/brandLogo';
@@ -162,11 +162,19 @@ const DefaultGetStarted = () => {
 
           {selectedRole != null ? (
             <View style={styles.continueWrap}>
-              <Button
-                title={t(AUTH_TEXT.GET_STARTED_CONTINUE)}
-                style={styles.buttonContainer}
-                onPress={goToLogin}
-              />
+              {isSengoBrand() ? (
+                <GradientButton
+                  title={t(AUTH_TEXT.GET_STARTED_CONTINUE)}
+                  style={[styles.buttonContainer, { alignSelf: 'stretch' }]}
+                  onPress={goToLogin}
+                />
+              ) : (
+                <Button
+                  title={t(AUTH_TEXT.GET_STARTED_CONTINUE)}
+                  style={styles.buttonContainer}
+                  onPress={goToLogin}
+                />
+              )}
             </View>
           ) : null}
         </Animated.View>

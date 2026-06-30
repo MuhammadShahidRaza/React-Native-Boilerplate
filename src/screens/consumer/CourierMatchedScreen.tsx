@@ -11,7 +11,7 @@ import {
   Wrapper,
 } from 'components/index';
 import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
-import { IMAGES } from 'constants/assets';
+import { IMAGES, isSengoBrand } from 'constants/assets';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { COLORS, formatMoney, isIOS } from 'utils/index';
 import { replace } from 'navigation/index';
@@ -82,7 +82,9 @@ export const CourierMatchedScreen = () => {
               <Typography style={styles.feeAmt}>
                 {deliveryFee != null ? formatMoney(deliveryFee) : '—'}
               </Typography>
-              <Typography style={styles.cash}>Cash Payment</Typography>
+              <Typography style={styles.cash}>
+                {isSengoBrand() ? 'Card Payment' : 'Cash Payment'}
+              </Typography>
             </View>
             <RideVehicleStatsRow
               items={trip?.vehicleStats ?? []}

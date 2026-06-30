@@ -1,3 +1,7 @@
+import { isSengoBrand } from 'constants/assets';
+
+const WORKER_PAYMENT_METHOD = isSengoBrand() ? 'Card' : 'Cash';
+
 export type WorkerTripRecord = {
   id: string;
   status: string;
@@ -35,7 +39,7 @@ export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
     destinationAddress: '85 W Broadway, NY',
     distance: '12.3 km',
     rating: '5.0',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
   },
   {
     id: '2',
@@ -49,7 +53,7 @@ export const WORKER_HISTORY_TRIPS: WorkerTripRecord[] = [
     destinationAddress: '85 W Broadway, NY',
     distance: '12.3 km',
     rating: '5.0',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
   },
 ];
 
@@ -119,7 +123,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
     eta: '12 min',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
     baseFare: 'CFA 550',
     commission: '-CFA 82',
     commissionPercentage: 15,
@@ -146,7 +150,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
     eta: '12 min',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
     baseFare: 'CFA 550',
     commission: '-CFA 82',
     commissionPercentage: 15,
@@ -173,7 +177,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     dropoffShortName: 'Airport Terminal 2',
     distance: '6.8 km',
     eta: '12 min',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
     baseFare: 'CFA 550',
     commission: '-CFA 82',
     commissionPercentage: 15,
@@ -200,7 +204,7 @@ export const WORKER_REQUEST_DETAILS: Record<string, WorkerRequestDetail> = {
     dropoffShortName: 'Broadway',
     distance: '4.2 km',
     eta: '11 min',
-    payment: 'Cash',
+    payment: WORKER_PAYMENT_METHOD,
     baseFare: 'CFA 330',
     commission: '-CFA 50',
     commissionPercentage: 15,
