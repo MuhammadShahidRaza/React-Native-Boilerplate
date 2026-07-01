@@ -37,6 +37,7 @@ export const SengoSplash = () => {
   const cloudRightX = useRef(new Animated.Value(CLOUD_FROM_RIGHT_START)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(LOGO_SCALE_START)).current;
+  const videoOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -71,6 +72,15 @@ export const SengoSplash = () => {
     setVideoPlaying(true);
   };
 
+  const revealVideo = () => {
+    Animated.timing(videoOpacity, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
     <View style={styles.root}>
       <View style={styles.cloudStage} pointerEvents='none'>
@@ -102,21 +112,23 @@ export const SengoSplash = () => {
       </View>
 
       <View style={[styles.videoBottom, { paddingBottom: insets.bottom }]}>
-        <Video
-          source={SENGO_VIDEOS.SPLASH_DELIVERY}
-          style={styles.video}
-          resizeMode='cover'
-          repeat
-          muted
-          paused={!videoPlaying}
-          controls={false}
-          playInBackground={false}
-          playWhenInactive={false}
-          ignoreSilentSwitch='ignore'
-          mixWithOthers='mix'
-          onLoad={startVideo}
-          onReadyForDisplay={startVideo}
-        />
+        <Animated.View style={[styles.video, { opacity: videoOpacity }]}>
+          <Video
+            source={SENGO_VIDEOS.SPLASH_DELIVERY}
+            style={styles.video}
+            resizeMode='cover'
+            repeat
+            muted
+            paused={!videoPlaying}
+            controls={false}
+            playInBackground={false}
+            playWhenInactive={false}
+            ignoreSilentSwitch='ignore'
+            mixWithOthers='mix'
+            onLoad={startVideo}
+            onReadyForDisplay={revealVideo}
+          />
+        </Animated.View>
       </View>
     </View>
   );

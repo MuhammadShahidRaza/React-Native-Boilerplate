@@ -117,6 +117,7 @@ export const WorkerWalletScreen = () => {
   }, [role]);
 
   useEffect(() => {
+    if (ENV_CONSTANTS.IS_ALPHA_PHASE) return;
     if (balance > 0 || topOffShownRef.current) return;
     topOffShownRef.current = true;
     setTopOffVisible(true);
@@ -337,7 +338,7 @@ export const WorkerWalletScreen = () => {
             wantToCloseOnBack
             children={
               <View style={styles.modalContent}>
-                <Typography style={styles.modalTitle}>Enter Withdrawl Amount</Typography>
+                <Typography style={styles.modalTitle}>Enter Withdrawal Amount</Typography>
                 <Input
                   title='Enter Amount'
                   name='amount'

@@ -22,7 +22,7 @@ import {
   Wrapper,
   Icon,
 } from 'components/index';
-import { VARIABLES } from 'constants/common';
+import { ENV_CONSTANTS, VARIABLES } from 'constants/common';
 import { FontSize, FontWeight } from 'types/fontTypes';
 import { navigate } from 'navigation/index';
 import { SCREENS } from 'constants/routes';
@@ -82,6 +82,10 @@ export const Home = () => {
   // Awaits any in-flight fetch first so a tap mid-load doesn't fall through to the create flow.
   const goToService = useCallback(
     async (type: SnliftBookingType, fallbackScreen: keyof RootStackParamList) => {
+      if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
+        navigate(fallbackScreen);
+        return;
+      }
       if (checkingActiveBooking) return;
       setCheckingActiveBooking(true);
       try {
@@ -205,14 +209,15 @@ export const Home = () => {
           <View style={styles.topRow}>
             <RowComponent onPress={() => navigate(SCREENS.LOCATION)} style={styles.locPillWrap}>
               {isSengoBrand() ? (
-                <Icon
-                  componentName={VARIABLES.EvilIcons}
-                  iconName='location'
-                  onPress={() => navigate(SCREENS.LOCATION)}
-                  size={FontSize.ExtraExtraLarge}
-                  iconStyle={{ backgroundColor: COLORS.WHITE, padding: 5, borderRadius: 10 }}
-                  color={COLORS.PRIMARY}
-                />
+                <View style={styles.iconCircle}>
+                  <Icon
+                    componentName={VARIABLES.EvilIcons}
+                    iconName='location'
+                    onPress={() => navigate(SCREENS.LOCATION)}
+                    size={FontSize.ExtraExtraLarge}
+                    color={COLORS.PRIMARY}
+                  />
+                </View>
               ) : (
                 <GradientIcon
                   componentName={VARIABLES.EvilIcons}
@@ -234,14 +239,15 @@ export const Home = () => {
             </RowComponent>
 
             {isSengoBrand() ? (
-              <Icon
-                componentName={VARIABLES.Feather}
-                iconName='bell'
-                size={FontSize.Large}
-                onPress={() => navigate(SCREENS.NOTIFICATIONS)}
-                iconStyle={{ backgroundColor: COLORS.WHITE, padding: 10, borderRadius: 10 }}
-                color={COLORS.PRIMARY}
-              />
+              <View style={styles.iconCircle}>
+                <Icon
+                  componentName={VARIABLES.Feather}
+                  iconName='bell'
+                  size={FontSize.Large}
+                  onPress={() => navigate(SCREENS.NOTIFICATIONS)}
+                  color={COLORS.PRIMARY}
+                />
+              </View>
             ) : (
               <GradientIcon
                 componentName={VARIABLES.Feather}
@@ -519,6 +525,14 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: COLORS.WHITE,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   locTextWrap: {
     flex: 1,

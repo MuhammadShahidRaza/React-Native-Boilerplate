@@ -37,7 +37,7 @@ export const ForgotPassword = () => {
       heading1={COMMON_TEXT.FORGOT_PASSWORD}
       description={AUTH_TEXT.RESET_YOUR_PASSWORD}
       descriptionStyle={{ marginBottom: 50, textAlign: 'left' }}
-    containerStyle={{ marginTop: 30 }}
+      containerStyle={{ marginTop: 30 }}
       bottomButtonText=''
       bottomText=''
     >
@@ -68,6 +68,7 @@ export const ForgotPassword = () => {
           title={COMMON_TEXT.SEND_OTP}
           onPress={onPress}
           style={[styles.button, { alignSelf: 'stretch' }]}
+          textStyle={styles.buttonText}
         />
       ) : (
         <Button

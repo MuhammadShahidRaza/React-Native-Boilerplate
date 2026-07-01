@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
+    borderColor: COLORS.BLACK,
   },
   driverInfo: { flex: 1 },
   roleLabel: {

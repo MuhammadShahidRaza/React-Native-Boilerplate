@@ -49,9 +49,8 @@ export const useUserLoginStatus = (): UserLoginStatus => {
 
         if (authToken && isUserLoggedIn) {
           // Token exists and user was logged in - verify and fetch user details
-          // But if it does, we need to fetch user details
+          await getUserDetails();
           if (!ENV_CONSTANTS.IS_ALPHA_PHASE) {
-            await getUserDetails();
             await ensurePlatformSettingsLoaded(dispatch);
           }
 

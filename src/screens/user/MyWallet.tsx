@@ -252,7 +252,7 @@ export const MyWallet = () => {
         wantToCloseOnBack={true}
         children={
           <View style={styles.modalContent}>
-            <Typography style={styles.modalTitle}>Enter Withdrawl Amount</Typography>
+            <Typography style={styles.modalTitle}>Enter Withdrawal Amount</Typography>
             <Input
               title='Enter Amount'
               name='amount'

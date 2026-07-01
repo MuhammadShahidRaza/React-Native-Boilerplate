@@ -110,8 +110,12 @@ export function getAlphaDummyUser(userType: USER_TYPE | string = 'user'): User {
 
 const getUserDetails = async <R extends { user: User }>(options?: { showLoader?: boolean }) => {
   if (ENV_CONSTANTS.IS_ALPHA_PHASE) {
-    const current = store.getState().user?.userDetails;
-    const role = current?.user_type ?? current?.user_role;
+    const userState = store.getState().user;
+    // Prefer userDetails.user_type, fall back to the persisted role (covers null userDetails)
+    const role =
+      userState.userDetails?.user_type ??
+      userState.userDetails?.user_role ??
+      userState.role;
     if (role === 'driver' || role === 'courier') {
       store.dispatch(setUserDetails(getAlphaDummyUser(role)));
     }
